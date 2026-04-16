@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { useNavigate } from "react-router";
+import { useNavigate, Navigate } from "react-router";
+import { auth, db } from "@/lib/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 export function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -8,28 +11,64 @@ export function Auth() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  const login = useAppStore((state) => state.login);
+  const currentUser = useAppStore((state) => state.currentUser);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (!isLogin && !agreeTerms) {
       alert("الرجاء الموافقة على شروط الاستخدام وسياسة الخصوصية لإتمام التسجيل.");
       return;
     }
+    
     if (email && password) {
-      // Simulation: if email is admin, make them admin. Otherwise user.
-      const role = email.includes("admin") ? "admin" : "user";
-      login({
-        id: Math.random().toString(36).substr(2, 9),
-        name: name || (isLogin ? "مستخدم العائلة" : "مستخدم جديد"),
-        email,
-        role
-      });
-      navigate(role === "admin" ? "/admin" : "/dashboard");
+      setLoading(true);
+      try {
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          
+          await updateProfile(user, { displayName: name });
+          
+          const role = email.includes("admin") ? "admin" : "user";
+          await setDoc(doc(db, "users", user.uid), {
+            id: user.uid,
+            name: name,
+            email: email,
+            role: role
+          });
+        }
+      } catch (err: any) {
+        console.error("Auth/Firestore error:", err);
+        
+        let errorMessage = "حدث خطأ في المصادقة.";
+        if (err.code === "auth/email-already-in-use") {
+          errorMessage = "البريد الإلكتروني هذا مستخدم مسبقاً.";
+        } else if (err.code === "auth/invalid-credential") {
+          errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        } else if (err.code === "permission-denied") {
+          errorMessage = "مرفوض: يرجى التأكد من تفعيل وتحديث Security Rules في Firestore." + (err.message || "");
+        } else if (err.message) {
+          errorMessage += " " + err.message;
+        }
+
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
     }
   };
+
+  if (currentUser) {
+    return <Navigate to={currentUser.role === "admin" ? "/admin" : "/dashboard"} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-brand-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -47,6 +86,11 @@ export function Auth() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-brand-100">
+          {error && (
+            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-lg text-sm text-center">
+              {error}
+            </div>
+          )}
           <form className="space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <div>
@@ -129,9 +173,10 @@ export function Auth() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition"
+                disabled={loading}
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${loading ? 'bg-brand-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'}`}
               >
-                {isLogin ? "الدخول لملف العائلة" : "إنشاء حساب"}
+                {loading ? "جاري المعالجة..." : (isLogin ? "الدخول لملف العائلة" : "إنشاء حساب")}
               </button>
             </div>
           </form>

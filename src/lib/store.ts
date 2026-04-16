@@ -1,4 +1,7 @@
 import { create } from "zustand";
+import { auth, db } from "./firebase";
+import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
+import { collection, doc, onSnapshot, setDoc, updateDoc, getDoc, query, where, getDocs } from "firebase/firestore";
 
 export type OrderStatus = "راحل" | "قيد البحث" | "طلب إيضاح" | "مكتمل";
 
@@ -58,20 +61,98 @@ export interface Order {
 interface AppState {
   currentUser: UserInfo | null;
   orders: Order[];
+  isAuthReady: boolean;
   login: (user: UserInfo) => void;
-  logout: () => void;
-  placeOrder: (order: Order) => void;
-  updateOrderStatus: (id: string, newStatus: OrderStatus) => void;
+  logout: () => Promise<void>;
+  placeOrder: (order: Order) => Promise<void>;
+  updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
+  initializeFirebase: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  currentUser: null, // Start logged out
+export const useAppStore = create<AppState>((set, get) => ({
+  currentUser: null,
   orders: [],
+  isAuthReady: false,
+  
   login: (user) => set({ currentUser: user }),
-  logout: () => set({ currentUser: null }),
-  placeOrder: (order) => set((state) => ({ orders: [...state.orders, order] })),
-  updateOrderStatus: (id, status) =>
-    set((state) => ({
-      orders: state.orders.map((o) => (o.id === id ? { ...o, status } : o)),
-    })),
+  
+  logout: async () => {
+    try {
+      await firebaseSignOut(auth);
+      set({ currentUser: null, orders: [] });
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  },
+
+  placeOrder: async (order) => {
+    try {
+      // Optimistic update
+      set((state) => ({ orders: [...state.orders, order] }));
+      await setDoc(doc(db, "orders", order.id), order);
+    } catch (error) {
+      console.error("Error placing order:", error);
+    }
+  },
+
+  updateOrderStatus: async (id, status) => {
+    try {
+      // Optimistic update
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === id ? { ...o, status } : o)),
+      }));
+      await updateDoc(doc(db, "orders", id), { status });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  },
+
+  initializeFirebase: () => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Get user document
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          let userInfo: UserInfo;
+          
+          if (userDoc.exists()) {
+            userInfo = userDoc.data() as UserInfo;
+          } else {
+            // First time login fallback (if created externally)
+            userInfo = {
+              id: user.uid,
+              name: user.displayName || "مستخدم",
+              email: user.email || "",
+              role: user.email?.includes("admin") ? "admin" : "user"
+            };
+            await setDoc(doc(db, "users", user.uid), userInfo);
+          }
+          
+          set({ currentUser: userInfo, isAuthReady: true });
+
+          // Listen to orders
+          const ordersRef = collection(db, "orders");
+          const q = userInfo.role === "admin" 
+            ? query(ordersRef) 
+            : query(ordersRef, where("userId", "==", user.uid));
+            
+          onSnapshot(q, (snapshot) => {
+            const ordersList: Order[] = [];
+            snapshot.forEach((doc) => {
+              ordersList.push(doc.data() as Order);
+            });
+            set({ orders: ordersList });
+          }, (error) => {
+             console.error("Error fetching orders:", error);
+          });
+          
+        } catch (error) {
+          console.error("Error during auth state change:", error);
+          set({ isAuthReady: true });
+        }
+      } else {
+        set({ currentUser: null, orders: [], isAuthReady: true });
+      }
+    });
+  }
 }));
