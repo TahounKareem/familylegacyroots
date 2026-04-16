@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Check, UploadCloud, ArrowRight, ArrowLeft } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { useAppStore, FamilyData } from "@/lib/store";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export function OrderFlow() {
   const [step, setStep] = useState(1);
@@ -15,7 +17,7 @@ export function OrderFlow() {
     grandfatherName: "",
     familyName: "",
     relation: "ابن",
-    country: "السعودية",
+    country: "",
     homeland: "",
     documents: [],
     photos: [],
@@ -27,9 +29,46 @@ export function OrderFlow() {
   const [printRequested, setPrintRequested] = useState<boolean>(false);
   const [agreedToService, setAgreedToService] = useState<boolean>(false);
   const [showSignModal, setShowSignModal] = useState<boolean>(false);
+  
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 4));
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    setUploading(true);
+    setUploadProgress(0);
+
+    const storageRef = ref(storage, `documents/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      }, 
+      (error) => {
+        console.error("Upload error:", error);
+        setUploading(false);
+        alert("فشل رفع الملف. تأكد من إعدادات Storage Rules.");
+      }, 
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setFormData(prev => ({
+            ...prev,
+            documents: [...prev.documents, downloadURL]
+          }));
+          setUploading(false);
+        });
+      }
+    );
+  };
 
   const submitOrder = async () => {
     // Generate mock order
@@ -108,7 +147,11 @@ export function OrderFlow() {
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
+                  <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
+                  <input type="text" placeholder="مثال: السعودية، الكويت، مصر..." className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.country} onChange={(e)=>setFormData({...formData, country: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي أو إمارة المنشأ *</label>
                   <input type="text" placeholder="المدينة، المحافظة" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} />
                 </div>
               </div>
@@ -138,11 +181,37 @@ export function OrderFlow() {
 
               <div>
                  <label className="block text-sm font-medium text-brand-800 mb-2">مرفقات ووثائق</label>
-                 <div className="border-2 border-dashed border-brand-300 rounded-2xl p-8 text-center hover:bg-brand-50 transition cursor-pointer">
-                   <UploadCloud className="w-10 h-10 text-brand-400 mx-auto mb-3" />
-                   <p className="text-brand-800 font-medium">اسحب وأفلت المرفقات هنا</p>
-                   <p className="text-sm text-brand-500 mt-1">صكوك، صور قديمة، وثائق (PDF, JPG, PNG)</p>
+                 <div 
+                   onClick={() => fileInputRef.current?.click()}
+                   className="border-2 border-dashed border-brand-300 rounded-2xl p-8 text-center hover:bg-brand-50 transition cursor-pointer relative"
+                 >
+                   <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.jpg,.jpeg,.png" />
+                   
+                   {uploading ? (
+                     <div className="flex flex-col items-center justify-center">
+                       <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mb-3"></div>
+                       <p className="text-brand-800 font-medium">جاري الرفع... {Math.round(uploadProgress)}%</p>
+                     </div>
+                   ) : (
+                     <>
+                       <UploadCloud className="w-10 h-10 text-brand-400 mx-auto mb-3" />
+                       <p className="text-brand-800 font-medium">اسحب وأفلت المرفقات أو انقر للرفع</p>
+                       <p className="text-sm text-brand-500 mt-1">صكوك، صور قديمة، وثائق (PDF, JPG, PNG)</p>
+                     </>
+                   )}
                  </div>
+
+                 {formData.documents.length > 0 && (
+                   <div className="mt-4 space-y-2">
+                     <p className="text-sm font-medium text-brand-800 mb-2">الملفات المرفقة ({formData.documents.length}):</p>
+                     {formData.documents.map((url, i) => (
+                       <div key={i} className="flex justify-between items-center bg-brand-50 border border-brand-100 p-2 rounded text-sm">
+                         <span className="truncate flex-1" dir="ltr">{url.split('?')[0].split('%2F').pop()}</span>
+                         <a href={url} target="_blank" rel="noreferrer" className="text-brand-600 hover:text-brand-800 mr-4 font-medium">عرض</a>
+                       </div>
+                     ))}
+                   </div>
+                 )}
               </div>
             </div>
           )}

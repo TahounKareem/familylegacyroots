@@ -3,7 +3,7 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { collection, doc, onSnapshot, setDoc, updateDoc, getDoc, query, where, getDocs } from "firebase/firestore";
 
-export type OrderStatus = "راحل" | "قيد البحث" | "طلب إيضاح" | "مكتمل";
+export type OrderStatus = "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل";
 
 export interface UserInfo {
   id: string;
@@ -31,6 +31,15 @@ export interface TreeData {
   edges: Edge[];
 }
 
+export interface Message {
+  id: string;
+  senderId: string;
+  senderRole: "user" | "admin";
+  text: string;
+  attachments?: string[];
+  createdAt: string;
+}
+
 export interface FamilyData {
   firstName: string;
   fatherName: string;
@@ -56,6 +65,7 @@ export interface Order {
   status: OrderStatus;
   data: FamilyData;
   createdAt: string;
+  messages?: Message[];
 }
 
 interface AppState {
@@ -66,6 +76,7 @@ interface AppState {
   logout: () => Promise<void>;
   placeOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
+  addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
   initializeFirebase: () => void;
 }
 
@@ -104,6 +115,31 @@ export const useAppStore = create<AppState>((set, get) => ({
       await updateDoc(doc(db, "orders", id), { status });
     } catch (error) {
       console.error("Error updating order status:", error);
+    }
+  },
+
+  addMessageToOrder: async (orderId, message, newStatus) => {
+    try {
+      const order = get().orders.find(o => o.id === orderId);
+      if (!order) return;
+      
+      const updatedMessages = [...(order.messages || []), message];
+      
+      // Optimistic update
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === orderId ? { 
+          ...o, 
+          messages: updatedMessages,
+          ...(newStatus ? { status: newStatus } : {})
+        } : o)),
+      }));
+
+      const updateData: any = { messages: updatedMessages };
+      if (newStatus) updateData.status = newStatus;
+
+      await updateDoc(doc(db, "orders", orderId), updateData);
+    } catch (error) {
+      console.error("Error adding message to order:", error);
     }
   },
 

@@ -18,10 +18,11 @@ interface Edge {
 interface TreeBuilderProps {
   initialNodes?: Node[];
   initialEdges?: Edge[];
-  onChange: (nodes: Node[], edges: Edge[]) => void;
+  onChange?: (nodes: Node[], edges: Edge[]) => void;
+  readOnly?: boolean;
 }
 
-export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: TreeBuilderProps) {
+export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, readOnly = false }: TreeBuilderProps) {
   const [nodes, setNodes] = useState<Node[]>(initialNodes.length ? initialNodes : [{ id: "root", name: "أنت", relation: "نقطة البداية", x: 300, y: 50 }]);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   
@@ -34,6 +35,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: 
   const [editRelation, setEditRelation] = useState("");
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
+    if (readOnly) return;
     e.stopPropagation();
     setDraggingNode(id);
     setSelectedNode(id);
@@ -45,7 +47,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: 
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!draggingNode || !containerRef.current) return;
+    if (readOnly || !draggingNode || !containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -55,8 +57,9 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: 
   };
 
   const handlePointerUp = () => {
+    if (readOnly) return;
     setDraggingNode(null);
-    onChange(nodes, edges);
+    if (onChange) onChange(nodes, edges);
   };
 
   const addRelative = (parentId: string) => {
@@ -82,24 +85,24 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: 
     const newEdges = [...edges, newEdge];
     setNodes(newNodes);
     setEdges(newEdges);
-    onChange(newNodes, newEdges);
+    if (onChange) onChange(newNodes, newEdges);
   };
 
   const deleteNode = (id: string) => {
-    if (id === "root") return; // Keep root
+    if (id === "root" || readOnly) return; // Keep root
     const newNodes = nodes.filter(n => n.id !== id);
     const newEdges = edges.filter(e => e.source !== id && e.target !== id);
     setNodes(newNodes);
     setEdges(newEdges);
-    onChange(newNodes, newEdges);
+    if (onChange) onChange(newNodes, newEdges);
     setSelectedNode(null);
   };
 
   const saveEdit = () => {
-    if(!selectedNode) return;
+    if(!selectedNode || readOnly) return;
     const newNodes = nodes.map(n => n.id === selectedNode ? { ...n, name: editName, relation: editRelation } : n);
     setNodes(newNodes);
-    onChange(newNodes, edges);
+    if (onChange) onChange(newNodes, edges);
     setIsEditing(false);
   }
 
@@ -134,14 +137,14 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange }: 
           <div
             key={node.id}
             onPointerDown={(e) => handlePointerDown(e, node.id)}
-            className={`absolute flex flex-col items-center justify-center p-3 rounded-xl border-2 shadow-sm cursor-grab active:cursor-grabbing transform -translate-x-1/2 -translate-y-1/2 min-w-[120px] transition-colors
-              ${selectedNode === node.id ? 'border-brand-600 bg-white' : 'border-brand-300 bg-brand-50 hover:border-brand-400'}`}
+            className={`absolute flex flex-col items-center justify-center p-3 rounded-xl border-2 shadow-sm ${readOnly ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} transform -translate-x-1/2 -translate-y-1/2 min-w-[120px] transition-colors
+              ${selectedNode === node.id && !readOnly ? 'border-brand-600 bg-white' : 'border-brand-300 bg-brand-50 hover:border-brand-400'}`}
             style={{ left: node.x, top: node.y }}
           >
              <div className="text-sm font-bold text-brand-900">{node.name}</div>
              <div className="text-xs text-brand-600">{node.relation}</div>
              
-             {selectedNode === node.id && (
+             {selectedNode === node.id && !readOnly && (
                <div className="absolute -bottom-10 flex gap-2">
                  <button onClick={(e) => { e.stopPropagation(); addRelative(node.id); }} className="p-1.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 shadow-md">
                    <Plus className="w-4 h-4" />

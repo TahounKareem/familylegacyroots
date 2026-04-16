@@ -1,9 +1,18 @@
-import { useAppStore } from "@/lib/store";
+import { useAppStore, Order, Message } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { FileText, Clock, AlertCircle, CheckCircle, BookOpen } from "lucide-react";
+import { FileText, Clock, AlertCircle, CheckCircle, BookOpen, MessageSquare, X, UploadCloud } from "lucide-react";
+import { useState, useRef } from "react";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export function Dashboard() {
-  const { currentUser, orders } = useAppStore();
+  const { currentUser, orders, addMessageToOrder } = useAppStore();
+  const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [attachedUrls, setAttachedUrls] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!currentUser) {
     return <Navigate to="/auth" />;
@@ -16,8 +25,58 @@ export function Dashboard() {
       case "مكتمل": return <CheckCircle className="text-green-500 w-5 h-5" />;
       case "طلب إيضاح": return <AlertCircle className="text-orange-500 w-5 h-5" />;
       case "قيد البحث": return <Clock className="text-blue-500 w-5 h-5" />;
+      case "تم الرد": return <CheckCircle className="text-brand-500 w-5 h-5" />;
       default: return <Clock className="text-gray-500 w-5 h-5" />;
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    setUploading(true);
+    setUploadProgress(0);
+
+    const storageRef = ref(storage, `messages/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      }, 
+      (error) => {
+        console.error("Upload error:", error);
+        setUploading(false);
+        alert("فشل رفع الملف.");
+      }, 
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setAttachedUrls(prev => [...prev, downloadURL]);
+          setUploading(false);
+        });
+      }
+    );
+  };
+
+  const handleSendReply = () => {
+    if (!messagingOrder || !currentUser || (!replyText.trim() && attachedUrls.length === 0)) return;
+
+    const newMessage: Message = {
+      id: Math.random().toString(36).substr(2, 9),
+      senderId: currentUser.id,
+      senderRole: "user",
+      text: replyText,
+      attachments: attachedUrls,
+      createdAt: new Date().toISOString()
+    };
+
+    addMessageToOrder(messagingOrder.id, newMessage, "تم الرد");
+    
+    setReplyText("");
+    setAttachedUrls([]);
+    setMessagingOrder(null);
   };
 
   return (
@@ -68,7 +127,20 @@ export function Dashboard() {
                          {order.status}
                        </span>
                        {order.status === "طلب إيضاح" && (
-                         <button className="text-sm text-orange-600 hover:underline">الرد على طلب الباحث</button>
+                         <button 
+                           onClick={() => setMessagingOrder(order)}
+                           className="text-sm text-orange-600 hover:text-orange-800 hover:underline flex items-center gap-1 font-medium bg-orange-100 px-3 py-1.5 rounded-md"
+                         >
+                           <MessageSquare className="w-4 h-4" /> الرد على الإيضاح
+                         </button>
+                       )}
+                       {order.messages && order.messages.length > 0 && order.status !== "طلب إيضاح" && (
+                         <button 
+                           onClick={() => setMessagingOrder(order)}
+                           className="text-sm text-brand-600 hover:text-brand-800 hover:underline flex items-center gap-1 font-medium bg-brand-100 px-3 py-1.5 rounded-md"
+                         >
+                           <MessageSquare className="w-4 h-4" /> عرض الرسائل
+                         </button>
                        )}
                     </div>
                   </div>
@@ -90,6 +162,80 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Messaging Modal */}
+      {messagingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right relative">
+            <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
+               <h3 className="font-bold text-brand-900 flex items-center gap-2">
+                 <MessageSquare className="w-5 h-5 text-brand-600" />
+                 طلب إيضاح وتواصل الاستشاري (طلب رقم: <span className="font-mono">{messagingOrder.id}</span>)
+               </h3>
+               <button onClick={() => setMessagingOrder(null)} className="text-brand-500 hover:text-brand-800 bg-white rounded-full p-1 shadow-sm">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+              {(!messagingOrder.messages || messagingOrder.messages.length === 0) ? (
+                <div className="text-center text-gray-500 text-sm py-4">لا توجد رسائل سابقة.</div>
+              ) : (
+                messagingOrder.messages.map(msg => (
+                  <div key={msg.id} className={`flex flex-col ${msg.senderRole === 'user' ? 'items-start' : 'items-end'}`}>
+                    <div className={`max-w-[80%] rounded-2xl p-4 ${msg.senderRole === 'user' ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-white border border-brand-200 text-brand-900 rounded-tl-none shadow-sm'}`}>
+                      <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                      
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {msg.attachments.map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noreferrer" className={`text-xs px-3 py-1 rounded bg-black/10 hover:bg-black/20 transition flex items-center gap-1 ${msg.senderRole === 'user' ? 'text-white' : 'text-brand-700'}`}>
+                              <FileText className="w-3 h-3" /> مرفق {i + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-400 mt-1">{new Date(msg.createdAt).toLocaleString('ar-SA')}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 bg-white border-t border-brand-100 flex flex-col gap-3">
+              <textarea 
+                rows={3}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="اكتب ردك هنا للباحث..."
+                className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 p-3 bg-brand-50 text-sm"
+              ></textarea>
+              
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.jpg,.jpeg,.png" />
+                  <button onClick={() => fileInputRef.current?.click()} className="text-brand-600 hover:text-brand-800 flex items-center gap-1 text-sm font-medium">
+                    <UploadCloud className="w-4 h-4" /> إرفاق ملف
+                  </button>
+                  {uploading && <span className="text-xs text-brand-500 font-medium">جاري الرفع... {Math.round(uploadProgress)}%</span>}
+                  
+                  {attachedUrls.length > 0 && (
+                    <span className="text-xs text-green-600 font-medium">{attachedUrls.length} ملفات مرفقة</span>
+                  )}
+                </div>
+                
+                <button 
+                  onClick={handleSendReply} 
+                  disabled={uploading || (!replyText.trim() && attachedUrls.length === 0)}
+                  className={`px-6 py-2 rounded-md font-bold text-white transition ${uploading || (!replyText.trim() && attachedUrls.length === 0) ? 'bg-brand-300 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700 shadow-md'}`}
+                >
+                  إرسال الرد
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

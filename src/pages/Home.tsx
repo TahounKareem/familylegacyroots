@@ -44,19 +44,15 @@ export function Home() {
               transition={{ duration: 1, delay: 0.2 }}
               className="relative"
             >
-              <div className="aspect-[4/3] rounded-[2rem] overflow-hidden border-8 border-brand-900 relative shadow-2xl">
-                <img 
-                  src="https://picsum.photos/seed/vintagebookbox/800/600" 
-                  alt="سجل التراث العائلي" 
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-                {/* Decorative Play Button for Promo Video */}
-                <div className="absolute inset-0 bg-brand-950/20 flex items-center justify-center group cursor-pointer hover:bg-brand-950/10 transition">
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/40 group-hover:scale-110 transition-transform">
-                    <div className="w-0 h-0 border-y-[10px] border-y-transparent border-r-[16px] border-r-white ml-2"></div>
-                  </div>
-                </div>
+              <div className="aspect-[4/3] rounded-[2rem] overflow-hidden border-8 border-brand-900 shadow-2xl relative">
+                <iframe 
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/RYEZJDqXKu8?rel=0&showinfo=0" 
+                  title="سجل التراث العائلي" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
               </div>
             </motion.div>
           </div>
