@@ -9,12 +9,12 @@ export function Home() {
       <section className="relative pt-24 pb-32 overflow-hidden text-white">
         {/* Background Image with optimized visibility */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/kXcB4kcn/pic1.jpg')] bg-cover bg-center"></div>
+          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/8c2yFZVz/Pic2-2.jpg')] bg-cover bg-center"></div>
           {/* Elegant Dark Red Overlay - light enough to show details, dark enough for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-brand-950/40 to-brand-950/90"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-3xl">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -40,38 +40,40 @@ export function Home() {
                 </Link>
               </div>
             </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="aspect-[4/3] rounded-[2rem] overflow-hidden border-8 border-brand-900 shadow-2xl relative">
-                <iframe 
-                  className="w-full h-full"
-                  src="https://www.youtube.com/embed/RYEZJDqXKu8?rel=0&showinfo=0" 
-                  title="سجل التراث العائلي" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Philosophy / About Short */}
+      {/* Philosophy / About & Video Section */}
       <section className="py-24 bg-brand-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <BookOpen className="w-12 h-12 text-brand-600 mx-auto mb-8" />
           <h2 className="font-serif text-4xl text-brand-900 mb-8 leading-normal">
             ما هو "سجل التراث العائلي"؟
           </h2>
-          <p className="text-xl text-brand-800 leading-relaxed font-light">
+          <p className="text-xl text-brand-800 leading-relaxed font-light max-w-3xl mx-auto mb-16">
             ليس مجرد كتاب، بل هو وثيقة تاريخية محققة تُورث للأجيال القادمة. نقوم بجمع الروايات المتناثرة، وتوثيق شجرة العائلة المتصلة، وتنسيق الوثائق التاريخية في قالب منهجي وفني فاخر.
           </p>
+
+          {/* Engraved Video Container */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="p-3 md:p-5 rounded-[2.5rem] bg-brand-100/50 shadow-inner border border-brand-200/60 mx-auto backdrop-blur-sm"
+          >
+            <div className="aspect-[16/9] rounded-[1.5rem] overflow-hidden shadow-2xl relative bg-brand-950 border border-brand-100">
+              <iframe 
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/RYEZJDqXKu8?rel=0&showinfo=0" 
+                title="سجل التراث العائلي" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </motion.div>
         </div>
       </section>
 
