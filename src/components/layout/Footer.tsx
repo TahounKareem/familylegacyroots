@@ -7,8 +7,9 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="inline-block mb-6 bg-white p-2.5 rounded-2xl shadow-sm hover:shadow-md transition">
-              <img src="https://i.postimg.cc/jDwMBRd2/Segel.png" alt="سجل تراث العائلة" className="h-10 w-auto object-contain drop-shadow-sm" />
+            <Link to="/" className="flex items-center gap-2 mb-6 text-white hover:text-brand-300 transition">
+              <BookOpen className="w-8 h-8 text-brand-500" />
+              <span className="font-serif text-2xl font-bold">سجل تراث العائلة</span>
             </Link>
             <p className="text-brand-300 text-sm leading-relaxed mb-6">
               نحن مؤسسة متخصصة في توثيق تاريخ وعراقة العائلات، وتقديم خدمات البحث والتدقيق في الأنساب، مع إخراج فني احترافي.

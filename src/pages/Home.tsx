@@ -6,11 +6,14 @@ export function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 overflow-hidden bg-brand-950 text-white">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/hXz2NKPG/pic1.jpg')] bg-cover bg-center mix-blend-overlay"></div>
+      <section className="relative pt-24 pb-32 overflow-hidden text-white">
+        {/* Background Image with optimized visibility */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/kXcB4kcn/pic1.jpg')] bg-cover bg-center"></div>
+          {/* Elegant Dark Red Overlay - light enough to show details, dark enough for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/40 to-brand-950/90"></div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -117,28 +120,39 @@ export function Home() {
       </section>
       
       {/* Target Audience */}
-      <section className="py-24 bg-brand-900 text-white">
+      <section className="py-24 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-               <h2 className="font-serif text-4xl mb-6">لمن هذا المنتج؟</h2>
-               <ul className="space-y-6">
-                 {[
-                   "لكل عميد أسرة يرغب في حفظ إرث أجداده.",
-                   "للأجيال الشابة الباحثة عن الانتماء ومعرفة جذورها.",
-                   "كهدية فاخرة لكبار العائلة في المناسبات الخاصة والأعياد."
-                 ].map((item, i) => (
-                   <li key={i} className="flex gap-4 items-start">
-                     <span className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shrink-0">
-                       <ChevronLeft className="w-5 h-5" />
-                     </span>
-                     <span className="text-xl text-brand-100 mt-1">{item}</span>
-                   </li>
-                 ))}
-               </ul>
-            </div>
-            <div className="w-full rounded-[2rem] overflow-hidden relative shadow-xl bg-white border border-brand-100 p-2 md:p-4 auto-rows-auto">
-              <img src="https://i.postimg.cc/TKLtBTYy/Pic2.jpg" alt="عائلة" className="w-full h-auto object-contain rounded-xl" referrerPolicy="no-referrer" />
+          <div className="bg-brand-50 rounded-[3rem] p-8 md:p-16 shadow-xl border border-brand-100">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              
+              <div>
+                 <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن هذا المنتج؟</h2>
+                 <ul className="space-y-6">
+                   {[
+                     "لكل عميد أسرة يرغب في حفظ إرث أجداده.",
+                     "للأجيال الشابة الباحثة عن الانتماء ومعرفة جذورها.",
+                     "كهدية فاخرة لكبار العائلة في المناسبات الخاصة والأعياد."
+                   ].map((item, i) => (
+                     <li key={i} className="flex gap-4 items-start">
+                       <span className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shrink-0 shadow-sm">
+                         <ChevronLeft className="w-5 h-5 text-white" />
+                       </span>
+                       <span className="text-xl text-brand-800 mt-1 font-medium">{item}</span>
+                     </li>
+                   ))}
+                 </ul>
+              </div>
+
+              {/* Natural Image Container - Ensures 0 aspect ratio distortion */}
+              <div className="w-full rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                  src="https://i.postimg.cc/cLpTJghp/Pic2.jpg" 
+                  alt="نموذج سجل العائلة" 
+                  className="w-full h-auto block"
+                  referrerPolicy="no-referrer" 
+                />
+              </div>
+
             </div>
           </div>
         </div>
