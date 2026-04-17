@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { useNavigate, Navigate } from "react-router";
 import { auth, db } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
 export function Auth() {
@@ -30,7 +30,12 @@ export function Auth() {
       setLoading(true);
       try {
         if (isLogin) {
-          await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          if (!userCredential.user.emailVerified) {
+            await signOut(auth);
+            setError("برجاء تفعيل حسابك أولاً من خلال الرابط المرسل إلى بريدك الإلكتروني.");
+            return;
+          }
         } else {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
@@ -44,6 +49,16 @@ export function Auth() {
             email: email,
             role: role
           });
+
+          // Send verification email and sign out to wait for verification
+          await sendEmailVerification(user);
+          await signOut(auth);
+          
+          // Clear inputs and show success message
+          setError("تم إنشاء الحساب بنجاح! برجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني قبل تسجيل الدخول.");
+          setIsLogin(true);
+          setPassword("");
+          return;
         }
       } catch (err: any) {
         console.error("Auth/Firestore error:", err);
@@ -87,7 +102,7 @@ export function Auth() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-brand-100">
           {error && (
-            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-lg text-sm text-center">
+            <div className={`mb-4 p-3 rounded-lg text-sm text-center ${error.includes('بنجاح') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
               {error}
             </div>
           )}

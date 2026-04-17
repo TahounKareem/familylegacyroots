@@ -146,6 +146,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   initializeFirebase: () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        if (!user.emailVerified) {
+          await firebaseSignOut(auth);
+          set({ currentUser: null, orders: [], isAuthReady: true });
+          return;
+        }
+
         try {
           // Get user document
           const userDoc = await getDoc(doc(db, "users", user.uid));

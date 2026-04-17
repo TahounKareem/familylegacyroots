@@ -7,8 +7,8 @@ export function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden bg-brand-950 text-white">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/arabesque/1920/1080')] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/hXz2NKPG/pic1.jpg')] bg-cover bg-center mix-blend-overlay"></div>
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -137,9 +137,8 @@ export function Home() {
                  ))}
                </ul>
             </div>
-            <div className="aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden relative">
-              <img src="https://picsum.photos/seed/familyportrait/800/1000?blur=2" alt="عائلة" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-transparent"></div>
+            <div className="w-full rounded-[2rem] overflow-hidden relative shadow-xl bg-white border border-brand-100 p-2 md:p-4 auto-rows-auto">
+              <img src="https://i.postimg.cc/TKLtBTYy/Pic2.jpg" alt="عائلة" className="w-full h-auto object-contain rounded-xl" referrerPolicy="no-referrer" />
             </div>
           </div>
         </div>

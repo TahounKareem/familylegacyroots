@@ -7,11 +7,8 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="flex items-center gap-3 group mb-6">
-              <div className="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-white">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <span className="font-serif text-2xl font-bold text-white tracking-tight">سجل تراث العائلة</span>
+            <Link to="/" className="inline-block mb-6 bg-white p-2.5 rounded-2xl shadow-sm hover:shadow-md transition">
+              <img src="https://i.postimg.cc/jDwMBRd2/Segel.png" alt="سجل تراث العائلة" className="h-10 w-auto object-contain drop-shadow-sm" />
             </Link>
             <p className="text-brand-300 text-sm leading-relaxed mb-6">
               نحن مؤسسة متخصصة في توثيق تاريخ وعراقة العائلات، وتقديم خدمات البحث والتدقيق في الأنساب، مع إخراج فني احترافي.
@@ -53,8 +50,14 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="pt-8 border-t border-brand-800/50 flex flex-col md:flex-row justify-between items-center text-sm text-brand-400">
-          <p>© {new Date().getFullYear()} GeneaLab LLC. جميع الحقوق محفوظة.</p>
+        <div className="pt-8 border-t border-brand-800/50 flex flex-col md:flex-row justify-between items-center text-sm text-brand-400 gap-4">
+          <div className="flex items-center gap-2">
+            <span>© {new Date().getFullYear()}</span>
+            <div className="bg-white/90 p-1.5 rounded-md">
+              <img src="https://i.postimg.cc/87JZxTP1/Genealab.png" alt="GeneaLab LLC" className="h-4 w-auto object-contain" />
+            </div>
+            <span>جميع الحقوق محفوظة.</span>
+          </div>
         </div>
       </div>
     </footer>

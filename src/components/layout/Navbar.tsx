@@ -21,10 +21,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white group-hover:bg-brand-700 transition">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <span className="font-serif text-2xl font-bold text-brand-900 tracking-tight">سجل تراث العائلة</span>
+            <img src="https://i.postimg.cc/jDwMBRd2/Segel.png" alt="سجل تراث العائلة" className="h-14 w-auto object-contain drop-shadow-sm" />
           </Link>
 
           {/* Desktop Menu */}
