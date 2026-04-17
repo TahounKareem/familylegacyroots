@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { useNavigate, Navigate } from "react-router";
+import { useNavigate, Navigate, Link } from "react-router";
+import { Home } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -42,7 +43,7 @@ export function Auth() {
           
           await updateProfile(user, { displayName: name });
           
-          const role = email.includes("admin") ? "admin" : "user";
+          const role = email.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "admin" : "user";
           await setDoc(doc(db, "users", user.uid), {
             id: user.uid,
             name: name,
@@ -86,7 +87,14 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-brand-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4 sm:top-8 sm:right-8">
+        <Link to="/" className="flex items-center gap-2 text-brand-600 hover:text-brand-800 transition bg-white py-2 px-4 rounded-full shadow-sm">
+          <Home className="w-5 h-5" />
+          <span className="font-medium">العودة للرئيسية</span>
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-serif font-bold text-brand-900">
           {isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}
@@ -163,7 +171,7 @@ export function Auth() {
                 </div>
                 <div className="ml-3 mr-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-brand-800">
-                    أوافق على <a href="/legal" target="_blank" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</a>، <a href="/legal" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</a>، و <a href="/legal" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الكوكيز</a>.
+                    أوافق على <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</a>، <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</a>، و <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">سياسة الكوكيز</a>.
                   </label>
                 </div>
               </div>

@@ -147,7 +147,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         if (!user.emailVerified) {
-          await firebaseSignOut(auth);
+          // Simply clear state, don't force a signout here as it races with Auth.tsx during registration
           set({ currentUser: null, orders: [], isAuthReady: true });
           return;
         }
@@ -165,7 +165,7 @@ export const useAppStore = create<AppState>((set, get) => ({
               id: user.uid,
               name: user.displayName || "مستخدم",
               email: user.email || "",
-              role: user.email?.includes("admin") ? "admin" : "user"
+              role: user.email?.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "admin" : "user"
             };
             await setDoc(doc(db, "users", user.uid), userInfo);
           }
