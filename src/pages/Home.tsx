@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft } from "lucide-react";
+import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play } from "lucide-react";
 
 export function Home() {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -63,15 +66,31 @@ export function Home() {
             transition={{ duration: 0.8 }}
             className="p-3 md:p-5 rounded-[2.5rem] bg-brand-100/50 shadow-inner border border-brand-200/60 mx-auto backdrop-blur-sm"
           >
-            <div className="aspect-[16/9] rounded-[1.5rem] overflow-hidden shadow-2xl relative bg-brand-950 border border-brand-100">
-              <iframe 
-                className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/RYEZJDqXKu8?rel=0&showinfo=0" 
-                title="سجل التراث العائلي" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              ></iframe>
+            <div className="aspect-[16/9] rounded-[1.5rem] overflow-hidden shadow-2xl relative bg-brand-950 border border-brand-100 group cursor-pointer" onClick={() => setIsVideoPlaying(true)}>
+              {!isVideoPlaying ? (
+                <>
+                  <img 
+                    src="https://img.youtube.com/vi/ZeSwzfHvw3I/maxresdefault.jpg" 
+                    alt="سجل التراث العائلي فيديو تعريفي" 
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-brand-950/30 group-hover:bg-brand-950/10 transition-colors duration-500"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 bg-brand-600/90 hover:bg-brand-500 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-110">
+                      <Play className="w-8 h-8 text-white ml-2" fill="currentColor" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <iframe 
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/ZeSwzfHvw3I?autoplay=1&rel=0&showinfo=0" 
+                  title="سجل التراث العائلي" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
+              )}
             </div>
           </motion.div>
         </div>
