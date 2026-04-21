@@ -12,7 +12,7 @@ export function Home() {
       <section className="relative pt-24 pb-32 overflow-hidden text-white">
         {/* Background Image with optimized visibility */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/8c2yFZVz/Pic2-2.jpg')] bg-cover bg-center"></div>
+          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/T3GWLKFv/Pic2-3.jpg')] bg-cover bg-center"></div>
           {/* Elegant Dark Red Overlay - light enough to show details, dark enough for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-brand-950/40 to-brand-950/90"></div>
         </div>
@@ -37,9 +37,6 @@ export function Home() {
                 <Link to="/auth" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
                   ابدأ توثيق عائلتك
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                </Link>
-                <Link to="/services" className="bg-transparent border border-brand-500 text-brand-300 hover:bg-brand-900 px-8 py-4 rounded-md font-semibold transition text-center text-lg">
-                  تعرف على خدماتنا
                 </Link>
               </div>
             </motion.div>

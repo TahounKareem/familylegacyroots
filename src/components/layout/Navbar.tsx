@@ -9,8 +9,8 @@ export function Navbar() {
 
   const navLinks = [
     { text: "الرئيسية", path: "/" },
-    { text: "عن سجلنا", path: "/about" },
-    { text: "خدماتنا", path: "/services" },
+    { text: "ماذا نقدم", path: "/about" },
+    { text: "سجل تراث العائلة", path: "/services" },
     { text: "المركز المعرفي", path: "/knowledge" },
     { text: "اتصل بنا", path: "/contact" },
   ];
@@ -44,13 +44,13 @@ export function Navbar() {
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={logout} className="text-sm text-red-600 hover:underline">
+                <button onClick={logout} className="text-brand-800 hover:text-red-600 font-medium transition">
                   تسجيل الخروج
                 </button>
               </div>
             ) : (
-              <Link to="/auth" className="bg-brand-600 text-white px-6 py-2.5 rounded-md font-semibold hover:bg-brand-700 transition">
-                ابدأ رحلتك
+              <Link to="/auth" className="text-brand-800 hover:text-brand-600 font-medium transition">
+                تسجيل الدخول / إنشاء حساب
               </Link>
             )}
           </div>
@@ -80,11 +80,11 @@ export function Navbar() {
           {currentUser ? (
             <>
               <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
-              <button onClick={() => { logout(); setIsOpen(false); }} className="block text-red-600 font-medium">تسجيل الخروج</button>
+              <button onClick={() => { logout(); setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-medium">تسجيل الخروج</button>
             </>
           ) : (
-            <Link to="/auth" className="block text-center bg-brand-600 text-white px-6 py-3 rounded-md font-semibold" onClick={() => setIsOpen(false)}>
-              ابدأ الموثوقية
+            <Link to="/auth" className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>
+              تسجيل الدخول / إنشاء حساب
             </Link>
           )}
         </div>
