@@ -56,7 +56,7 @@ export function Auth() {
           await signOut(auth);
           
           // Clear inputs and show success message
-          setError("تم إنشاء الحساب بنجاح! برجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني قبل تسجيل الدخول.");
+          setError("تم إنشاء الحساب بنجاح! برجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني قبل تسجيل الدخول. (إذا لم تجد الرسالة، يرجى تفقد مجلد الرسائل المزعجة Spam / Junk).");
           setIsLogin(true);
           setPassword("");
           return;
