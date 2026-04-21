@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDqDs3H5DGxa27ZTOvRfgYq1c24M4QrTIk",
-  authDomain: "familylegacyroots.firebaseapp.com",
-  projectId: "familylegacyroots",
-  storageBucket: "familylegacyroots.firebasestorage.app",
-  messagingSenderId: "929808717275",
-  appId: "1:929808717275:web:f9792ce33f56296fe483fe"
+  apiKey: "AIzaSyCPORB4oL9rb_Z2zilSjGyW3v6gv5rKIlc",
+  authDomain: "family-legacy-47605.firebaseapp.com",
+  projectId: "family-legacy-47605",
+  storageBucket: "family-legacy-47605.firebasestorage.app",
+  messagingSenderId: "164909144094",
+  appId: "1:164909144094:web:07faf173fe3f394de0b60f"
 };
 
 export const app = initializeApp(firebaseConfig);
