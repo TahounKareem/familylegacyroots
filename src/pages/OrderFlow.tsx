@@ -151,7 +151,7 @@ export function OrderFlow() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
-                  <input type="text" placeholder="المدينة، المحافظة" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} />
                 </div>
               </div>
             </div>
