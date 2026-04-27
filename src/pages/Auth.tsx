@@ -179,7 +179,7 @@ export function Auth() {
                 </div>
                 <div className="ml-3 mr-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-brand-800">
-                    أوافق على <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</a>، <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</a>، و <a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-500 underline">سياسة الكوكيز</a>.
+                    أوافق على <Link to="/legal#terms" target="_blank" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</Link>، <Link to="/legal#privacy" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</Link>، و <Link to="/legal#cookies" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الكوكيز</Link>.
                   </label>
                 </div>
               </div>

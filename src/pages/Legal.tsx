@@ -48,6 +48,13 @@ export function Legal() {
           </div>
         </section>
 
+        <section id="cookies" className="bg-white p-8 rounded-3xl border border-brand-100">
+          <h2 className="font-serif text-2xl font-bold text-brand-900 mb-6">سياسة الكوكيز</h2>
+          <div className="prose prose-brand text-brand-800 leading-relaxed font-light">
+             <p>نستخدم ملفات تعريف الارتباط (الكوكيز) لتحسين تجربتك على منصتنا، ولضمان عمل الموقع بشكل أسرع وأكثر كفاءة، ولمتابعة جلسات الدخول للمستخدمين بشكل آمن. استمرارك في استخدام الموقع يعني موافقتك على استخدام الكوكيز.</p>
+          </div>
+        </section>
+
         <section id="copyright" className="bg-white p-8 md:p-12 rounded-3xl border border-brand-100 shadow-sm">
           <h2 className="font-serif text-3xl font-bold text-brand-900 mb-8 border-b-2 border-brand-100 pb-4">إشعار حقوق النشر وإخلاء المسؤولية</h2>
           <div className="prose prose-brand text-brand-800 leading-relaxed font-light max-w-none">

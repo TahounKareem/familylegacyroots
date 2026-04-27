@@ -29,10 +29,10 @@ export function Footer() {
           <div>
             <h3 className="font-serif text-lg text-white mb-6">الوثائق القانونية</h3>
             <ul className="space-y-4 text-brand-300">
-              <li><a href="https://adam.tahoun.live/legal#agreement" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition">اتفاقية الخدمة</a></li>
-              <li><a href="https://adam.tahoun.live/legal#privacy" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition">سياسة الخصوصية</a></li>
-              <li><a href="https://adam.tahoun.live/legal#terms" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition">شروط الاستخدام</a></li>
-              <li><a href="https://adam.tahoun.live/legal#cookies" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition">سياسة الكوكيز</a></li>
+              <li><Link to="/legal#agreement" className="hover:text-brand-400 transition">اتفاقية الخدمة</Link></li>
+              <li><Link to="/legal#privacy" className="hover:text-brand-400 transition">سياسة الخصوصية</Link></li>
+              <li><Link to="/legal#terms" className="hover:text-brand-400 transition">شروط الاستخدام</Link></li>
+              <li><Link to="/legal#cookies" className="hover:text-brand-400 transition">سياسة الكوكيز</Link></li>
             </ul>
           </div>
           
