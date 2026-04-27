@@ -20,11 +20,19 @@ interface TreeBuilderProps {
   initialEdges?: Edge[];
   onChange?: (nodes: Node[], edges: Edge[]) => void;
   readOnly?: boolean;
+  familyName?: string;
 }
 
-export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, readOnly = false }: TreeBuilderProps) {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes.length ? initialNodes : [{ id: "root", name: "أنت", relation: "نقطة البداية", x: 300, y: 50 }]);
+export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, readOnly = false, familyName }: TreeBuilderProps) {
+  const [nodes, setNodes] = useState<Node[]>(initialNodes.length ? initialNodes : [{ id: "root", name: familyName || "أنت", relation: "نقطة البداية", x: 300, y: 50 }]);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  
+  // Sync root node name with familyName if it hasn't been heavily manually changed and it's the beginning
+  useEffect(() => {
+    if (!initialNodes.length && familyName) {
+      setNodes(prev => prev.map(n => n.id === "root" ? { ...n, name: familyName } : n));
+    }
+  }, [familyName, initialNodes.length]);
   
   const [draggingNode, setDraggingNode] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,8 +77,8 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
     const newId = Math.random().toString(36).substring(7);
     const newNode = {
       id: newId,
-      name: "قريب جديد",
-      relation: "ابن/أخ/أب",
+      name: "",
+      relation: "إبن",
       x: parent.x,
       y: parent.y + 100
     };
@@ -172,7 +180,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
            </div>
            <div className="flex-1 w-full">
              <label className="block text-xs font-medium text-brand-700 mb-1">الصلة</label>
-             <input type="text" value={editRelation} onChange={e => setEditRelation(e.target.value)} className="w-full border border-brand-200 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500" />
+             <input type="text" value={editRelation} disabled className="w-full border border-gray-100 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-500 cursor-not-allowed" />
            </div>
            <button onClick={saveEdit} className="bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 flex items-center gap-2 text-sm font-medium">
              <Check className="w-4 h-4" /> حفظ

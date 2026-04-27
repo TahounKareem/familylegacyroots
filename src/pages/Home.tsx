@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play } from "lucide-react";
+import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play, FolderPlus, Database, SearchCheck, Gift } from "lucide-react";
 
 export function Home() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -28,14 +28,14 @@ export function Home() {
               </span>
               <h1 className="font-serif text-5xl lg:text-7xl font-bold leading-tight mb-6">
                 وثق جذورك<br />
-                <span className="text-brand-400 font-light italic">واحفظ عراقتك</span>
+                <span className="text-brand-400 font-light italic">وإحفظ تراثك</span>
               </h1>
               <p className="text-xl text-brand-200 mb-10 leading-relaxed max-w-lg">
                 عمل احترافي دقيق لتوثيق تاريخ وعراقة العائلة من خلال البحث العميق، وتصميم "سجل التراث العائلي" بأسلوب فني يليق بقيمتكم.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/auth" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
-                  ابدأ توثيق عائلتك
+                  إبدأ رحلة توثيق سجلك العائلي
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -49,7 +49,7 @@ export function Home() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <BookOpen className="w-12 h-12 text-brand-600 mx-auto mb-8" />
           <h2 className="font-serif text-4xl text-brand-900 mb-8 leading-normal">
-            ما هو "سجل التراث العائلي"؟
+            ما هو "سجل تراث العائلة"؟
           </h2>
           <p className="text-xl text-brand-800 leading-relaxed font-light max-w-3xl mx-auto mb-16">
             ليس مجرد كتاب، بل هو وثيقة تاريخية محققة تُورث للأجيال القادمة. نقوم بجمع الروايات المتناثرة، وتوثيق شجرة العائلة المتصلة، وتنسيق الوثائق التاريخية في قالب منهجي وفني فاخر.
@@ -97,25 +97,31 @@ export function Home() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl font-bold text-brand-900">لماذا تختار منصتنا؟</h2>
+            <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث العائلة</h2>
+            <p className="text-brand-600 text-lg max-w-2xl mx-auto">منهجية أكاديمية دقيقة تضمن لكم الحصول على سجل تاريخي معتمد</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-4 gap-8">
             {[
               {
-                icon: Shield,
-                title: "دقة وموثوقية",
-                desc: "باحثون متخصصون في الأنساب يراجعون كافة الوثائق ويدققون المراجع التاريخية لضمان صحة التسلسل."
+                icon: FolderPlus,
+                title: "فتح سجل تراث العائلة",
+                desc: "خطوتك الأولى لتدوين تاريخ عائلتك العريق وتوليد ملف خاص بأسرتك."
               },
               {
-                icon: TreeDeciduous,
-                title: "شجرة العائلة الرقمية",
-                desc: "أداة بناء مبتكرة تتيح لك إدخال أسماء أفراد العائلة وترابطهم مع معالجة الروايات المختلفة للنسب."
+                icon: Database,
+                title: "تزويد البيانات",
+                desc: "إدراج التفاصيل الخاصة والوثائق والصور بدقة وسرية تامة."
               },
               {
-                icon: Star,
-                title: "إخراج فني فاخر",
-                desc: "طباعة فاخرة على ورق عالي الجودة وتجليد فني متقن، ليصبح الكتاب تحفة فنية تزين مكتبتك."
+                icon: SearchCheck,
+                title: "التدقيق الميداني",
+                desc: "فحص وتوثيق وتحقيق أكاديمي للمعلومات لضمان التاريخ المعتمد."
+              },
+              {
+                icon: Gift,
+                title: "استلم السجل",
+                desc: "حصولك على نسختك الفاخرة والرقمية لتراثك الموثق الجاهز للمشاركة."
               }
             ].map((feature, idx) => (
                <motion.div 
@@ -124,13 +130,13 @@ export function Home() {
                  whileInView={{ opacity: 1, y: 0 }}
                  viewport={{ once: true }}
                  transition={{ delay: idx * 0.1 }}
-                 className="bg-brand-50 rounded-3xl p-8 border border-brand-100 hover:shadow-xl transition-shadow"
+                 className="bg-brand-50 rounded-3xl p-8 border border-brand-100 hover:shadow-xl transition-shadow text-center"
                >
-                 <div className="w-14 h-14 bg-brand-200 rounded-2xl flex items-center justify-center text-brand-700 mb-6">
-                   <feature.icon className="w-7 h-7" />
+                 <div className="w-16 h-16 bg-brand-200 rounded-full flex items-center justify-center text-brand-700 mx-auto mb-6">
+                   <feature.icon className="w-8 h-8" />
                  </div>
                  <h3 className="font-serif text-xl font-bold text-brand-900 mb-4">{feature.title}</h3>
-                 <p className="text-brand-800/80 leading-relaxed">{feature.desc}</p>
+                 <p className="text-brand-800/80 leading-relaxed text-sm">{feature.desc}</p>
                </motion.div>
             ))}
           </div>
@@ -144,12 +150,12 @@ export function Home() {
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               
               <div>
-                 <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن هذا المنتج؟</h2>
+                 <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن هذا السجل؟</h2>
                  <ul className="space-y-6">
                    {[
-                     "لكل عميد أسرة يرغب في حفظ إرث أجداده.",
+                     "لكل من يرغب في حفظ إرث أجداده.",
                      "للأجيال الشابة الباحثة عن الانتماء ومعرفة جذورها.",
-                     "كهدية فاخرة لكبار العائلة في المناسبات الخاصة والأعياد."
+                     "لمن يرغب في تقديم هدية قيمة لعائلته."
                    ].map((item, i) => (
                      <li key={i} className="flex gap-4 items-start">
                        <span className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shrink-0 shadow-sm">

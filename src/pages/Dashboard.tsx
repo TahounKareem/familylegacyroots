@@ -2,8 +2,9 @@ import { useAppStore, Order, Message } from "@/lib/store";
 import { Navigate, Link } from "react-router";
 import { FileText, Clock, AlertCircle, CheckCircle, BookOpen, MessageSquare, X, UploadCloud } from "lucide-react";
 import { useState, useRef } from "react";
-import { storage } from "@/lib/firebase";
+import { storage, auth } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { signOut } from "firebase/auth";
 
 export function Dashboard() {
   const { currentUser, orders, addMessageToOrder } = useAppStore();
@@ -84,12 +85,15 @@ export function Dashboard() {
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-serif text-brand-900 mb-2">أهلاً بك، {currentUser.name}</h1>
-          <p className="text-brand-700">مرحباً بك في لوحة تحكم عائلتك. يمكنك تتبع طلباتك وإضافة المعلومات من هنا.</p>
+          <p className="text-brand-700">مرحباً بك في لوحة التحكم الخاصة بك , يمكنك تتبع طلباتك وإضافة بياناتك من هنا.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/" className="text-brand-600 hover:text-brand-800 hover:underline font-medium">العودة للرئيسية</Link>
           <span className="text-brand-300">|</span>
-          <Link to="/services" className="text-brand-600 hover:text-brand-800 hover:underline font-medium">الخدمات</Link>
+          <button onClick={() => {
+            signOut(auth);
+            useAppStore.getState().logout();
+          }} className="text-brand-600 hover:text-brand-800 hover:underline font-medium">تسجيل الخروج</button>
         </div>
       </div>
 
@@ -114,12 +118,15 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {userOrders.map((order) => (
+                {userOrders.map((order) => {
+                  const deliveryDate = new Date(new Date(order.createdAt).getTime() + 90 * 24 * 60 * 60 * 1000);
+                  const daysRemaining = Math.ceil((deliveryDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                  return (
                   <div key={order.id} className="border border-brand-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h4 className="font-bold text-brand-900 text-lg">سجل عائلة {order.data.familyName}</h4>
                       <p className="text-sm text-brand-600 mt-1">تاريخ الطلب: {new Date(order.createdAt).toLocaleDateString('ar-EG')}</p>
-                      <p className="text-sm text-brand-600">الباقة: {order.plan === 'express' ? 'سريع' : 'عادي'} | الطباعة: {order.printRequested ? 'مطلوبة (تحت المراجعة)' : 'نسخة رقمية'}</p>
+                      <p className="text-sm text-brand-600">تاريخ الإستلام المتوقع: خلال 90 يوم من تاريخ تقديم الطلب ({deliveryDate.toLocaleDateString('ar-EG')})</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                        <span className="flex items-center gap-2 bg-brand-50 px-3 py-1 rounded-full text-sm font-medium border border-brand-100">
@@ -144,7 +151,8 @@ export function Dashboard() {
                        )}
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
           </div>

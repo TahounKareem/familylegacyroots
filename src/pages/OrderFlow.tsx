@@ -34,7 +34,7 @@ export function OrderFlow() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,10 +76,10 @@ export function OrderFlow() {
       id: "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
       userId: currentUser?.id || "guest",
       createdAt: new Date().toISOString(),
-      plan,
-      printRequested,
+      plan: "standard",
+      printRequested: false,
       status: "قيد البحث",
-      totalAmount: plan === "express" ? 4000 : 2000,
+      totalAmount: 1999,
       data: formData,
     });
     
@@ -102,7 +102,7 @@ export function OrderFlow() {
         <div className="mb-12">
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-brand-200 -z-10 translate-y-[-50%]"></div>
-            {[1, 2, 3, 4].map((s) => (
+            {[1, 2, 3].map((s) => (
               <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors border-4 ${
                 step >= s ? 'bg-brand-600 border-brand-100 text-white' : 'bg-white border-brand-200 text-brand-400'
               }`}>
@@ -111,9 +111,8 @@ export function OrderFlow() {
             ))}
           </div>
           <div className="flex justify-between mt-3 text-xs md:text-sm font-medium text-brand-700">
-            <span>البيانات الأساسية</span>
-            <span>الشجرة والقصة</span>
-            <span>الباقات والخيارات</span>
+            <span>البيانات الأساسية لسجل تراث عائلتك</span>
+            <span>مشجرة الأحياء</span>
             <span>الدفع والاعتماد</span>
           </div>
         </div>
@@ -123,11 +122,11 @@ export function OrderFlow() {
           
           {step === 1 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-serif font-bold text-brand-900 mb-6">البيانات الأساسية</h2>
+              <h2 className="text-2xl font-serif font-bold text-brand-900 mb-6">البيانات الأساسية لسجل تراث عائلتك</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الاسم الأول *</label>
+                  <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل وأمين السجل) *</label>
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} />
                 </div>
                 <div>
@@ -151,7 +150,7 @@ export function OrderFlow() {
                   <input type="text" placeholder="مثال: السعودية، الكويت، مصر..." className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.country} onChange={(e)=>setFormData({...formData, country: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي أو إمارة المنشأ *</label>
+                  <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
                   <input type="text" placeholder="المدينة، المحافظة" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} />
                 </div>
               </div>
@@ -160,7 +159,7 @@ export function OrderFlow() {
 
           {step === 2 && (
             <div className="space-y-8">
-              <h2 className="text-2xl font-serif font-bold text-brand-900">مخطط الشجرة والقصة</h2>
+              <h2 className="text-2xl font-serif font-bold text-brand-900">مشجرة الأحياء (تحت إشراف العميل / أمين السجل)</h2>
               
               <div>
                 <label className="block text-sm font-medium text-brand-800 mb-4">شجرة العائلة المبدئية (اسحب لإضافة أقاربك)</label>
@@ -169,13 +168,14 @@ export function OrderFlow() {
                     initialNodes={formData.treeData.nodes} 
                     initialEdges={formData.treeData.edges} 
                     onChange={(nodes, edges) => setFormData({...formData, treeData: { nodes, edges }})}
+                    familyName={formData.familyName}
                   />
                 </div>
                 <p className="text-sm text-brand-500 mt-2">* هذه شجرة مبدئية، سيقوم الباحثون بالتدقيق وبناء الشجرة الكاملة.</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-800 mb-2">نبذة تاريخية أو قصص متوارثة</label>
+                <label className="block text-sm font-medium text-brand-800 mb-2">نبذة تاريخية عن العائلة (سيتم إدراجها في القسم الخاص الذي يقع تحت إشرافكم)</label>
                 <textarea rows={4} className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.historicalNotes} onChange={(e)=>setFormData({...formData, historicalNotes: e.target.value})} placeholder="اكتب ما تتذكره من قصص الأجداد ومآثرهم..."></textarea>
               </div>
 
@@ -196,7 +196,7 @@ export function OrderFlow() {
                      <>
                        <UploadCloud className="w-10 h-10 text-brand-400 mx-auto mb-3" />
                        <p className="text-brand-800 font-medium">اسحب وأفلت المرفقات أو انقر للرفع</p>
-                       <p className="text-sm text-brand-500 mt-1">صكوك، صور قديمة، وثائق (PDF, JPG, PNG)</p>
+                       <p className="text-sm text-brand-500 mt-1">صور و وثائق (PDF, JPG, PNG)</p>
                      </>
                    )}
                  </div>
@@ -218,65 +218,19 @@ export function OrderFlow() {
 
           {step === 3 && (
             <div className="space-y-8">
-              <h2 className="text-2xl font-serif font-bold text-brand-900">خيارات الباقة والطباعة</h2>
-              
-              <div>
-                <h3 className="font-semibold text-brand-900 mb-4">مدة التنفيذ</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div onClick={() => setPlan('standard')} className={`cursor-pointer rounded-2xl border-2 p-6 transition ${plan === 'standard' ? 'border-brand-600 bg-brand-50' : 'border-brand-100 hover:border-brand-300'}`}>
-                    <div className="flex justify-between items-start mb-2">
-                       <h4 className="font-bold text-lg text-brand-900">عادي</h4>
-                       <span className="text-brand-600 font-bold">$2000</span>
-                    </div>
-                    <p className="text-brand-600 text-sm">يستغرق شهر واحد للبحث والفهرسة والتصميم.</p>
-                  </div>
-                  <div onClick={() => setPlan('express')} className={`cursor-pointer rounded-2xl border-2 p-6 transition ${plan === 'express' ? 'border-brand-600 bg-brand-50' : 'border-brand-100 hover:border-brand-300'}`}>
-                    <div className="flex justify-between items-start mb-2">
-                       <h4 className="font-bold text-lg text-brand-900">سريع</h4>
-                       <span className="text-brand-600 font-bold">$4000</span>
-                    </div>
-                    <p className="text-brand-600 text-sm">مسار سريع ينجز خلال أسبوع واحد بأولوية قصوى.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-brand-900 mb-4">خدمات الطباعة</h3>
-                <div 
-                  onClick={() => setPrintRequested(!printRequested)} 
-                  className={`cursor-pointer rounded-2xl border-2 p-6 flex gap-4 transition ${printRequested ? 'border-brand-600 bg-brand-50' : 'border-brand-100 hover:border-brand-300'}`}
-                >
-                   <div className={`w-6 h-6 rounded border flex items-center justify-center shrink-0 mt-1 ${printRequested ? 'bg-brand-600 border-brand-600 text-white' : 'border-brand-300'}`}>
-                     {printRequested && <Check className="w-4 h-4" />}
-                   </div>
-                   <div>
-                     <h4 className="font-bold text-lg text-brand-900 mb-2">أرغب بطلب نسخ مطبوعة</h4>
-                     <p className="text-brand-600 text-sm">التكلفة الإضافية للطباعة (العادية أو الفاخرة) سيتم تحديدها والاتفاق عليها لاحقاً حسب عدد النسخ ومواصفات التجليد المختارة.</p>
-                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div className="space-y-8">
               <h2 className="text-2xl font-serif font-bold text-brand-900 text-center">مراجعة الفاتورة والموافقة</h2>
               
               <div className="bg-brand-50 p-6 rounded-2xl border border-brand-200 w-full max-w-lg mx-auto">
-                 <h3 className="font-bold border-b border-brand-200 pb-4 mb-4">ملخص الطلب لعائلة ({formData.familyName || "---"})</h3>
+                 <h3 className="font-bold border-b border-brand-200 pb-4 mb-4">ملخص الطلب لسجل ({formData.familyName || "---"})</h3>
                  <div className="space-y-3 text-brand-800 mb-6">
                     <div className="flex justify-between">
-                      <span>باقة البحث ({plan === 'express' ? 'سريع' : 'عادي'})</span>
-                      <span className="font-medium font-mono">${plan === 'express' ? '4000' : '2000'}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-brand-500">
-                      <span>طلب طباعة مستقل؟</span>
-                      <span>{printRequested ? "نعم (تحدد التكلفة لاحقاً)" : "لا (نسخة رقمية فقط)"}</span>
+                      <span>الباقة الرقمية الشاملة</span>
+                      <span className="font-medium font-mono">$1999</span>
                     </div>
                  </div>
                  <div className="flex justify-between border-t border-brand-200 pt-4 font-bold text-xl text-brand-900">
                     <span>الإجمالي (الدفعة المبدئية)</span>
-                    <span className="font-mono">${plan === 'express' ? 4000 : 2000}</span>
+                    <span className="font-mono">$1999</span>
                  </div>
               </div>
 
@@ -317,7 +271,7 @@ export function OrderFlow() {
             السابق
           </button>
           
-          {step < 4 ? (
+          {step < 3 ? (
             <button 
               type="button" 
               onClick={handleNext}

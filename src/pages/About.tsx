@@ -1,4 +1,4 @@
-import { BookOpen, Milestone, Users, Archive } from "lucide-react";
+import { BookOpen, Milestone, Users, Archive, Library, Palette, Waypoints, Handshake } from "lucide-react";
 
 export function About() {
   return (
@@ -22,7 +22,7 @@ export function About() {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="flex gap-4 items-start">
             <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Archive className="w-6 h-6" />
+              <Library className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">البحث والتدقيق الأرشيفي</h3>
@@ -32,7 +32,7 @@ export function About() {
           
           <div className="flex gap-4 items-start">
             <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <BookOpen className="w-6 h-6" />
+              <Palette className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">الإخراج الفني المتقن</h3>
@@ -42,7 +42,7 @@ export function About() {
 
           <div className="flex gap-4 items-start">
             <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Milestone className="w-6 h-6" />
+              <Waypoints className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">ربط التسلل الزمني</h3>
@@ -52,7 +52,7 @@ export function About() {
 
           <div className="flex gap-4 items-start">
             <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Users className="w-6 h-6" />
+              <Handshake className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">منصة تعاونية</h3>
