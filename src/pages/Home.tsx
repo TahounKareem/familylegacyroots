@@ -34,10 +34,10 @@ export function Home() {
                 عمل احترافي دقيق لتوثيق تاريخ وعراقة العائلة من خلال البحث العميق، وتصميم "سجل التراث العائلي" بأسلوب فني يليق بقيمتكم.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/auth" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
+                <a href="#journey" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
                   إبدأ رحلة توثيق سجلك العائلي
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                </Link>
+                </a>
               </div>
             </motion.div>
           </div>
@@ -94,7 +94,7 @@ export function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 bg-white">
+      <section id="journey" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث العائلة</h2>
@@ -140,6 +140,19 @@ export function Home() {
                </motion.div>
             ))}
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="mt-16 text-center flex justify-center"
+          >
+            <Link to="/auth" className="inline-flex items-center justify-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-xl font-semibold transition shadow-lg text-lg group">
+              إبدأ رحلة توثيق سجلك العائلي
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
         </div>
       </section>
       
