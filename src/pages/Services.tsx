@@ -46,7 +46,7 @@ export function Services() {
           <p className="text-brand-500 mb-6">توثيق منهجي دقيق مع مشجرة متكاملة</p>
           <div className="text-4xl font-bold text-brand-700 mb-8 font-mono">$1999</div>
           <ul className="text-right space-y-4 text-brand-700 mb-10 border-t border-brand-100 pt-6">
-            <li>✓ وثيقة رقمية فاخرة (بدون طباعة مطبعية)</li>
+            <li>✓ وثيقة رقمية فاخرة</li>
             <li>✓ مشجرة شاملة لنسب الأحياء مع أسماء الأبناء</li>
             <li>✓ رفع النسب العالي الخاص للعائلة بالمراجع المعتمدة</li>
             <li>✓ ربط تاريخي بـ QR Code مخصص لسهولة الاستعراض والطباعة من العميل</li>
