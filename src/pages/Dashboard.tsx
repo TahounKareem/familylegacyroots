@@ -101,7 +101,7 @@ export function Dashboard() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-brand-100 p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold font-serif text-brand-900">طلبات سجل العائلة</h2>
+              <h2 className="text-xl font-bold font-serif text-brand-900">طلبات سجل تراث العائلة</h2>
               <Link to="/order" className="bg-brand-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-700 transition">
                 طلب جديد
               </Link>

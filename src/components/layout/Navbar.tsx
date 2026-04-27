@@ -21,7 +21,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           <Link to="/" className="flex items-center gap-3 group">
-            <img src="https://i.postimg.cc/jDwMBRd2/Segel.png" alt="سجل تراث العائلة" className="h-14 w-auto object-contain drop-shadow-sm" />
+            <img src="https://i.postimg.cc/rybzQd5Z/Segel2.png" alt="سجل تراث العائلة" className="h-14 w-auto object-contain drop-shadow-sm" />
           </Link>
 
           {/* Desktop Menu */}
