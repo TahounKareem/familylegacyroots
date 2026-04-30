@@ -4,7 +4,8 @@ import path from "path";
 import Stripe from "stripe";
 import "dotenv/config";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
+const stripeKey = process.env.STRIPE_SECRET_KEY || "mk_1TRqW0LoZVLfHLu7mRzwkZec";
+const stripe = new Stripe(stripeKey);
 
 async function startServer() {
   const app = express();
@@ -70,7 +71,7 @@ async function startServer() {
     try {
       const { orderId, userName, userEmail, packagePrice } = req.body;
 
-      if (!process.env.STRIPE_SECRET_KEY) {
+      if (!stripeKey) {
         throw new Error("Stripe secret key configuration is missing on the server. Please add STRIPE_SECRET_KEY to your .env file.");
       }
 
