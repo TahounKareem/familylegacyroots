@@ -3,9 +3,10 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { collection, doc, onSnapshot, setDoc, updateDoc, getDoc, query, where, getDocs } from "firebase/firestore";
 
-export type OrderStatus = "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل";
+export type OrderStatus = "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل";
 
 export interface UserInfo {
+
   id: string;
   name: string;
   email: string;
@@ -66,6 +67,7 @@ export interface Order {
   data: FamilyData;
   createdAt: string;
   messages?: Message[];
+  deliveryLink?: string;
 }
 
 interface AppState {
@@ -76,6 +78,7 @@ interface AppState {
   logout: () => Promise<void>;
   placeOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
+  fulfillOrder: (id: string, deliveryLink: string) => Promise<void>;
   addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
   initializeFirebase: () => void;
 }
@@ -115,6 +118,17 @@ export const useAppStore = create<AppState>((set, get) => ({
       await updateDoc(doc(db, "orders", id), { status });
     } catch (error) {
       console.error("Error updating order status:", error);
+    }
+  },
+
+  fulfillOrder: async (id, deliveryLink) => {
+    try {
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === id ? { ...o, status: "مكتمل", deliveryLink } : o)),
+      }));
+      await updateDoc(doc(db, "orders", id), { status: "مكتمل", deliveryLink });
+    } catch (error) {
+      console.error("Error fulfilling order:", error);
     }
   },
 

@@ -129,7 +129,7 @@ export function Dashboard() {
                       <p className="text-sm text-brand-600">تاريخ الإستلام المتوقع: خلال 90 يوم من تاريخ تقديم الطلب ({deliveryDate.toLocaleDateString('ar-EG')})</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                       <span className="flex items-center gap-2 bg-brand-50 px-3 py-1 rounded-full text-sm font-medium border border-brand-100">
+                       <span className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${order.status === 'مكتمل' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-brand-50 border-brand-100'}`}>
                          {getStatusIcon(order.status)}
                          {order.status}
                        </span>
@@ -148,6 +148,16 @@ export function Dashboard() {
                          >
                            <MessageSquare className="w-4 h-4" /> عرض الرسائل
                          </button>
+                       )}
+                       {order.status === "مكتمل" && order.deliveryLink && (
+                         <a 
+                           href={order.deliveryLink}
+                           target="_blank"
+                           rel="noreferrer"
+                           className="text-sm text-white bg-green-600 hover:bg-green-700 flex items-center gap-1 font-medium px-4 py-2 rounded-md shadow-sm transition mt-2"
+                         >
+                           <CheckCircle className="w-4 h-4" /> استلام الوثيقة
+                         </a>
                        )}
                     </div>
                   </div>

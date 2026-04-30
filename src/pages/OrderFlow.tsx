@@ -5,6 +5,7 @@ import { TreeBuilder } from "./TreeBuilder";
 import { useAppStore, FamilyData } from "@/lib/store";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { sendOrderConfirmationEmail } from "@/lib/emailService";
 
 export function OrderFlow() {
   const [step, setStep] = useState(1);
@@ -70,21 +71,55 @@ export function OrderFlow() {
     );
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const submitOrder = async () => {
-    // Generate mock order
-    placeOrder({
-      id: "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
-      userId: currentUser?.id || "guest",
-      createdAt: new Date().toISOString(),
-      plan: "standard",
-      printRequested: false,
-      status: "قيد البحث",
-      totalAmount: 1999,
-      data: formData,
-    });
-    
-    // In a real app we redirect to Stripe here. We mock success.
-    navigate("/dashboard?success=true");
+    setIsSubmitting(true);
+    try {
+      const orderId = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+      const planPrice = 1999;
+      
+      // Save order in Firestore with local pending state 
+      await placeOrder({
+        id: orderId,
+        userId: currentUser?.id || "guest",
+        createdAt: new Date().toISOString(),
+        plan: "standard",
+        printRequested: false,
+        status: "بانتظار الدفع", // Order created but not paid yet
+        totalAmount: planPrice,
+        data: formData,
+      });
+      
+      // We don't send the email here anymore! The webhook in backend will send it upon payment.
+
+      // Call Express Backend to create a Stripe Session
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId,
+          userName: currentUser?.name || "عميل المركز",
+          userEmail: currentUser?.email || "pending@example.com",
+          packagePrice: planPrice,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("حدث خطأ أثناء الاتصال ببوابة الدفع");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Order submission error", error);
+      alert("حدث خطأ غير متوقع.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -283,10 +318,10 @@ export function OrderFlow() {
             <button 
               type="button" 
               onClick={submitOrder}
-              disabled={!agreedToService}
-              className={`px-10 py-3 rounded-md font-semibold flex items-center gap-2 shadow-xl transition ${agreedToService ? 'bg-brand-900 text-white hover:bg-brand-800' : 'bg-brand-200 text-brand-500 cursor-not-allowed'}`}
+              disabled={!agreedToService || isSubmitting}
+              className={`px-10 py-3 rounded-md font-semibold flex items-center gap-2 shadow-xl transition ${agreedToService && !isSubmitting ? 'bg-brand-900 text-white hover:bg-brand-800' : 'bg-brand-200 text-brand-500 cursor-not-allowed'}`}
             >
-               إتمام الطلب والدفع المبدئي
+               {isSubmitting ? "جاري المعالجة..." : "إتمام الطلب والدفع المبدئي"}
             </button>
           )}
         </div>

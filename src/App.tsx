@@ -12,6 +12,8 @@ import { OrderFlow } from "./pages/OrderFlow";
 import { AdminPanel } from "./pages/AdminPanel";
 import { Legal } from "./pages/Legal";
 import { useAppStore } from "./lib/store";
+import { CookieBanner } from "./components/ui/CookieBanner";
+import { Chatbot } from "./components/ui/Chatbot";
 
 export default function App() {
   const initializeFirebase = useAppStore(state => state.initializeFirebase);
@@ -30,21 +32,25 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/knowledge" element={<KnowledgeCenter />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/legal" element={<Legal />} />
-      </Route>
-      
-      <Route path="/auth" element={<Auth />} />
-      
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/order" element={<OrderFlow />} />
-      <Route path="/admin" element={<AdminPanel />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/knowledge" element={<KnowledgeCenter />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/legal" element={<Legal />} />
+        </Route>
+        
+        <Route path="/auth" element={<Auth />} />
+        
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/order" element={<OrderFlow />} />
+        <Route path="/admin" element={<AdminPanel />} />
+      </Routes>
+      <CookieBanner />
+      <Chatbot />
+    </>
   );
 }

@@ -1,14 +1,20 @@
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useState } from "react";
-import { useAppStore, Order } from "@/lib/store";
+import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home } from "lucide-react";
+import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
+import { sendDeliveryEmail } from "@/lib/emailService";
 
 export function AdminPanel() {
-  const { currentUser, orders, updateOrderStatus, addMessageToOrder } = useAppStore();
+  const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder } = useAppStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
+  const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [deliveryLink, setDeliveryLink] = useState("");
+  const [isFulfilling, setIsFulfilling] = useState(false);
 
   if (!currentUser || currentUser.role !== "admin") {
     return <Navigate to="/dashboard" />;
@@ -31,6 +37,30 @@ export function AdminPanel() {
 
     setReplyText("");
     setMessagingOrder(null);
+  };
+
+  const handleFulfillOrder = async () => {
+    if (!deliveryLink.trim() || !deliveryOrder) return;
+    setIsFulfilling(true);
+    try {
+      await fulfillOrder(deliveryOrder.id, deliveryLink);
+      
+      const userDoc = await getDoc(doc(db, "users", deliveryOrder.userId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as UserInfo;
+        if (userData.email) {
+          await sendDeliveryEmail(userData.email, userData.name || "العميل الكريم", deliveryOrder.id, deliveryLink);
+        }
+      }
+
+      setDeliveryOrder(null);
+      setDeliveryLink("");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء التسليم");
+    } finally {
+      setIsFulfilling(false);
+    }
   };
 
   return (
@@ -130,10 +160,18 @@ export function AdminPanel() {
                          <MessageSquare className="w-3 h-3" /> مراسلة
                        </button>
                      </div>
-                     {order.status === "مكتمل" && (
-                       <button className="w-full flex items-center justify-center gap-1 text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-md transition font-medium text-xs">
-                         <CheckCircle className="w-3 h-3" /> تسليم عبر Klaviyo
+                     {!order.deliveryLink && (
+                       <button 
+                         onClick={() => setDeliveryOrder(order)}
+                         className="w-full flex items-center justify-center gap-1 text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-md transition font-medium text-xs mt-2 w-full"
+                       >
+                         <CheckCircle className="w-3 h-3" /> تسليم الوثيقة للعميل
                        </button>
+                     )}
+                     {order.deliveryLink && (
+                       <div className="w-full text-center text-xs text-green-700 font-bold bg-green-50 p-1.5 rounded-md mt-2">
+                         تم التسليم
+                       </div>
                      )}
                   </td>
                 </tr>
@@ -281,6 +319,52 @@ export function AdminPanel() {
                  <button onClick={() => setMessagingOrder(null)} className="px-4 py-2 rounded-md font-medium text-brand-600 hover:bg-brand-100 transition">إلغاء</button>
                  <button onClick={handleSendReply} className="px-6 py-2 rounded-md font-bold bg-brand-600 text-white hover:bg-brand-700 transition">إرسال التوجيه</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delivery Modal */}
+      {deliveryOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-6 px-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-2xl text-brand-900 flex items-center gap-2">
+                <LinkIcon className="w-6 h-6 text-brand-600" />
+                إتمام وتسليم الطلب
+              </h3>
+              <button onClick={() => setDeliveryOrder(null)} className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-brand-700 mb-6 text-sm">
+              برجاء إدخال رابط الوثيقة النهائية (مثال: رابط Google Drive، أو رابط Dropbox، أو رابط مباشر للملف). سيتم تغيير حالة الطلب وتسليمه للعميل مباشرة.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط الاستلام المنشور</label>
+                <input 
+                  type="url" 
+                  value={deliveryLink}
+                  onChange={(e) => setDeliveryLink(e.target.value)}
+                  placeholder="https://..."
+                  dir="ltr"
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              <button 
+                onClick={handleFulfillOrder}
+                disabled={isFulfilling || !deliveryLink.trim()}
+                className="w-full py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isFulfilling ? 'جاري التسليم...' : (
+                  <>
+                    <Send className="w-5 h-5" /> تأكيد التسليم وإرسال البريد
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
