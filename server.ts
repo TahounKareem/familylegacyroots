@@ -4,8 +4,11 @@ import path from "path";
 import Stripe from "stripe";
 import "dotenv/config";
 
-const stripeKey = process.env.STRIPE_SECRET_KEY || "mk_1TRqW0LoZVLfHLu7mRzwkZec";
-const stripe = new Stripe(stripeKey);
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeKey) {
+  console.error("STRIPE_SECRET_KEY is not set in environment variables");
+}
+const stripe = new Stripe(stripeKey || "");
 
 async function startServer() {
   const app = express();
