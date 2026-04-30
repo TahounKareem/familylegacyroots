@@ -71,8 +71,7 @@ async function startServer() {
       const { orderId, userName, userEmail, packagePrice } = req.body;
 
       if (!process.env.STRIPE_SECRET_KEY) {
-        // Fallback for development without keys: Mock success redirect
-        return res.json({ url: "/dashboard?success=true" });
+        throw new Error("Stripe secret key configuration is missing on the server. Please add STRIPE_SECRET_KEY to your .env file.");
       }
 
       const session = await stripe.checkout.sessions.create({

@@ -112,7 +112,7 @@ export function OrderFlow() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("حدث خطأ أثناء الاتصال ببوابة الدفع");
+        alert(data.error || "حدث خطأ أثناء الاتصال ببوابة الدفع. برجاء إعداد مفاتيح Stripe.");
         setIsSubmitting(false);
       }
     } catch (error) {

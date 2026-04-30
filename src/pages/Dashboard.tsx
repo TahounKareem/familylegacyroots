@@ -1,19 +1,38 @@
 import { useAppStore, Order, Message } from "@/lib/store";
-import { Navigate, Link } from "react-router";
+import { Navigate, Link, useLocation, useNavigate } from "react-router";
 import { FileText, Clock, AlertCircle, CheckCircle, BookOpen, MessageSquare, X, UploadCloud } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { storage, auth } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { signOut } from "firebase/auth";
 
 export function Dashboard() {
-  const { currentUser, orders, addMessageToOrder } = useAppStore();
+  const { currentUser, orders, addMessageToOrder, updateOrderStatus } = useAppStore();
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
   const [replyText, setReplyText] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [attachedUrls, setAttachedUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check for Stripe success redirect
+    const params = new URLSearchParams(location.search);
+    const success = params.get("success");
+    const orderId = params.get("order_id");
+
+    if (success === "true" && orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (order && order.status === "بانتظار الدفع") {
+        updateOrderStatus(orderId, "قيد البحث");
+        // Remove query params to avoid re-triggering
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [location.search, orders, updateOrderStatus, navigate]);
 
   if (!currentUser) {
     return <Navigate to="/auth" />;
