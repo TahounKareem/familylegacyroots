@@ -2,7 +2,8 @@ import { useAppStore, Order, Message } from "@/lib/store";
 import { Navigate, Link, useLocation, useNavigate } from "react-router";
 import { FileText, Clock, AlertCircle, CheckCircle, BookOpen, MessageSquare, X, UploadCloud } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { storage, auth } from "@/lib/firebase";
+import { storage, auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { signOut } from "firebase/auth";
 
@@ -28,6 +29,15 @@ export function Dashboard() {
       const order = orders.find(o => o.id === orderId);
       if (order && order.status === "بانتظار الدفع") {
         updateOrderStatus(orderId, "قيد البحث");
+        // Trigger email
+        getDoc(doc(db, "users", currentUser.id)).then(userDoc => {
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            import("@/lib/emailService").then(({ sendOrderConfirmationEmail }) => {
+              sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", orderId);
+            });
+          }
+        });
         // Remove query params to avoid re-triggering
         navigate("/dashboard", { replace: true });
       }

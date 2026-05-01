@@ -24,7 +24,7 @@ export function AdminPanel() {
     updateOrderStatus(orderId, newStatus);
   };
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!replyText.trim() || !messagingOrder || !currentUser) return;
     
     addMessageToOrder(messagingOrder.id, {
@@ -34,6 +34,17 @@ export function AdminPanel() {
       text: replyText,
       createdAt: new Date().toISOString()
     }, "طلب إيضاح");
+
+    // Array destruction to get the value for sure
+    const userDocRef = doc(db, "users", messagingOrder.userId);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data() as UserInfo;
+      if (userData.email) {
+        const { sendClarificationRequestEmail } = await import("@/lib/emailService");
+        await sendClarificationRequestEmail(userData.email, userData.name || "العميل الكريم", messagingOrder.id, replyText);
+      }
+    }
 
     setReplyText("");
     setMessagingOrder(null);
