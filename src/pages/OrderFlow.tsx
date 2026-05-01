@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Check, UploadCloud, ArrowRight, ArrowLeft } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";

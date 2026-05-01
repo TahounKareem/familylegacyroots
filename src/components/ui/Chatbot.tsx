@@ -34,7 +34,7 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTicketMode, setIsTicketMode] = useState(false);
   const [ticketStatus, setTicketStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
-  const currentUser = useAppStore(state => state.user);
+  const currentUser = useAppStore(state => state.currentUser);
 
   const [ticketData, setTicketData] = useState({
     name: currentUser?.name || '',

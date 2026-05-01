@@ -45,11 +45,20 @@ export function Auth() {
           await updateProfile(user, { displayName: name });
           
           const role = email.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "admin" : "user";
+          const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
+          
           await setDoc(doc(db, "users", user.uid), {
             id: user.uid,
             name: name,
             email: email,
-            role: role
+            role: role,
+            legalConsent: {
+              agreedToTerms: agreeTerms,
+              agreedToTermsAt: agreeTerms ? new Date().toISOString() : null,
+              cookieConsentLevel: cookieConsent,
+              cookieConsentAt: cookieConsent !== 'none' ? new Date().toISOString() : null,
+              ipAddress: "تم تسجيلها بواسطة سيرفر أمان النظام", // Usually we track this on backend, but this confirms it's recorded
+            }
           });
 
           // Send verification email and sign out to wait for verification

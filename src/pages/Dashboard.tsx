@@ -1,7 +1,7 @@
 import { useAppStore, Order, Message } from "@/lib/store";
 import { Navigate, Link, useLocation, useNavigate } from "react-router";
 import { FileText, Clock, AlertCircle, CheckCircle, BookOpen, MessageSquare, X, UploadCloud } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { storage, auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
