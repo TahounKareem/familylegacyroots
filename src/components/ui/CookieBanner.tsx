@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -15,14 +17,38 @@ export function CookieBanner() {
     }
   }, []);
 
-  const acceptAll = () => {
-    localStorage.setItem('cookie-consent', 'all');
-    setIsVisible(false);
+  const saveConsentToArchive = async (level: 'all' | 'essential') => {
+    try {
+      // Generate a random visitor ID if not exists
+      let visitorId = localStorage.getItem('visitor_id');
+      if (!visitorId) {
+        visitorId = crypto.randomUUID();
+        localStorage.setItem('visitor_id', visitorId);
+      }
+
+      await addDoc(collection(db, 'visitor_consents'), {
+        visitorId,
+        consentLevel: level,
+        createdAt: serverTimestamp(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        type: 'cookie_consent'
+      });
+    } catch (error) {
+      console.error("Error archiving visitor consent:", error);
+    }
   };
 
-  const acceptEssential = () => {
+  const acceptAll = async () => {
+    localStorage.setItem('cookie-consent', 'all');
+    setIsVisible(false);
+    await saveConsentToArchive('all');
+  };
+
+  const acceptEssential = async () => {
     localStorage.setItem('cookie-consent', 'essential');
     setIsVisible(false);
+    await saveConsentToArchive('essential');
   };
 
   return (
