@@ -12,15 +12,15 @@ export function Footer() {
               <span className="font-serif text-2xl font-bold">سجل تراث العائلة</span>
             </Link>
             <p className="text-brand-300 text-sm leading-relaxed mb-6">
-              نحن مؤسسة متخصصة في توثيق تاريخ وعراقة العائلات، وتقديم خدمات البحث والتدقيق في الأنساب، مع إخراج فني احترافي.
+              نحن شركة متخصصة في علم الأنساب "الجينيولوجي" ، نقوم بتوثيق أصول وتاريخ العائلات، عبر منتجنا وعلامتنا التجارية " سجل تراث العائلة" والذي نقدمه في قالب فني أنيق وإحترافي.
             </p>
           </div>
           
           <div>
             <h3 className="font-serif text-lg text-white mb-6">روابط سريعة</h3>
             <ul className="space-y-4 text-brand-300">
-              <li><Link to="/about" className="hover:text-brand-400 transition">من نحن</Link></li>
-              <li><Link to="/services" className="hover:text-brand-400 transition">خدماتنا</Link></li>
+              <li><Link to="/about" className="hover:text-brand-400 transition">من نحن وماذا نقدم</Link></li>
+              <li><Link to="/services" className="hover:text-brand-400 transition">سجل تراث العائلة</Link></li>
               <li><Link to="/knowledge" className="hover:text-brand-400 transition">المركز المعرفي</Link></li>
               <li><Link to="/contact" className="hover:text-brand-400 transition">تواصل معنا</Link></li>
             </ul>
@@ -29,9 +29,8 @@ export function Footer() {
           <div>
             <h3 className="font-serif text-lg text-white mb-6">الوثائق القانونية</h3>
             <ul className="space-y-4 text-brand-300">
-              <li><Link to="/legal#agreement" className="hover:text-brand-400 transition">اتفاقية الخدمة</Link></li>
-              <li><Link to="/legal#privacy" className="hover:text-brand-400 transition">سياسة الخصوصية</Link></li>
               <li><Link to="/legal#terms" className="hover:text-brand-400 transition">شروط الاستخدام</Link></li>
+              <li><Link to="/legal#privacy" className="hover:text-brand-400 transition">سياسة الخصوصية</Link></li>
               <li><Link to="/legal#cookies" className="hover:text-brand-400 transition">سياسة الكوكيز</Link></li>
             </ul>
           </div>

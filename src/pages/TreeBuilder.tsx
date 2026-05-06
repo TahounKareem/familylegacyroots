@@ -154,14 +154,14 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
              
              {selectedNode === node.id && !readOnly && (
                <div className="absolute -bottom-10 flex gap-2">
-                 <button onClick={(e) => { e.stopPropagation(); addRelative(node.id); }} className="p-1.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 shadow-md">
+                 <button onPointerDown={(e) => { e.stopPropagation(); addRelative(node.id); }} className="p-1.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 shadow-md">
                    <Plus className="w-4 h-4" />
                  </button>
-                 <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-1.5 bg-white text-brand-600 border border-brand-200 rounded-full hover:bg-brand-50 shadow-md">
+                 <button onPointerDown={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-1.5 bg-white text-brand-600 border border-brand-200 rounded-full hover:bg-brand-50 shadow-md">
                    <Edit2 className="w-4 h-4" />
                  </button>
                  {node.id !== "root" && (
-                   <button onClick={(e) => { e.stopPropagation(); deleteNode(node.id); }} className="p-1.5 bg-white text-red-500 border border-red-200 rounded-full hover:bg-red-50 shadow-md">
+                   <button onPointerDown={(e) => { e.stopPropagation(); deleteNode(node.id); }} className="p-1.5 bg-white text-red-500 border border-red-200 rounded-full hover:bg-red-50 shadow-md">
                      <Trash2 className="w-4 h-4" />
                    </button>
                  )}
@@ -180,9 +180,9 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
            </div>
            <div className="flex-1 w-full">
              <label className="block text-xs font-medium text-brand-700 mb-1">الصلة</label>
-             <input type="text" value={editRelation} disabled className="w-full border border-gray-100 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-500 cursor-not-allowed" />
+             <input type="text" value={editRelation} onChange={e => setEditRelation(e.target.value)} className="w-full border border-brand-200 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500" />
            </div>
-           <button onClick={saveEdit} className="bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 flex items-center gap-2 text-sm font-medium">
+           <button onPointerDown={(e) => { e.stopPropagation(); saveEdit(); }} className="bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 flex items-center gap-2 text-sm font-medium">
              <Check className="w-4 h-4" /> حفظ
            </button>
         </div>

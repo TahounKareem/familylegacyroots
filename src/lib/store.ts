@@ -47,13 +47,24 @@ export interface FamilyData {
   grandfatherName: string;
   familyName: string;
   tribeName?: string;
-  relation: string;
   country: string;
   homeland: string;
-  knownLineage?: string;
-  documents: string[]; // URLs (mocked)
+  startingPointType?: string;
+  startingPointAncestor?: string;
+  startingPointName?: string;
+  startingPoint?: string; // keeping for backward compatibility
+  designTemplate?: string;
+  documents: string[]; // URLs
   photos: string[];
   historicalNotes: string;
+  managerWord?: string;
+  mobileNumber?: string;
+  shippingAddress?: {
+    country: string;
+    state: string;
+    zip: string;
+    street: string;
+  };
   treeData: TreeData;
 }
 
@@ -68,6 +79,9 @@ export interface Order {
   createdAt: string;
   messages?: Message[];
   deliveryLink?: string;
+  digitalCopyLink?: string;
+  posterLink?: string;
+  researchRecommendations?: string;
 }
 
 interface AppState {
@@ -78,7 +92,7 @@ interface AppState {
   logout: () => Promise<void>;
   placeOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
-  fulfillOrder: (id: string, deliveryLink: string) => Promise<void>;
+  fulfillOrder: (id: string, links: { deliveryLink?: string, digitalCopyLink?: string, posterLink?: string, researchRecommendations?: string }) => Promise<void>;
   addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
   initializeFirebase: () => void;
 }
@@ -121,12 +135,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  fulfillOrder: async (id, deliveryLink) => {
+  fulfillOrder: async (id, links) => {
     try {
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === id ? { ...o, status: "مكتمل", deliveryLink } : o)),
+        orders: state.orders.map((o) => (o.id === id ? { ...o, status: "مكتمل", ...links } : o)),
       }));
-      await updateDoc(doc(db, "orders", id), { status: "مكتمل", deliveryLink });
+      await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...links });
     } catch (error) {
       console.error("Error fulfilling order:", error);
     }

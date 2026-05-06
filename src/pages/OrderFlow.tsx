@@ -1,98 +1,73 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
-import { Check, UploadCloud, ArrowRight, ArrowLeft } from "lucide-react";
-import { TreeBuilder } from "./TreeBuilder";
+import { Check, ArrowRight, ArrowLeft, UserPlus } from "lucide-react";
 import { useAppStore, FamilyData } from "@/lib/store";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { sendOrderConfirmationEmail } from "@/lib/emailService";
 
 export function OrderFlow() {
   const [step, setStep] = useState(1);
-  const { currentUser, placeOrder } = useAppStore();
+  const { currentUser, placeOrder, orders } = useAppStore();
   const navigate = useNavigate();
+
+  // Redirect if they already have an order
+  useEffect(() => {
+    if (orders.find(o => o.userId === currentUser?.id)) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [orders, currentUser, navigate]);
 
   const [formData, setFormData] = useState<FamilyData>({
     firstName: "",
     fatherName: "",
     grandfatherName: "",
     familyName: "",
-    relation: "ابن",
+    tribeName: "",
     country: "",
     homeland: "",
+    startingPoint: "",
+    designTemplate: "فاخر",
     documents: [],
     photos: [],
     historicalNotes: "",
     treeData: { nodes: [], edges: [] }
   });
 
-  const [plan, setPlan] = useState<"standard"|"express">("standard");
-  const [printRequested, setPrintRequested] = useState<boolean>(false);
   const [agreedToService, setAgreedToService] = useState<boolean>(false);
-  const [showSignModal, setShowSignModal] = useState<boolean>(false);
-  
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
-  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-    setUploading(true);
-    setUploadProgress(0);
-
-    const storageRef = ref(storage, `documents/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on('state_changed', 
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      }, 
-      (error) => {
-        console.error("Upload error:", error);
-        setUploading(false);
-        alert("فشل رفع الملف. تأكد من إعدادات Storage Rules.");
-      }, 
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setFormData(prev => ({
-            ...prev,
-            documents: [...prev.documents, downloadURL]
-          }));
-          setUploading(false);
-        });
-      }
-    );
-  };
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
+  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const submitOrder = async () => {
     setIsSubmitting(true);
     try {
-      const orderId = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+      // User must be logged in to reach here due to routes, but just in case
+      if (!currentUser) {
+        alert("يجب تسجيل الدخول لإتمام الطلب");
+        return;
+      }
+      
+      const orderId = currentUser.id; // Using User ID as Order ID ensures 1 order per user
       const planPrice = 1999;
       
       // Save order in Firestore with local pending state 
       await placeOrder({
         id: orderId,
-        userId: currentUser?.id || "guest",
+        userId: currentUser.id,
         createdAt: new Date().toISOString(),
         plan: "standard",
         printRequested: false,
-        status: "بانتظار الدفع", // Order created but not paid yet
+        status: "بانتظار الدفع",
         totalAmount: planPrice,
         data: formData,
       });
-      
-      // We don't send the email here anymore! The webhook in backend will send it upon payment.
 
+      // محاكاة لعملية الدفع حتى يتم ربط البوابة مع الخادم (Backend)
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigate('/dashboard');
+      }, 2000);
+      
+      /*
       // Call Express Backend to create a Stripe Session
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
@@ -110,17 +85,25 @@ export function OrderFlow() {
       const data = await response.json();
       
       if (data.url) {
-        window.location.href = data.url;
+        window.top.location.href = data.url;
       } else {
         alert(data.error || "حدث خطأ أثناء الاتصال ببوابة الدفع. برجاء إعداد مفاتيح Stripe.");
         setIsSubmitting(false);
       }
+      */
     } catch (error) {
       console.error("Order submission error", error);
       alert("حدث خطأ غير متوقع.");
       setIsSubmitting(false);
     }
   };
+
+  const stepsList = [
+    { title: "تقديم البيانات", subtitle: "بيانات أمين السجل/العميل" },
+    { title: "تحديد المسار", subtitle: "نقطة البدء وقالب التصميم" },
+    { title: "تأكيد الإصدار", subtitle: "مراجعة الطلب والموافقة" },
+    { title: "بدء التنفيذ", subtitle: "إتمام الدفع" }
+  ];
 
   return (
     <div className="bg-brand-50 min-h-screen py-12 relative">
@@ -137,7 +120,7 @@ export function OrderFlow() {
         <div className="mb-12">
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-brand-200 -z-10 translate-y-[-50%]"></div>
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors border-4 ${
                 step >= s ? 'bg-brand-600 border-brand-100 text-white' : 'bg-white border-brand-200 text-brand-400'
               }`}>
@@ -145,221 +128,292 @@ export function OrderFlow() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-3 text-xs md:text-sm font-medium text-brand-700">
-            <span>البيانات الأساسية لسجل تراث عائلتك</span>
-            <span>مشجرة الأحياء</span>
-            <span>الدفع والاعتماد</span>
+          <div className="flex justify-between mt-4 text-center px-1">
+            {stepsList.map((stepItem, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <span className={`text-sm md:text-base ${step >= i + 1 ? 'text-brand-900 font-bold' : 'text-brand-600 font-medium'}`}>{stepItem.title}</span>
+                <span className={`text-[10px] md:text-xs mt-1 ${step >= i + 1 ? 'text-brand-700' : 'text-brand-400'}`}>{stepItem.subtitle}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Steps Content */}
-        <div className="bg-white rounded-3xl shadow-sm border border-brand-100 p-6 md:p-10 mb-8">
+        <div className="bg-white rounded-[2rem] shadow-sm border border-brand-100 p-8 md:p-12 mb-8">
           
           {step === 1 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-serif font-bold text-brand-900 mb-6">البيانات الأساسية لسجل تراث عائلتك</h2>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تقديم البيانات</h2>
+                <p className="text-brand-600">أدخل بيانات أمين السجل / العميل المعتمد للتواصل</p>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل وأمين السجل) *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">اسم الأب *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} placeholder="اسم الأب" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">اسم الجد *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">اسم العائلة / اللقب *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">القبيلة (اختياري)</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} placeholder="القبيلة إن وجدت" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
                   <input type="text" placeholder="مثال: السعودية، الكويت، مصر..." className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.country} onChange={(e)=>setFormData({...formData, country: e.target.value})} />
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} />
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
                 </div>
               </div>
             </div>
           )}
 
           {step === 2 && (
-            <div className="space-y-8">
-              <h2 className="text-2xl font-serif font-bold text-brand-900">مشجرة الأحياء (تحت إشراف العميل / أمين السجل)</h2>
-              
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تحديد المسار</h2>
+                <p className="text-brand-600">حدد المعطيات الأساسية لتوثيق السجل</p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-brand-800 mb-4">شجرة العائلة المبدئية (اسحب لإضافة أقاربك)</label>
-                <div className="rounded-2xl border-2 border-brand-100 overflow-hidden">
-                  <TreeBuilder 
-                    initialNodes={formData.treeData.nodes} 
-                    initialEdges={formData.treeData.edges} 
-                    onChange={(nodes, edges) => setFormData({...formData, treeData: { nodes, edges }})}
-                    familyName={formData.familyName}
-                  />
+                <label className="flex items-center gap-2 text-xl font-medium text-brand-900 mb-2">
+                  <UserPlus className="w-6 h-6 text-brand-600" />
+                  نقطة بدء عمود النسب *
+                </label>
+                <div className="text-sm font-light text-brand-700 mb-6 bg-brand-50 p-6 rounded-xl border border-brand-100 leading-relaxed">
+                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ويمكن لأمين السجل إختيار أحد اسلافه (المشهورين) بدءاً من الأب او أحد الأجداد الذين يختارهم لبدء توثيق عمود النسب ، وبالطبع سيتم سرد سلسلة النسب التي تشمل أمين السجل / العميل تصاعدياً مروراً بنقطة البدء التي اختارها .
                 </div>
-                <p className="text-sm text-brand-500 mt-2">* هذه شجرة مبدئية، سيقوم الباحثون بالتدقيق وبناء الشجرة الكاملة.</p>
+                
+                <div className="space-y-4 mb-8">
+                  <label className="flex items-center gap-3 p-4 border border-brand-200 rounded-xl cursor-pointer hover:bg-brand-50 transition">
+                    <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
+                      checked={formData.startingPointType === "أنا أمين السجل"} 
+                      onChange={() => {
+                        setFormData({...formData, startingPointType: "أنا أمين السجل", startingPoint: "أنا أمين السجل"});
+                      }} 
+                    />
+                    <span className="font-medium text-brand-800">أنا أمين السجل سأكون نقطة البدء .</span>
+                  </label>
+                  
+                  <label className="flex items-center gap-3 p-4 border border-brand-200 rounded-xl cursor-pointer hover:bg-brand-50 transition">
+                    <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
+                      checked={formData.startingPointType === "اسم العائلة"} 
+                      onChange={() => {
+                        setFormData({...formData, startingPointType: "اسم العائلة", startingPoint: "اسم العائلة"});
+                      }} 
+                    />
+                    <span className="font-medium text-brand-800">اسم العائلة سيكون نقطة البدء .</span>
+                  </label>
+                  
+                  <div className="border border-brand-200 rounded-xl p-4 transition hover:bg-brand-50">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <div className="pt-1">
+                        <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
+                          checked={formData.startingPointType === "احد الأسلاف"} 
+                          onChange={() => {
+                            setFormData({...formData, startingPointType: "احد الأسلاف"});
+                          }} 
+                        />
+                      </div>
+                      <span className="font-medium text-brand-800 leading-tight">احد الأسلاف التاليين سيكون نقطة البدء - الجد الثالث بحد اقصى ( حدد مع ذكر الإسم ) .</span>
+                    </label>
+                    
+                    {formData.startingPointType === "احد الأسلاف" && (
+                      <div className="mt-4 mr-8 space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <select className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500"
+                          value={formData.startingPointAncestor || ""}
+                          onChange={(e) => {
+                            const ancestor = e.target.value;
+                            let name = formData.startingPointName || "";
+                            if (ancestor === "الأب") name = formData.fatherName || "";
+                            if (ancestor === "الجد الاول") name = formData.grandfatherName || "";
+                            if (ancestor === "الجد الثاني" || ancestor === "الجد الثالث") name = "";
+                            const newVal = `${ancestor} - ${name}`;
+                            setFormData({...formData, startingPointAncestor: ancestor, startingPointName: name, startingPoint: newVal});
+                          }}
+                        >
+                          <option value="" disabled>اختر السلف...</option>
+                          <option value="الأب">الأب</option>
+                          <option value="الجد الاول">الجد الاول</option>
+                          <option value="الجد الثاني">الجد الثاني</option>
+                          <option value="الجد الثالث">الجد الثالث</option>
+                        </select>
+                        
+                        {(formData.startingPointAncestor === "الجد الثاني" || formData.startingPointAncestor === "الجد الثالث") && (
+                          <input type="text" className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 animate-in fade-in slide-in-from-top-2" 
+                            placeholder="أدخل اسم السلف هنا..."
+                            value={formData.startingPointName || ""}
+                            onChange={(e) => {
+                              const name = e.target.value;
+                              const newVal = `${formData.startingPointAncestor || "السلف"} - ${name}`;
+                              setFormData({...formData, startingPointName: name, startingPoint: newVal});
+                            }}
+                          />
+                        )}
+                        {(formData.startingPointAncestor === "الأب" || formData.startingPointAncestor === "الجد الاول") && (
+                          <div className="text-sm text-brand-600 bg-brand-50 p-3 rounded-lg border border-brand-100">
+                            تم تحديد الاسم تلقائياً: <strong>{formData.startingPointName}</strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-800 mb-2">نبذة تاريخية عن العائلة (سيتم إدراجها في القسم الخاص الذي يقع تحت إشرافكم)</label>
-                <textarea rows={4} className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.historicalNotes} onChange={(e)=>setFormData({...formData, historicalNotes: e.target.value})} placeholder="اكتب ما تتذكره من قصص الأجداد ومآثرهم..."></textarea>
-              </div>
-
-              <div>
-                 <label className="block text-sm font-medium text-brand-800 mb-2">مرفقات ووثائق</label>
-                 <div 
-                   onClick={() => fileInputRef.current?.click()}
-                   className="border-2 border-dashed border-brand-300 rounded-2xl p-8 text-center hover:bg-brand-50 transition cursor-pointer relative"
-                 >
-                   <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.jpg,.jpeg,.png" />
-                   
-                   {uploading ? (
-                     <div className="flex flex-col items-center justify-center">
-                       <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mb-3"></div>
-                       <p className="text-brand-800 font-medium">جاري الرفع... {Math.round(uploadProgress)}%</p>
-                     </div>
-                   ) : (
-                     <>
-                       <UploadCloud className="w-10 h-10 text-brand-400 mx-auto mb-3" />
-                       <p className="text-brand-800 font-medium">اسحب وأفلت المرفقات أو انقر للرفع</p>
-                       <p className="text-sm text-brand-500 mt-1">صور و وثائق (PDF, JPG, PNG)</p>
-                     </>
-                   )}
-                 </div>
-
-                 {formData.documents.length > 0 && (
-                   <div className="mt-4 space-y-2">
-                     <p className="text-sm font-medium text-brand-800 mb-2">الملفات المرفقة ({formData.documents.length}):</p>
-                     {formData.documents.map((url, i) => (
-                       <div key={i} className="flex justify-between items-center bg-brand-50 border border-brand-100 p-2 rounded text-sm">
-                         <span className="truncate flex-1" dir="ltr">{url.split('?')[0].split('%2F').pop()}</span>
-                         <a href={url} target="_blank" rel="noreferrer" className="text-brand-600 hover:text-brand-800 mr-4 font-medium">عرض</a>
-                       </div>
-                     ))}
-                   </div>
-                 )}
+              <div className="pt-6 border-t border-brand-100">
+                <label className="block text-xl font-medium text-brand-900 mb-2">اختيار القالب :</label>
+                <div className="text-sm font-light text-brand-700 mb-6 bg-brand-50 p-4 rounded-xl border border-brand-100">
+                  اختر نموذج قالب التصميم الفني الذي ترغب فيه لسجلك ( نوفر نوعين من التصاميم المميزة لكي يظهر فيه سجلك ) .
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                  <label className={`cursor-pointer border-2 rounded-xl p-6 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
+                    <input type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
+                       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
+                       <span className="font-sans font-bold text-lg relative z-10">مودرن</span>
+                    </div>
+                    <span className="font-bold text-brand-900 text-lg">نموذج حديث "مودرن"</span>
+                  </label>
+                  
+                  <label className={`cursor-pointer border-2 rounded-xl p-6 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
+                    <input type="radio" name="design" value="كلاسيكي" className="hidden" checked={formData.designTemplate === "كلاسيكي"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
+                    <div className="w-24 h-24 bg-gradient-to-br from-[#8c7355] to-[#4a3a28] rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=200&auto=format&fit=crop')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
+                      <span className="font-serif font-bold text-lg relative z-10">عتيق</span>
+                    </div>
+                    <span className="font-bold text-brand-900 text-lg">نموذج كلاسيكي</span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
 
           {step === 3 && (
-            <div className="space-y-8">
-              <h2 className="text-2xl font-serif font-bold text-brand-900 text-center">مراجعة الفاتورة والموافقة</h2>
-              
-              <div className="bg-brand-50 p-6 rounded-2xl border border-brand-200 w-full max-w-lg mx-auto">
-                 <h3 className="font-bold border-b border-brand-200 pb-4 mb-4">ملخص الطلب لسجل ({formData.familyName || "---"})</h3>
-                 <div className="space-y-3 text-brand-800 mb-6">
-                    <div className="flex justify-between">
-                      <span>الباقة الرقمية الشاملة</span>
-                      <span className="font-medium font-mono">$1999</span>
-                    </div>
-                 </div>
-                 <div className="flex justify-between border-t border-brand-200 pt-4 font-bold text-xl text-brand-900">
-                    <span>الإجمالي (الدفعة المبدئية)</span>
-                    <span className="font-mono">$1999</span>
-                 </div>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
+                <p className="text-brand-600">مراجعة بيانات الطلب والموافقة على الشروط</p>
               </div>
 
-              {!agreedToService ? (
-                <div className="max-w-lg mx-auto bg-white border-2 border-brand-200 p-6 rounded-2xl text-center shadow-sm">
-                  <h3 className="font-bold text-brand-900 mb-2">توقيع اتفاقية تقديم الخدمة</h3>
-                  <p className="text-sm text-brand-600 mb-4">
-                    لضمان حقوقك القانونية وحقوق فريق البحث، يرجى توقيع اتفاقية مستوى الخدمة وإشعار إخلاء المسؤولية رسمياً.
-                    (التوقيع الإلكتروني متوافق مع نظام ESIGN Act و UETA).
-                  </p>
-                  <button 
-                    type="button"
-                    onClick={() => setShowSignModal(true)}
-                    className="bg-brand-900 text-white px-6 py-2 rounded-md font-semibold hover:bg-brand-800 transition shadow-md w-full"
-                  >
-                    بدء التوقيع الإلكتروني (E-Signature)
-                  </button>
+              <div className="bg-brand-50 p-6 rounded-2xl border border-brand-200 space-y-4">
+                <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-2">ملخص بيانات أمين السجل</h3>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                  <div className="col-span-2 md:col-span-1"><span className="text-brand-600">الاسم:</span> <strong className="text-brand-900">{formData.firstName} {formData.fatherName} {formData.grandfatherName} {formData.familyName}</strong></div>
+                  <div><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{formData.country}</strong></div>
+                  <div><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{formData.homeland}</strong></div>
+                  <div><span className="text-brand-600">القبيلة:</span> <strong className="text-brand-900">{formData.tribeName || "غير محدد"}</strong></div>
                 </div>
-              ) : (
-                <div className="max-w-lg mx-auto bg-green-50 border border-green-200 p-4 rounded-xl text-center text-green-800 flex items-center justify-center gap-2" dir="ltr">
-                  <span className="font-medium" dir="rtl">تم توقيع الاتفاقية بنجاح.</span>
-                  <Check className="w-5 h-5" />
+
+                <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-2 mt-4 pt-4">المسار والمخرجات</h3>
+                <div className="grid grid-cols-1 gap-y-4 gap-x-2 text-sm pt-2">
+                  <div><span className="text-brand-600">نقطة البدء:</span> <strong className="text-brand-900">{formData.startingPoint || "-"}</strong></div>
+                  <div><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{formData.designTemplate}</strong></div>
+                  <div className="mt-4 border-t border-brand-100 pt-4">
+                    <span className="text-brand-600 block mb-2 font-bold text-base">الباقة</span>
+                    <strong className="text-brand-900 block text-lg mb-2">السجل الأساسي ($1999) ويشمل</strong>
+                    <ul className="list-disc list-inside text-brand-800 space-y-1">
+                      <li>نسخة رقمية "الكترونية"</li>
+                      <li>عدد 10 نسخ ورقية مطبوعة</li>
+                      <li>بوستر مشجر عمود النسب الشامل</li>
+                      <li>حافظة أنيقة لبوستر مشجر عمود النسب</li>
+                    </ul>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <div className="bg-white border-2 border-brand-100 p-6 rounded-2xl">
+                <label className="flex items-start gap-4 cursor-pointer">
+                  <div className="pt-1">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+                      checked={agreedToService}
+                      onChange={(e) => setAgreedToService(e.target.checked)}
+                    />
+                  </div>
+                  <div className="text-sm text-brand-700 leading-relaxed">
+                    أقر أنا أمين السجل بصحة البيانات المقدمة أعلاه، وأوافق على بدء توثيق "سجل تراث العائلة" لعمود نسبنا بناءً على المعلومات المرفقة. كما أتعهد بالالتزام بشروط وأحكام الخدمة والسرية وقوانين الخصوصية الموضحة في وثيقة الخدمات. هذا التأكيد بمثابة موافقة إلكترونية.
+                    <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-100 text-center">
+                      <span className="text-brand-600 block mb-2">سيتم توقيع العقد قانونياً ورسمياً عبر منصة خارجية (eSignatures):</span>
+                      <a href="#" onClick={(e) => e.preventDefault()} className="inline-block bg-white border border-brand-300 text-brand-800 px-4 py-2 rounded shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 mx-auto max-w-xs">
+                        توقيع العقد الإلكتروني <ArrowLeft className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </label>
+              </div>
             </div>
           )}
 
+          {step === 4 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8">
+              <div className="w-24 h-24 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Check className="w-12 h-12" />
+              </div>
+              <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">بدء التنفيذ والإعتماد</h2>
+              <p className="text-brand-700 text-lg mb-8 max-w-lg mx-auto">
+                سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
+              </p>
+              
+              <div className="text-5xl font-mono text-brand-900 mb-8 font-bold border-y border-brand-100 py-6 mx-auto max-w-xs">
+                $1,999<span className="text-2xl text-brand-500 font-light">.00</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between">
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100">
           <button 
             type="button" 
             onClick={handlePrev} 
-            disabled={step === 1}
-            className={`px-6 py-3 rounded-md font-semibold flex items-center gap-2 transition ${step === 1 ? 'opacity-50 cursor-not-allowed text-brand-400' : 'text-brand-700 hover:bg-brand-200 bg-brand-100'}`}
+            disabled={step === 1 || isSubmitting}
+            className="px-6 py-3 rounded-2xl font-medium text-brand-600 disabled:opacity-30 hover:bg-brand-50 transition flex items-center gap-2"
           >
-            السابق
+           <ArrowRight className="w-5 h-5" /> عودة
           </button>
           
-          {step < 3 ? (
+          {step < 4 ? (
             <button 
-              type="button" 
-              onClick={handleNext}
-              className="px-8 py-3 rounded-md font-semibold flex items-center gap-2 bg-brand-600 text-white hover:bg-brand-700 shadow-md transition"
+              onClick={handleNext} 
+              disabled={
+                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland)) ||
+                (step === 2 && !formData.startingPoint) ||
+                (step === 3 && !agreedToService)
+              }
+              className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               التالي <ArrowLeft className="w-5 h-5" />
             </button>
           ) : (
             <button 
-              type="button" 
-              onClick={submitOrder}
-              disabled={!agreedToService || isSubmitting}
-              className={`px-10 py-3 rounded-md font-semibold flex items-center gap-2 shadow-xl transition ${agreedToService && !isSubmitting ? 'bg-brand-900 text-white hover:bg-brand-800' : 'bg-brand-200 text-brand-500 cursor-not-allowed'}`}
+              onClick={submitOrder} 
+              disabled={isSubmitting}
+              className="px-10 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
             >
-               {isSubmitting ? "جاري المعالجة..." : "إتمام الطلب والدفع المبدئي"}
+              {isSubmitting ? (
+                <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <>إتمام الدفع واعتماد الطلب <Check className="w-5 h-5 mr-2" /></>
+              )}
             </button>
           )}
         </div>
-
       </div>
-
-      {showSignModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
-               <h3 className="font-bold text-brand-900">توقيع الوثيقة (محاكاة eSignatures.com)</h3>
-               <button onClick={() => setShowSignModal(false)} className="text-brand-500 hover:text-brand-800">إغلاق</button>
-            </div>
-            <div className="p-6 overflow-y-auto flex-1 text-sm text-brand-800 leading-relaxed font-serif">
-              <h4 className="font-bold mb-4 text-center text-lg">عقد تقديم خدمة بحث وتوثيق الأنساب</h4>
-              <p className="mb-4"><strong>الطرف الأول (مزود الخدمة):</strong> منصة سجل تراث العائلة.</p>
-              <p className="mb-4"><strong>الطرف الثاني (العميل):</strong> {formData.firstName} {formData.familyName}</p>
-              <p className="mb-4">بناءً على طلب الطرف الثاني لتوثيق شجرة عائلته، تم الاتفاق على الخطوط العريضة التالية:</p>
-              <ul className="list-disc list-inside space-y-2 mb-6">
-                <li>يلتزم الطرف الأول بتقديم أقصى درجات العناية والبحث في المصادر والمراجع التاريخية لتوثيق التسلسل النسبي لعائلة الطرف الثاني.</li>
-                <li>يقر الطرف الثاني بأن كافة المعلومات والمستندات المقدمة منه مبدئياً صحيحة، وتتحمل الجهة الطالبة مسؤوليتها الأخلاقية والاجتماعية.</li>
-                <li><strong>إخلاء المسؤولية:</strong> نتائج البحث تعتمد على الوثائق والمصادر المتاحة والحمض النووي (إن وجد). لا يتحمل الطرف الأول مسؤلية أي تضارب تاريخي قديم لا تدعمه المصادر.</li>
-                <li>حقوق الطبع والنشر لآلية وشكل إخراج الشجرة محفوظة للطرف الأول، بينما يمتلك الطرف الثاني حقوق المادة العلمية الناتجة عن المشروع.</li>
-              </ul>
-              <div className="bg-brand-50 p-4 border border-brand-200 rounded-lg text-center mt-6">
-                <p className="font-bold text-brand-900 mb-2">منطقة التوقيع الإلكتروني</p>
-                <div className="w-full h-24 bg-white border border-dashed border-brand-300 rounded flex items-center justify-center text-brand-400 mb-2 italic">
-                  [المستخدم يوقع هنا تقنياً عبر مزود الخدمة]
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-brand-100 bg-brand-50 flex justify-end gap-3">
-               <button onClick={() => setShowSignModal(false)} className="px-6 py-2 rounded-md font-medium text-brand-600 hover:bg-brand-100 transition">إلغاء</button>
-               <button onClick={() => { setAgreedToService(true); setShowSignModal(false); }} className="px-6 py-2 rounded-md font-bold bg-brand-600 text-white hover:bg-brand-700 transition">أوافق وأوقع إلكترونياً</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

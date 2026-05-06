@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // ==========================================
+    // Authentication & Authorization Helpers
+    // ==========================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Check if user is the admin (based on the email hardcoded in your app or user document role)
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net') ||
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // ==========================================
+    // Users Collection
+    // ==========================================
+    match /users/{userId} {
+      // Users can modify their own profile; Admin can modify anyone's
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // ==========================================
+    // Orders Collection
+    // ==========================================
+    match /orders/{orderId} {
+      // Admin can see everything
+      allow read: if isAdmin();
+      
+      // User can only see and list their own orders
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // User can create orders that belong to them
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      
+      // User can update their own orders
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Only Admin can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Email triggers
+    // ==========================================
+    match /mail/{mailId} {
+      allow create: if isSignedIn();
+      allow read, write: if isAdmin();
+    }
+    
+    // ==========================================
+    // Support Tickets
+    // ==========================================
+    match /support_tickets/{ticketId} {
+      allow create: if isSignedIn();
+      allow read, write: if isAdmin();
+    }
+    
+    // ==========================================
+    // Visitor Consents
+    // ==========================================
+    match /visitor_consents/{id} {
+      allow create: if true;
+      allow read, write: if isAdmin();
+    }
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2,64 +2,90 @@ import { BookOpen, Milestone, Users, Archive, Library, Palette, Waypoints, Hands
 
 export function About() {
   return (
-    <div className="bg-brand-50 min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h1 className="font-serif text-5xl font-bold text-brand-900 mb-8 text-center">قصتنا ورسالتنا</h1>
-        
-        <p className="text-xl text-brand-800 leading-loose mb-16 text-center font-light">
-          نؤمن بأن "من لا ماضي له، لا حاضر ولا مستقبل له". تأسس مشروع <b>سجل تراث العائلة</b> من شغف عميق بتوثيق الأنساب العربية بطريقة علمية موثقة، وإخراجها في قالب فني يليق بمقام وتاريخ عائلتكم.
-        </p>
+    <div className="bg-brand-50 min-h-screen pb-20">
+      
+      {/* Hero Section */}
+      <div className="bg-white py-16 mb-12 shadow-sm border-b border-brand-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="font-serif text-5xl font-bold text-brand-900 mb-6">من نحن وماذا نقدم</h1>
+        </div>
+      </div>
 
-        <div className="bg-white p-10 rounded-3xl shadow-sm border border-brand-100 mb-16">
-          <h2 className="font-serif text-3xl text-brand-900 mb-6 border-b border-brand-200 pb-4">رؤيتنا</h2>
-          <p className="text-brand-700 leading-relaxed text-lg">
-            أن نكون المرجع الرقمي والتوثيقي الأول لحفظ تراث العائلات في العالم العربي، ونوفر منصة تجمع بين عراقة الماضي وتقنيات المستقبل، لربط الأجيال الشابة بتاريخ وأمجاد أجدادهم.
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        
+        {/* من نحن */}
+        <section className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-sm border border-brand-100">
+          <h2 className="font-serif text-3xl font-bold text-brand-900 mb-8 border-b border-brand-100 pb-4">من نحن</h2>
+          <div className="space-y-6 text-brand-800 text-lg font-light leading-relaxed">
+            <p><strong className="text-brand-900 font-semibold">شركتنا:</strong> شركة جيني لاب ، شركة متخصصة في مجال الأنساب "الجينيولوجي"، وتاريخ العائلات.</p>
+            <p><strong className="text-brand-900 font-semibold">فريقنا:</strong> لدينا فريق مميز ، يملك خبرات واسعة في تنسيق وتقديم خدمات بحثية و نشر فني مميز.</p>
+            <p><strong className="text-brand-900 font-semibold">شبكتنا:</strong> ترتبط شركتنا بعلاقات واسعة مع مختبرات علمية ومراكز بحوث ، وباحثين أكاديميين و نسابين تقليديين من جميع انحاء العالم العربي ودول المهجر.</p>
+            <p><strong className="text-brand-900 font-semibold">بياناتنا:</strong> لدينا امتيازات وصول الى عدة قواعد بيانات عن الأنساب تتيح لنا تنسيق وتقديم خدمات بحث علمية أصيلة وموثوقة .</p>
+          </div>
+        </section>
+
+        {/* رسالتنا */}
+        <section className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-sm border border-brand-100">
+          <h2 className="font-serif text-3xl font-bold text-brand-900 mb-8 border-b border-brand-100 pb-4">رسالتنا</h2>
+          <p className="text-brand-800 text-lg font-light leading-relaxed">
+            نؤمن بأن "الماضي لايُستعاد ، لكنه يُقرأ حين يُوثق" . يقوم مشروع "سجل تراث العائلة" البحثي على شغف عميق بتوثيق الأنساب العربية بطريقة علمية موثقة ، وإخراجها في قالب فني يليق بمقام وتاريخ العائلة.
           </p>
-        </div>
+        </section>
 
-        <h2 className="font-serif text-3xl text-brand-900 mb-10 text-center">أركان عملنا</h2>
-        
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="flex gap-4 items-start">
-            <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Library className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">البحث والتدقيق الأرشيفي</h3>
-              <p className="text-brand-600 leading-relaxed">فريقنا مكون من باحثين في التاريخ والأنساب، يقومون بمراجعة الوثائق المرفقة والمصادر والمشجرات القديمة بدقة منهجية.</p>
-            </div>
-          </div>
+        {/* رؤيتنا */}
+        <section className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-sm border border-brand-100">
+          <h2 className="font-serif text-3xl font-bold text-brand-900 mb-8 border-b border-brand-100 pb-4">رؤيتنا</h2>
+          <p className="text-brand-800 text-lg font-light leading-relaxed">
+            أن نكون المرجع البحثي والتوثيقي الأول لحفظ تراث العائلات في العالم العربي، ونوفر منصة رقمية تجمع بين عراقة الماضي وتقنيات المستقبل، لربط الأجيال الشابة بتاريخ وأمجاد أجدادهم.
+          </p>
+        </section>
+
+        {/* ماذا نقدم */}
+        <section className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-sm border border-brand-100">
+          <h2 className="font-serif text-3xl font-bold text-brand-900 mb-10 border-b border-brand-100 pb-4">ماذا نقدم</h2>
           
-          <div className="flex gap-4 items-start">
-            <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Palette className="w-6 h-6" />
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="flex gap-4 items-start">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100">
+                <Library className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">البحث العلمي</h3>
+                <p className="text-brand-700 leading-relaxed font-light">نبحث في قواعد البيانات المتخصصة والمصادر المموثوقة ، كما نقوم بمراجعة رواياتكم النسبية ووثائقكم المرفقة بدقة منهجية لتقديم سجلات تراث موثوقة.</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">الإخراج الفني المتقن</h3>
-              <p className="text-brand-600 leading-relaxed">نصمم السجل كتحفة فنية. من خطوط الطباعة الملكية إلى تصميم شجرة العائلة بطريقة واضحة وجميلة تسرد قصة العائلة.</p>
+            
+            <div className="flex gap-4 items-start">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100">
+                <Waypoints className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">توثيق الأصل / عمود النسب</h3>
+                <p className="text-brand-700 leading-relaxed font-light">نقوم بتوثيق الأصل العائلي وكذلك عمود نسبكم وتحديد نقطة الالتقاء النسبي مع طبقات النسب المعروفة والموثقة من أجل ابراز اصل الإنتساب ولتكون العمود الفقري لسجل تراث عائلتكم .</p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Waypoints className="w-6 h-6" />
+            <div className="flex gap-4 items-start">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100">
+                <Palette className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">الإخراج الفني الأنيق</h3>
+                <p className="text-brand-700 leading-relaxed font-light">نصمم سجل تراث عائلتكم كتحفة فنية. من خطوط الطباعة الراقية إلى تصميم مشجر عمود الأنتساب بطريقة واضحة وجميلة تسرد قصة عائلتكم .</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">ربط التسلل الزمني</h3>
-              <p className="text-brand-600 leading-relaxed">توضيح الخط الزمني من "نقطة البداية" وصولًا لأحدث المواليد، مع ذكر النوابغ والمؤثرين من أبناء الخط التاريخي.</p>
-            </div>
-          </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-12 h-12 rounded-xl bg-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-              <Handshake className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-serif text-xl font-bold text-brand-900 mb-2">منصة تعاونية</h3>
-              <p className="text-brand-600 leading-relaxed">نوفر لوحة تحكم تتيح كبار العائلة التواصل معنا لإيضاح المستجدات واعتماد التصاميم قبل الطباعة والنشر.</p>
+            <div className="flex gap-4 items-start">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100">
+                <Handshake className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">منصة تعاونية</h3>
+                <p className="text-brand-700 leading-relaxed font-light">نوفر لوحة تحكم سهلة تتيح لكم التواصل معنا لتبادل البيانات التي تخدم بناء سجل تراث عائلتكم وتوثيق تاريخ عائلتكم.</p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>

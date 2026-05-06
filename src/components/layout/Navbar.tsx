@@ -9,7 +9,7 @@ export function Navbar() {
 
   const navLinks = [
     { text: "الرئيسية", path: "/" },
-    { text: "ماذا نقدم", path: "/about" },
+    { text: "من نحن وماذا نقدم", path: "/about" },
     { text: "سجل تراث العائلة", path: "/services" },
     { text: "المركز المعرفي", path: "/knowledge" },
     { text: "اتصل بنا", path: "/contact" },
@@ -21,7 +21,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           <Link to="/" className="flex items-center gap-3 group">
-            <img src="https://i.postimg.cc/rybzQd5Z/Segel2.png" alt="سجل تراث العائلة" className="h-14 w-auto object-contain drop-shadow-sm" />
+            <img src="https://i.postimg.cc/KvK4Lspq/Segel-Logo.png" alt="سجل تراث العائلة" className="h-14 w-auto object-contain drop-shadow-sm" />
           </Link>
 
           {/* Desktop Menu */}

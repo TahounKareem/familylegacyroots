@@ -10,11 +10,9 @@ export function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden text-white">
-        {/* Background Image with optimized visibility */}
+        {/* Background Image without filters */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/T3GWLKFv/Pic2-3.jpg')] bg-cover bg-center"></div>
-          {/* Elegant Dark Red Overlay - light enough to show details, dark enough for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/40 to-brand-950/90"></div>
+          <div className="absolute inset-0 bg-[url('https://i.postimg.cc/y8tmcZTT/webhero.jpg')] bg-cover bg-center"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -31,11 +29,11 @@ export function Home() {
                 <span className="text-brand-400 font-light italic">وإحفظ تراثك</span>
               </h1>
               <p className="text-xl text-brand-200 mb-10 leading-relaxed max-w-lg">
-                عمل احترافي دقيق لتوثيق تاريخ وعراقة العائلة من خلال البحث العميق، وتصميم "سجل التراث العائلي" بأسلوب فني يليق بقيمتكم.
+                عمل بحثي احترافي لمعرفة اصل انتسابك من خلال البحث العميق وتوثيق عمود نسبك ، وتصميم "سجل تراث عائلتك" بأسلوب فني يبرز جذور الإنتماء.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a href="#journey" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
-                  إبدأ رحلة توثيق سجلك العائلي
+                  إبدأ رحلة توثيق سجل تراثك
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </a>
               </div>
@@ -52,7 +50,7 @@ export function Home() {
             ما هو "سجل تراث العائلة"؟
           </h2>
           <p className="text-xl text-brand-800 leading-relaxed font-light max-w-3xl mx-auto mb-16">
-            ليس مجرد كتاب، بل هو وثيقة تاريخية محققة تُورث للأجيال القادمة. نقوم بجمع الروايات المتناثرة، وتوثيق شجرة العائلة المتصلة، وتنسيق الوثائق التاريخية في قالب منهجي وفني فاخر.
+            ليس مجرد كتاب، بل هو وثيقة تاريخية موثقة تُورّث للأجيال القادمة. حيث نقوم ببحث الروايات المتناثرة، وتوثيق الإنتساب ، وتنسيق الوثائق التاريخية في قالب منهجي وفني فاخر.
           </p>
 
           {/* Engraved Video Container */}
@@ -97,31 +95,31 @@ export function Home() {
       <section id="journey" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث العائلة</h2>
-            <p className="text-brand-600 text-lg max-w-2xl mx-auto">منهجية أكاديمية دقيقة تضمن لكم الحصول على سجل تاريخي معتمد</p>
+            <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث عائلتك</h2>
+            <p className="text-brand-600 text-lg max-w-2xl mx-auto">منهجية بحثية علمية تضمن لكم الحصول على سجل تاريخي موثق.</p>
           </div>
           
           <div className="grid md:grid-cols-4 gap-8">
             {[
               {
                 icon: FolderPlus,
-                title: "فتح سجل تراث العائلة",
-                desc: "خطوتك الأولى لتدوين تاريخ عائلتك العريق وتوليد ملف خاص بأسرتك."
+                title: "إنشئ سجلك",
+                desc: "خطوتك الأولى لتدوين تاريخ عائلتك العريق وانشاء حساب خاص بك على منصتنا."
               },
               {
                 icon: Database,
-                title: "تزويد البيانات",
-                desc: "إدراج التفاصيل الخاصة والوثائق والصور بدقة وسرية تامة."
+                title: "حدثنا عنك",
+                desc: "إدرج بياناتك الأساسية لنتمكن من البحث عن انتسابكم وادرج ماترغب في عرضه في سجلك بخصوصية تامة."
               },
               {
                 icon: SearchCheck,
-                title: "التدقيق الميداني",
-                desc: "فحص وتوثيق وتحقيق أكاديمي للمعلومات لضمان التاريخ المعتمد."
+                title: "نقوم بالبحث والتوثيق",
+                desc: "سيقوم فريقنا بالبحث العلمي عن أصل الإنتساب وأعمال التوثيق ألأكاديمي والإخراج الفني لسجل تراثك."
               },
               {
                 icon: Gift,
                 title: "استلم السجل",
-                desc: "حصولك على نسختك الفاخرة والرقمية لتراثك الموثق الجاهز للمشاركة."
+                desc: "نقوم بتسليمك سجل تراث عائلتك الموثق في نسخ رقمية وورقية أنيقة بالإضافة الي بوستر مشجر عمود النسب."
               }
             ].map((feature, idx) => (
                <motion.div 
@@ -166,8 +164,9 @@ export function Home() {
                  <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن هذا السجل؟</h2>
                  <ul className="space-y-6">
                    {[
-                     "لكل من يرغب في حفظ إرث أجداده.",
-                     "للأجيال الشابة الباحثة عن الانتماء ومعرفة جذورها.",
+                     "لمن يريد ان يعرف أصل عائلته وتوثيق عمود النسب.",
+                     "للأجيال الباحثة عن الانتماء ومعرفة جذورها.",
+                     "لمن يرغب في حفظ إرث أجداده.",
                      "لمن يرغب في تقديم هدية قيمة لعائلته."
                    ].map((item, i) => (
                      <li key={i} className="flex gap-4 items-start">

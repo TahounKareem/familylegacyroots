@@ -14,6 +14,9 @@ export function AdminPanel() {
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
   const [replyText, setReplyText] = useState("");
   const [deliveryLink, setDeliveryLink] = useState("");
+  const [digitalCopyLink, setDigitalCopyLink] = useState("");
+  const [posterLink, setPosterLink] = useState("");
+  const [researchRecommendations, setResearchRecommendations] = useState("");
   const [isFulfilling, setIsFulfilling] = useState(false);
 
   if (!currentUser || currentUser.role !== "admin") {
@@ -54,7 +57,12 @@ export function AdminPanel() {
     if (!deliveryLink.trim() || !deliveryOrder) return;
     setIsFulfilling(true);
     try {
-      await fulfillOrder(deliveryOrder.id, deliveryLink);
+      await fulfillOrder(deliveryOrder.id, {
+        deliveryLink,
+        digitalCopyLink,
+        posterLink,
+        researchRecommendations
+      });
       
       const userDoc = await getDoc(doc(db, "users", deliveryOrder.userId));
       if (userDoc.exists()) {
@@ -170,6 +178,21 @@ export function AdminPanel() {
                        >
                          <MessageSquare className="w-3 h-3" /> مراسلة
                        </button>
+                       <button 
+                         onClick={async () => {
+                           if (window.confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) {
+                             try {
+                               const { deleteDoc, doc } = await import("firebase/firestore");
+                               const { db } = await import("@/lib/firebase");
+                               await deleteDoc(doc(db, "orders", order.id));
+                               useAppStore.setState(s => ({ orders: s.orders.filter(o => o.id !== order.id) }));
+                             } catch(e) { console.error(e); alert("خطأ في الحذف"); }
+                           }
+                         }}
+                         className="flex-1 flex items-center justify-center gap-1 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
+                       >
+                         <X className="w-3 h-3" /> حذف
+                       </button>
                      </div>
                      {!order.deliveryLink && (
                        <button 
@@ -222,14 +245,6 @@ export function AdminPanel() {
                   <p className="text-brand-500 text-xs mb-1">تاريخ الطلب</p>
                   <p className="font-bold font-mono text-brand-900">{new Date(selectedOrder.createdAt).toLocaleDateString('ar-SA')}</p>
                 </div>
-                <div>
-                  <p className="text-brand-500 text-xs mb-1">المسار (الباقة)</p>
-                  <p className="font-bold text-brand-900">{selectedOrder.plan === 'express' ? 'سريع' : 'عادي'}</p>
-                </div>
-                <div>
-                  <p className="text-brand-500 text-xs mb-1">طلب طباعة ورقية</p>
-                  <p className="font-bold text-brand-900">{selectedOrder.printRequested ? 'نعم (يتم تقييم التكلفة وتسعيرها للعميل)' : 'لا (نسخة رقمية فقط)'}</p>
-                </div>
               </div>
 
               <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2">تفاصيل وبيانات العائلة</h4>
@@ -237,11 +252,14 @@ export function AdminPanel() {
                  <div><strong className="text-brand-600">جد العائلة:</strong> {selectedOrder.data.grandfatherName}</div>
                  <div><strong className="text-brand-600">اسم القبيلة/العائلة:</strong> {selectedOrder.data.tribeName || 'غير متوفر'}</div>
                  <div><strong className="text-brand-600">الموطن أو المنشأ:</strong> {selectedOrder.data.country} - {selectedOrder.data.homeland}</div>
-                 {selectedOrder.data.knownLineage && (
-                   <div><strong className="text-brand-600">التسلسل النسبي المعروف:</strong> <p className="mt-1 bg-gray-50 p-3 rounded border border-gray-200">{selectedOrder.data.knownLineage}</p></div>
+                 {selectedOrder.data.startingPoint && (
+                   <div><strong className="text-brand-600">نقطة الانطلاق لعمود النسب:</strong> <p className="mt-1 bg-brand-50 p-3 rounded border border-brand-200">{selectedOrder.data.startingPoint}</p></div>
+                 )}
+                 {selectedOrder.data.designTemplate && (
+                   <div><strong className="text-brand-600">القالب المختار:</strong> <p className="mt-1 bg-brand-50 p-3 rounded border border-brand-200">{selectedOrder.data.designTemplate}</p></div>
                  )}
                  {selectedOrder.data.historicalNotes && (
-                   <div><strong className="text-brand-600">ملاحظات تاريخية:</strong> <p className="mt-1 bg-gray-50 p-3 rounded border border-gray-200">{selectedOrder.data.historicalNotes}</p></div>
+                   <div><strong className="text-brand-600">ملاحظات تاريخية (نبذة):</strong> <p className="mt-1 bg-gray-50 p-3 rounded border border-gray-200">{selectedOrder.data.historicalNotes}</p></div>
                  )}
               </div>
 
@@ -353,21 +371,41 @@ export function AdminPanel() {
               برجاء إدخال رابط الوثيقة النهائية (مثال: رابط Google Drive، أو رابط Dropbox، أو رابط مباشر للملف). سيتم تغيير حالة الطلب وتسليمه للعميل مباشرة.
             </p>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
-                <label className="block font-semibold text-brand-900 mb-2">رابط الاستلام المنشور</label>
+                <label className="block font-semibold text-brand-900 mb-2">رابط النسخة الرقمية للسجل</label>
                 <input 
                   type="url" 
-                  value={deliveryLink}
-                  onChange={(e) => setDeliveryLink(e.target.value)}
+                  value={digitalCopyLink}
+                  onChange={(e) => { setDigitalCopyLink(e.target.value); setDeliveryLink(e.target.value); }}
                   placeholder="https://..."
                   dir="ltr"
                   className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                 />
               </div>
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط بوستر المشجرة</label>
+                <input 
+                  type="url" 
+                  value={posterLink}
+                  onChange={(e) => setPosterLink(e.target.value)}
+                  placeholder="https://..."
+                  dir="ltr"
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">التوصيات واقتراحات فريق البحث</label>
+                <textarea 
+                  value={researchRecommendations}
+                  onChange={(e) => setResearchRecommendations(e.target.value)}
+                  placeholder="أكتب التوصيات..."
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
+                />
+              </div>
               <button 
                 onClick={handleFulfillOrder}
-                disabled={isFulfilling || !deliveryLink.trim()}
+                disabled={isFulfilling || !digitalCopyLink.trim()}
                 className="w-full py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 {isFulfilling ? 'جاري التسليم...' : (
