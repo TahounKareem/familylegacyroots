@@ -9,12 +9,12 @@ export function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 overflow-hidden text-white">
+      <section className="relative pt-24 pb-32 md:pt-0 md:pb-0 md:aspect-[21/9] lg:aspect-[2.5/1] flex items-center overflow-hidden text-white bg-brand-950">
         {/* Background Image without filters */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[url('https://i.postimg.cc/y8tmcZTT/webhero.jpg')] bg-cover bg-center"></div>
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
           <div className="max-w-3xl">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}

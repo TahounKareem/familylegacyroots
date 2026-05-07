@@ -173,7 +173,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
       
       {/* Editor Panel */}
       {isEditing && selectedNode && (
-        <div className="absolute bottom-4 left-4 right-4 bg-white p-4 rounded-xl shadow-lg border border-brand-200 flex flex-col sm:flex-row gap-4 items-end">
+        <div className="absolute top-4 left-4 right-4 sm:top-auto sm:bottom-4 z-50 bg-white p-4 rounded-xl shadow-2xl border-2 border-brand-300 flex flex-col sm:flex-row gap-4 items-end">
            <div className="flex-1 w-full">
              <label className="block text-xs font-medium text-brand-700 mb-1">الاسم</label>
              <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full border border-brand-200 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500" />

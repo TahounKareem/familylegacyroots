@@ -5,7 +5,7 @@ import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles } from "lucide-react";
+import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
@@ -186,7 +186,7 @@ export function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Greeting */}
-        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-40">
+        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-[60]">
           <div className="flex flex-col md:flex-row items-center gap-4 relative">
              <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="w-14 h-14 rounded-full bg-brand-100 border border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl hover:bg-brand-200 transition shrink-0 uppercase">
                {currentUser.name?.charAt(0) || "U"}
@@ -490,7 +490,7 @@ export function Dashboard() {
                   {activeTab === "إدراج مشجر الأحياء" && (
                     <div className="space-y-4">
                       <p className="text-brand-600 mb-4">أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك المباشر في هذا المخطط المبدئي).</p>
-                      <div className="h-[500px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white">
+                      <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
                         <TreeBuilder 
                           initialNodes={order.data.treeData?.nodes || []} 
                           initialEdges={order.data.treeData?.edges || []} 
@@ -605,13 +605,16 @@ export function Dashboard() {
                           <BookOpen className="w-20 h-20 text-brand-600 mx-auto mb-6" />
                           <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">سجل تراث عائلتك جاهز للتصفح</h3>
                           <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">لقد انتهينا من إعداد نسختك الرقمية بأعلى معايير الجودة والإخراج.</p>
-                          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <a href={order.digitalCopyLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
-                              <Download className="w-6 h-6" /> تحميل النسخة الرقمية
-                            </a>
-                            <button onClick={() => window.print()} className="bg-white text-brand-700 border-2 border-brand-200 px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-3 w-full sm:w-auto">
-                              <Printer className="w-6 h-6" /> طباعة السجل
-                            </button>
+                          <div className="flex flex-col items-center justify-center gap-6">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                              <a href={order.digitalCopyLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
+                                <Download className="w-6 h-6" /> تحميل النسخة الرقمية
+                              </a>
+                            </div>
+                            <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
+                              <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، بوستر مشجرة العائلة، وحافظة مميزة لحفظ الوثائق.</p>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -632,13 +635,16 @@ export function Dashboard() {
                           <Compass className="w-20 h-20 text-brand-600 mx-auto mb-6" />
                           <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">بوستر مشجرة العائلة جاهز!</h3>
                           <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">تحفة فنية فريدة صُممت لتوثيق عمود نسبكم عبر الأجيال.</p>
-                          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <a href={order.posterLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
-                              <Download className="w-6 h-6" /> تحميل البوستر عالي الدقة
-                            </a>
-                            <button onClick={() => window.print()} className="bg-white text-brand-700 border-2 border-brand-200 px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-3 w-full sm:w-auto">
-                              <Printer className="w-6 h-6" /> طباعة البوستر
-                            </button>
+                          <div className="flex flex-col items-center justify-center gap-6">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                              <a href={order.posterLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
+                                <Download className="w-6 h-6" /> تحميل البوستر عالي الدقة
+                              </a>
+                            </div>
+                            <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
+                              <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، بوستر مشجرة العائلة، وحافظة مميزة لحفظ الوثائق.</p>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -654,7 +660,17 @@ export function Dashboard() {
                            <p className="text-brand-600 font-light max-w-sm mx-auto">لتتمكن من التبليغ عن الأخطاء ليتم بناءاً عليها من إصلاح وتحديث الاخطاء عند وجودها، وذلك بعد إصدار السجل.</p>
                         </div>
                       ) : (
-                        <div className="px-6 md:px-12">
+                        <div className="px-6 md:px-12 py-8">
+                          {order.researchRecommendations && (
+                            <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-6 md:p-8 mb-10 shadow-sm">
+                              <h3 className="text-xl md:text-2xl font-bold text-brand-900 mb-4 leading-tight flex items-center gap-3">
+                                <Star className="w-6 h-6 text-brand-500 fill-brand-500" /> مساحة خاصة بتوصيات واقتراحات فريق البحث
+                              </h3>
+                              <div className="text-brand-800 text-lg leading-relaxed text-right whitespace-pre-line bg-white p-6 rounded-xl border border-brand-100 shadow-inner">
+                                {order.researchRecommendations}
+                              </div>
+                            </div>
+                          )}
                           <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
                             <FileText className="w-8 h-8 text-brand-600" /> نموذج طلب تصويب
                           </h3>
@@ -689,6 +705,29 @@ export function Dashboard() {
                               </button>
                             </div>
                           </div>
+
+                          {/* Previous Corrections List */}
+                          {order.messages && order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).length > 0 && (
+                            <div className="mt-12 bg-brand-50 rounded-2xl p-6 md:p-8 border border-brand-100 shadow-sm">
+                              <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
+                                <Clock className="w-6 h-6 text-brand-600" />
+                                طلبات التصويب السابقة
+                              </h3>
+                              <div className="space-y-4">
+                                {order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).map(msg => (
+                                  <div key={msg.id} className="bg-white p-5 rounded-xl border border-brand-200 shadow-sm">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className="text-sm font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-md">
+                                        تم الإرسال
+                                      </span>
+                                      <span className="text-xs text-brand-500 font-mono" dir="ltr">{new Date(msg.createdAt).toLocaleString('ar-SA')}</span>
+                                    </div>
+                                    <p className="text-brand-800 whitespace-pre-line text-sm mt-3">{msg.text}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {showCorrectionTerms && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -860,13 +899,37 @@ export function Dashboard() {
                   {activeTab === "عقد تسجيل الخدمة" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
                        <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><FileText className="w-8 h-8 text-brand-600" /> عقد تسجيل الخدمة</h3>
-                       <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100 flex items-center gap-4">
-                          <CheckCircle className="w-10 h-10 text-green-500" />
-                          <div>
-                            <h4 className="font-bold text-green-800 text-lg">لقد وافقت على تفاصيل التعاقد</h4>
-                            <p className="text-sm text-green-700">تمت الموافقة عند إنشاء الطلب وتوثيق النسب.</p>
-                          </div>
-                       </div>
+                       {!order ? (
+                         <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 flex items-center gap-4">
+                            <AlertCircle className="w-10 h-10 text-orange-500" />
+                            <div>
+                              <h4 className="font-bold text-orange-800 text-lg">لم تقم بالتوقيع على العقد بعد</h4>
+                              <p className="text-sm text-orange-700">لم يتم العثور على سجل مرتبط بحسابك.</p>
+                            </div>
+                         </div>
+                       ) : (
+                         <div className="space-y-6">
+                           <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex items-center gap-4 shadow-sm">
+                              <CheckCircle className="w-10 h-10 text-green-500" />
+                              <div>
+                                <h4 className="font-bold text-green-800 text-lg">تم توقيع العقد بنجاح</h4>
+                                <p className="text-sm text-green-700 font-mono mt-1" dir="ltr">{new Date(order.createdAt).toLocaleString('ar-SA')}</p>
+                              </div>
+                           </div>
+                           
+                           <div className="bg-white p-8 rounded-2xl border border-brand-200 shadow-inner">
+                             <h4 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-4 mb-6">نص التعاقد / الإقرار</h4>
+                             <p className="text-brand-800 leading-relaxed text-lg whitespace-pre-line">
+                               أقر أنا أمين السجل بصحة البيانات المقدمة، وأوافق على بدء توثيق "سجل تراث العائلة" لعمود نسبنا بناءً على المعلومات المرفقة.
+                               
+                               كما أتعهد بالالتزام بشروط وأحكام الخدمة والسرية وقوانين الخصوصية الموضحة في وثيقة الخدمات. هذا التأكيد بمثابة موافقة إلكترونية ملزمة.
+                               
+                               اسم أمين السجل: {order.data.firstName} بن {order.data.fatherName} {order.data.familyName}
+                               تاريخ الموافقة: {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                             </p>
+                           </div>
+                         </div>
+                       )}
                     </div>
                   )}
 

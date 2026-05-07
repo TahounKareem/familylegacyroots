@@ -3,7 +3,7 @@ import { useAppStore } from "@/lib/store";
 import { useNavigate, Navigate, Link } from "react-router";
 import { Home, Eye, EyeOff } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
 export function Auth() {
@@ -89,6 +89,25 @@ export function Auth() {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const handleForgotPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError("الرجاء إدخال البريد الإلكتروني أولاً لاستعادة كلمة المرور.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.");
+    } catch (err: any) {
+      console.error(err);
+      setError("حدث خطأ أثناء محاولة إرسال رابط الاستعادة. تأكد من صحة البريد الإلكتروني.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -203,7 +222,7 @@ export function Auth() {
                   </label>
                 </div>
                 <div className="text-sm">
-                  <a href="#" className="font-medium text-brand-600 hover:text-brand-500">
+                  <a href="#" onClick={handleForgotPassword} className="font-medium text-brand-600 hover:text-brand-500">
                     نسيت كلمة المرور؟
                   </a>
                 </div>

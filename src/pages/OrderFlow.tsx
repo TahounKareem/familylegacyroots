@@ -61,13 +61,6 @@ export function OrderFlow() {
         data: formData,
       });
 
-      // محاكاة لعملية الدفع حتى يتم ربط البوابة مع الخادم (Backend)
-      setTimeout(() => {
-        setIsSubmitting(false);
-        navigate('/dashboard');
-      }, 2000);
-      
-      /*
       // Call Express Backend to create a Stripe Session
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
@@ -85,12 +78,11 @@ export function OrderFlow() {
       const data = await response.json();
       
       if (data.url) {
-        window.top.location.href = data.url;
+        window.location.href = data.url;
       } else {
-        alert(data.error || "حدث خطأ أثناء الاتصال ببوابة الدفع. برجاء إعداد مفاتيح Stripe.");
+        alert(data.error || "حدث خطأ أثناء الاتصال ببوابة الدفع. برجاء وضع مفتاح Stripe بالخادم.");
         setIsSubmitting(false);
       }
-      */
     } catch (error) {
       console.error("Order submission error", error);
       alert("حدث خطأ غير متوقع.");

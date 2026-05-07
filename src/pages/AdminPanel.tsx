@@ -3,7 +3,7 @@ import { db } from "@/lib/firebase";
 import { useState } from "react";
 import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send } from "lucide-react";
+import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
 
@@ -18,6 +18,7 @@ export function AdminPanel() {
   const [posterLink, setPosterLink] = useState("");
   const [researchRecommendations, setResearchRecommendations] = useState("");
   const [isFulfilling, setIsFulfilling] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
   if (!currentUser || currentUser.role !== "admin") {
     return <Navigate to="/dashboard" />;
@@ -141,7 +142,7 @@ export function AdminPanel() {
             <tbody className="divide-y divide-brand-50">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-brand-50/50 transition">
-                  <td className="px-6 py-4 font-mono text-brand-600">{order.id}</td>
+                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.id.slice(0,6)}</td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-brand-900">{order.data.firstName} بن {order.data.fatherName}</p>
                     <p className="text-xs text-brand-600 mt-1">عائلة: {order.data.familyName} | {order.data.homeland}</p>
@@ -179,16 +180,7 @@ export function AdminPanel() {
                          <MessageSquare className="w-3 h-3" /> مراسلة
                        </button>
                        <button 
-                         onClick={async () => {
-                           if (window.confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) {
-                             try {
-                               const { deleteDoc, doc } = await import("firebase/firestore");
-                               const { db } = await import("@/lib/firebase");
-                               await deleteDoc(doc(db, "orders", order.id));
-                               useAppStore.setState(s => ({ orders: s.orders.filter(o => o.id !== order.id) }));
-                             } catch(e) { console.error(e); alert("خطأ في الحذف"); }
-                           }
-                         }}
+                         onClick={() => setOrderToDelete(order)}
                          className="flex-1 flex items-center justify-center gap-1 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
                        >
                          <X className="w-3 h-3" /> حذف
@@ -222,6 +214,45 @@ export function AdminPanel() {
         </div>
       </div>
 
+      {/* Delete Order Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 p-6 border-b-4 border-red-500">
+            <h2 className="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+              <AlertCircle className="w-6 h-6" />
+              تحذير خطير
+            </h2>
+            <p className="text-gray-700 leading-relaxed mb-6 font-medium">
+              سيتم حذف السجل رقم <span className="p-1 px-2 uppercase bg-gray-100 rounded text-brand-700 mx-1">#{orderToDelete.id.slice(0,6)}</span> وكافة مرفقاته ومكوناته. 
+              <br/><br/>
+              هل أنت متأكد من ذلك؟ هذا الإجراء <strong>لا يمكن التراجع عنه</strong>!
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={async () => {
+                   try {
+                     const { deleteDoc, doc } = await import("firebase/firestore");
+                     const { db } = await import("@/lib/firebase");
+                     await deleteDoc(doc(db, "orders", orderToDelete.id));
+                     useAppStore.setState(s => ({ orders: s.orders.filter(o => o.id !== orderToDelete.id) }));
+                     setOrderToDelete(null);
+                   } catch(e) { console.error(e); alert("خطأ في الحذف"); }
+                }}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-lg"
+              >
+                تأكيد حذف السجل
+              </button>
+              <button 
+                onClick={() => setOrderToDelete(null)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl transition"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* View Order Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -229,7 +260,7 @@ export function AdminPanel() {
             <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
                <h3 className="font-bold text-brand-900 flex items-center gap-2">
                  <FileText className="w-5 h-5 text-brand-600" />
-                 تفاصيل الطلب: {selectedOrder.id}
+                 تفاصيل الطلب: <span className="uppercase">#{selectedOrder.id.slice(0,6)}</span>
                </h3>
                <button onClick={() => setSelectedOrder(null)} className="text-brand-500 hover:text-brand-800 bg-white rounded-full p-1 shadow-sm">
                  <X className="w-5 h-5" />
@@ -248,18 +279,28 @@ export function AdminPanel() {
               </div>
 
               <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2">تفاصيل وبيانات العائلة</h4>
-              <div className="space-y-4">
-                 <div><strong className="text-brand-600">جد العائلة:</strong> {selectedOrder.data.grandfatherName}</div>
-                 <div><strong className="text-brand-600">اسم القبيلة/العائلة:</strong> {selectedOrder.data.tribeName || 'غير متوفر'}</div>
-                 <div><strong className="text-brand-600">الموطن أو المنشأ:</strong> {selectedOrder.data.country} - {selectedOrder.data.homeland}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="bg-white p-4 border border-brand-100 rounded-xl"><strong className="text-brand-600 block mb-1">اسم الجد الأول:</strong> {selectedOrder.data.grandfatherName}</div>
+                 <div className="bg-white p-4 border border-brand-100 rounded-xl"><strong className="text-brand-600 block mb-1">اسم القبيلة/العائلة:</strong> {selectedOrder.data.tribeName || 'غير متوفر'}</div>
+                 <div className="bg-white p-4 border border-brand-100 rounded-xl"><strong className="text-brand-600 block mb-1">الموطن أو المنشأ:</strong> {selectedOrder.data.country} - {selectedOrder.data.homeland}</div>
+                 <div className="bg-white p-4 border border-brand-100 rounded-xl"><strong className="text-brand-600 block mb-1">رقم هاتف العميل:</strong> <span dir="ltr">{selectedOrder.data.mobileNumber || 'غير متوفر'}</span></div>
+                 {selectedOrder.data.shippingAddress && (
+                   <div className="bg-white p-4 border border-brand-100 rounded-xl md:col-span-2">
+                     <strong className="text-brand-600 block mb-1">عنوان الشحن:</strong>
+                     {selectedOrder.data.shippingAddress.country}، {selectedOrder.data.shippingAddress.state}، {selectedOrder.data.shippingAddress.street} (الرمز البريدي: {selectedOrder.data.shippingAddress.zip})
+                   </div>
+                 )}
                  {selectedOrder.data.startingPoint && (
-                   <div><strong className="text-brand-600">نقطة الانطلاق لعمود النسب:</strong> <p className="mt-1 bg-brand-50 p-3 rounded border border-brand-200">{selectedOrder.data.startingPoint}</p></div>
+                   <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">نقطة الانطلاق لعمود النسب:</strong> <p className="mt-1 font-medium">{selectedOrder.data.startingPoint}</p></div>
                  )}
                  {selectedOrder.data.designTemplate && (
-                   <div><strong className="text-brand-600">القالب المختار:</strong> <p className="mt-1 bg-brand-50 p-3 rounded border border-brand-200">{selectedOrder.data.designTemplate}</p></div>
+                   <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">القالب المختار:</strong> <p className="mt-1 font-medium">{selectedOrder.data.designTemplate}</p></div>
+                 )}
+                 {selectedOrder.data.managerWord && (
+                   <div className="bg-white border border-brand-100 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">كلمة أمين السجل:</strong> <p className="mt-1 whitespace-pre-wrap">{selectedOrder.data.managerWord}</p></div>
                  )}
                  {selectedOrder.data.historicalNotes && (
-                   <div><strong className="text-brand-600">ملاحظات تاريخية (نبذة):</strong> <p className="mt-1 bg-gray-50 p-3 rounded border border-gray-200">{selectedOrder.data.historicalNotes}</p></div>
+                   <div className="bg-white border border-brand-100 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">ملاحظات تاريخية (نبذة عن العائلة):</strong> <p className="mt-1 whitespace-pre-wrap">{selectedOrder.data.historicalNotes}</p></div>
                  )}
               </div>
 
@@ -289,6 +330,18 @@ export function AdminPanel() {
                   </div>
                 </>
               )}
+               {selectedOrder.data.photos && selectedOrder.data.photos.length > 0 && (
+                <>
+                  <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">الصور الشخصية المرفقة</h4>
+                  <div className="grid grid-cols-2 flex-wrap gap-4 mb-4">
+                    {selectedOrder.data.photos.map((photoUrl, idx) => (
+                      <a key={idx} href={photoUrl} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border border-brand-200 hover:border-brand-500 transition shadow-sm">
+                        <img src={photoUrl} alt={`صورة ${idx+1}`} className="w-full h-40 object-cover bg-gray-100" loading="lazy" />
+                      </a>
+                    ))}
+                  </div>
+                </>
+               )}
             </div>
             <div className="p-4 border-t border-brand-100 bg-brand-50 flex justify-end gap-3">
                <button onClick={() => setSelectedOrder(null)} className="px-6 py-2 rounded-md font-bold bg-brand-600 text-white hover:bg-brand-700 transition">إغلاق</button>
