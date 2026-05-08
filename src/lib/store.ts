@@ -41,6 +41,15 @@ export interface Message {
   createdAt: string;
 }
 
+export interface MediaItem {
+  url: string;
+  title?: string;
+  kind?: string;
+  description?: string;
+  purpose?: string;
+  isCover?: boolean;
+}
+
 export interface FamilyData {
   firstName: string;
   fatherName: string;
@@ -54,8 +63,8 @@ export interface FamilyData {
   startingPointName?: string;
   startingPoint?: string; // keeping for backward compatibility
   designTemplate?: string;
-  documents: string[]; // URLs
-  photos: string[];
+  documents: (string | MediaItem)[];
+  photos: (string | MediaItem)[];
   historicalNotes: string;
   managerWord?: string;
   mobileNumber?: string;

@@ -158,7 +158,7 @@ export function AdminPanel() {
                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
                        className="border border-brand-200 rounded px-2 py-1 bg-white text-sm focus:ring-brand-500"
                      >
-                       <option value="راحل">راحل (تم الدفع المبدئي)</option>
+                       <option value="راحل">راحل (تم الدفع)</option>
                        <option value="قيد البحث">قيد البحث والمقارنة</option>
                        <option value="طلب إيضاح">طلب إيضاح / وثائق ناقصة</option>
                        <option value="تم الرد">تم الرد (من العميل)</option>

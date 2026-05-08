@@ -337,16 +337,16 @@ export function OrderFlow() {
                       onChange={(e) => setAgreedToService(e.target.checked)}
                     />
                   </div>
-                  <div className="text-sm text-brand-700 leading-relaxed">
-                    أقر أنا أمين السجل بصحة البيانات المقدمة أعلاه، وأوافق على بدء توثيق "سجل تراث العائلة" لعمود نسبنا بناءً على المعلومات المرفقة. كما أتعهد بالالتزام بشروط وأحكام الخدمة والسرية وقوانين الخصوصية الموضحة في وثيقة الخدمات. هذا التأكيد بمثابة موافقة إلكترونية.
-                    <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-100 text-center">
-                      <span className="text-brand-600 block mb-2">سيتم توقيع العقد قانونياً ورسمياً عبر منصة خارجية (eSignatures):</span>
-                      <a href="#" onClick={(e) => e.preventDefault()} className="inline-block bg-white border border-brand-300 text-brand-800 px-4 py-2 rounded shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 mx-auto max-w-xs">
-                        توقيع العقد الإلكتروني <ArrowLeft className="w-4 h-4" />
-                      </a>
-                    </div>
+                  <div className="text-sm text-brand-700 leading-relaxed font-semibold pt-0.5">
+                    أقر بمراجعتي وموافقتي على تقديم الخدمة ، وأفهم أن العقد يصبح نافذاً بعد إتمام الدفع .
                   </div>
                 </label>
+                <div className="mt-6 p-6 bg-brand-50 rounded-xl border border-brand-100 flex flex-col items-center text-center shadow-sm">
+                  <span className="text-brand-800 block mb-3 font-bold text-sm">يجب الإطلاع على تفاصيل التعاقد ووثيقة تقديم الخدمة قبل الإقرار</span>
+                  <a href="/legal" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
+                    الإطلاع على عقد الخدمة <ArrowLeft className="w-4 h-4" />
+                  </a>
+                </div>
               </div>
             </div>
           )}

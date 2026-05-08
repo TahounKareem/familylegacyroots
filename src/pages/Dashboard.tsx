@@ -5,7 +5,7 @@ import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package } from "lucide-react";
+import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
@@ -17,6 +17,7 @@ export function Dashboard() {
   const [correctionSection, setCorrectionSection] = useState("");
   const [correctionPage, setCorrectionPage] = useState("");
   const [correctionText, setCorrectionText] = useState("");
+  const [correctionError, setCorrectionError] = useState("");
   const [agreeToCorrectionTerms, setAgreeToCorrectionTerms] = useState(false);
   const [showCorrectionTerms, setShowCorrectionTerms] = useState(false);
   const location = useLocation();
@@ -81,6 +82,9 @@ export function Dashboard() {
     }
   };
 
+  const [pendingUpload, setPendingUpload] = useState<{file: File, arrayName: "documents"|"photos"} | null>(null);
+  const [mediaMeta, setMediaMeta] = useState({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
+
   const updateSpecificData = async (updates: Partial<FamilyData>) => {
     if (!order) return;
     const newData = { ...order.data, ...updates };
@@ -91,9 +95,15 @@ export function Dashboard() {
   };
 
   const uploadFileAndUpdate = (file: File, type: "documents" | "photos") => {
+    setPendingUpload({ file, arrayName: type });
+    setMediaMeta({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
+  };
+
+  const confirmUpload = () => {
+    if (!pendingUpload || !order) return;
     setIsUploading(true);
-    const storageRef = ref(storage, `${type}/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const storageRef = ref(storage, `${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, pendingUpload.file);
 
     uploadTask.on('state_changed', null, 
       (error) => {
@@ -103,24 +113,26 @@ export function Dashboard() {
       }, 
       async () => {
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        const currentArr = order?.data[type] || [];
-        await updateSpecificData({ [type]: [...currentArr, downloadURL] });
+        const currentArr = order.data[pendingUpload.arrayName] || [];
+        await updateSpecificData({ [pendingUpload.arrayName]: [...currentArr, { url: downloadURL, ...mediaMeta }] });
         setIsUploading(false);
+        setPendingUpload(null);
       }
     );
   };
 
   const handleSendCorrection = () => {
-    if (!order || !correctionText.trim() || !correctionSection || !correctionPage || !agreeToCorrectionTerms) return;
+    if (!order || !correctionText.trim() || !correctionError.trim() || !correctionSection || !correctionPage || !agreeToCorrectionTerms) return;
     const newMessage: Message = {
       id: Math.random().toString(36).substr(2, 9),
       senderId: currentUser.id,
       senderRole: "user",
-      text: `طلب تصويب - القسم: ${correctionSection}، صفحة: ${correctionPage}\n\nالتصويب المرجو:\n${correctionText}`,
+      text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
       createdAt: new Date().toISOString()
     };
     addMessageToOrder(order.id, newMessage, "رسالة جديدة");
     setCorrectionText("");
+    setCorrectionError("");
     setCorrectionPage("");
     setCorrectionSection("");
     setAgreeToCorrectionTerms(false);
@@ -158,7 +170,7 @@ export function Dashboard() {
     </div>
   );
 
-  const SidebarItem = ({ title, isActive, isLocked, info }: { title: string, isActive: boolean, isLocked?: boolean, info?: string }) => (
+  const SidebarItem = ({ title, isActive, isLocked, info, badge }: { title: string, isActive: boolean, isLocked?: boolean, info?: string, badge?: number }) => (
     <button 
       disabled={isLocked && title !== "حالة السجل"}
       onClick={() => setActiveTab(title)}
@@ -168,6 +180,9 @@ export function Dashboard() {
     >
       <div className="flex items-center">
         <span>{title}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">{badge}</span>
+        )}
         {info && (
           <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-20">
             <div className="w-4 h-4 rounded-full bg-brand-200 text-brand-600 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-300">i</div>
@@ -181,6 +196,16 @@ export function Dashboard() {
     </button>
   );
 
+  const totalAdminMessages = order?.messages?.filter(m => m.senderRole === "admin").length || 0;
+  const [readMessagesCount, setReadMessagesCount] = useState(0);
+  const unreadCount = Math.max(0, totalAdminMessages - readMessagesCount);
+
+  useEffect(() => {
+    if (activeTab === "رسائل فريق البحث") {
+      setReadMessagesCount(totalAdminMessages);
+    }
+  }, [activeTab, totalAdminMessages]);
+
   return (
     <div className="bg-brand-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -191,9 +216,10 @@ export function Dashboard() {
              <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="w-14 h-14 rounded-full bg-brand-100 border border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl hover:bg-brand-200 transition shrink-0 uppercase">
                {currentUser.name?.charAt(0) || "U"}
              </button>
-             <div className="text-center md:text-right">
-                <h1 className="text-2xl font-bold font-serif text-brand-900 mb-1">أهلاً بك، {currentUser.name}</h1>
+             <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
+                <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">أهلاً بك، {currentUser.name}</h1>
                 <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2"><Mail className="w-4 h-4" /> {currentUser.email}</p>
+                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: {order.id.slice(0,6).toUpperCase()}</span>}
              </div>
              
              {showProfileMenu && (
@@ -202,7 +228,6 @@ export function Dashboard() {
                  <div className="absolute top-16 right-0 md:right-1/2 md:translate-x-12 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
                    <button onClick={() => { setActiveTab("الملف الشخصي"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><User className="w-4 h-4 text-brand-500" /> الملف الشخصي</button>
                    <button onClick={() => { setActiveTab("إعدادات"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><Settings className="w-4 h-4 text-brand-500" /> إعدادات</button>
-                   <button onClick={() => { setActiveTab("عقد تسجيل الخدمة"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل الخدمة</button>
                    <div className="border-t border-brand-100 my-1"></div>
                    <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
                  </div>
@@ -254,7 +279,7 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">التواصل والتحديثات</h3>
                 <div className="space-y-1">
-                  <SidebarItem title="رسائل فريق البحث" isActive={activeTab === "رسائل فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." />
+                  <SidebarItem title="رسائل فريق البحث" isActive={activeTab === "رسائل فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={unreadCount} />
                 </div>
               </div>
 
@@ -270,7 +295,32 @@ export function Dashboard() {
               <div>
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">فتح الأبواب المغلقة</h3>
                 <div className="space-y-1">
-                   <SidebarItem title="بحث متقدم (فتح الأبواب المغلقة)" isActive={activeTab === "بحث متقدم (فتح الأبواب المغلقة)"} isLocked={!isPaid} info="هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ." />
+                   <SidebarItem title="فتح الأبواب المغلقة ( بحث متقدم )" isActive={activeTab === "فتح الأبواب المغلقة ( بحث متقدم )"} isLocked={!isPaid} info="هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ." />
+                </div>
+              </div>
+
+              {/* Social Media & Outer Links */}
+              <div className="mt-8 border-t border-brand-100 pt-6">
+                <Link to="/" className="w-full mb-3 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm">
+                  <Home className="w-5 h-5 text-brand-500" />
+                  الموقع الرسمي
+                </Link>
+                <button onClick={() => setActiveTab("حالة السجل")} className="w-full mb-6 bg-brand-900 text-white px-4 py-3 rounded-xl transition flex items-center justify-center gap-2 hover:bg-brand-800 font-semibold shadow-sm">
+                  <Compass className="w-5 h-5 text-brand-300" />
+                  العودة لحالة السجل
+                </button>
+                
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-3 text-center">تواصل معنا</h3>
+                <div className="flex justify-center gap-4">
+                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" /></svg>
+                  </a>
                 </div>
               </div>
 
@@ -289,9 +339,9 @@ export function Dashboard() {
                   <Link to="/order" className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block">بدء رحلة التوثيق</Link>
                 </div>
               ) : !isPaid ? (
-                <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
+                 <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
                   <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">تم حفظ بيانات الطلب مبدئياً</h2>
+                  <h2 className="text-2xl font-serif text-brand-900 mb-4">تم حفظ بيانات الطلب</h2>
                   <p className="text-brand-600 mb-8 max-w-sm mx-auto">لم يتم إتمام عملية الدفع حتى الآن. يرجى إتمام الدفع لفتح جميع خدمات وإدراجات لوحة التحكم كأمين سجل.</p>
                   <button onClick={handleResumePayment} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg">إتمام الدفع واعتماد الطلب (1999$)</button>
                 </div>
@@ -303,32 +353,53 @@ export function Dashboard() {
                   {activeTab === "حالة السجل" && (
                      <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-brand-200">
-                         {order.status === "مكتمل" ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-blue-500" />}
+                         {order.status === "مكتمل" ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-orange-500" />}
                          <div>
                            <h3 className="text-xl font-bold text-brand-900 mb-2">حالة السجل الحالية: <span className="text-brand-600">{order.status}</span></h3>
                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-brand-600 text-sm mt-1">
                              <span className="flex items-center gap-1"><CalendarCheck className="w-4 h-4" /> تاريخ الطلب: <strong className="font-bold">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</strong></span>
-                             <span className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded"><Clock className="w-4 h-4" /> التسليم المتوقع: <strong className="font-bold">{calculateDeliveryDate(order.createdAt)}</strong></span>
+                             {order.status === "مكتمل" ? (
+                               <span className="flex items-center gap-1 text-green-600 font-bold text-base"><CheckCircle className="w-5 h-5" /> تم التسليم بنجاح!</span>
+                             ) : (
+                               <span className="flex items-center gap-1 text-orange-600"><Clock className="w-4 h-4" /> التسليم المتوقع: <strong className="font-bold border-b border-orange-200 pb-0.5">{calculateDeliveryDate(order.createdAt)}</strong></span>
+                             )}
                            </div>
                          </div>
                        </div>
                        
-                       <p className="text-brand-900 font-bold mb-4">عزيزي أمين السجل / العميل</p>
-                       
-                       <ul className="space-y-4 text-brand-700 leading-relaxed text-lg">
-                         <li className="flex items-start gap-3">
-                           <BookOpen className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                           <span>يعمل فريق بحث سجل تراث العائلة على توثيق سجلك ، البحوث الجادة تأخذ وقتاً من اجل اعداد سجل نسبي موثوق .</span>
-                         </li>
-                         <li className="flex items-start gap-3">
-                           <MessageSquare className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                           <span>في حالة وجود استفسار لدى فريق البحث فسيتم التواصل معك من خلال المنصة وسوف يتم اشعاركم بالبريد الالكتروني حول ذلك .</span>
-                         </li>
-                         <li className="flex items-start gap-3">
-                           <CheckCircle className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                           <span>فريقنا في غاية الحماس كي يصدر سجل تراث عائلتكم في افضل جودة علمية واجمل اخراج وتصميم فني .</span>
-                         </li>
-                       </ul>
+                       {order.status === "مكتمل" ? (
+                         <div className="space-y-4">
+                           <h3 className="text-2xl font-bold text-brand-900 mb-4 tracking-tight">يسعدنا إتمام العمل!</h3>
+                           <p className="text-brand-700 leading-relaxed text-lg">
+                             لقد تم إصدار سجل تراث عائلتكم وهو الآن بين أيديكم. نأمل أن يكون هذا العمل على قدر تطلعاتكم وتوقعاتكم، وأن يكون مرجعاً يفخر به الأبناء والأحفاد.
+                           </p>
+                           <p className="text-brand-700 leading-relaxed text-lg">
+                             بإمكانكم الآن الاطلاع على سجلكم الرقمي، كما ندعوكم لقراءة <strong className="text-brand-900">توصيات واقتراحات فريق البحث</strong> بعناية للاستفادة القصوى من العمل، ويمكنكم تقديم طلبات التصويب وفقاً للشروط والأحكام خلال الفترة المحددة.
+                           </p>
+                           <p className="text-brand-700 leading-relaxed text-lg">
+                             وللتعمق أكثر في تاريخ عائلتكم، ندعوكم لاستكشاف خدمة <strong className="text-brand-900 text-xl border-b-2 border-brand-300 ml-1">فتح الأبواب المغلقة (بحث متقدم)</strong> للحصول على إصدارنا الثاني الحصري.
+                           </p>
+                         </div>
+                       ) : (
+                         <>
+                           <p className="text-brand-900 font-bold mb-4">عزيزي أمين السجل / العميل</p>
+                           
+                           <ul className="space-y-4 text-brand-700 leading-relaxed text-lg">
+                             <li className="flex items-start gap-3">
+                               <BookOpen className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
+                               <span>يعمل فريق بحث سجل تراث العائلة على توثيق سجلك ، البحوث الجادة تأخذ وقتاً من اجل اعداد سجل نسبي موثوق .</span>
+                             </li>
+                             <li className="flex items-start gap-3">
+                               <MessageSquare className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
+                               <span>في حالة وجود استفسار لدى فريق البحث فسيتم التواصل معك من خلال المنصة وسوف يتم اشعاركم بالبريد الالكتروني حول ذلك .</span>
+                             </li>
+                             <li className="flex items-start gap-3">
+                               <CheckCircle className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
+                               <span>فريقنا في غاية الحماس كي يصدر سجل تراث عائلتكم في افضل جودة علمية واجمل اخراج وتصميم فني .</span>
+                             </li>
+                           </ul>
+                         </>
+                       )}
 
                        <div className="mt-8 border-t border-brand-200 pt-6">
                          <h4 className="font-bold text-brand-900 mb-2">رقم الطلب:</h4>
@@ -345,6 +416,7 @@ export function Dashboard() {
                         <div><span className="block text-sm text-brand-500 mb-1">اسم الأب:</span> <strong>{order.data.fatherName}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">اسم الجد:</span> <strong>{order.data.grandfatherName}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">اللقب / العائلة:</span> <strong>{order.data.familyName}</strong></div>
+                        <div><span className="block text-sm text-brand-500 mb-1">القبيلة / العائلة:</span> <strong>{order.data.tribeName || 'غير متوفر'}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">الدولة:</span> <strong>{order.data.country}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">الموطن الأصلي:</span> <strong>{order.data.homeland}</strong></div>
                       </div>
@@ -443,7 +515,7 @@ export function Dashboard() {
                   {activeTab === "قالب التصميم المختار" && (
                     <div className="p-8 bg-white border-2 border-brand-100 rounded-2xl text-center">
                       <div className="text-4xl font-serif text-brand-900 mb-4">{order.data.designTemplate}</div>
-                      <p className="text-brand-600">سيتم تكييف النسخة الفاخرة المطبوعة والرقمية بناءً على الأسلوب {order.data.designTemplate}.</p>
+                      <p className="text-brand-600">سيتم تصميم نسخة أنيقة من سجلك بناءً على النموذج {order.data.designTemplate}.</p>
                     </div>
                   )}
 
@@ -489,7 +561,7 @@ export function Dashboard() {
 
                   {activeTab === "إدراج مشجر الأحياء" && (
                     <div className="space-y-4">
-                      <p className="text-brand-600 mb-4">أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك المباشر في هذا المخطط المبدئي).</p>
+                      <p className="text-brand-600 mb-4">أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك المباشر في هذا المخطط).</p>
                       <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
                         <TreeBuilder 
                           initialNodes={order.data.treeData?.nodes || []} 
@@ -503,33 +575,129 @@ export function Dashboard() {
 
                   {activeTab === "إدراج وثائق" && (
                     <div className="space-y-6">
-                      <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center hover:bg-brand-50 cursor-pointer">
-                         <input type="file" className="hidden" ref={fileInputRef} onChange={(e) => e.target.files && uploadFileAndUpdate(e.target.files[0], "documents")} accept=".pdf,.doc,.docx" />
-                         {isUploading ? <p>جاري الرفع...</p> : <><UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" /><p className="text-brand-800">انقر هنا لرفع الوثائق التاريخية (PDF, Word)</p></>}
-                      </div>
+                      {pendingUpload?.arrayName === "documents" ? (
+                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
+                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2"><FileText className="w-5 h-5 text-brand-500"/> تفاصيل الوثيقة: <span className="text-brand-600 font-normal">{pendingUpload.file.name}</span></h4>
+                           <div className="space-y-4">
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">عنوان الوثيقة (إختياري)</label>
+                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.title} onChange={e => setMediaMeta({...mediaMeta, title: e.target.value})} placeholder="مثال: وثيقة زواج جدي" />
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">النوع (إختياري)</label>
+                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.kind} onChange={e => setMediaMeta({...mediaMeta, kind: e.target.value})} placeholder="صك محكمة، شهادة ميلاد..." />
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">الوصف (إختياري)</label>
+                               <textarea className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" rows={3} value={mediaMeta.description} onChange={e => setMediaMeta({...mediaMeta, description: e.target.value})} placeholder="أي تفاصيل تود توضيحها حول هذه الوثيقة..."></textarea>
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">الغرض من الإدراج</label>
+                               <select className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white" value={mediaMeta.purpose} onChange={e => setMediaMeta({...mediaMeta, purpose: e.target.value})}>
+                                 <option value="إضافة لسجل تراث العائلة">إضافة لسجل تراث العائلة الرئيسي</option>
+                                 <option value="مشاركة للغرض البحثي فقط">مشاركة مع فريق البحث للغرض البحثي فقط</option>
+                                 <option value="غلاف للسجل">استخدام كغلاف لسجل تراث العائلة</option>
+                               </select>
+                             </div>
+                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
+                               <button disabled={isUploading} onClick={confirmUpload} className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2">
+                                 {isUploading ? <><UploadCloud className="w-5 h-5 animate-pulse" /> جاري الرفع...</> : 'حفظ ورفع الوثيقة'}
+                               </button>
+                               <button disabled={isUploading} onClick={() => setPendingUpload(null)} className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition">إلغاء</button>
+                             </div>
+                           </div>
+                         </div>
+                      ) : (
+                        <div onClick={() => !isUploading && fileInputRef.current?.click()} className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-50 cursor-pointer'}`}>
+                           <input type="file" className="hidden" ref={fileInputRef} onChange={(e) => { if(e.target.files && e.target.files[0]) { uploadFileAndUpdate(e.target.files[0], "documents"); e.target.value = ''; } }} accept=".pdf,.doc,.docx" disabled={isUploading} />
+                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
+                           <p className="text-brand-800 font-bold mb-2">انقر هنا لرفع وثيقة تاريخية جديدة</p>
+                           <p className="text-sm text-brand-600">(الرفع لمرفق واحد في كل مرة)</p>
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {order.data.documents?.map((url, i) => (
-                           <a key={i} href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 bg-brand-50 rounded-xl border border-brand-100 hover:border-brand-300">
-                             <FileText className="w-6 h-6 text-brand-500" />
-                             <span className="truncate flex-1 text-sm text-brand-800" dir="ltr">{url.split('%2F').pop()?.split('?')[0]}</span>
-                           </a>
-                        ))}
+                        {order.data.documents?.map((docItem, i) => {
+                           const isStr = typeof docItem === 'string';
+                           const url = isStr ? docItem : docItem.url;
+                           const title = isStr ? url.split('%2F').pop()?.split('?')[0] || 'وثيقة' : (docItem.title || url.split('%2F').pop()?.split('?')[0] || 'وثيقة');
+                           return (
+                             <a key={i} href={url} target="_blank" rel="noreferrer" className="flex flex-col gap-2 p-4 bg-white rounded-xl border border-brand-200 hover:border-brand-400 hover:shadow-md transition group relative overflow-hidden">
+                               <div className="absolute top-0 right-0 w-1 h-full bg-brand-400 group-hover:bg-brand-500 transition-colors"></div>
+                               <div className="flex items-start gap-3">
+                                 <FileText className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                                 <div>
+                                   <h4 className="font-bold text-brand-900 line-clamp-1" dir="auto">{title}</h4>
+                                   {!isStr && <p className="text-xs text-brand-600 mt-1 font-mono">{docItem.purpose} {docItem.kind ? ` • ${docItem.kind}` : ''}</p>}
+                                 </div>
+                               </div>
+                               {!isStr && docItem.description && <p className="text-xs text-brand-500 mt-2 line-clamp-2 pr-8">{docItem.description}</p>}
+                             </a>
+                           );
+                        })}
                       </div>
                     </div>
                   )}
 
                   {activeTab === "إدراج صور" && (
                     <div className="space-y-6">
-                      <div onClick={() => photosInputRef.current?.click()} className="border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center hover:bg-brand-50 cursor-pointer">
-                         <input type="file" className="hidden" ref={photosInputRef} onChange={(e) => e.target.files && uploadFileAndUpdate(e.target.files[0], "photos")} accept="image/jpeg,image/png,image/jpg" />
-                         {isUploading ? <p>جاري الرفع...</p> : <><UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" /><p className="text-brand-800">انقر هنا لرفع الصور العائلية الموثقة (JPEG, JPG, PNG)</p></>}
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {order.data.photos?.map((url, i) => (
-                           <a key={i} href={url} target="_blank" rel="noreferrer" className="aspect-square bg-white rounded-xl overflow-hidden border border-brand-200 hover:border-brand-400 hover:shadow-md transition block relative group">
-                             <img src={url} alt={`Photo ${i}`} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<div class="flex items-center justify-center h-full text-xs text-gray-400 p-2 text-center">لا يمكن عرض الصورة هنا، انقر للعرض</div>'; }} />
-                           </a>
-                        ))}
+                      {pendingUpload?.arrayName === "photos" ? (
+                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
+                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-brand-500"/> تفاصيل الصورة: <span className="text-brand-600 font-normal">{pendingUpload.file.name}</span></h4>
+                           <div className="space-y-4">
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">عنوان الصورة (إختياري)</label>
+                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.title} onChange={e => setMediaMeta({...mediaMeta, title: e.target.value})} placeholder="مثال: صورة للعائلة في قرية..." />
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">النوع (إختياري)</label>
+                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.kind} onChange={e => setMediaMeta({...mediaMeta, kind: e.target.value})} placeholder="صورة شخصية، صورة جماعية، معلم أثري..." />
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">الوصف (إختياري)</label>
+                               <textarea className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" rows={3} value={mediaMeta.description} onChange={e => setMediaMeta({...mediaMeta, description: e.target.value})} placeholder="أي تفاصيل تود توضيحها حول هذه الصورة..."></textarea>
+                             </div>
+                             <div>
+                               <label className="block text-sm font-semibold text-brand-700 mb-1">الغرض من الإدراج</label>
+                               <select className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white" value={mediaMeta.purpose} onChange={e => setMediaMeta({...mediaMeta, purpose: e.target.value})}>
+                                 <option value="إضافة لسجل تراث العائلة">إضافة لسجل تراث العائلة الرئيسي</option>
+                                 <option value="مشاركة للغرض البحثي فقط">مشاركة مع فريق البحث للغرض البحثي فقط</option>
+                                 <option value="غلاف للسجل">استخدام الصورة كغلاف لسجل تراث العائلة</option>
+                               </select>
+                             </div>
+                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
+                               <button disabled={isUploading} onClick={confirmUpload} className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2">
+                                 {isUploading ? <><UploadCloud className="w-5 h-5 animate-pulse" /> جاري الرفع...</> : 'حفظ ورفع الصورة'}
+                               </button>
+                               <button disabled={isUploading} onClick={() => setPendingUpload(null)} className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition">إلغاء</button>
+                             </div>
+                           </div>
+                         </div>
+                      ) : (
+                        <div onClick={() => !isUploading && photosInputRef.current?.click()} className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-50 cursor-pointer'}`}>
+                           <input type="file" className="hidden" ref={photosInputRef} onChange={(e) => { if(e.target.files && e.target.files[0]) { uploadFileAndUpdate(e.target.files[0], "photos"); e.target.value = ''; } }} accept="image/jpeg,image/png,image/jpg" disabled={isUploading} />
+                           <ImageIcon className="w-12 h-12 text-brand-400 mx-auto mb-4" />
+                           <p className="text-brand-800 font-bold mb-2">انقر هنا لرفع صورة عائلية موثقة</p>
+                           <p className="text-sm text-brand-600">(الرفع لمرفق واحد في كل مرة)</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {order.data.photos?.map((photoItem, i) => {
+                           const isStr = typeof photoItem === 'string';
+                           const url = isStr ? photoItem : photoItem.url;
+                           const title = !isStr && photoItem.title ? photoItem.title : '';
+                           return (
+                             <a key={i} href={url} target="_blank" rel="noreferrer" className="aspect-[4/5] bg-white rounded-xl overflow-hidden border border-brand-200 hover:border-brand-400 hover:shadow-md transition block relative group">
+                               <img src={url} alt={`Photo ${i}`} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<div class="flex items-center justify-center h-full text-xs text-brand-400 p-2 text-center">لا يمكن عرض الصورة هنا، انقر للعرض</div>'; }} />
+                               {!isStr && (photoItem.title || photoItem.purpose) && (
+                                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform">
+                                   <p className="text-xs font-bold line-clamp-1">{photoItem.title || "صورة عائلية"}</p>
+                                   <p className="text-[10px] opacity-80 mt-0.5 line-clamp-1">{photoItem.purpose}</p>
+                                 </div>
+                               )}
+                             </a>
+                           );
+                        })}
                       </div>
                     </div>
                   )}
@@ -597,7 +765,7 @@ export function Dashboard() {
                       {!order.digitalCopyLink ? (
                         <>
                           <Sparkles className="w-16 h-16 text-brand-400 mx-auto mb-6 animate-pulse" />
-                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">ستحظى قريباً بتجربة تصفح استثنائية!</h3>
+                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">قريباً سيكون سجل تراث عائلتك بين يديك!</h3>
                           <p className="text-brand-700 max-w-md mx-auto text-lg">سيظهر لك هنا رابط تحميل <strong className="text-brand-900">سجل تراث عائلتك الرقمي</strong> فور اعتماده وإصداره.</p>
                         </>
                       ) : (
@@ -627,7 +795,7 @@ export function Dashboard() {
                       {!order.posterLink ? (
                         <>
                           <Star className="w-16 h-16 text-brand-400 mx-auto mb-6 animate-pulse" />
-                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">تحفة فنية توثق جذور عائلتك!</h3>
+                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">لوحة فنية توثق جذور عائلتك!</h3>
                           <p className="text-brand-700 max-w-md mx-auto text-lg">سيظهر لك هنا رابط تحميل <strong className="text-brand-900">بوستر مشجر عمود نسبكم</strong> بصيغة رقمية أصلية عند الإصدار.</p>
                         </>
                       ) : (
@@ -664,7 +832,7 @@ export function Dashboard() {
                           {order.researchRecommendations && (
                             <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-6 md:p-8 mb-10 shadow-sm">
                               <h3 className="text-xl md:text-2xl font-bold text-brand-900 mb-4 leading-tight flex items-center gap-3">
-                                <Star className="w-6 h-6 text-brand-500 fill-brand-500" /> مساحة خاصة بتوصيات واقتراحات فريق البحث
+                                <Star className="w-6 h-6 text-brand-500 fill-brand-500" /> توصيات واقتراحات فريق البحث
                               </h3>
                               <div className="text-brand-800 text-lg leading-relaxed text-right whitespace-pre-line bg-white p-6 rounded-xl border border-brand-100 shadow-inner">
                                 {order.researchRecommendations}
@@ -680,27 +848,37 @@ export function Dashboard() {
                             <div className="space-y-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                  <label className="block text-sm font-bold text-brand-700 mb-1">القسم / الباب</label>
-                                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 bg-white" placeholder="مثال: الباب الأول - تسلسل الأجداد" value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
+                                  <label className="block text-sm font-bold text-brand-700 mb-1">القسم / الباب الذي يوجد به الخطأ</label>
+                                  <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر או اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
+                                  <datalist id="sections">
+                                    <option value="الباب الأول: التسلسل النسبي" />
+                                    <option value="الباب الثاني: الوثائق" />
+                                    <option value="الباب الثالث: الصور" />
+                                    <option value="مقدمة السجل" />
+                                  </datalist>
                                 </div>
                                 <div>
                                   <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة</label>
-                                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 bg-white" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
+                                  <input type="text" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">التصويب المطلوب</label>
-                                <textarea className="w-full border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px]" placeholder="اكتب التصويب بالتفصيل..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة حرة لكتابة ما تعتقد أنه يحتاج لتصويب (الخطأ المزعوم)</label>
+                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها خاطئة..." value={correctionError} onChange={(e) => setCorrectionError?.(e.target.value)}></textarea>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">التصويب المقترح (مع إمكانية إضافة مصادر)</label>
+                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك التي تعتمد عليها..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
                               </div>
                               
                               <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
                                 <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
                                 <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
-                                  أقر بأنني قمت بمراجعة السجل بالكامل، وأن هذه التصويبات مستندة إلى مصادر صحيحة وموثوقة، وأوافق على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>الشروط والأحكام</button> الخاصة بالتعديلات.
+                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر.
                                 </label>
                               </div>
 
-                              <button onClick={handleSendCorrection} disabled={!correctionSection || !correctionPage || !correctionText || !agreeToCorrectionTerms} className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2">
+                              <button onClick={handleSendCorrection} disabled={!correctionSection || !correctionPage || !correctionText || !correctionError || !agreeToCorrectionTerms} className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm">
                                 <Send className="w-5 h-5" /> إرسال طلب التصويب
                               </button>
                             </div>
@@ -893,43 +1071,6 @@ export function Dashboard() {
                             </div>
                          </div>
                        </div>
-                    </div>
-                  )}
-
-                  {activeTab === "عقد تسجيل الخدمة" && (
-                    <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
-                       <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><FileText className="w-8 h-8 text-brand-600" /> عقد تسجيل الخدمة</h3>
-                       {!order ? (
-                         <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 flex items-center gap-4">
-                            <AlertCircle className="w-10 h-10 text-orange-500" />
-                            <div>
-                              <h4 className="font-bold text-orange-800 text-lg">لم تقم بالتوقيع على العقد بعد</h4>
-                              <p className="text-sm text-orange-700">لم يتم العثور على سجل مرتبط بحسابك.</p>
-                            </div>
-                         </div>
-                       ) : (
-                         <div className="space-y-6">
-                           <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex items-center gap-4 shadow-sm">
-                              <CheckCircle className="w-10 h-10 text-green-500" />
-                              <div>
-                                <h4 className="font-bold text-green-800 text-lg">تم توقيع العقد بنجاح</h4>
-                                <p className="text-sm text-green-700 font-mono mt-1" dir="ltr">{new Date(order.createdAt).toLocaleString('ar-SA')}</p>
-                              </div>
-                           </div>
-                           
-                           <div className="bg-white p-8 rounded-2xl border border-brand-200 shadow-inner">
-                             <h4 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-4 mb-6">نص التعاقد / الإقرار</h4>
-                             <p className="text-brand-800 leading-relaxed text-lg whitespace-pre-line">
-                               أقر أنا أمين السجل بصحة البيانات المقدمة، وأوافق على بدء توثيق "سجل تراث العائلة" لعمود نسبنا بناءً على المعلومات المرفقة.
-                               
-                               كما أتعهد بالالتزام بشروط وأحكام الخدمة والسرية وقوانين الخصوصية الموضحة في وثيقة الخدمات. هذا التأكيد بمثابة موافقة إلكترونية ملزمة.
-                               
-                               اسم أمين السجل: {order.data.firstName} بن {order.data.fatherName} {order.data.familyName}
-                               تاريخ الموافقة: {new Date(order.createdAt).toLocaleDateString('ar-SA')}
-                             </p>
-                           </div>
-                         </div>
-                       )}
                     </div>
                   )}
 
