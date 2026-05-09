@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
-import { Check, ArrowRight, ArrowLeft, UserPlus } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, UserPlus, X } from "lucide-react";
 import { useAppStore, FamilyData } from "@/lib/store";
 
 export function OrderFlow() {
@@ -347,7 +347,15 @@ export function OrderFlow() {
 
                 <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-2 mt-4 pt-4">المسار والمخرجات</h3>
                 <div className="grid grid-cols-1 gap-y-4 gap-x-2 text-sm pt-2">
-                  <div><span className="text-brand-600">نقطة البدء:</span> <strong className="text-brand-900">{formData.startingPoint || "-"}</strong></div>
+                  <div>
+                    <span className="text-brand-600">نقطة البدء:</span> 
+                    <strong className="text-brand-900">
+                      {formData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${formData.firstName} بن ${formData.fatherName})` :
+                       formData.startingPointType === "اسم العائلة" ? `اسم العائلة (${formData.familyName})` :
+                       formData.startingPointType === "احد الأسلاف" ? `${formData.startingPointAncestor || "احد الأسلاف"} (${formData.startingPointName})` :
+                       formData.startingPoint || "-"}
+                    </strong>
+                  </div>
                   <div><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{formData.designTemplate}</strong></div>
                   <div className="mt-4 border-t border-brand-100 pt-4">
                     <span className="text-brand-600 block mb-2 font-bold text-base">الباقة</span>
@@ -356,13 +364,18 @@ export function OrderFlow() {
                       <li>نسخة رقمية "الكترونية"</li>
                       <li>عدد 10 نسخ ورقية مطبوعة</li>
                       <li>بوستر مشجر عمود النسب الشامل</li>
-                      <li>حافظة أنيقة لبوستر مشجر عمود النسب</li>
                     </ul>
                   </div>
                 </div>
               </div>
 
               <div className="bg-white border-2 border-brand-100 p-6 rounded-2xl">
+                <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-100 flex flex-col items-center text-center shadow-sm">
+                  <span className="text-brand-800 block mb-3 font-bold text-sm">يجب الإطلاع على تفاصيل التعاقد ووثيقة تقديم الخدمة قبل الإقرار</span>
+                  <a href="/legal" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
+                    الإطلاع على عقد الخدمة <ArrowLeft className="w-4 h-4" />
+                  </a>
+                </div>
                 <label className="flex items-start gap-4 cursor-pointer">
                   <div className="pt-1">
                     <input 
@@ -376,12 +389,6 @@ export function OrderFlow() {
                     أقر بمراجعتي وموافقتي على تقديم الخدمة ، وأفهم أن العقد يصبح نافذاً بعد إتمام الدفع .
                   </div>
                 </label>
-                <div className="mt-6 p-6 bg-brand-50 rounded-xl border border-brand-100 flex flex-col items-center text-center shadow-sm">
-                  <span className="text-brand-800 block mb-3 font-bold text-sm">يجب الإطلاع على تفاصيل التعاقد ووثيقة تقديم الخدمة قبل الإقرار</span>
-                  <a href="/legal" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
-                    الإطلاع على عقد الخدمة <ArrowLeft className="w-4 h-4" />
-                  </a>
-                </div>
               </div>
             </div>
           )}
@@ -393,8 +400,8 @@ export function OrderFlow() {
                   <button onClick={() => setShowInviteModal(false)} className="absolute top-4 left-4 text-gray-400 hover:text-gray-600">
                     <X className="w-5 h-5" />
                   </button>
-                  <h3 className="text-2xl font-bold text-brand-900 mb-2">كود موجه وتسويقي</h3>
-                  <p className="text-brand-600 mb-6 text-sm">أدخل الكود التسويقي الخاص بك للمتابعة</p>
+                  <h3 className="text-2xl font-bold text-brand-900 mb-2">كود دعوة</h3>
+                  <p className="text-brand-600 mb-6 text-sm">أدخل كود الدعوة الخاص بك للمتابعة</p>
                   
                   <input 
                     type="text" 
@@ -433,9 +440,10 @@ export function OrderFlow() {
                   
                   <button 
                     onClick={() => setShowInviteModal(true)}
-                    className="text-brand-600 hover:text-brand-800 underline font-medium mt-4 mx-auto inline-block text-sm"
+                    className="flex justify-center items-center gap-2 bg-white text-brand-600 hover:bg-brand-50 border border-brand-200 hover:border-brand-300 font-bold px-6 py-2 rounded-full mx-auto shadow-sm transition"
                   >
-                    لديك كود موجه وتسويقي؟
+                    <UserPlus className="w-4 h-4" />
+                    لدي كود دعوة
                   </button>
                 </>
               )}

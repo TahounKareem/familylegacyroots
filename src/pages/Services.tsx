@@ -278,7 +278,6 @@ export function Services() {
                             <li>نسخة رقمية "الكترونية"</li>
                             <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق .</li>
                             <li>بوستر مشجر عمود النسب الشامل .</li>
-                            <li>حافظة أنيقة لبوستر مشجر عمود النسب .</li>
                           </ul>
                         </div>
                       </li>
@@ -382,7 +381,7 @@ export function Services() {
                 <div className="relative z-10">
                   <h3 className="text-3xl font-serif font-bold mb-4">باقة السجل الأساسي</h3>
                   <div className="text-5xl font-bold text-brand-400 mb-4 font-mono">$1999</div>
-                  <p className="text-brand-200 text-lg mb-8 max-w-lg mx-auto">للقيمة الأساسية للإصدار الرقمي، يقدم حالياً متضمناً طباعة 10 نسخ ورقية أنيقة + بوستر مشجر عمود النسب مع حافظة أنيقة.</p>
+                  <p className="text-brand-200 text-lg mb-8 max-w-lg mx-auto">للقيمة الأساسية للإصدار الرقمي، يقدم حالياً متضمناً طباعة 10 نسخ ورقية أنيقة + بوستر مشجر عمود النسب.</p>
                   
                   <div className="bg-brand-900/50 rounded-2xl p-6 border border-brand-800 text-right max-w-xl mx-auto mb-10">
                     <h4 className="font-bold text-xl mb-4 font-serif text-brand-300 border-b border-brand-800 pb-3">في "سجل تراث العائلة" تحصل على:</h4>
@@ -390,7 +389,7 @@ export function Services() {
                       <li>✓ بحث علمي وتاريخي</li>
                       <li>✓ توثيق خط نسب محدد "عمود النسب"</li>
                       <li>✓ توثيق المصادر والمراجع للعقد النسبية والسير الذاتية</li>
-                      <li>✓ بوستر مشجر عمود النسب مع حافظة أنيقة</li>
+                      <li>✓ بوستر مشجر عمود النسب</li>
                       <li>✓ تصدر في نسخة رقمية وورقية أنيقة</li>
                       <li>✓ مدة الإنجاز والتسليم: خلال 90 يوماً</li>
                       <li className="text-brand-400 text-sm font-light mt-4">- تنطبق الشروط والأحكام على الخدمة.</li>

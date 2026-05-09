@@ -44,7 +44,7 @@ export function Navbar() {
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={logout} className="text-brand-800 hover:text-red-600 font-medium transition">
+                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-brand-800 hover:text-red-600 font-medium transition">
                   تسجيل الخروج
                 </button>
               </div>
@@ -80,7 +80,7 @@ export function Navbar() {
           {currentUser ? (
             <>
               <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
-              <button onClick={() => { logout(); setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-medium">تسجيل الخروج</button>
+              <button onClick={() => { logout(); window.location.href = '/auth'; setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-medium">تسجيل الخروج</button>
             </>
           ) : (
             <Link to="/auth" className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>

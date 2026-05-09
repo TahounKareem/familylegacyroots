@@ -163,9 +163,9 @@ export function Dashboard() {
   };
 
   const InfoTooltip = ({ text }: { text: string }) => (
-    <div className="relative group inline-flex items-center justify-center mr-2 z-10 align-middle">
+    <div className="relative group inline-flex items-center justify-center mr-2 z-50 align-middle">
       <div className="w-5 h-5 rounded-full bg-brand-200 text-brand-700 font-bold text-xs flex items-center justify-center cursor-help">i</div>
-      <div className="absolute bottom-full right-full translate-x-2 -translate-y-2 w-64 bg-gray-900 text-white text-xs rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none">
+      <div className="absolute bottom-full right-1/2 translate-x-1/2 mb-2 w-64 bg-brand-50 border border-brand-200 text-brand-800 text-xs rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
         {text}
       </div>
     </div>
@@ -185,9 +185,9 @@ export function Dashboard() {
           <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">{badge}</span>
         )}
         {info && (
-          <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-20">
+          <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
             <div className="w-4 h-4 rounded-full bg-brand-200 text-brand-600 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-300">i</div>
-            <div className="absolute top-full mt-2 right-0 w-60 bg-gray-900 text-white font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none">
+            <div className="absolute bottom-full mb-2 right-0 w-60 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
               {info}
             </div>
           </div>
@@ -229,7 +229,7 @@ export function Dashboard() {
                    <button onClick={() => { setActiveTab("إعدادات"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><Settings className="w-4 h-4 text-brand-500" /> إعدادات</button>
                    <button onClick={() => { setActiveTab("عقد تسجيل الخدمة"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل الخدمة</button>
                    <div className="border-t border-brand-100 my-1"></div>
-                   <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); navigate('/'); }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
+                   <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); window.location.href = '/auth'; }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
                  </div>
                </>
              )}
@@ -261,9 +261,9 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4 flex items-center">
                   بيانات "الإدراج الإختياري"
-                  <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-20">
+                  <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
                     <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help">i</div>
-                    <div className="absolute top-full mt-2 right-0 w-64 bg-gray-900 text-white font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none normal-case">
+                    <div className="absolute bottom-full mb-2 right-0 w-64 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none normal-case z-50">
                       هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) – عند رغبته – ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم (بين يدي السجل ) من أجل جعل السجل أكثر خصوصية للعائلة والذي قد يشمل على سبيل المثال مايلي: ( كلمة لأمين السجل / العميل - نبذة تاريخية عن العائلة - مشجر الأحياء من العائلة والأسلاف ضمن عمود النسب ).
                     </div>
                   </div>
@@ -787,7 +787,7 @@ export function Dashboard() {
                             </div>
                             <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
                               <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، بوستر مشجرة العائلة، وحافظة مميزة لحفظ الوثائق.</p>
+                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.</p>
                             </div>
                           </div>
                         </div>
@@ -817,7 +817,7 @@ export function Dashboard() {
                             </div>
                             <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
                               <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، بوستر مشجرة العائلة، وحافظة مميزة لحفظ الوثائق.</p>
+                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.</p>
                             </div>
                           </div>
                         </div>
