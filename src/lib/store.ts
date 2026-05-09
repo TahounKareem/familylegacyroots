@@ -80,8 +80,9 @@ export interface FamilyData {
 
 export interface Order {
   id: string;
+  orderNumber?: string;
   userId: string;
-  plan: "standard" | "express";
+  plan: "standard" | "express" | "invite" | "paid";
   printRequested: boolean;
   totalAmount: number;
   status: OrderStatus;

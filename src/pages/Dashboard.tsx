@@ -45,7 +45,7 @@ export function Dashboard() {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(({ sendOrderConfirmationEmail }) => {
-                sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", orderId, isInvite);
+                sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || orderId, isInvite);
               });
             }
           });
@@ -218,7 +218,7 @@ export function Dashboard() {
              <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
                 <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">أهلاً بك، {currentUser.name}</h1>
                 <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2"><Mail className="w-4 h-4" /> {currentUser.email}</p>
-                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: #{order.id.toUpperCase()}</span>}
+                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: #{order.orderNumber || order.id.toUpperCase()}</span>}
              </div>
              
              {showProfileMenu && (
@@ -305,9 +305,9 @@ export function Dashboard() {
                   <Compass className="w-5 h-5 text-brand-300" />
                   العودة للصفحة الرئيسية
                 </button>
-                <Link to="/" className="w-full mb-6 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm">
-                  <Home className="w-5 h-5 text-brand-500" />
-                  الذهاب الى موقع سجل تراث العائلة
+                <Link to="/" className="w-full mb-6 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm text-sm">
+                  <Home className="w-5 h-5 text-brand-500 shrink-0" />
+                  <span className="truncate">العودة لموقع سجل تراث العائلة</span>
                 </Link>
                 
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-3 text-center">تواصل معنا</h3>
@@ -409,7 +409,7 @@ export function Dashboard() {
 
                        <div className="mt-8 border-t border-brand-200 pt-6">
                          <h4 className="font-bold text-brand-900 mb-2">رقم الطلب:</h4>
-                         <p className="font-mono text-xl text-brand-600 bg-white inline-block px-4 py-2 border border-brand-200 rounded-lg">#{order.id.toUpperCase()}</p>
+                         <p className="font-mono text-xl text-brand-600 bg-white inline-block px-4 py-2 border border-brand-200 rounded-lg">#{order.orderNumber || order.id.toUpperCase()}</p>
                        </div>
                      </div>
                   )}
@@ -854,8 +854,8 @@ export function Dashboard() {
                             <div className="space-y-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                  <label className="block text-sm font-bold text-brand-700 mb-1">القسم / الباب الذي يوجد به الخطأ</label>
-                                  <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر או اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
+                                  <label className="block text-sm font-bold text-brand-700 mb-1">أي قسم في سجل تراث العائلة يحتاج لهذا التصويب؟</label>
+                                  <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر أو اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
                                   <datalist id="sections">
                                     <option value="الباب الأول: التسلسل النسبي" />
                                     <option value="الباب الثاني: الوثائق" />
@@ -864,23 +864,23 @@ export function Dashboard() {
                                   </datalist>
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة</label>
+                                  <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة في سجل تراث العائلة التي تحتاج لهذا التصويب</label>
                                   <input type="text" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة حرة لكتابة ما تعتقد أنه يحتاج لتصويب (الخطأ المزعوم)</label>
-                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها خاطئة..." value={correctionError} onChange={(e) => setCorrectionError?.(e.target.value)}></textarea>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة حرة لتحديد مايراه يستحق التصويب</label>
+                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..." value={correctionError} onChange={(e) => setCorrectionError(e.target.value)}></textarea>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">التصويب المقترح (مع إمكانية إضافة مصادر)</label>
-                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك التي تعتمد عليها..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">كتابة التصويب مع توضيح مرجعيته أو مصادره لهذا التصويب إن وجد</label>
+                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
                               </div>
                               
                               <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
                                 <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
                                 <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
-                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأوافق على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>الشروط والأحكام</button> الخاصة بالتعديلات.
+                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأقر بالموافقة على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>تطبيق الشروط والأحكام</button> الخاصة بالتعديلات.
                                 </label>
                               </div>
 
@@ -941,7 +941,7 @@ export function Dashboard() {
                         ) : (
                           <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-8 mb-8 shadow-sm">
                             <h3 className="text-2xl md:text-3xl font-bold text-brand-900 mb-4 leading-tight flex justify-center items-center gap-3">
-                              <Star className="w-8 h-8 text-brand-500 fill-brand-500" /> مساحة خاصة بتوصيات واقتراحات فريق البحث
+                              <Star className="w-8 h-8 text-brand-500 fill-brand-500" /> توصيات واقتراحات فريق البحث
                             </h3>
                             <div className="text-brand-800 text-lg leading-relaxed text-right whitespace-pre-line bg-white p-6 rounded-xl border border-brand-100 shadow-inner">
                               {order.researchRecommendations}

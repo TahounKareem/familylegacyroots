@@ -52,19 +52,21 @@ export function OrderFlow() {
       if (!currentUser) return;
       
       const orderId = currentUser.id;
+      const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();
       await placeOrder({
         id: orderId,
+        orderNumber,
         userId: currentUser.id,
         createdAt: new Date().toISOString(),
-        plan: "standard",
+        plan: "invite",
         printRequested: false,
-        status: "بانتظار الدفع", // It's immediately upgraded to "قيد البحث" by Dashboard.tsx using ?success=true
+        status: "بانتظار الدفع",
         totalAmount: 0,
         data: formData,
       });
 
       // Navigate to success page mimicking Stripe
-      window.location.href = `/?success=true&order_id=${orderId}&invite=true`;
+      window.location.href = `/dashboard?success=true&order_id=${orderId}&invite=true`;
     } catch (e) {
       console.error(e);
       alert("حدث خطأ");
@@ -82,11 +84,13 @@ export function OrderFlow() {
       }
       
       const orderId = currentUser.id; // Using User ID as Order ID ensures 1 order per user
+      const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();
       const planPrice = 1999;
       
       // Save order in Firestore with local pending state 
       await placeOrder({
         id: orderId,
+        orderNumber,
         userId: currentUser.id,
         createdAt: new Date().toISOString(),
         plan: "standard",

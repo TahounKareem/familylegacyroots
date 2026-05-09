@@ -142,14 +142,14 @@ export function AdminPanel() {
             <tbody className="divide-y divide-brand-50">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-brand-50/50 transition">
-                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.id.toUpperCase()}</td>
+                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.orderNumber || order.id.toUpperCase()}</td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-brand-900">{order.data.firstName} بن {order.data.fatherName}</p>
                     <p className="text-xs text-brand-600 mt-1">عائلة: ( {order.data.familyName} ) | {order.data.homeland}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${order.plan==='express'?'bg-red-50 text-red-700':'bg-brand-100 text-brand-700'}`}>
-                      {order.plan === 'express' ? 'سريع' : 'عادي'}
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${order.plan==='express'?'bg-red-50 text-red-700': order.plan==='invite' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                      {order.plan === 'express' ? 'سريع' : order.plan === 'invite' ? 'كود دعوة' : 'مدفوع'}
                     </span>
                   </td>
                    <td className="px-6 py-4">
@@ -233,7 +233,7 @@ export function AdminPanel() {
               تحذير خطير
             </h2>
             <p className="text-gray-700 leading-relaxed mb-6 font-medium">
-              سيتم حذف السجل رقم <span className="p-1 px-2 uppercase bg-gray-100 rounded text-brand-700 mx-1">#{orderToDelete.id.toUpperCase()}</span> وكافة مرفقاته ومكوناته. 
+              سيتم حذف السجل رقم <span className="p-1 px-2 uppercase bg-gray-100 rounded text-brand-700 mx-1">#{orderToDelete.orderNumber || orderToDelete.id.toUpperCase()}</span> وكافة مرفقاته ومكوناته. 
               <br/><br/>
               هل أنت متأكد من ذلك؟ هذا الإجراء <strong>لا يمكن التراجع عنه</strong>!
             </p>
@@ -270,7 +270,7 @@ export function AdminPanel() {
             <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
                <h3 className="font-bold text-brand-900 flex items-center gap-2">
                  <FileText className="w-5 h-5 text-brand-600" />
-                 تفاصيل الطلب: <span className="uppercase">#{selectedOrder.id.toUpperCase()}</span>
+                 تفاصيل الطلب: <span className="uppercase">#{selectedOrder.orderNumber || selectedOrder.id.toUpperCase()}</span>
                </h3>
                <button onClick={() => setSelectedOrder(null)} className="text-brand-500 hover:text-brand-800 bg-white rounded-full p-1 shadow-sm">
                  <X className="w-5 h-5" />

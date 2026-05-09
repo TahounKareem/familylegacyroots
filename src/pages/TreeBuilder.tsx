@@ -108,7 +108,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
 
   const saveEdit = () => {
     if(!selectedNode || readOnly) return;
-    const newNodes = nodes.map(n => n.id === selectedNode ? { ...n, name: editName, relation: editRelation } : n);
+    const newNodes = nodes.map(n => n.id === selectedNode ? { ...n, name: editName, relation: "ابن" } : n);
     setNodes(newNodes);
     if (onChange) onChange(newNodes, edges);
     setIsEditing(false);
@@ -150,7 +150,6 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
             style={{ left: node.x, top: node.y }}
           >
              <div className="text-sm font-bold text-brand-900">{node.name}</div>
-             <div className="text-xs text-brand-600">{node.relation}</div>
              
              {selectedNode === node.id && !readOnly && (
                <div className="absolute -bottom-10 flex gap-2">
@@ -178,11 +177,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
              <label className="block text-xs font-medium text-brand-700 mb-1">الاسم</label>
              <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full border border-brand-200 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500" />
            </div>
-           <div className="flex-1 w-full">
-             <label className="block text-xs font-medium text-brand-700 mb-1">الصلة</label>
-             <input type="text" value={editRelation} onChange={e => setEditRelation(e.target.value)} className="w-full border border-brand-200 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500" />
-           </div>
-           <button onPointerDown={(e) => { e.stopPropagation(); saveEdit(); }} className="bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 flex items-center gap-2 text-sm font-medium">
+           <button onPointerDown={(e) => { e.stopPropagation(); saveEdit(); }} className="bg-brand-600 text-white px-8 py-2 rounded-md hover:bg-brand-700 flex items-center justify-center gap-2 text-sm font-medium h-[38px]">
              <Check className="w-4 h-4" /> حفظ
            </button>
         </div>
