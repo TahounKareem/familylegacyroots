@@ -92,7 +92,7 @@ export function Home() {
       </section>
 
       {/* Features Grid */}
-      <section id="journey" className="py-24 bg-brand-100">
+      <section id="journey" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث عائلتك</h2>
@@ -128,9 +128,9 @@ export function Home() {
                  whileInView={{ opacity: 1, y: 0 }}
                  viewport={{ once: true }}
                  transition={{ delay: idx * 0.1 }}
-                 className="bg-white rounded-3xl p-8 border border-brand-200 hover:shadow-xl transition-shadow text-center"
+                 className="bg-brand-50 rounded-3xl p-8 hover:shadow-xl transition-shadow text-center"
                >
-                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-brand-500 mx-auto mb-6 border border-brand-100 shadow-sm">
+                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-brand-500 mx-auto mb-6 shadow-sm border border-brand-100">
                    <feature.icon className="w-8 h-8" />
                  </div>
                  <h3 className="font-serif text-xl font-bold text-brand-900 mb-4">{feature.title}</h3>

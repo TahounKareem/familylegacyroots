@@ -60,7 +60,7 @@ export function Services() {
   };
 
   return (
-    <div className="bg-brand-100 min-h-screen pb-20 relative">
+    <div className="bg-brand-50 min-h-screen pb-20 relative">
       {/* Hero Section */}
       <div className="bg-white py-16 mb-12 shadow-sm border-b border-brand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

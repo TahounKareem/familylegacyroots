@@ -5,7 +5,7 @@ import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home } from "lucide-react";
+import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home, Send } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
@@ -131,7 +131,7 @@ export function Dashboard() {
       text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
       createdAt: new Date().toISOString()
     };
-    addMessageToOrder(order.id, newMessage, "رسالة جديدة");
+    addMessageToOrder(order.id, newMessage);
     setCorrectionText("");
     setCorrectionError("");
     setCorrectionPage("");
@@ -206,7 +206,7 @@ export function Dashboard() {
   }, [activeTab, totalAdminMessagesUnread, order]);
 
   return (
-    <div className="bg-brand-100 min-h-screen py-10">
+    <div className="bg-brand-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Greeting */}
