@@ -835,82 +835,107 @@ export function Dashboard() {
                         </div>
                       ) : (
                         <div className="px-6 md:px-12 py-8">
-                          {order?.researchRecommendations && (
-                            <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-6 md:p-8 mb-10 shadow-sm">
-                              <h3 className="text-xl md:text-2xl font-bold text-brand-900 mb-4 leading-tight flex items-center gap-3">
-                                <Star className="w-6 h-6 text-brand-500 fill-brand-500" /> توصيات واقتراحات فريق البحث
-                              </h3>
-                              <div className="text-brand-800 text-lg leading-relaxed text-right whitespace-pre-line bg-white p-6 rounded-xl border border-brand-100 shadow-inner">
-                                {order.researchRecommendations}
-                              </div>
-                            </div>
-                          )}
-                          <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                            <FileText className="w-8 h-8 text-brand-600" /> نموذج طلب تصويب
-                          </h3>
-                          <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100 mb-8">
-                            <p className="text-brand-800 font-medium mb-4">نأمل منكم في حالة وجود أي ملاحظات أو أخطاء مطبعية أو علمية تعبئة النموذج أدناه بدقة ليتسنى لفريق البحث إدراجها وتحديث السجل.</p>
-                            
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-bold text-brand-700 mb-1">أي قسم في سجل تراث العائلة يحتاج لهذا التصويب؟</label>
-                                  <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر أو اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
-                                  <datalist id="sections">
-                                    <option value="الباب الأول: التسلسل النسبي" />
-                                    <option value="الباب الثاني: الوثائق" />
-                                    <option value="الباب الثالث: الصور" />
-                                    <option value="مقدمة السجل" />
-                                  </datalist>
+                          {order?.messages && order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).length > 0 ? (
+                            <div className="space-y-8">
+                              {/* Previous Corrections List */}
+                              <div className="bg-white rounded-2xl p-6 md:p-8 border border-brand-200 shadow-sm">
+                                <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
+                                  <Clock className="w-6 h-6 text-brand-600" />
+                                  طلبات التصويب السابقة
+                                </h3>
+                                <div className="space-y-4">
+                                  {order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).map(msg => (
+                                    <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
+                                      <div className="flex justify-between items-start mb-2">
+                                        <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
+                                          تم الإرسال
+                                        </span>
+                                        <span className="text-xs text-brand-500 font-mono" dir="ltr">{new Date(msg.createdAt).toLocaleString('ar-SA')}</span>
+                                      </div>
+                                      <p className="text-brand-800 whitespace-pre-line text-sm mt-3">{msg.text}</p>
+                                    </div>
+                                  ))}
                                 </div>
-                                <div>
-                                  <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة في سجل تراث العائلة التي تحتاج لهذا التصويب</label>
-                                  <input type="text" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة كتابة حرة لتحديد الخطأ</label>
-                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..." value={correctionError} onChange={(e) => setCorrectionError(e.target.value)}></textarea>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة كتابة حرة ليكتب التصويب مع توضيح مرجعيته أو مصادره لهذا التصويب إن وجد</label>
-                                <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
                               </div>
                               
-                              <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
-                                <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
-                                <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
-                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأقر بالموافقة على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>تطبيق الشروط والأحكام</button> الخاصة بالتعديلات.
-                                </label>
-                              </div>
+                              {/* Marketing Message */}
+                              <div className="bg-brand-50 p-8 rounded-2xl border flex flex-col items-center justify-center text-center border-brand-200 shadow-sm relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
 
-                              <button onClick={handleSendCorrection} disabled={!correctionSection || !correctionPage || !correctionText || !correctionError || !agreeToCorrectionTerms} className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm">
-                                <Send className="w-5 h-5" /> إرسال طلب التصويب
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Previous Corrections List */}
-                          {order.messages && order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).length > 0 && (
-                            <div className="mt-12 bg-brand-50 rounded-2xl p-6 md:p-8 border border-brand-100 shadow-sm">
-                              <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
-                                <Clock className="w-6 h-6 text-brand-600" />
-                                طلبات التصويب السابقة
-                              </h3>
-                              <div className="space-y-4">
-                                {order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).map(msg => (
-                                  <div key={msg.id} className="bg-white p-5 rounded-xl border border-brand-200 shadow-sm">
-                                    <div className="flex justify-between items-start mb-2">
-                                      <span className="text-sm font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-md">
-                                        تم الإرسال
-                                      </span>
-                                      <span className="text-xs text-brand-500 font-mono" dir="ltr">{new Date(msg.createdAt).toLocaleString('ar-SA')}</span>
-                                    </div>
-                                    <p className="text-brand-800 whitespace-pre-line text-sm mt-3">{msg.text}</p>
+                                <Sparkles className="w-16 h-16 text-brand-500 mb-6" />
+                                <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">جاري دراسة طلبكم بكل اهتمام</h3>
+                                <p className="text-brand-700 text-lg mb-8 max-w-2xl leading-relaxed">
+                                  يقوم فريق البحث حالياً بدراسة طلب التصويب بدقة. سيتم تحديث السجل الخاص بكم فور التأكد من مدى صحة ومطابقة التصويب مع المصادر المعتمدة.
+                                </p>
+                                
+                                <div className="bg-white p-8 rounded-2xl border border-brand-100 shadow-sm w-full relative z-10">
+                                  <h4 className="text-xl font-bold text-brand-900 mb-3 font-serif flex items-center justify-center gap-2 text-center">
+                                    <Star className="w-6 h-6 text-brand-500 fill-brand-500" />
+                                    ارتقِ بتجربتك مع الإصدار الثاني!
+                                  </h4>
+                                  <p className="text-brand-600 mb-6 leading-relaxed">
+                                    يمكنك طلب الإصدار الثاني بمزايا حصرية وتفاصيل أعمق عن تاريخ عائلتك. قم بدعوة أصدقائك للحصول على "سجل تراث العائلة" واستمتع بتخفيض خاص عند طلبك للإصدار الثاني أو عند استكشافك لخدمة البحث المتقدم "فتح الأبواب المغلقة".
+                                  </p>
+                                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <Link to="/#scope" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition">
+                                      خدمة فتح الأبواب المغلقة
+                                      <ChevronRight className="w-4 h-4" />
+                                    </Link>
+                                    <Link to="/services" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-50 text-brand-700 border border-brand-200 rounded-xl font-bold hover:bg-brand-100 transition">
+                                      المزيد عن السجل
+                                    </Link>
                                   </div>
-                                ))}
+                                </div>
                               </div>
                             </div>
+                          ) : (
+                            <>
+                              <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                                <FileText className="w-8 h-8 text-brand-600" /> نموذج طلب تصويب
+                              </h3>
+                              <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100 mb-8">
+                                <p className="text-brand-800 font-medium mb-4">نأمل منكم في حالة وجود أي ملاحظات أو أخطاء مطبعية أو علمية تعبئة النموذج أدناه بدقة ليتسنى لفريق البحث إدراجها وتحديث السجل.</p>
+                                
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="block text-sm font-bold text-brand-700 mb-1">أي قسم في سجل تراث العائلة يحتاج لهذا التصويب؟</label>
+                                      <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر أو اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
+                                      <datalist id="sections">
+                                        <option value="الباب الأول: التسلسل النسبي" />
+                                        <option value="الباب الثاني: الوثائق" />
+                                        <option value="الباب الثالث: الصور" />
+                                        <option value="مقدمة السجل" />
+                                      </datalist>
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة في سجل تراث العائلة التي تحتاج لهذا التصويب</label>
+                                      <input type="text" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-bold text-brand-700 mb-1">التصويب المطلوب</label>
+                                    <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..." value={correctionError} onChange={(e) => setCorrectionError(e.target.value)}></textarea>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-bold text-brand-700 mb-1">مرجعية او مصدر هذا التصويب</label>
+                                    <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
+                                  </div>
+                                  
+                                  <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
+                                    <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
+                                    <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
+                                      تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأقر بالموافقة على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>تطبيق الشروط والأحكام</button> الخاصة بالتعديلات.
+                                    </label>
+                                  </div>
+
+                                  <button onClick={handleSendCorrection} disabled={!correctionSection || !correctionPage || !correctionText || !correctionError || !agreeToCorrectionTerms} className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm">
+                                    <Send className="w-5 h-5" /> إرسال طلب التصويب
+                                  </button>
+                                </div>
+                              </div>
+                            </>
                           )}
 
                           {showCorrectionTerms && (
