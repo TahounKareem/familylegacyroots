@@ -82,7 +82,7 @@ export function Services() {
                 <img src="https://i.postimg.cc/hG3tfLbD/Hist.png" alt="فهرس تاريخي" className="w-full h-auto object-cover rounded-xl" />
               </div>
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-brand-100">
-                <h3 className="font-serif text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">فهرس المحتويات</h3>
+                <h3 className="font-serif text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">عن سجل تراث العائلة</h3>
                 <ul className="space-y-3">
                 {sections.map((sec) => (
                   <li key={sec.id}>

@@ -35,7 +35,42 @@ export function OrderFlow() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 4));
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState("");
+
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
+
+  const handleInviteSubmit = async () => {
+    if (inviteCode !== "alpha24") {
+      setInviteError("الكود المدخل غير صحيح");
+      return;
+    }
+    setInviteError("");
+    setIsSubmitting(true);
+    try {
+      if (!currentUser) return;
+      
+      const orderId = currentUser.id;
+      await placeOrder({
+        id: orderId,
+        userId: currentUser.id,
+        createdAt: new Date().toISOString(),
+        plan: "standard",
+        printRequested: false,
+        status: "بانتظار الدفع", // It's immediately upgraded to "قيد البحث" by Dashboard.tsx using ?success=true
+        totalAmount: 0,
+        data: formData,
+      });
+
+      // Navigate to success page mimicking Stripe
+      window.location.href = `/?success=true&order_id=${orderId}&invite=true`;
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ");
+      setIsSubmitting(false);
+    }
+  };
 
   const submitOrder = async () => {
     setIsSubmitting(true);
@@ -274,7 +309,7 @@ export function OrderFlow() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   <label className={`cursor-pointer border-2 rounded-xl p-6 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
                     <input type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
+                    <div className="w-24 h-24 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
                        <span className="font-sans font-bold text-lg relative z-10">مودرن</span>
                     </div>
@@ -352,18 +387,58 @@ export function OrderFlow() {
           )}
 
           {step === 4 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8">
-              <div className="w-24 h-24 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Check className="w-12 h-12" />
-              </div>
-              <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">بدء التنفيذ والإعتماد</h2>
-              <p className="text-brand-700 text-lg mb-8 max-w-lg mx-auto">
-                سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
-              </p>
-              
-              <div className="text-5xl font-mono text-brand-900 mb-8 font-bold border-y border-brand-100 py-6 mx-auto max-w-xs">
-                $1,999<span className="text-2xl text-brand-500 font-light">.00</span>
-              </div>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8 relative">
+              {showInviteModal ? (
+                <div className="bg-brand-50 p-8 rounded-3xl border border-brand-200 max-w-md mx-auto relative z-10 shadow-lg">
+                  <button onClick={() => setShowInviteModal(false)} className="absolute top-4 left-4 text-gray-400 hover:text-gray-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                  <h3 className="text-2xl font-bold text-brand-900 mb-2">كود موجه وتسويقي</h3>
+                  <p className="text-brand-600 mb-6 text-sm">أدخل الكود التسويقي الخاص بك للمتابعة</p>
+                  
+                  <input 
+                    type="text" 
+                    value={inviteCode}
+                    onChange={(e) => {
+                      setInviteCode(e.target.value);
+                      setInviteError("");
+                    }}
+                    placeholder="أدخل الكود هنا" 
+                    className="w-full text-center text-lg tracking-widest font-mono border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-4 mb-4" 
+                  />
+                  
+                  {inviteError && <p className="text-red-500 text-sm mb-4">{inviteError}</p>}
+                  
+                  <button 
+                    onClick={handleInviteSubmit}
+                    disabled={isSubmitting || !inviteCode}
+                    className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition disabled:opacity-50"
+                  >
+                    {isSubmitting ? "جاري المعالجة..." : "تفعيل الكود والبدء"}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="w-24 h-24 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Check className="w-12 h-12" />
+                  </div>
+                  <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">بدء التنفيذ والإعتماد</h2>
+                  <p className="text-brand-700 text-lg mb-8 max-w-lg mx-auto">
+                    سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
+                  </p>
+                  
+                  <div className="text-5xl font-mono text-brand-900 mb-8 font-bold border-y border-brand-100 py-6 mx-auto max-w-xs">
+                    $1,999<span className="text-2xl text-brand-500 font-light">.00</span>
+                  </div>
+                  
+                  <button 
+                    onClick={() => setShowInviteModal(true)}
+                    className="text-brand-600 hover:text-brand-800 underline font-medium mt-4 mx-auto inline-block text-sm"
+                  >
+                    لديك كود موجه وتسويقي؟
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -373,7 +448,7 @@ export function OrderFlow() {
           <button 
             type="button" 
             onClick={handlePrev} 
-            disabled={step === 1 || isSubmitting}
+            disabled={step === 1 || isSubmitting || showInviteModal}
             className="px-6 py-3 rounded-2xl font-medium text-brand-600 disabled:opacity-30 hover:bg-brand-50 transition flex items-center gap-2"
           >
            <ArrowRight className="w-5 h-5" /> عودة
@@ -394,10 +469,10 @@ export function OrderFlow() {
           ) : (
             <button 
               onClick={submitOrder} 
-              disabled={isSubmitting}
+              disabled={isSubmitting || showInviteModal}
               className="px-10 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
             >
-              {isSubmitting ? (
+              {isSubmitting && !showInviteModal ? (
                 <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
                 <>إتمام الدفع واعتماد الطلب <Check className="w-5 h-5 mr-2" /></>

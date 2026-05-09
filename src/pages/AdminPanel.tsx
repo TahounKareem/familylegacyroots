@@ -8,7 +8,7 @@ import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
 
 export function AdminPanel() {
-  const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder } = useAppStore();
+  const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
@@ -105,7 +105,7 @@ export function AdminPanel() {
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-brand-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+          <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600">
             <Search className="w-6 h-6" />
           </div>
           <div>
@@ -142,10 +142,10 @@ export function AdminPanel() {
             <tbody className="divide-y divide-brand-50">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-brand-50/50 transition">
-                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.id.slice(0,6)}</td>
+                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.id.toUpperCase()}</td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-brand-900">{order.data.firstName} بن {order.data.fatherName}</p>
-                    <p className="text-xs text-brand-600 mt-1">عائلة: {order.data.familyName} | {order.data.homeland}</p>
+                    <p className="text-xs text-brand-600 mt-1">عائلة: ( {order.data.familyName} ) | {order.data.homeland}</p>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded text-xs font-bold ${order.plan==='express'?'bg-red-50 text-red-700':'bg-brand-100 text-brand-700'}`}>
@@ -169,15 +169,25 @@ export function AdminPanel() {
                      <div className="flex gap-2">
                        <button 
                          onClick={() => setSelectedOrder(order)}
-                         className="flex-1 flex items-center justify-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
+                         className="flex-1 flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
                        >
                          <Eye className="w-3 h-3" /> عرض
                        </button>
                        <button 
-                         onClick={() => setMessagingOrder(order)}
-                         className="flex-1 flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-100 hover:bg-brand-200 px-3 py-1.5 rounded-md transition font-medium text-xs"
+                         onClick={() => {
+                           setMessagingOrder(order);
+                           if (order.messages?.some(m => m.senderRole === "user" && !m.isRead)) {
+                             markMessagesAsRead(order.id, "admin");
+                           }
+                         }}
+                         className="flex-1 flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-100 hover:bg-brand-200 px-3 py-1.5 rounded-md transition font-medium text-xs relative"
                        >
                          <MessageSquare className="w-3 h-3" /> مراسلة
+                         {order.messages && order.messages.filter(m => m.senderRole === "user" && !m.isRead).length > 0 && (
+                           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-sm">
+                             {order.messages.filter(m => m.senderRole === "user" && !m.isRead).length}
+                           </span>
+                         )}
                        </button>
                        <button 
                          onClick={() => setOrderToDelete(order)}
@@ -223,7 +233,7 @@ export function AdminPanel() {
               تحذير خطير
             </h2>
             <p className="text-gray-700 leading-relaxed mb-6 font-medium">
-              سيتم حذف السجل رقم <span className="p-1 px-2 uppercase bg-gray-100 rounded text-brand-700 mx-1">#{orderToDelete.id.slice(0,6)}</span> وكافة مرفقاته ومكوناته. 
+              سيتم حذف السجل رقم <span className="p-1 px-2 uppercase bg-gray-100 rounded text-brand-700 mx-1">#{orderToDelete.id.toUpperCase()}</span> وكافة مرفقاته ومكوناته. 
               <br/><br/>
               هل أنت متأكد من ذلك؟ هذا الإجراء <strong>لا يمكن التراجع عنه</strong>!
             </p>
@@ -260,7 +270,7 @@ export function AdminPanel() {
             <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
                <h3 className="font-bold text-brand-900 flex items-center gap-2">
                  <FileText className="w-5 h-5 text-brand-600" />
-                 تفاصيل الطلب: <span className="uppercase">#{selectedOrder.id.slice(0,6)}</span>
+                 تفاصيل الطلب: <span className="uppercase">#{selectedOrder.id.toUpperCase()}</span>
                </h3>
                <button onClick={() => setSelectedOrder(null)} className="text-brand-500 hover:text-brand-800 bg-white rounded-full p-1 shadow-sm">
                  <X className="w-5 h-5" />
@@ -270,7 +280,7 @@ export function AdminPanel() {
               <div className="grid grid-cols-2 gap-6 mb-8 bg-brand-50 p-4 rounded-xl border border-brand-100">
                 <div>
                   <p className="text-brand-500 text-xs mb-1">العميل</p>
-                  <p className="font-bold text-brand-900">{selectedOrder.data.firstName} بن {selectedOrder.data.fatherName} {selectedOrder.data.familyName}</p>
+                  <p className="font-bold text-brand-900">{selectedOrder.data.firstName} بن {selectedOrder.data.fatherName} ( {selectedOrder.data.familyName} )</p>
                 </div>
                 <div>
                   <p className="text-brand-500 text-xs mb-1">تاريخ الطلب</p>
@@ -290,8 +300,16 @@ export function AdminPanel() {
                      {selectedOrder.data.shippingAddress.country}، {selectedOrder.data.shippingAddress.state}، {selectedOrder.data.shippingAddress.street} (الرمز البريدي: {selectedOrder.data.shippingAddress.zip})
                    </div>
                  )}
-                 {selectedOrder.data.startingPoint && (
-                   <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">نقطة الانطلاق لعمود النسب:</strong> <p className="mt-1 font-medium">{selectedOrder.data.startingPoint}</p></div>
+                 {(selectedOrder.data.startingPoint || selectedOrder.data.startingPointType) && (
+                   <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2">
+                     <strong className="text-brand-600 block mb-1">نقطة الانطلاق لعمود النسب:</strong> 
+                     <p className="mt-1 font-medium">
+                        {selectedOrder.data.startingPointType === "أنا أمين السجل" ? `${selectedOrder.data.firstName} بن ${selectedOrder.data.fatherName}` :
+                         selectedOrder.data.startingPointType === "اسم العائلة" ? `( ${selectedOrder.data.familyName} )` :
+                         selectedOrder.data.startingPointType === "احد الأسلاف" ? selectedOrder.data.startingPointName :
+                         selectedOrder.data.startingPoint}
+                     </p>
+                   </div>
                  )}
                  {selectedOrder.data.designTemplate && (
                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2"><strong className="text-brand-600 block mb-1">القالب المختار:</strong> <p className="mt-1 font-medium">{selectedOrder.data.designTemplate}</p></div>
@@ -318,27 +336,40 @@ export function AdminPanel() {
                 <>
                   <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">الوثائق والمرفقات</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedOrder.data.documents.map((docUrl, idx) => (
-                      <a key={idx} href={docUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-white border border-brand-200 p-3 rounded-lg hover:border-brand-500 transition shadow-sm text-brand-700">
-                        <FileText className="w-5 h-5 text-brand-500" />
-                        <div className="overflow-hidden">
-                           <p className="font-medium text-sm">مرفق وثيقة #{idx + 1}</p>
-                           <p className="text-xs text-brand-500 truncate" dir="ltr">{docUrl.substring(0,40)}...</p>
+                    {selectedOrder.data.documents.map((docItem, idx) => {
+                      const isStr = typeof docItem === 'string';
+                      const url = isStr ? docItem : docItem.url;
+                      const title = !isStr && docItem.title ? docItem.title : `مرفق وثيقة #${idx + 1}`;
+                      return (
+                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-white border border-brand-200 p-4 rounded-xl hover:border-brand-500 transition shadow-sm text-brand-700">
+                        <FileText className="w-6 h-6 text-brand-500 shrink-0" />
+                        <div className="overflow-hidden w-full">
+                           <p className="font-bold text-sm text-brand-900 line-clamp-1">{title}</p>
+                           {!isStr && <p className="text-xs text-brand-600 mt-1 line-clamp-1">{docItem.purpose} {docItem.kind ? ` • ${docItem.kind}` : ''}</p>}
                         </div>
                       </a>
-                    ))}
+                    )})}
                   </div>
                 </>
               )}
                {selectedOrder.data.photos && selectedOrder.data.photos.length > 0 && (
                 <>
-                  <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">الصور الشخصية المرفقة</h4>
-                  <div className="grid grid-cols-2 flex-wrap gap-4 mb-4">
-                    {selectedOrder.data.photos.map((photoUrl, idx) => (
-                      <a key={idx} href={photoUrl} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border border-brand-200 hover:border-brand-500 transition shadow-sm">
-                        <img src={photoUrl} alt={`صورة ${idx+1}`} className="w-full h-40 object-cover bg-gray-100" loading="lazy" />
+                  <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">الصور المرفقة</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                    {selectedOrder.data.photos.map((photoItem, idx) => {
+                      const isStr = typeof photoItem === 'string';
+                      const url = isStr ? photoItem : photoItem.url;
+                      const title = !isStr && photoItem.title ? photoItem.title : `صورة ${idx + 1}`;
+                      return (
+                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="relative group block rounded-xl overflow-hidden border border-brand-200 hover:border-brand-500 transition shadow-sm aspect-square bg-white">
+                        <img src={url} alt={title} className="w-full h-full object-cover bg-gray-100" loading="lazy" />
+                        {!isStr && (
+                           <div className="absolute inset-x-0 bottom-0 bg-black/70 p-2 text-white">
+                             <p className="text-xs font-bold line-clamp-1">{title}</p>
+                           </div>
+                        )}
                       </a>
-                    ))}
+                    )})}
                   </div>
                 </>
                )}

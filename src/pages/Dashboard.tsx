@@ -33,6 +33,7 @@ export function Dashboard() {
     const params = new URLSearchParams(location.search);
     const success = params.get("success");
     const orderId = params.get("order_id");
+    const isInvite = params.get("invite") === "true";
 
     if (success === "true" && orderId) {
       const order = orders.find(o => o.id === orderId);
@@ -44,7 +45,7 @@ export function Dashboard() {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(({ sendOrderConfirmationEmail }) => {
-                sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", orderId);
+                sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", orderId, isInvite);
               });
             }
           });
@@ -196,15 +197,13 @@ export function Dashboard() {
     </button>
   );
 
-  const totalAdminMessages = order?.messages?.filter(m => m.senderRole === "admin").length || 0;
-  const [readMessagesCount, setReadMessagesCount] = useState(0);
-  const unreadCount = Math.max(0, totalAdminMessages - readMessagesCount);
+  const totalAdminMessagesUnread = order?.messages?.filter(m => m.senderRole === "admin" && !m.isRead).length || 0;
 
   useEffect(() => {
-    if (activeTab === "رسائل فريق البحث") {
-      setReadMessagesCount(totalAdminMessages);
+    if (activeTab === "رسائل فريق البحث" && totalAdminMessagesUnread > 0 && order) {
+      useAppStore.getState().markMessagesAsRead(order.id, "user");
     }
-  }, [activeTab, totalAdminMessages]);
+  }, [activeTab, totalAdminMessagesUnread, order]);
 
   return (
     <div className="bg-brand-50 min-h-screen py-10">
@@ -219,7 +218,7 @@ export function Dashboard() {
              <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
                 <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">أهلاً بك، {currentUser.name}</h1>
                 <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2"><Mail className="w-4 h-4" /> {currentUser.email}</p>
-                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: {order.id.slice(0,6).toUpperCase()}</span>}
+                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: #{order.id.toUpperCase()}</span>}
              </div>
              
              {showProfileMenu && (
@@ -228,8 +227,9 @@ export function Dashboard() {
                  <div className="absolute top-16 right-0 md:right-1/2 md:translate-x-12 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
                    <button onClick={() => { setActiveTab("الملف الشخصي"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><User className="w-4 h-4 text-brand-500" /> الملف الشخصي</button>
                    <button onClick={() => { setActiveTab("إعدادات"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><Settings className="w-4 h-4 text-brand-500" /> إعدادات</button>
+                   <button onClick={() => { setActiveTab("عقد تسجيل الخدمة"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل الخدمة</button>
                    <div className="border-t border-brand-100 my-1"></div>
-                   <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
+                   <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); navigate('/'); }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
                  </div>
                </>
              )}
@@ -279,7 +279,7 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">التواصل والتحديثات</h3>
                 <div className="space-y-1">
-                  <SidebarItem title="رسائل فريق البحث" isActive={activeTab === "رسائل فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={unreadCount} />
+                  <SidebarItem title="رسائل فريق البحث" isActive={activeTab === "رسائل فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={totalAdminMessagesUnread} />
                 </div>
               </div>
 
@@ -301,25 +301,31 @@ export function Dashboard() {
 
               {/* Social Media & Outer Links */}
               <div className="mt-8 border-t border-brand-100 pt-6">
-                <Link to="/" className="w-full mb-3 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm">
-                  <Home className="w-5 h-5 text-brand-500" />
-                  الموقع الرسمي
-                </Link>
-                <button onClick={() => setActiveTab("حالة السجل")} className="w-full mb-6 bg-brand-900 text-white px-4 py-3 rounded-xl transition flex items-center justify-center gap-2 hover:bg-brand-800 font-semibold shadow-sm">
+                <button onClick={() => setActiveTab("حالة السجل")} className="w-full mb-3 bg-brand-900 text-white px-4 py-3 rounded-xl transition flex items-center justify-center gap-2 hover:bg-brand-800 font-semibold shadow-sm">
                   <Compass className="w-5 h-5 text-brand-300" />
-                  العودة لحالة السجل
+                  العودة للصفحة الرئيسية
                 </button>
+                <Link to="/" className="w-full mb-6 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm">
+                  <Home className="w-5 h-5 text-brand-500" />
+                  الذهاب الى موقع سجل تراث العائلة
+                </Link>
                 
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-3 text-center">تواصل معنا</h3>
-                <div className="flex justify-center gap-4">
-                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                <div className="flex flex-wrap justify-center gap-3">
+                  <a href="http://facebook.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
                   </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
-                  </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                  <a href="https://www.instagram.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" /></svg>
+                  </a>
+                  <a href="https://www.tiktok.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512"><path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25v178.72A162.55 162.55 0 1 1 162.6 162.6v82.08A80.59 80.59 0 1 0 243.1 325.2V20.27h82.08a162.33 162.33 0 0 0 122.8 122.8v66.84z"/></svg>
+                  </a>
+                  <a href="https://www.youtube.com/@TheFamilyLegacyRoots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                  <a href="https://www.snapchat.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.08 0C9.69-.02 7.74.83 6.09 2.5c-.8.81-1.37 1.83-1.63 3.02-.12.56-.21 1.13-.34 1.69-.17.72-.4 1.41-.85 2-.45.58-1 .99-1.74 1.12a2.31 2.31 0 0 0-.25.06c-.84.28-1.12 1.34-.51 1.96.22.22.48.42.76.57.85.45 1.76.77 2.7 1 .2.05.37.24.48.42.17.27.15.54 0 .8-.49.92-.99 1.84-1.55 2.72-.51.81-1.22 1.4-2.1 1.82-.47.22-.64.58-.59 1 .05.41.36.78.85.98.54.21 1.11.31 1.68.4.92.14 1.84.22 2.77.25 1.13.04 2.21.32 3.23.82.78.38 1.54.78 2.32 1.14.47.22 1 0 1.25-.46.06-.11.1-.23.15-.35.15-.35.29-.68.58-.92.83-.69 1.82-.93 2.87-1 1.09-.07 2.18-.08 3.27-.12.18-.01.37-.02.55-.03 1.07-.07 1.8-.83 1.69-1.86-.06-.5-.38-.85-.85-1.07-.85-.4-1.52-1.01-2-1.8-.57-.89-1.06-1.81-1.55-2.73-.13-.25-.13-.5 0-.75.1-.2.27-.38.48-.44.97-.24 1.9-.57 2.77-1.04.38-.2.7-.47 1-.84.45-.55.33-1.38-.27-1.76-.11-.07-.22-.12-.34-.17a4.93 4.93 0 0 1-1.95-1.34c-.4-.48-.65-1.06-.79-1.68-.13-.57-.22-1.13-.34-1.69-.26-1.19-.83-2.21-1.63-3.02C16.42.83 14.47-.02 12.08 0zm1.75 3.03c.5.09 1 .28 1.41.59.51.37.84.87 1.05 1.46.22.61.34 1.25.43 1.89.06.41.13.82.35 1.18.23.36.56.63.95.83.25.13.52.22.79.31a3 3 0 0 0 .5-.47c-.5-.11-1-.18-1.49-.33-.64-.21-.99-.68-1.03-1.35-.04-.6 0-1.21.05-1.81.08-.85.22-1.69.58-2.46.33-.71.85-1.25 1.55-1.59.69-.34 1.43-.46 2.19-.53.49-.04 1-.03 1.49 0 .15.86-.18 1.61-.75 2.17-.67.66-1.52.92-2.45.98-.67.04-1.35.01-2.02.04-.66.03-1.07.45-1.07 1.1 0 .66.42 1.06 1.05 1.09.73.04 1.46.03 2.19 0 1.15-.05 2.16-.48 2.92-1.36.65-.75.98-1.65 1.01-2.65.02-.91-.18-1.78-.6-2.58-.2-.37-.44-.71-.72-1.01A5.3 5.3 0 0 0 18.06 1.3c-.63-.25-1.3-.4-1.98-.44-.1-.01-.2 0-.3.01.21.84-.04 1.58-.6 2.16z"/></svg>
                   </a>
                 </div>
               </div>
@@ -403,7 +409,7 @@ export function Dashboard() {
 
                        <div className="mt-8 border-t border-brand-200 pt-6">
                          <h4 className="font-bold text-brand-900 mb-2">رقم الطلب:</h4>
-                         <p className="font-mono text-xl text-brand-600 bg-white inline-block px-4 py-2 border border-brand-200 rounded-lg">ORD-{order.id.substring(0, 9).toUpperCase()}</p>
+                         <p className="font-mono text-xl text-brand-600 bg-white inline-block px-4 py-2 border border-brand-200 rounded-lg">#{order.id.toUpperCase()}</p>
                        </div>
                      </div>
                   )}
@@ -504,7 +510,7 @@ export function Dashboard() {
                         <UserPlus className="w-10 h-10 text-brand-600" />
                         <span>
                           {order.data.startingPointType === "أنا أمين السجل" ? order.data.firstName :
-                           order.data.startingPointType === "اسم العائلة" ? order.data.familyName :
+                           order.data.startingPointType === "اسم العائلة" ? `عائلة (${order.data.familyName})` :
                            order.data.startingPointType === "احد الأسلاف" ? order.data.startingPointName :
                            order.data.startingPoint}
                         </span>
@@ -874,7 +880,7 @@ export function Dashboard() {
                               <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
                                 <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
                                 <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
-                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر.
+                                  تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأوافق على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>الشروط والأحكام</button> الخاصة بالتعديلات.
                                 </label>
                               </div>
 
@@ -926,7 +932,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "بحث متقدم (فتح الأبواب المغلقة)" && (
+                  {activeTab === "فتح الأبواب المغلقة ( بحث متقدم )" && (
                     <div className="py-12 px-4 sm:px-8 bg-white shadow-inner rounded-3xl border border-brand-200">
                       <div className="text-center mb-10">
                         <Telescope className="w-20 h-20 text-brand-600 mx-auto mb-6 opacity-90" />
@@ -1071,6 +1077,29 @@ export function Dashboard() {
                             </div>
                          </div>
                        </div>
+                    </div>
+                  )}
+
+                  {activeTab === "عقد تسجيل الخدمة" && (
+                    <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
+                       <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><FileText className="w-8 h-8 text-brand-600" /> عقد تسجيل الخدمة</h3>
+                       {!order ? (
+                         <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 flex items-center gap-4">
+                            <AlertCircle className="w-10 h-10 text-orange-500" />
+                            <div>
+                              <h4 className="font-bold text-orange-800 text-lg">لم تقم بالتوقيع على العقد بعد</h4>
+                              <p className="text-sm text-orange-700">لم يتم العثور على سجل مرتبط بحسابك.</p>
+                            </div>
+                         </div>
+                       ) : (
+                         <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex items-center gap-4 shadow-sm">
+                            <CheckCircle className="w-10 h-10 text-green-500" />
+                            <div>
+                              <h4 className="font-bold text-green-800 text-lg">تم توقيع العقد بنجاح</h4>
+                              <p className="text-sm text-green-700 font-mono mt-1" dir="ltr">{new Date(order.createdAt).toLocaleString('ar-SA')}</p>
+                            </div>
+                         </div>
+                       )}
                     </div>
                   )}
 

@@ -13,9 +13,9 @@ export function KnowledgeCenter() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[
           { title: "كيف تقرأ المخطوطات القديمة؟", type: "مقال", icon: FileText, color: "bg-orange-50 text-orange-600" },
-          { title: "أهمية توثيق شجرة العائلة", type: "دليل إرشادي", icon: Book, color: "bg-blue-50 text-blue-600" },
+          { title: "أهمية توثيق شجرة العائلة", type: "دليل إرشادي", icon: Book, color: "bg-brand-50 text-brand-600" },
           { title: "الفرق بين القبيلة، الفخذ، والعشيرة", type: "مقال توضيحي", icon: FileText, color: "bg-green-50 text-green-600" },
-          { title: "أساليب التحقق الجيني والمطابقة التاريخية", type: "بحث علمي", icon: LinkIcon, color: "bg-purple-50 text-purple-600" },
+          { title: "أساليب التحقق الجيني والمطابقة التاريخية", type: "بحث علمي", icon: LinkIcon, color: "bg-brand-50 text-brand-600" },
           { title: "كيف تحافظ على الوثائق الورقية القديمة لعائلتك", type: "دليل إرشادي", icon: Book, color: "bg-brand-100 text-brand-700" },
         ].map((item, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl border border-brand-100 hover:shadow-lg transition-shadow group flex flex-col justify-between h-full">

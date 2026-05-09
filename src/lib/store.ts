@@ -39,6 +39,7 @@ export interface Message {
   text: string;
   attachments?: string[];
   createdAt: string;
+  isRead?: boolean;
 }
 
 export interface MediaItem {
@@ -103,6 +104,7 @@ interface AppState {
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
   fulfillOrder: (id: string, links: { deliveryLink?: string, digitalCopyLink?: string, posterLink?: string, researchRecommendations?: string }) => Promise<void>;
   addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
+  markMessagesAsRead: (orderId: string, forRole: "user" | "admin") => Promise<void>;
   initializeFirebase: () => void;
 }
 
@@ -177,6 +179,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       await updateDoc(doc(db, "orders", orderId), updateData);
     } catch (error) {
       console.error("Error adding message to order:", error);
+    }
+  },
+
+  markMessagesAsRead: async (orderId, forRole) => {
+    try {
+      const order = get().orders.find(o => o.id === orderId);
+      if (!order || !order.messages) return;
+      
+      let hasChanges = false;
+      const updatedMessages = order.messages.map(msg => {
+        // if user opens it, we mark admin's messages as read.
+        // if admin opens it, we mark user's messages as read.
+        if (msg.senderRole !== forRole && !msg.isRead) {
+          hasChanges = true;
+          return { ...msg, isRead: true };
+        }
+        return msg;
+      });
+
+      if (!hasChanges) return;
+
+      // Optimistic 
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === orderId ? { ...o, messages: updatedMessages } : o))
+      }));
+
+      await updateDoc(doc(db, "orders", orderId), { messages: updatedMessages });
+    } catch(e) {
+      console.error("Error marking msg read:", e);
     }
   },
 

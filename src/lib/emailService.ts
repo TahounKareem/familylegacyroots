@@ -34,25 +34,39 @@ const queueEmail = async (emailData: EmailTemplate) => {
 /**
  * إرسال إيميل تأكيد استلام الطلب
  */
-export const sendOrderConfirmationEmail = async (userEmail: string, userName: string, orderId: string) => {
-  await queueEmail({
-    to: userEmail,
-    message: {
-      subject: `تأكيد استلام طلب وثيقة تراث العائلة - طلب رقم #${orderId}`,
-      text: `أهلاً ${userName}، شكرًا لثقتك بنا. تم استلام طلبك لتوثيق السجل العائلي بنجاح. سيقوم فريقنا بمراجعة البيانات والبدء في العمل.`,
-      html: `
+export const sendOrderConfirmationEmail = async (userEmail: string, userName: string, orderId: string, isInvite: boolean = false) => {
+  const subject = isInvite ? `مبروك! تم اعتماد طلب السجل الخاص بكم - طلب رقم #${orderId.toUpperCase()}` : `تأكيد استلام طلب وثيقة تراث العائلة - طلب رقم #${orderId.toUpperCase()}`;
+  const htmlContent = isInvite ? `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>شكرًا لثقتك بمركز آدم للبحوث. تم استلام طلبك لتوثيق السجل العائلي بنجاح.</p>
+          <p>نهنئكم لإعتماد السجل الخاص بكم عبر الكود التسويقي، وقد تم البدء في البحث من قبل فريقنا المختص.</p>
           <div style="background-color: #fcebd2; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <strong>رقم الطلب:</strong> #${orderId}
+            <strong>رقم الطلب:</strong> #${orderId.toUpperCase()}
+          </div>
+          <p>يمكنك متابعة حالة الطلب من خلال لوحة التحكم الخاصة بك.</p>
+          <br />
+          <p>أطيب التحيات،<br /><strong>سجل تراث العائلة</strong></p>
+        </div>
+      ` : `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>شكرًا لثقتك بسجل تراث العائلة. تم استلام طلبك لتوثيق السجل العائلي بنجاح.</p>
+          <div style="background-color: #fcebd2; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <strong>رقم الطلب:</strong> #${orderId.toUpperCase()}
           </div>
           <p>سيقوم فريقنا المتخصص من الباحثين بمراجعة البيانات المقدمة للبدء في رحلة توثيق تراث عائلتكم.</p>
           <p>سنبقيك على اطلاع في كل مرحلة. يمكنك دائماً متابعة حالة الطلب من خلال لوحة التحكم الخاصة بك.</p>
           <br />
-          <p>أطيب التحيات،<br /><strong>فريق مركز آدم للبحوث</strong></p>
+          <p>أطيب التحيات،<br /><strong>فريق سجل تراث العائلة</strong></p>
         </div>
-      `
+      `;
+
+  await queueEmail({
+    to: userEmail,
+    message: {
+      subject,
+      text: isInvite ? `أهلاً ${userName}، نهنئكم لإعتماد السجل الخاص بكم عبر الكود التسويقي.` : `أهلاً ${userName}، شكرًا لثقتك بنا. تم استلام طلبك لتوثيق السجل العائلي بنجاح.`,
+      html: htmlContent
     }
   });
 };
