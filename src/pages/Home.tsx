@@ -21,14 +21,14 @@ export function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <span className="inline-block py-1 px-3 rounded-full bg-brand-800 text-brand-300 text-sm font-semibold mb-6 tracking-wide uppercase">
+              <span className="inline-block py-1 px-3 rounded-full bg-white/20 text-white text-sm font-semibold mb-6 tracking-wide uppercase">
                 إرث يمتد لأجيال
               </span>
-              <h1 className="font-serif text-5xl lg:text-7xl font-bold leading-tight mb-6">
+              <h1 className="font-serif text-5xl lg:text-7xl font-bold leading-tight mb-6 text-white">
                 وثق جذورك<br />
-                <span className="text-brand-400 font-light italic">وإحفظ تراثك</span>
+                <span className="text-white font-light italic">وإحفظ تراثك</span>
               </h1>
-              <p className="text-xl text-brand-200 mb-10 leading-relaxed max-w-lg">
+              <p className="text-xl text-white mb-10 leading-relaxed max-w-lg">
                 عمل بحثي احترافي لمعرفة اصل انتسابك من خلال البحث العميق وتوثيق عمود نسبك ، وتصميم "سجل تراث عائلتك" بأسلوب فني يبرز جذور الإنتماء.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -92,7 +92,7 @@ export function Home() {
       </section>
 
       {/* Features Grid */}
-      <section id="journey" className="py-24 bg-white">
+      <section id="journey" className="py-24 bg-brand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث عائلتك</h2>
@@ -128,9 +128,9 @@ export function Home() {
                  whileInView={{ opacity: 1, y: 0 }}
                  viewport={{ once: true }}
                  transition={{ delay: idx * 0.1 }}
-                 className="bg-brand-50 rounded-3xl p-8 border border-brand-100 hover:shadow-xl transition-shadow text-center"
+                 className="bg-white rounded-3xl p-8 border border-brand-200 hover:shadow-xl transition-shadow text-center"
                >
-                 <div className="w-16 h-16 bg-brand-200 rounded-full flex items-center justify-center text-brand-700 mx-auto mb-6">
+                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-brand-500 mx-auto mb-6 border border-brand-100 shadow-sm">
                    <feature.icon className="w-8 h-8" />
                  </div>
                  <h3 className="font-serif text-xl font-bold text-brand-900 mb-4">{feature.title}</h3>

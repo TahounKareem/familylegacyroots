@@ -206,7 +206,7 @@ export function Dashboard() {
   }, [activeTab, totalAdminMessagesUnread, order]);
 
   return (
-    <div className="bg-brand-50 min-h-screen py-10">
+    <div className="bg-brand-100 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Greeting */}
@@ -827,7 +827,7 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {order.status !== "مكتمل" ? (
+                      {order?.status !== "مكتمل" ? (
                         <div className="text-center py-10 px-4">
                            <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
                            <h3 className="text-xl font-bold text-brand-900 mb-2">سيظهر لك هنا نموذج التصويبات</h3>
@@ -835,7 +835,7 @@ export function Dashboard() {
                         </div>
                       ) : (
                         <div className="px-6 md:px-12 py-8">
-                          {order.researchRecommendations && (
+                          {order?.researchRecommendations && (
                             <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-6 md:p-8 mb-10 shadow-sm">
                               <h3 className="text-xl md:text-2xl font-bold text-brand-900 mb-4 leading-tight flex items-center gap-3">
                                 <Star className="w-6 h-6 text-brand-500 fill-brand-500" /> توصيات واقتراحات فريق البحث
@@ -869,11 +869,11 @@ export function Dashboard() {
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة حرة لتحديد مايراه يستحق التصويب</label>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة كتابة حرة لتحديد الخطأ</label>
                                 <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..." value={correctionError} onChange={(e) => setCorrectionError(e.target.value)}></textarea>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-brand-700 mb-1">كتابة التصويب مع توضيح مرجعيته أو مصادره لهذا التصويب إن وجد</label>
+                                <label className="block text-sm font-bold text-brand-700 mb-1">مساحة كتابة حرة ليكتب التصويب مع توضيح مرجعيته أو مصادره لهذا التصويب إن وجد</label>
                                 <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
                               </div>
                               

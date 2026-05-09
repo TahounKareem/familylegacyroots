@@ -3,74 +3,84 @@ import { BookOpen, MapPin, Phone, Mail } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-brand-950 text-brand-100 pt-16 pb-8 border-t-4 border-brand-500">
+    <footer className="bg-[#8E9091] text-white pt-16 pb-8 border-t-4 border-brand-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-6 text-white hover:text-brand-300 transition">
-              <BookOpen className="w-8 h-8 text-brand-500" />
+              <BookOpen className="w-8 h-8 text-white" />
               <span className="font-serif text-2xl font-bold">سجل تراث العائلة</span>
             </Link>
-            <p className="text-brand-300 text-sm leading-relaxed mb-6">
+            <p className="text-white text-sm leading-relaxed mb-6">
               نحن شركة متخصصة في علم الأنساب "الجينيولوجي" ، نقوم بتوثيق أصول وتاريخ العائلات، عبر منتجنا وعلامتنا التجارية " سجل تراث العائلة" والذي نقدمه في قالب فني أنيق وإحترافي.
             </p>
           </div>
           
           <div>
             <h3 className="font-serif text-lg text-white mb-6">روابط سريعة</h3>
-            <ul className="space-y-4 text-brand-300">
-              <li><Link to="/about" className="hover:text-brand-400 transition">من نحن وماذا نقدم</Link></li>
-              <li><Link to="/services" className="hover:text-brand-400 transition">سجل تراث العائلة</Link></li>
-              <li><Link to="/knowledge" className="hover:text-brand-400 transition">المركز المعرفي</Link></li>
-              <li><Link to="/contact" className="hover:text-brand-400 transition">تواصل معنا</Link></li>
+            <ul className="space-y-4 text-white">
+              <li><Link to="/about" className="hover:text-brand-300 transition">من نحن وماذا نقدم</Link></li>
+              <li><Link to="/services" className="hover:text-brand-300 transition">سجل تراث العائلة</Link></li>
+              <li><Link to="/knowledge" className="hover:text-brand-300 transition">المركز المعرفي</Link></li>
+              <li><Link to="/contact" className="hover:text-brand-300 transition">تواصل معنا</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-serif text-lg text-white mb-6">الوثائق القانونية</h3>
-            <ul className="space-y-4 text-brand-300">
-              <li><Link to="/legal#terms" className="hover:text-brand-400 transition">شروط الاستخدام</Link></li>
-              <li><Link to="/legal#privacy" className="hover:text-brand-400 transition">سياسة الخصوصية</Link></li>
-              <li><Link to="/legal#cookies" className="hover:text-brand-400 transition">سياسة الكوكيز</Link></li>
+            <ul className="space-y-4 text-white">
+              <li><Link to="/legal#terms" className="hover:text-brand-300 transition">شروط الاستخدام</Link></li>
+              <li><Link to="/legal#privacy" className="hover:text-brand-300 transition">سياسة الخصوصية</Link></li>
+              <li><Link to="/legal#cookies" className="hover:text-brand-300 transition">سياسة الكوكيز</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-serif text-lg text-white mb-6">التواصل</h3>
-            <ul className="space-y-4 text-brand-300">
+            <ul className="space-y-4 text-white">
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-white shrink-0 mt-0.5" />
                 <span dir="ltr" className="text-right">30 N Gould St, STE R, Sheridan, WY 82801, USA</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-brand-500 shrink-0" />
+                <Mail className="w-5 h-5 text-white shrink-0" />
                 <span>info@thefamilylegacyroots.com</span>
               </li>
             </ul>
           </div>
         </div>
         
-        <div className="pt-8 border-t border-brand-800/50 flex flex-col md:flex-row justify-between items-center text-sm text-brand-400 gap-4">
-          <div className="flex gap-4 items-center">
-            <a href="http://facebook.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-900 border border-brand-800 flex items-center justify-center text-brand-300 hover:bg-brand-600 hover:text-white transition shadow-sm">
+        <div className="pt-8 border-t border-[#A0A2A3] flex flex-col items-center gap-6 text-sm text-white">
+          {/* Social Icons matching theme */}
+          <div className="flex flex-wrap gap-4 items-center justify-center">
+            {/* Facebook */}
+            <a href="http://facebook.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
             </a>
-            <a href="https://www.instagram.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-900 border border-brand-800 flex items-center justify-center text-brand-300 hover:bg-brand-600 hover:text-white transition shadow-sm">
+            {/* Instagram */}
+            <a href="https://www.instagram.com/thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" /></svg>
             </a>
-            <a href="https://www.tiktok.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-900 border border-brand-800 flex items-center justify-center text-brand-300 hover:bg-brand-600 hover:text-white transition shadow-sm">
+            {/* X (Twitter) */}
+            <a href="http://x.com/familylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.6 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg>
+            </a>
+            {/* TikTok */}
+            <a href="https://www.tiktok.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512"><path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25v178.72A162.55 162.55 0 1 1 162.6 162.6v82.08A80.59 80.59 0 1 0 243.1 325.2V20.27h82.08a162.33 162.33 0 0 0 122.8 122.8v66.84z"/></svg>
             </a>
-            <a href="https://www.youtube.com/@TheFamilyLegacyRoots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-900 border border-brand-800 flex items-center justify-center text-brand-300 hover:bg-brand-600 hover:text-white transition shadow-sm">
+            {/* YouTube */}
+            <a href="https://www.youtube.com/@TheFamilyLegacyRoots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             </a>
-            <a href="https://www.snapchat.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-brand-900 border border-brand-800 flex items-center justify-center text-brand-300 hover:bg-brand-600 hover:text-white transition shadow-sm">
+            {/* Snapchat */}
+            <a href="https://www.snapchat.com/@thefamilylegacyroots" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:text-white transition shadow-sm">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.08 0C9.69-.02 7.74.83 6.09 2.5c-.8.81-1.37 1.83-1.63 3.02-.12.56-.21 1.13-.34 1.69-.17.72-.4 1.41-.85 2-.45.58-1 .99-1.74 1.12a2.31 2.31 0 0 0-.25.06c-.84.28-1.12 1.34-.51 1.96.22.22.48.42.76.57.85.45 1.76.77 2.7 1 .2.05.37.24.48.42.17.27.15.54 0 .8-.49.92-.99 1.84-1.55 2.72-.51.81-1.22 1.4-2.1 1.82-.47.22-.64.58-.59 1 .05.41.36.78.85.98.54.21 1.11.31 1.68.4.92.14 1.84.22 2.77.25 1.13.04 2.21.32 3.23.82.78.38 1.54.78 2.32 1.14.47.22 1 0 1.25-.46.06-.11.1-.23.15-.35.15-.35.29-.68.58-.92.83-.69 1.82-.93 2.87-1 1.09-.07 2.18-.08 3.27-.12.18-.01.37-.02.55-.03 1.07-.07 1.8-.83 1.69-1.86-.06-.5-.38-.85-.85-1.07-.85-.4-1.52-1.01-2-1.8-.57-.89-1.06-1.81-1.55-2.73-.13-.25-.13-.5 0-.75.1-.2.27-.38.48-.44.97-.24 1.9-.57 2.77-1.04.38-.2.7-.47 1-.84.45-.55.33-1.38-.27-1.76-.11-.07-.22-.12-.34-.17a4.93 4.93 0 0 1-1.95-1.34c-.4-.48-.65-1.06-.79-1.68-.13-.57-.22-1.13-.34-1.69-.26-1.19-.83-2.21-1.63-3.02C16.42.83 14.47-.02 12.08 0zm1.75 3.03c.5.09 1 .28 1.41.59.51.37.84.87 1.05 1.46.22.61.34 1.25.43 1.89.06.41.13.82.35 1.18.23.36.56.63.95.83.25.13.52.22.79.31a3 3 0 0 0 .5-.47c-.5-.11-1-.18-1.49-.33-.64-.21-.99-.68-1.03-1.35-.04-.6 0-1.21.05-1.81.08-.85.22-1.69.58-2.46.33-.71.85-1.25 1.55-1.59.69-.34 1.43-.46 2.19-.53.49-.04 1-.03 1.49 0 .15.86-.18 1.61-.75 2.17-.67.66-1.52.92-2.45.98-.67.04-1.35.01-2.02.04-.66.03-1.07.45-1.07 1.1 0 .66.42 1.06 1.05 1.09.73.04 1.46.03 2.19 0 1.15-.05 2.16-.48 2.92-1.36.65-.75.98-1.65 1.01-2.65.02-.91-.18-1.78-.6-2.58-.2-.37-.44-.71-.72-1.01A5.3 5.3 0 0 0 18.06 1.3c-.63-.25-1.3-.4-1.98-.44-.1-.01-.2 0-.3.01.21.84-.04 1.58-.6 2.16z"/></svg>
             </a>
           </div>
-          <div className="flex items-center gap-2">
-            <span>© {new Date().getFullYear()}</span>
-            <div className="bg-white/90 p-1.5 rounded-md">
+          <div className="flex items-center justify-center gap-2 mt-2 pb-4">
+            <span>© 2026</span>
+            <div className="bg-white/90 p-1.5 rounded-md mx-1">
               <img src="https://i.postimg.cc/87JZxTP1/Genealab.png" alt="GeneaLab LLC" className="h-4 w-auto object-contain" />
             </div>
             <span>جميع الحقوق محفوظة.</span>

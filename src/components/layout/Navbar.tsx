@@ -30,7 +30,7 @@ export function Navbar() {
               <Link 
                 key={link.path} 
                 to={link.path}
-                className="text-brand-800 hover:text-brand-600 font-medium transition"
+                className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm"
               >
                 {link.text}
               </Link>
@@ -40,16 +40,16 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {currentUser ? (
               <div className="flex items-center gap-4">
-                <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-brand-800 hover:text-brand-600 font-medium transition">
+                <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-brand-800 hover:text-red-600 font-medium transition">
+                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
                   تسجيل الخروج
                 </button>
               </div>
             ) : (
-              <Link to="/auth" className="text-brand-800 hover:text-brand-600 font-medium transition">
+              <Link to="/auth" className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
                 تسجيل الدخول / إنشاء حساب
               </Link>
             )}
