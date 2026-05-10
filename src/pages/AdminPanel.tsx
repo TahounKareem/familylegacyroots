@@ -341,12 +341,20 @@ export function AdminPanel() {
                       const url = isStr ? docItem : docItem.url;
                       const title = !isStr && docItem.title ? docItem.title : `مرفق وثيقة #${idx + 1}`;
                       return (
-                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-white border border-brand-200 p-4 rounded-xl hover:border-brand-500 transition shadow-sm text-brand-700">
-                        <FileText className="w-6 h-6 text-brand-500 shrink-0" />
-                        <div className="overflow-hidden w-full">
-                           <p className="font-bold text-sm text-brand-900 line-clamp-1">{title}</p>
-                           {!isStr && <p className="text-xs text-brand-600 mt-1 line-clamp-1">{docItem.purpose} {docItem.kind ? ` • ${docItem.kind}` : ''}</p>}
+                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="flex flex-col gap-2 bg-white border border-brand-200 p-4 rounded-xl hover:border-brand-500 transition shadow-sm text-brand-700">
+                        <div className="flex items-center gap-3 w-full">
+                          <FileText className="w-6 h-6 text-brand-500 shrink-0" />
+                          <div className="overflow-hidden w-full">
+                             <p className="font-bold text-sm text-brand-900 line-clamp-1">{title}</p>
+                             {!isStr && <p className="text-xs text-brand-600 mt-1 line-clamp-1">{docItem.purpose}</p>}
+                          </div>
                         </div>
+                        {!isStr && (docItem.kind || docItem.description) && (
+                          <div className="mt-2 text-xs text-brand-800 bg-brand-50 p-2 rounded-lg border border-brand-100">
+                             {docItem.kind && <p><span className="font-bold">النوع:</span> {docItem.kind}</p>}
+                             {docItem.description && <p className="mt-1 whitespace-pre-line"><span className="font-bold">الوصف:</span> {docItem.description}</p>}
+                          </div>
+                        )}
                       </a>
                     )})}
                   </div>
@@ -355,17 +363,23 @@ export function AdminPanel() {
                {selectedOrder.data.photos && selectedOrder.data.photos.length > 0 && (
                 <>
                   <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">الصور المرفقة</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     {selectedOrder.data.photos.map((photoItem, idx) => {
                       const isStr = typeof photoItem === 'string';
                       const url = isStr ? photoItem : photoItem.url;
                       const title = !isStr && photoItem.title ? photoItem.title : `صورة ${idx + 1}`;
                       return (
-                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="relative group block rounded-xl overflow-hidden border border-brand-200 hover:border-brand-500 transition shadow-sm aspect-square bg-white">
-                        <img src={url} alt={title} className="w-full h-full object-cover bg-gray-100" loading="lazy" />
+                      <a key={idx} href={url} target="_blank" rel="noreferrer" className="relative group flex flex-col rounded-xl overflow-hidden border border-brand-200 hover:border-brand-500 transition shadow-sm bg-white">
+                        <div className="aspect-square relative w-full">
+                          <img src={url} alt={title} className="w-full h-full object-cover bg-gray-100 absolute inset-0" loading="lazy" />
+                        </div>
                         {!isStr && (
-                           <div className="absolute inset-x-0 bottom-0 bg-black/70 p-2 text-white">
-                             <p className="text-xs font-bold line-clamp-1">{title}</p>
+                           <div className="p-3 bg-white text-right border-t border-brand-100">
+                             <p className="text-sm font-bold text-brand-900 mb-1 line-clamp-1">{title}</p>
+                             <div className="text-xs text-brand-600 space-y-1">
+                               {photoItem.purpose && <p><span className="font-semibold">الغرض:</span> {photoItem.purpose}</p>}
+                               {photoItem.description && <p><span className="font-semibold">الوصف:</span> {photoItem.description}</p>}
+                             </div>
                            </div>
                         )}
                       </a>
