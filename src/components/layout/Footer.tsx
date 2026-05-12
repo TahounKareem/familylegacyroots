@@ -29,9 +29,11 @@ export function Footer() {
           <div>
             <h3 className="font-serif text-lg text-white mb-6">الوثائق القانونية</h3>
             <ul className="space-y-4 text-white">
-              <li><Link to="/legal#terms" className="hover:text-brand-300 transition">شروط الاستخدام</Link></li>
-              <li><Link to="/legal#privacy" className="hover:text-brand-300 transition">سياسة الخصوصية</Link></li>
-              <li><Link to="/legal#cookies" className="hover:text-brand-300 transition">سياسة الكوكيز</Link></li>
+              <li><Link to="/legal/terms" className="hover:text-brand-300 transition">شروط استخدام الموقع والمنصة</Link></li>
+              <li><Link to="/legal/privacy" className="hover:text-brand-300 transition">سياسة الخصوصية وسرية البيانات</Link></li>
+              <li><Link to="/legal/cookies" className="hover:text-brand-300 transition">سياسة ملفات تعريف الارتباط</Link></li>
+              <li><Link to="/legal/refund" className="hover:text-brand-300 transition">سياسة الإلغاء وعدم الاسترجاع</Link></li>
+              <li><Link to="/legal/payments" className="hover:text-brand-300 transition">سياسة الدفع والفوترة والمعاملات المالية</Link></li>
             </ul>
           </div>
           

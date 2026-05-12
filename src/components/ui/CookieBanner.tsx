@@ -75,16 +75,16 @@ export function CookieBanner() {
             </div>
             <p className="text-sm text-brand-700 leading-relaxed mb-6">
               نحن نستخدم ملفات تعريف الارتباط (الكوكيز) لنقدم لك أفضل تجربة ممكنة على موقعنا، ولتحليل التصفح، وتقديم محتوى مخصص. بمواصلة تصفح الموقع، فإنك توافق على{' '}
-              <Link to="/legal#cookies" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
-                سياسة الكوكيز
+              <Link to="/legal/cookies" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
+                سياسة ملفات تعريف الارتباط
               </Link>{' '}
               و{' '}
-              <Link to="/legal#privacy" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
-                سياسة الخصوصية
+              <Link to="/legal/privacy" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
+                سياسة الخصوصية وسرية البيانات
               </Link>{' '}
               و{' '}
-              <Link to="/legal#terms" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
-                شروط الاستخدام
+              <Link to="/legal/terms" className="text-brand-600 font-medium underline hover:text-brand-800 transition">
+                شروط استخدام الموقع والمنصة
               </Link>.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">

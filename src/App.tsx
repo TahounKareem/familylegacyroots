@@ -40,7 +40,7 @@ export default function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/knowledge" element={<KnowledgeCenter />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/legal" element={<Legal />} />
+          <Route path="/legal/:documentId" element={<Legal />} />
         </Route>
         
         <Route path="/auth" element={<Auth />} />

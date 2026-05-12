@@ -376,7 +376,7 @@ export function OrderFlow() {
               <div className="bg-white border-2 border-brand-100 p-6 rounded-2xl">
                 <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-100 flex flex-col items-center text-center shadow-sm">
                   <span className="text-brand-800 block mb-3 font-bold text-sm">يجب الإطلاع على تفاصيل التعاقد ووثيقة تقديم الخدمة قبل الإقرار</span>
-                  <a href="/legal" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
+                  <a href="/legal/terms" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
                     الإطلاع على عقد الخدمة <ArrowLeft className="w-4 h-4" />
                   </a>
                 </div>
