@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, Link, useLocation } from "react-router";
 import { Check, ArrowRight, ArrowLeft, UserPlus, X } from "lucide-react";
 import { useAppStore, FamilyData } from "@/lib/store";
+import { OrderStepper } from "@/components/OrderStepper";
 
 export function OrderFlow() {
   const [step, setStep] = useState(1);
-  const { currentUser, placeOrder, orders } = useAppStore();
+  const { currentUser, placeOrder, orders, pendingOrderData, setPendingOrderData } = useAppStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Redirect if they already have an order
   useEffect(() => {
@@ -15,7 +17,19 @@ export function OrderFlow() {
     }
   }, [orders, currentUser, navigate]);
 
-  const [formData, setFormData] = useState<FamilyData>({
+  // Jump to step if returning from other pages
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get("payment") === "true") {
+      setStep(6);
+    } else if (searchParams.get("step") === "2") {
+      setStep(2);
+    } else if (searchParams.get("step") === "4") {
+      setStep(4);
+    }
+  }, [location.search]);
+
+  const [formData, setFormData] = useState<FamilyData>(pendingOrderData || {
     firstName: "",
     fatherName: "",
     grandfatherName: "",
@@ -31,15 +45,29 @@ export function OrderFlow() {
     treeData: { nodes: [], edges: [] }
   });
 
+  // Always update pending order data when formData changes to persist it through the flow
+  useEffect(() => {
+    setPendingOrderData(formData);
+  }, [formData, setPendingOrderData]);
+
   const [agreedToService, setAgreedToService] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [inviteError, setInviteError] = useState("");
 
-  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
+  const handleNext = () => {
+    if (step === 1) setStep(2);
+    else if (step === 2) navigate("/shipping-details");
+    else if (step === 4) navigate("/service-agreement");
+  };
+
+  const handlePrev = () => {
+    if (step === 2) setStep(1);
+    else if (step === 4) navigate("/shipping-details");
+    else if (step === 6) navigate("/e-signature");
+  };
 
   const handleInviteSubmit = async () => {
     if (inviteCode !== "alpha24") {
@@ -129,13 +157,6 @@ export function OrderFlow() {
     }
   };
 
-  const stepsList = [
-    { title: "تقديم البيانات", subtitle: "بيانات أمين السجل/العميل" },
-    { title: "تحديد المسار", subtitle: "نقطة البدء وقالب التصميم" },
-    { title: "تأكيد الإصدار", subtitle: "مراجعة الطلب والموافقة" },
-    { title: "بدء التنفيذ", subtitle: "إتمام الدفع" }
-  ];
-
   return (
     <div className="bg-brand-50 min-h-screen py-12 relative">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -148,29 +169,11 @@ export function OrderFlow() {
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between relative">
-            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-brand-200 -z-10 translate-y-[-50%]"></div>
-            {[1, 2, 3, 4].map((s) => (
-              <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors border-4 ${
-                step >= s ? 'bg-brand-600 border-brand-100 text-white' : 'bg-white border-brand-200 text-brand-400'
-              }`}>
-                {step > s ? <Check className="w-5 h-5" /> : s}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-4 text-center px-1">
-            {stepsList.map((stepItem, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <span className={`text-sm md:text-base ${step >= i + 1 ? 'text-brand-900 font-bold' : 'text-brand-600 font-medium'}`}>{stepItem.title}</span>
-                <span className={`text-[10px] md:text-xs mt-1 ${step >= i + 1 ? 'text-brand-700' : 'text-brand-400'}`}>{stepItem.subtitle}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <OrderStepper currentStep={step} />
 
         {/* Steps Content */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-brand-100 p-8 md:p-12 mb-8">
+
           
           {step === 1 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -333,11 +336,11 @@ export function OrderFlow() {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
-                <p className="text-brand-600">مراجعة بيانات الطلب والموافقة على الشروط</p>
+                <p className="text-brand-600">مراجعة بيانات الطلب</p>
               </div>
 
               <div className="bg-brand-50 p-6 rounded-2xl border border-brand-200 space-y-4">
@@ -374,12 +377,6 @@ export function OrderFlow() {
               </div>
 
               <div className="bg-white border-2 border-brand-100 p-6 rounded-2xl">
-                <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-100 flex flex-col items-center text-center shadow-sm">
-                  <span className="text-brand-800 block mb-3 font-bold text-sm">يجب الإطلاع على تفاصيل التعاقد ووثيقة تقديم الخدمة قبل الإقرار</span>
-                  <a href="/legal/terms" target="_blank" className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-700 transition shadow hover:shadow-md">
-                    الإطلاع على عقد الخدمة <ArrowLeft className="w-4 h-4" />
-                  </a>
-                </div>
                 <label className="flex items-start gap-4 cursor-pointer">
                   <div className="pt-1">
                     <input 
@@ -390,14 +387,14 @@ export function OrderFlow() {
                     />
                   </div>
                   <div className="text-sm text-brand-700 leading-relaxed font-semibold pt-0.5">
-                    أقر بمراجعتي وموافقتي على تقديم الخدمة ، وأفهم أن العقد يصبح نافذاً بعد إتمام الدفع .
+                    أقر بمراجعتي وموافقتي على البيانات المقدمة لبدء العمل على تقديم الخدمة .
                   </div>
                 </label>
               </div>
             </div>
           )}
 
-          {step === 4 && (
+          {step === 6 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8 relative">
               {showInviteModal ? (
                 <div className="bg-brand-50 p-8 rounded-3xl border border-brand-200 max-w-md mx-auto relative z-10 shadow-lg">
@@ -466,17 +463,17 @@ export function OrderFlow() {
            <ArrowRight className="w-5 h-5" /> عودة
           </button>
           
-          {step < 4 ? (
+          {step < 6 ? (
             <button 
               onClick={handleNext} 
               disabled={
                 (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland)) ||
                 (step === 2 && !formData.startingPoint) ||
-                (step === 3 && !agreedToService)
+                (step === 4 && !agreedToService)
               }
               className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              التالي <ArrowLeft className="w-5 h-5" />
+              {step === 4 ? "تحويل للموافقة والتوقيع" : "التالي"} <ArrowLeft className="w-5 h-5" />
             </button>
           ) : (
             <button 

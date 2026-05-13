@@ -15,6 +15,10 @@ import { useAppStore } from "./lib/store";
 import { CookieBanner } from "./components/ui/CookieBanner";
 import { Chatbot } from "./components/ui/Chatbot";
 
+import { ShippingDetails } from "./pages/ShippingDetails";
+import { ServiceAgreement } from "./pages/ServiceAgreement";
+import { ESignature } from "./pages/ESignature";
+
 export default function App() {
   const initializeFirebase = useAppStore(state => state.initializeFirebase);
   const isAuthReady = useAppStore(state => state.isAuthReady);
@@ -47,6 +51,9 @@ export default function App() {
         
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/order" element={<OrderFlow />} />
+        <Route path="/shipping-details" element={<ShippingDetails />} />
+        <Route path="/service-agreement" element={<ServiceAgreement />} />
+        <Route path="/e-signature" element={<ESignature />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
       <CookieBanner />

@@ -70,10 +70,13 @@ export interface FamilyData {
   managerWord?: string;
   mobileNumber?: string;
   shippingAddress?: {
+    name: string;
+    phone: string;
     country: string;
     state: string;
-    zip: string;
     street: string;
+    zip?: string;
+    notes?: string;
   };
   treeData: TreeData;
 }
@@ -99,6 +102,8 @@ interface AppState {
   currentUser: UserInfo | null;
   orders: Order[];
   isAuthReady: boolean;
+  pendingOrderData: FamilyData | null;
+  setPendingOrderData: (data: FamilyData | null) => void;
   login: (user: UserInfo) => void;
   logout: () => Promise<void>;
   placeOrder: (order: Order) => Promise<void>;
@@ -113,6 +118,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   orders: [],
   isAuthReady: false,
+  pendingOrderData: null,
+  
+  setPendingOrderData: (data) => set({ pendingOrderData: data }),
   
   login: (user) => set({ currentUser: user }),
   
