@@ -77,15 +77,34 @@ export function ServiceAgreement() {
          customer_email: currentUser.email,
          customer_phone: pendingOrderData.shippingAddress?.phone || "-",
          shipping_full_address: `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`,
+         detailed_name: `الجد: ${pendingOrderData.grandfatherName || "-"} | القبيلة: ${pendingOrderData.tribeName || "-"}`,
+         homeland_and_start: `الموطن: ${pendingOrderData.homeland || "-"} | نقطة البدء: ${pendingOrderData.startingPoint || "-"}`,
+         design_template: pendingOrderData.designTemplate || "-",
+         historical_notes: pendingOrderData.historicalNotes || "-",
          productname: "توثيق شجرة العائلة",
          price_amount: 1999.00,
-         price_currency: "SAR", // Assuming SAR
+         price_currency: "SAR",
          payment_method: "pending",
          payment_status: "pending",
        }
     );
 
     await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
+
+    // Record consents
+    const consentTypes = [
+      "consent_intro",
+      "consent_service_nature",
+      "consent_scope",
+      "consent_lineage_rules",
+      "consent_secretary",
+      "consent_responsibility",
+      "consent_data_protection"
+    ];
+    
+    for (const type of consentTypes) {
+      await recordLegalConsent(type, { version: "v1.0" }, contractId.current, orderId.current);
+    }
 
     navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
   };
@@ -224,6 +243,10 @@ export function ServiceAgreement() {
                     [orderDetailsContract.ar.fields.orderId, `${dummyOrderId} / ${dummyInvoiceId}`, orderDetailsContract.en.fields.orderId],
                     [orderDetailsContract.ar.fields.orderDate, new Date().toLocaleDateString('ar-EG'), orderDetailsContract.en.fields.orderDate],
                     [orderDetailsContract.ar.fields.customerName, `${pendingOrderData.firstName} ${pendingOrderData.fatherName} ${pendingOrderData.familyName}`, orderDetailsContract.en.fields.customerName],
+                    [orderDetailsContract.ar.fields.detailedName, `الجد: ${pendingOrderData.grandfatherName || "-"} | القبيلة: ${pendingOrderData.tribeName || "-"}`, orderDetailsContract.en.fields.detailedName],
+                    [orderDetailsContract.ar.fields.homeland, `الموطن: ${pendingOrderData.homeland || "-"} | نقطة البدء: ${pendingOrderData.startingPoint || "-"}`, orderDetailsContract.en.fields.homeland],
+                    [orderDetailsContract.ar.fields.template, pendingOrderData.designTemplate || "-", orderDetailsContract.en.fields.template],
+                    [orderDetailsContract.ar.fields.notes, pendingOrderData.historicalNotes ? (pendingOrderData.historicalNotes.length > 50 ? pendingOrderData.historicalNotes.substring(0, 50) + '...' : pendingOrderData.historicalNotes) : "-", orderDetailsContract.en.fields.notes],
                     [orderDetailsContract.ar.fields.email, currentUser.email, orderDetailsContract.en.fields.email],
                     [orderDetailsContract.ar.fields.phone, pendingOrderData.shippingAddress?.phone || "-", orderDetailsContract.en.fields.phone],
                     [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`, orderDetailsContract.en.fields.shippingAddress],
