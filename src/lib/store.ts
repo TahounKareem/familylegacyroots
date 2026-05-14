@@ -3,7 +3,55 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { collection, doc, onSnapshot, setDoc, updateDoc, getDoc, query, where, getDocs } from "firebase/firestore";
 
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData?.map(provider => ({
+        providerId: provider.providerId,
+        email: provider.email,
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
 export type OrderStatus = "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل";
+
 
 export interface UserInfo {
 
@@ -139,7 +187,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set((state) => ({ orders: [...state.orders, order] }));
       await setDoc(doc(db, "orders", order.id), order);
     } catch (error) {
-      console.error("Error placing order:", error);
+      handleFirestoreError(error, OperationType.CREATE, `orders/${order.id}`);
     }
   },
 
@@ -151,7 +199,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
       await updateDoc(doc(db, "orders", id), { status });
     } catch (error) {
-      console.error("Error updating order status:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
     }
   },
 
@@ -162,7 +210,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
       await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...links });
     } catch (error) {
-      console.error("Error fulfilling order:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
     }
   },
 
@@ -187,7 +235,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       await updateDoc(doc(db, "orders", orderId), updateData);
     } catch (error) {
-      console.error("Error adding message to order:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `orders/${orderId}`);
     }
   },
 
@@ -216,7 +264,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       await updateDoc(doc(db, "orders", orderId), { messages: updatedMessages });
     } catch(e) {
-      console.error("Error marking msg read:", e);
+      handleFirestoreError(e, OperationType.UPDATE, `orders/${orderId}`);
     }
   },
 
@@ -262,7 +310,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             });
             set({ orders: ordersList });
           }, (error) => {
-             console.error("Error fetching orders:", error);
+             handleFirestoreError(error, OperationType.LIST, `orders`);
           });
           
         } catch (error) {

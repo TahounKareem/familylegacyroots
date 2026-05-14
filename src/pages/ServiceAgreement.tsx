@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { orderDetailsContract, mainContractSections } from "@/data/contractContent";
+import { logLegalEvent, recordLegalConsent, createLegalContractRecord, createOrderEvidence } from "@/lib/legalService";
 
 export function ServiceAgreement() {
   const { currentUser, pendingOrderData } = useAppStore();
@@ -26,12 +27,25 @@ export function ServiceAgreement() {
 
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  const contractId = useRef(`CTR-${Date.now()}-${Math.floor(Math.random() * 1000)}`);
+  const orderId = useRef(`ORD-PENDING-${Math.floor(Math.random() * 9000)}`);
+  const invoiceId = useRef(`INV-PENDING-${Math.floor(Math.random() * 9000)}`);
+
+  useEffect(() => {
+    if (currentUser && pendingOrderData) {
+      logLegalEvent("contract_opened", { version: "v1.0" }, contractId.current, orderId.current);
+    }
+  }, [currentUser, pendingOrderData]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
       if (scrollHeight - scrollTop <= clientHeight + 150) {
-        setScrolledToBottom(true);
+        if (!scrolledToBottom) {
+          setScrolledToBottom(true);
+          logLegalEvent("contract_reading_completed", { version: "v1.0" }, contractId.current, orderId.current);
+        }
       }
     }
   };
@@ -39,16 +53,48 @@ export function ServiceAgreement() {
   const allChecked = req1 && req2 && req3 && req4 && req5 && req6;
   const canProceed = allChecked && scrolledToBottom;
 
-  const handleProceed = () => {
-    // Navigating to E-signature placeholder
-    navigate("/e-signature");
+  const handleProceed = async () => {
+    if (!currentUser || !pendingOrderData) return;
+    
+    await createLegalContractRecord(
+      contractId.current,
+      orderId.current,
+      "v1.0",
+      "awaiting_signature",
+      { ...currentUser },
+      { ...pendingOrderData.shippingAddress },
+      { ...pendingOrderData }
+    );
+
+    await createOrderEvidence(
+       orderId.current,
+       contractId.current,
+       {
+         order_id: orderId.current,
+         invoice_id: invoiceId.current,
+         order_date: new Date().toISOString(),
+         customer_full_name: pendingOrderData.firstName + " " + pendingOrderData.familyName,
+         customer_email: currentUser.email,
+         customer_phone: pendingOrderData.shippingAddress?.phone || "-",
+         shipping_full_address: `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`,
+         productname: "توثيق شجرة العائلة",
+         price_amount: 1999.00,
+         price_currency: "SAR", // Assuming SAR
+         payment_method: "pending",
+         payment_status: "pending",
+       }
+    );
+
+    await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
+
+    navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
   };
 
   if (!currentUser || !pendingOrderData) return null;
 
   const priceAmount = "$1999.00";
-  const dummyOrderId = "ORD-PENDING-" + Math.floor(Math.random() * 9000);
-  const dummyInvoiceId = "INV-PENDING";
+  const dummyOrderId = orderId.current;
+  const dummyInvoiceId = invoiceId.current;
 
   // Prevent copy in viewer
   const handleCopy = (e: React.ClipboardEvent) => {
@@ -234,28 +280,34 @@ export function ServiceAgreement() {
           
           <div className="space-y-4">
             <CheckboxLabel 
-              checked={req1} onChange={setReq1} 
-              text="أقر بأن جميع بيانات الطلب صحيحة." 
+              checked={req1} onChange={(v) => { setReq1(v); if(v) recordLegalConsent("order_accuracy", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أقر بأن جميع بيانات الطلب صحيحة." 
+              textEn="I acknowledge that all order data is correct."
             />
             <CheckboxLabel 
-              checked={req2} onChange={setReq2} 
-              text="أؤكد اطلاعي الكامل على وثيقة تقديم الخدمة الموضحة أعلاه." 
+              checked={req2} onChange={(v) => { setReq2(v); if(v) recordLegalConsent("contract_reviewed", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أؤكد اطلاعي الكامل على وثيقة تقديم الخدمة الموضحة أعلاه." 
+              textEn="I confirm my full review of the service provision document outlined above."
             />
             <CheckboxLabel 
-              checked={req3} onChange={setReq3} 
-              text="أوافق على شروط تنفيذ الخدمة وإخلاء المسؤولية." 
+              checked={req3} onChange={(v) => { setReq3(v); if(v) recordLegalConsent("execution_terms", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أوافق على شروط تنفيذ الخدمة وإخلاء المسؤولية." 
+              textEn="I agree to the terms of service execution and disclaimer of liability."
             />
             <CheckboxLabel 
-              checked={req4} onChange={setReq4} 
-              text="أقر بفهمي لسياسة الإلغاء وعدم الاسترجاع." 
+              checked={req4} onChange={(v) => { setReq4(v); if(v) recordLegalConsent("refund_acknowledged", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أقر بفهمي لسياسة الإلغاء وعدم الاسترجاع." 
+              textEn="I acknowledge my understanding of the cancellation and non-refund policy."
             />
             <CheckboxLabel 
-              checked={req5} onChange={setReq5} 
-              text="أقر بمراجعتي لسياسة الخصوصية وسرية البيانات." 
+              checked={req5} onChange={(v) => { setReq5(v); if(v) recordLegalConsent("privacy_acknowledged", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أقر بمراجعتي لسياسة الخصوصية وسرية البيانات." 
+              textEn="I acknowledge my review of the privacy and data confidentiality policy."
             />
             <CheckboxLabel 
-              checked={req6} onChange={setReq6} 
-              text="أوافق على إتمام التعاقد الإلكتروني واستخدام السجلات والتوقيع الإلكتروني." 
+              checked={req6} onChange={(v) => { setReq6(v); if(v) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أوافق على إتمام التعاقد الإلكتروني واستخدام السجلات والتوقيع الإلكتروني." 
+              textEn="I agree to complete the electronic contracting and to the use of electronic records and signatures."
             />
           </div>
 
@@ -298,7 +350,7 @@ export function ServiceAgreement() {
   );
 }
 
-function CheckboxLabel({ checked, onChange, text }: { checked: boolean, onChange: (val: boolean) => void, text: string }) {
+function CheckboxLabel({ checked, onChange, textAr, textEn }: { checked: boolean, onChange: (val: boolean) => void, textAr: string, textEn: string }) {
   return (
     <label className="flex items-start gap-4 p-4 border border-brand-100 rounded-xl cursor-pointer hover:bg-brand-50 transition">
       <div className="pt-0.5">
@@ -309,8 +361,13 @@ function CheckboxLabel({ checked, onChange, text }: { checked: boolean, onChange
           onChange={(e) => onChange(e.target.checked)}
         />
       </div>
-      <div className="text-sm text-brand-800 leading-relaxed font-bold">
-        {text}
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="text-sm text-brand-800 leading-relaxed font-bold text-right">
+          {textAr}
+        </div>
+        <div className="text-sm text-brand-800 leading-relaxed font-bold text-left dir-ltr" dir="ltr">
+          {textEn}
+        </div>
       </div>
     </label>
   );

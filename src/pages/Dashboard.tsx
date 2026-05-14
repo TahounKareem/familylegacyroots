@@ -28,6 +28,9 @@ export function Dashboard() {
   const [replyAttachments, setReplyAttachments] = useState<string[]>([]);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
 
+  const [pendingUpload, setPendingUpload] = useState<{file: File, arrayName: "documents"|"photos"} | null>(null);
+  const [mediaMeta, setMediaMeta] = useState({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
+
   // Check for Stripe success redirect
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -54,6 +57,15 @@ export function Dashboard() {
       }
     }
   }, [location.search, orders, updateOrderStatus, navigate, currentUser]);
+
+  const totalAdminMessagesUnread = orders.find(o => o.userId === currentUser?.id)?.messages?.filter(m => m.senderRole === "admin" && !m.isRead).length || 0;
+
+  useEffect(() => {
+    const order = orders.find(o => o.userId === currentUser?.id);
+    if (activeTab === "رسائل فريق البحث" && totalAdminMessagesUnread > 0 && order) {
+      useAppStore.getState().markMessagesAsRead(order.id, "user");
+    }
+  }, [activeTab, totalAdminMessagesUnread, orders, currentUser]);
 
   if (!currentUser) return <Navigate to="/auth" />;
 
@@ -82,9 +94,6 @@ export function Dashboard() {
       alert("حدث خطأ.");
     }
   };
-
-  const [pendingUpload, setPendingUpload] = useState<{file: File, arrayName: "documents"|"photos"} | null>(null);
-  const [mediaMeta, setMediaMeta] = useState({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
 
   const updateSpecificData = async (updates: Partial<FamilyData>) => {
     if (!order) return;
@@ -196,14 +205,6 @@ export function Dashboard() {
       {isLocked && title !== "حالة السجل" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
     </button>
   );
-
-  const totalAdminMessagesUnread = order?.messages?.filter(m => m.senderRole === "admin" && !m.isRead).length || 0;
-
-  useEffect(() => {
-    if (activeTab === "رسائل فريق البحث" && totalAdminMessagesUnread > 0 && order) {
-      useAppStore.getState().markMessagesAsRead(order.id, "user");
-    }
-  }, [activeTab, totalAdminMessagesUnread, order]);
 
   return (
     <div className="bg-brand-50 min-h-screen py-10">
