@@ -21,11 +21,11 @@ export function OrderFlow() {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("payment") === "true") {
-      setStep(6);
+      setStep(5);
     } else if (searchParams.get("step") === "2") {
       setStep(2);
-    } else if (searchParams.get("step") === "4") {
-      setStep(4);
+    } else if (searchParams.get("step") === "5") {
+      setStep(5);
     }
   }, [location.search]);
 
@@ -42,7 +42,16 @@ export function OrderFlow() {
     documents: [],
     photos: [],
     historicalNotes: "",
-    treeData: { nodes: [], edges: [] }
+    treeData: { nodes: [], edges: [] },
+    shippingAddress: {
+      name: "",
+      phone: "",
+      country: "",
+      state: "",
+      street: "",
+      zip: "",
+      notes: ""
+    }
   });
 
   // Always update pending order data when formData changes to persist it through the flow
@@ -59,14 +68,12 @@ export function OrderFlow() {
 
   const handleNext = () => {
     if (step === 1) setStep(2);
-    else if (step === 2) navigate("/shipping-details");
-    else if (step === 4) navigate("/service-agreement");
+    else if (step === 2) navigate("/service-agreement");
   };
 
   const handlePrev = () => {
     if (step === 2) setStep(1);
-    else if (step === 4) navigate("/shipping-details");
-    else if (step === 6) navigate("/e-signature");
+    else if (step === 5) navigate("/e-signature");
   };
 
   const handleInviteSubmit = async () => {
@@ -88,7 +95,7 @@ export function OrderFlow() {
         createdAt: new Date().toISOString(),
         plan: "invite",
         printRequested: false,
-        status: "بانتظار الدفع",
+        status: "بإنتظار إتمام الدفع",
         totalAmount: 0,
         data: formData,
       });
@@ -123,7 +130,7 @@ export function OrderFlow() {
         createdAt: new Date().toISOString(),
         plan: "standard",
         printRequested: false,
-        status: "بانتظار الدفع",
+        status: "بإنتظار إتمام الدفع",
         totalAmount: planPrice,
         data: formData,
       });
@@ -182,7 +189,7 @@ export function OrderFlow() {
                 <p className="text-brand-600">أدخل بيانات أمين السجل / العميل المعتمد للتواصل</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 border-b border-brand-100 pb-12">
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل وأمين السجل) *</label>
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
@@ -210,6 +217,48 @@ export function OrderFlow() {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
+                </div>
+              </div>
+
+              <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200 mt-8">
+                <h3 className="text-xl font-bold text-brand-900 mb-2 flex items-center gap-2">محطة استلام السجل المطبوع</h3>
+                <p className="text-sm text-brand-600 mb-6">احرص على دقة بيانات الشحن لضمان تسليم النسخ الورقية بأمان.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                      value={formData.shippingAddress?.name || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">رقم الهاتف *</label>
+                    <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
+                      value={formData.shippingAddress?.phone || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: e.target.value}})} placeholder="+0000000000" dir="ltr" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                      value={formData.shippingAddress?.country || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, country: e.target.value}})} placeholder="الدولة" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                      value={formData.shippingAddress?.state || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي (اختياري)</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                      value={formData.shippingAddress?.zip || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                      value={formData.shippingAddress?.street || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-brand-800 mb-2">ملاحظات الشحن (اختياري)</label>
+                    <textarea className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 h-24 resize-none" 
+                      value={formData.shippingAddress?.notes || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, notes: e.target.value}})} placeholder="أي ملاحظات تفصيلية لشركة الشحن..." />
+                  </div>
                 </div>
               </div>
             </div>
@@ -336,65 +385,9 @@ export function OrderFlow() {
             </div>
           )}
 
-          {step === 4 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
-                <p className="text-brand-600">مراجعة بيانات الطلب</p>
-              </div>
+          {/* Removed Step 4 (Confirm Edition) from here */}
 
-              <div className="bg-brand-50 p-6 rounded-2xl border border-brand-200 space-y-4">
-                <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-2">ملخص بيانات أمين السجل</h3>
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                  <div className="col-span-2 md:col-span-1"><span className="text-brand-600">الاسم:</span> <strong className="text-brand-900">{formData.firstName} {formData.fatherName} {formData.grandfatherName} {formData.familyName}</strong></div>
-                  <div><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{formData.country}</strong></div>
-                  <div><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{formData.homeland}</strong></div>
-                  <div><span className="text-brand-600">القبيلة:</span> <strong className="text-brand-900">{formData.tribeName || "غير محدد"}</strong></div>
-                </div>
-
-                <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-2 mt-4 pt-4">المسار والمخرجات</h3>
-                <div className="grid grid-cols-1 gap-y-4 gap-x-2 text-sm pt-2">
-                  <div>
-                    <span className="text-brand-600">نقطة البدء:</span> 
-                    <strong className="text-brand-900">
-                      {formData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${formData.firstName} بن ${formData.fatherName})` :
-                       formData.startingPointType === "اسم العائلة" ? `اسم العائلة (${formData.familyName})` :
-                       formData.startingPointType === "احد الأسلاف" ? `${formData.startingPointAncestor || "احد الأسلاف"} (${formData.startingPointName})` :
-                       formData.startingPoint || "-"}
-                    </strong>
-                  </div>
-                  <div><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{formData.designTemplate}</strong></div>
-                  <div className="mt-4 border-t border-brand-100 pt-4">
-                    <span className="text-brand-600 block mb-2 font-bold text-base">الباقة</span>
-                    <strong className="text-brand-900 block text-lg mb-2">السجل الأساسي ($1999) ويشمل</strong>
-                    <ul className="list-disc list-inside text-brand-800 space-y-1">
-                      <li>نسخة رقمية "الكترونية"</li>
-                      <li>عدد 10 نسخ ورقية مطبوعة</li>
-                      <li>بوستر مشجر عمود النسب الشامل</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-brand-100 p-6 rounded-2xl">
-                <label className="flex items-start gap-4 cursor-pointer">
-                  <div className="pt-1">
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
-                      checked={agreedToService}
-                      onChange={(e) => setAgreedToService(e.target.checked)}
-                    />
-                  </div>
-                  <div className="text-sm text-brand-700 leading-relaxed font-semibold pt-0.5">
-                    أقر بمراجعتي وموافقتي على البيانات المقدمة لبدء العمل على تقديم الخدمة .
-                  </div>
-                </label>
-              </div>
-            </div>
-          )}
-
-          {step === 6 && (
+          {step === 5 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8 relative">
               {showInviteModal ? (
                 <div className="bg-brand-50 p-8 rounded-3xl border border-brand-200 max-w-md mx-auto relative z-10 shadow-lg">
@@ -463,17 +456,16 @@ export function OrderFlow() {
            <ArrowRight className="w-5 h-5" /> عودة
           </button>
           
-          {step < 6 ? (
+          {step < 5 ? (
             <button 
               onClick={handleNext} 
               disabled={
-                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland)) ||
-                (step === 2 && !formData.startingPoint) ||
-                (step === 4 && !agreedToService)
+                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.shippingAddress?.name || !formData.shippingAddress?.phone || !formData.shippingAddress?.country || !formData.shippingAddress?.state || !formData.shippingAddress?.street)) ||
+                (step === 2 && !formData.startingPoint)
               }
               className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {step === 4 ? "تحويل للموافقة والتوقيع" : "التالي"} <ArrowLeft className="w-5 h-5" />
+              {step === 2 ? "تحويل للمراجعة والعقد" : "التالي"} <ArrowLeft className="w-5 h-5" />
             </button>
           ) : (
             <button 

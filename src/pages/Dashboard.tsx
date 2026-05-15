@@ -40,7 +40,7 @@ export function Dashboard() {
 
     if (success === "true" && orderId) {
       const order = orders.find(o => o.id === orderId);
-      if (order && order.status === "بانتظار الدفع") {
+      if (order && (order.status === "بانتظار الدفع" || order.status === "بإنتظار إتمام الدفع")) {
         updateOrderStatus(orderId, "قيد البحث");
         // Trigger email
         if (currentUser) {
@@ -72,7 +72,7 @@ export function Dashboard() {
   const userOrders = orders.filter(o => o.userId === currentUser.id);
   const order = userOrders[0]; // ONLY 1 order allowed
   
-  const isPaid = order && order.status !== "بانتظار الدفع";
+  const isPaid = order && order.status !== "بانتظار الدفع" && order.status !== "بإنتظار إتمام الدفع";
 
   const handleResumePayment = async () => {
     if (!order) return;
@@ -236,11 +236,7 @@ export function Dashboard() {
              )}
           </div>
           <div className="flex gap-4">
-             {!order && (
-               <Link to="/order" className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-brand-700 shadow-sm transition">
-                 إنشاء سجل وتوثيق نسب
-               </Link>
-             )}
+             {/* Removed upper button as requested */}
           </div>
         </div>
 
@@ -301,17 +297,19 @@ export function Dashboard() {
               </div>
 
               {/* Social Media & Outer Links */}
-              <div className="mt-8 border-t border-brand-100 pt-6">
-                <button onClick={() => setActiveTab("حالة السجل")} className="w-full mb-3 bg-brand-900 text-white px-4 py-3 rounded-xl transition flex items-center justify-center gap-2 hover:bg-brand-800 font-semibold shadow-sm">
-                  <Compass className="w-5 h-5 text-brand-300" />
-                  العودة للصفحة الرئيسية
-                </button>
-                <Link to="/" className="w-full mb-6 bg-white text-brand-700 px-4 py-3 rounded-xl border border-brand-200 transition flex items-center justify-center gap-2 hover:bg-brand-50 font-semibold shadow-sm text-sm">
-                  <Home className="w-5 h-5 text-brand-500 shrink-0" />
-                  <span className="truncate">العودة لموقع سجل تراث العائلة</span>
-                </Link>
+              <div className="mt-8 pt-6">
+                <div className="space-y-2 mb-6">
+                  <button onClick={() => setActiveTab("حالة السجل")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
+                    <Compass className="w-4 h-4" />
+                    العودة للصفحة الرئيسية
+                  </button>
+                  <Link to="/" className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
+                    <Home className="w-4 h-4" />
+                    <span className="truncate">العودة لموقع سجل تراث العائلة</span>
+                  </Link>
+                </div>
                 
-                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-3 text-center">تواصل معنا</h3>
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-4 px-4">تواصل معنا</h3>
                 <div className="flex flex-wrap justify-center gap-2">
                   {/* Facebook */}
                   <a href="https://www.facebook.com/TheFamilyLegacyRoots" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 hover:bg-brand-600 hover:text-white transition shadow-sm" title="Facebook">
@@ -350,15 +348,15 @@ export function Dashboard() {
               {!order ? (
                 <div className="text-center py-20">
                   <BookOpen className="w-16 h-16 text-brand-200 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">ليس لديك طلب مسجل بعد</h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">للبدء في توثيق تاريخ العائلة وفتح جميع أقسام المنصة، يرجى تقديم طلب جديد.</p>
-                  <Link to="/order" className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block">بدء رحلة التوثيق</Link>
+                  <h2 className="text-2xl font-serif text-brand-900 mb-4">طلب غير مكتمل</h2>
+                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">يمكنك متابعة استكمال البيانات في أي وقت.</p>
+                  <Link to="/order" className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block drop-shadow-md">إنشاء السجل الأساسي</Link>
                 </div>
               ) : !isPaid ? (
                  <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
                   <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">تم حفظ بيانات الطلب</h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">لم يتم إتمام عملية الدفع حتى الآن. يرجى إتمام الدفع لفتح جميع خدمات وإدراجات لوحة التحكم كأمين سجل.</p>
+                  <h2 className="text-2xl font-serif text-brand-900 mb-4">بانتظار إتمام الدفع</h2>
+                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">أكمل عملية الدفع لإنهاء طلب السجل وتفعيل الاشتراك.</p>
                   <button onClick={handleResumePayment} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg">إتمام الدفع واعتماد الطلب (1999$)</button>
                 </div>
               ) : (
@@ -369,12 +367,12 @@ export function Dashboard() {
                   {activeTab === "حالة السجل" && (
                      <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-brand-200">
-                         {order.status === "مكتمل" ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-orange-500" />}
+                         {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-orange-500" />}
                          <div>
                            <h3 className="text-xl font-bold text-brand-900 mb-2">حالة السجل الحالية: <span className="text-brand-600">{order.status}</span></h3>
                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-brand-600 text-sm mt-1">
                              <span className="flex items-center gap-1"><CalendarCheck className="w-4 h-4" /> تاريخ الطلب: <strong className="font-bold">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</strong></span>
-                             {order.status === "مكتمل" ? (
+                             {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? (
                                <span className="flex items-center gap-1 text-green-600 font-bold text-base"><CheckCircle className="w-5 h-5" /> تم التسليم بنجاح!</span>
                              ) : (
                                <span className="flex items-center gap-1 text-orange-600"><Clock className="w-4 h-4" /> التسليم المتوقع: <strong className="font-bold border-b border-orange-200 pb-0.5">{calculateDeliveryDate(order.createdAt)}</strong></span>
@@ -383,7 +381,7 @@ export function Dashboard() {
                          </div>
                        </div>
                        
-                       {order.status === "مكتمل" ? (
+                       {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? (
                          <div className="space-y-4">
                            <h3 className="text-2xl font-bold text-brand-900 mb-4 tracking-tight">يسعدنا إتمام العمل!</h3>
                            <p className="text-brand-700 leading-relaxed text-lg">
@@ -837,7 +835,7 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {order?.status !== "مكتمل" ? (
+                      {(order?.status !== "مكتمل" && order?.status !== "طلب مكتمل") ? (
                         <div className="text-center py-10 px-4">
                            <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
                            <h3 className="text-xl font-bold text-brand-900 mb-2">سيظهر لك هنا نموذج التصويبات</h3>

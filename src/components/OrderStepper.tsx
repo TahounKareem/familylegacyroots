@@ -7,11 +7,10 @@ interface OrderStepperProps {
 
 export function OrderStepper({ currentStep }: OrderStepperProps) {
   const stepsList = [
-    { title: "تقديم البيانات", subtitle: "بيانات أمين السجل/العميل" },
+    { title: "تقديم البيانات", subtitle: "البيانات الأساسية ومعلومات الشحن" },
     { title: "تحديد المسار", subtitle: "نقطة البدء وقالب التصميم" },
-    { title: "بيانات الشحن", subtitle: "لتسليم السجل والوثائق" },
-    { title: "تأكيد الإصدار", subtitle: "مراجعة الطلب والموافقة" },
-    { title: "العقد والتوقيع", subtitle: "عقد تقديم الخدمة" },
+    { title: "العقد والمراجعة", subtitle: "مراجعة الطلب والإقرارات" },
+    { title: "التوقيع الإلكتروني", subtitle: "الإعتماد القانوني" },
     { title: "بدء التنفيذ", subtitle: "إتمـام الدفـع" }
   ];
 
@@ -19,7 +18,7 @@ export function OrderStepper({ currentStep }: OrderStepperProps) {
     <div className="mb-12">
       <div className="flex items-center justify-between relative">
         <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-brand-200 -z-10 translate-y-[-50%]"></div>
-        {[1, 2, 3, 4, 5, 6].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm transition-colors border-4 ${
             currentStep >= s ? 'bg-brand-600 border-brand-100 text-white' : 'bg-white border-brand-200 text-brand-400'
           }`}>
@@ -29,7 +28,7 @@ export function OrderStepper({ currentStep }: OrderStepperProps) {
       </div>
       <div className="flex justify-between mt-4 text-center px-1">
         {stepsList.map((stepItem, i) => (
-          <div key={i} className="flex flex-col items-center w-[16%]">
+          <div key={i} className="flex flex-col items-center w-[20%]">
             <span className={`text-[9px] sm:text-xs md:text-sm leading-tight ${currentStep >= i + 1 ? 'text-brand-900 font-bold' : 'text-brand-600 font-medium'}`}>{stepItem.title}</span>
             <span className={`hidden sm:block text-[8px] sm:text-[10px] md:text-xs mt-1 leading-tight ${currentStep >= i + 1 ? 'text-brand-700' : 'text-brand-400'}`}>{stepItem.subtitle}</span>
           </div>
@@ -38,3 +37,4 @@ export function OrderStepper({ currentStep }: OrderStepperProps) {
     </div>
   );
 }
+

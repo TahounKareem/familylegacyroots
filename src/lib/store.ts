@@ -50,7 +50,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
-export type OrderStatus = "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل";
+export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل" | "طلب مكتمل" | "تم تسليم الإصدار الأول";
 
 
 export interface UserInfo {

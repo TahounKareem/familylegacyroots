@@ -1,14 +1,20 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle } from "lucide-react";
+import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
+import { KnowledgeArticle } from "./KnowledgeCenter";
 
 export function AdminPanel() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
+  const [activeTab, setActiveTab] = useState<"orders" | "articles">("orders");
+  const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
+  const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(null);
+  const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
+  const [articleForm, setArticleForm] = useState({ title: "", type: "مقال", content: "", colorType: "brand" });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
@@ -19,6 +25,52 @@ export function AdminPanel() {
   const [researchRecommendations, setResearchRecommendations] = useState("");
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (activeTab === "articles") {
+      const q = query(collection(db, "knowledge_articles"), orderBy("createdAt", "desc"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: KnowledgeArticle[] = [];
+        snapshot.forEach(doc => {
+          data.push({ id: doc.id, ...doc.data() } as KnowledgeArticle);
+        });
+        setArticles(data);
+      });
+      return () => unsubscribe();
+    }
+  }, [activeTab]);
+
+  const handleSaveArticle = async () => {
+    try {
+      if (editingArticle) {
+        await updateDoc(doc(db, "knowledge_articles", editingArticle.id), {
+          ...articleForm
+        });
+      } else {
+        await addDoc(collection(db, "knowledge_articles"), {
+          ...articleForm,
+          createdAt: serverTimestamp()
+        });
+      }
+      setIsArticleModalOpen(false);
+      setEditingArticle(null);
+      setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" });
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء حفظ المقال");
+    }
+  };
+
+  const handleDeleteArticle = async (id: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذا المقال؟")) {
+      try {
+        await deleteDoc(doc(db, "knowledge_articles", id));
+      } catch (e) {
+        console.error(e);
+        alert("حدث خطأ أثناء الحذف");
+      }
+    }
+  };
 
   if (!currentUser || currentUser.role !== "admin") {
     return <Navigate to="/dashboard" />;
@@ -87,14 +139,22 @@ export function AdminPanel() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex justify-between items-center mb-8 border-b border-brand-200 pb-4">
         <h1 className="text-3xl font-serif text-brand-900">
-          لوحة تحكم الإدارة (فريق البحث)
+          لوحة تحكم الإدارة
         </h1>
-        <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
-          <Home className="w-5 h-5" /> الصفحة الرئيسية
-        </Link>
+        <div className="flex items-center gap-4">
+          <div className="bg-brand-50 p-1 rounded-xl flex">
+            <button onClick={() => setActiveTab("orders")} className={`px-4 py-2 rounded-lg font-bold transition-all text-sm ${activeTab === "orders" ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}>الطلبات</button>
+            <button onClick={() => setActiveTab("articles")} className={`px-4 py-2 rounded-lg font-bold transition-all text-sm ${activeTab === "articles" ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}>المركز المعرفي</button>
+          </div>
+          <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
+            <Home className="w-5 h-5" /> الرئيسية
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      {activeTab === "orders" ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-brand-100 flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600">
             <FileText className="w-6 h-6" />
@@ -158,10 +218,12 @@ export function AdminPanel() {
                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
                        className="border border-brand-200 rounded px-2 py-1 bg-white text-sm focus:ring-brand-500"
                      >
-                       <option value="راحل">راحل (تم الدفع)</option>
+                       <option value="بإنتظار إتمام الدفع">بإنتظار إتمام الدفع</option>
                        <option value="قيد البحث">قيد البحث والمقارنة</option>
                        <option value="طلب إيضاح">طلب إيضاح / وثائق ناقصة</option>
                        <option value="تم الرد">تم الرد (من العميل)</option>
+                       <option value="تم تسليم الإصدار الأول">تم تسليم الإصدار الأول</option>
+                       <option value="طلب مكتمل">طلب مكتمل</option>
                        <option value="مكتمل">التدقيق المنجز للطباعة</option>
                      </select>
                   </td>
@@ -223,6 +285,66 @@ export function AdminPanel() {
           </table>
         </div>
       </div>
+      </>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
+            <h2 className="font-bold text-lg text-brand-900">إدارة المقالات والمركز المعرفي</h2>
+            <button 
+              onClick={() => { setEditingArticle(null); setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" }); setIsArticleModalOpen(true); }}
+              className="bg-brand-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-700 transition"
+            >
+              <Plus className="w-5 h-5"/> إضافة مقال
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-white text-brand-500 border-b border-brand-100">
+                <tr>
+                  <th className="px-6 py-4 font-medium w-1/2">العنوان</th>
+                  <th className="px-6 py-4 font-medium">النوع</th>
+                  <th className="px-6 py-4 font-medium">اللون</th>
+                  <th className="px-6 py-4 font-medium">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-50">
+                {articles.map((article) => (
+                  <tr key={article.id} className="hover:bg-brand-50/50 transition">
+                    <td className="px-6 py-4 font-bold text-brand-900">{article.title}</td>
+                    <td className="px-6 py-4 text-brand-600">{article.type}</td>
+                    <td className="px-6 py-4 text-brand-600">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${article.colorType === 'orange' ? 'bg-orange-100 text-orange-700' : article.colorType === 'green' ? 'bg-green-100 text-green-700' : 'bg-brand-100 text-brand-700'}`}>
+                        {article.colorType}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 flex gap-2">
+                      <button 
+                        onClick={() => { setEditingArticle(article); setArticleForm({ title: article.title, type: article.type, content: article.content, colorType: article.colorType || "brand" }); setIsArticleModalOpen(true); }}
+                        className="flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
+                      >
+                        <Edit3 className="w-3 h-3" /> تعديل
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteArticle(article.id)}
+                        className="flex items-center justify-center gap-1 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
+                      >
+                        <Trash2 className="w-3 h-3" /> حذف
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {articles.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-brand-500">
+                      لا يوجد مقالات حالياً في المركز المعرفي
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Delete Order Modal */}
       {orderToDelete && (
@@ -516,6 +638,78 @@ export function AdminPanel() {
           </div>
         </div>
       )}
+      {/* Article Modal */}
+      {isArticleModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-brand-100 flex justify-between items-center bg-brand-50 sticky top-0">
+              <h2 className="text-xl font-bold font-serif text-brand-900">{editingArticle ? 'تعديل مقال' : 'إضافة مقال جديد'}</h2>
+              <button 
+                onClick={() => { setIsArticleModalOpen(false); setEditingArticle(null); setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" }); }}
+                className="p-2 hover:bg-brand-200 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">عنوان المقال / الدليل</label>
+                <input 
+                  type="text" 
+                  className="w-full p-3 border border-brand-200 rounded-lg"
+                  value={articleForm.title}
+                  onChange={(e) => setArticleForm({...articleForm, title: e.target.value})}
+                  placeholder="مثال: أهمية توثيق شجرة العائلة"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">التصنيف (النوع)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.type}
+                    onChange={(e) => setArticleForm({...articleForm, type: e.target.value})}
+                    placeholder="مقال، دليل إرشادي، بحث..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">اللون المميز للمربع</label>
+                  <select 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.colorType}
+                    onChange={(e) => setArticleForm({...articleForm, colorType: e.target.value})}
+                  >
+                    <option value="brand">أساسي (بيج/بني)</option>
+                    <option value="orange">برتقالي (للمستندات)</option>
+                    <option value="green">أخضر (للتراجم والأعلام)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">محتوى المقال (سيظهر في النافذة المنبثقة)</label>
+                <textarea 
+                  className="w-full p-3 border border-brand-200 rounded-lg h-64 text-justify"
+                  value={articleForm.content}
+                  onChange={(e) => setArticleForm({...articleForm, content: e.target.value})}
+                  placeholder="اكتب المحتوى هنا..."
+                />
+              </div>
+              <div className="pt-4 flex justify-end">
+                <button 
+                  onClick={handleSaveArticle}
+                  disabled={!articleForm.title || !articleForm.content}
+                  className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 disabled:opacity-50"
+                >
+                  حفظ المقال
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

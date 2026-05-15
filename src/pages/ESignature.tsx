@@ -26,7 +26,7 @@ export function ESignature() {
     <div className="bg-brand-50 min-h-screen py-12 animate-in fade-in zoom-in duration-500">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <OrderStepper currentStep={5} />
+        <OrderStepper currentStep={4} />
 
         <div className="bg-white p-12 rounded-[2rem] shadow-xl border border-brand-100 text-center relative overflow-hidden mb-8 max-w-lg mx-auto">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>

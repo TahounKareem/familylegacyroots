@@ -41,10 +41,13 @@ export function ServiceAgreement() {
   const handleScroll = () => {
     if (scrollContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 150) {
+      const scrollPercentage = ((scrollTop + clientHeight) / scrollHeight) * 100;
+      
+      // Consider 95%-100% as fully scrolled
+      if (scrollPercentage >= 95) {
         if (!scrolledToBottom) {
           setScrolledToBottom(true);
-          logLegalEvent("contract_reading_completed", { version: "v1.0" }, contractId.current, orderId.current);
+          logLegalEvent("contract_fully_scrolled", { scrollPercentage, version: "v1.0" }, contractId.current, orderId.current);
         }
       }
     }
@@ -70,6 +73,9 @@ export function ServiceAgreement() {
     for (const type of consentTypes) {
       await recordLegalConsent(type, { version: "v1.0" }, contractId.current, orderId.current);
     }
+
+    // Add final acceptance event required by rules
+    await logLegalEvent("contract_terms_accepted", { mandatoryConsentsCompleted: true, contractVersion: "v1.0" }, contractId.current, orderId.current);
 
     // 2. Generate the actual legal contract record
     await createLegalContractRecord(
@@ -128,7 +134,64 @@ export function ServiceAgreement() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Progress Bar (Step 5 - Service Agreement) */}
-        <OrderStepper currentStep={5} />
+        <OrderStepper currentStep={3} />
+
+        {/* Order Summary (Confirm Edition) */}
+        <div className="bg-brand-50 p-6 md:p-10 rounded-[2rem] border border-brand-200 shadow-sm mb-8">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
+            <p className="text-brand-600">مراجعة بيانات الطلب قبل الموافقة على العقد</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm">
+              <h3 className="font-bold text-brand-900 border-b border-brand-100 pb-3 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-brand-600" />
+                ملخص بيانات أمين السجل
+              </h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between items-center"><span className="text-brand-600">الاسم:</span> <strong className="text-brand-900">{pendingOrderData.firstName} {pendingOrderData.fatherName} {pendingOrderData.grandfatherName} {pendingOrderData.familyName}</strong></div>
+                <div className="flex justify-between items-center"><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{pendingOrderData.country}</strong></div>
+                <div className="flex justify-between items-center"><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{pendingOrderData.homeland}</strong></div>
+                <div className="flex justify-between items-center"><span className="text-brand-600">القبيلة:</span> <strong className="text-brand-900">{pendingOrderData.tribeName || "غير محدد"}</strong></div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm">
+              <h3 className="font-bold text-brand-900 border-b border-brand-100 pb-3 mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-brand-600" />
+                المسار والمخرجات
+              </h3>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <span className="text-brand-600 block mb-1">نقطة البدء:</span> 
+                  <strong className="text-brand-900">
+                    {pendingOrderData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${pendingOrderData.firstName} بن ${pendingOrderData.fatherName})` :
+                     pendingOrderData.startingPointType === "اسم العائلة" ? `اسم العائلة (${pendingOrderData.familyName})` :
+                     pendingOrderData.startingPointType === "احد الأسلاف" ? `${pendingOrderData.startingPointAncestor || "احد الأسلاف"} (${pendingOrderData.startingPointName})` :
+                     pendingOrderData.startingPoint || "-"}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center"><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{pendingOrderData.designTemplate}</strong></div>
+              </div>
+            </div>
+            
+            <div className="md:col-span-2 bg-gradient-to-r from-brand-800 to-brand-900 text-white p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center">
+               <div className="mb-4 md:mb-0">
+                  <span className="text-brand-200 block mb-1 font-bold text-sm">الباقة المختارة</span>
+                  <strong className="font-serif text-xl">السجل الأساسي ويشمل:</strong>
+                  <ul className="list-disc list-inside text-brand-100 mt-2 text-sm space-y-1">
+                    <li>نسخة رقمية "الكترونية" لتاريخ العائلة</li>
+                    <li>عدد 10 نسخ ورقية مطبوعة أصلية</li>
+                    <li>بوستر مشجر عمود النسب الشامل</li>
+                  </ul>
+               </div>
+               <div className="text-left">
+                  <div className="text-3xl font-mono font-bold">{priceAmount}</div>
+               </div>
+            </div>
+          </div>
+        </div>
 
         {/* Privacy Trust Layer */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-brand-100 p-8 mb-8 relative overflow-hidden">
@@ -348,10 +411,10 @@ export function ServiceAgreement() {
         <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100">
           <button 
             type="button" 
-            onClick={() => navigate("/shipping-details")} 
+            onClick={() => navigate("/order?step=2")} 
             className="px-6 py-3 rounded-2xl font-medium text-brand-600 hover:bg-brand-50 transition flex items-center gap-2"
           >
-           <ArrowRight className="w-5 h-5" /> عودة
+           <ArrowRight className="w-5 h-5" /> عودة لتحديد المسار
           </button>
           
           <button 
