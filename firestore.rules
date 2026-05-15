@@ -9,6 +9,13 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    function isStaff() {
+      return isSignedIn() && (
+        (request.auth.token != null && request.auth.token.email != null && request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'maestro', 'research', 'marketing', 'accounting', 'compliance', 'shipping', 'customer_service', 'editor'])
+      );
+    }
+    
     function isAdmin() {
       return isSignedIn() && (
         (request.auth.token != null && request.auth.token.email != null && request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net') ||
@@ -103,6 +110,14 @@ service cloud.firestore {
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
+    }
+    
+    // ==========================================
+    // Knowledge Articles Collection
+    // ==========================================
+    match /knowledge_articles/{articleId} {
+      allow read: if true;
+      allow write: if isStaff();
     }
     
     // Default Deny

@@ -16,6 +16,7 @@ export interface KnowledgeArticle {
   publishDate?: string;
   imageCaption?: string;
   imageCopyright?: string;
+  coverImageUrl?: string;
   videoUrl?: string;
   duration?: string;
   createdAt?: string;
@@ -62,6 +63,40 @@ export function KnowledgeCenter() {
       snapshot.forEach(doc => {
         data.push({ id: doc.id, ...doc.data() } as KnowledgeArticle);
       });
+
+      if (data.length === 0) {
+        import("firebase/firestore").then(async ({ addDoc }) => {
+          try {
+            await addDoc(collection(db, "knowledge_articles"), {
+              title: "تاريخ عائلة عريق وممتد عبر الأجيال",
+              type: "مقال",
+              section: "الروايات والذاكرة",
+              filter: "المشجرات العائلية",
+              description: "مقال توضيحي يستعرض تاريخ العائلة، من خلال تتبع الجذور والروايات الشفوية القديمة، ويستحضر العادات والتقاليد.",
+              author: "أمين السجل",
+              content: "هذا نص مكون كمحتوى عشوائي.\nتعتبر الذاكرة العائلية من أهم مصادر كتابة التاريخ، حيث أن الكثير من العائلات تمتلك مقتنيات أو صور ووثائق تحكي الكثير من تاريخها...\n\nهذا المقال مجرد نموذج تجريبي لكيفية عرض المقالات في الواجهة.",
+              coverImageUrl: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?auto=format&fit=crop&w=800&q=80",
+              imageCaption: "صورة تعبيرية لتجمع عائلي قديم",
+              createdAt: new Date().toISOString()
+            });
+            await addDoc(collection(db, "knowledge_articles"), {
+              title: "رحلة البحث في التراث: فيلم وثائقي قصير",
+              type: "فيديو",
+              section: "قراءات ومراجع",
+              filter: "مراجع",
+              description: "شرح تفصيلي مرئي يشرح كيفية قراءة الوثائق التاريخية وكيفية الاستدلال بها.",
+              duration: "14:45",
+              videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+              coverImageUrl: "https://images.unsplash.com/photo-1492271626350-0bfbdc753b89?auto=format&fit=crop&w=800&q=80",
+              imageCaption: "لقطة من الفيلم الوثائقي",
+              createdAt: new Date().toISOString()
+            });
+          } catch (e) {
+            console.error("Error seeding", e);
+          }
+        });
+      }
+
       setArticles(data);
       setLoading(false);
     }, (error) => {
@@ -144,7 +179,7 @@ export function KnowledgeCenter() {
               <div key={item.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all cursor-pointer group flex flex-col h-full" onClick={() => setSelectedArticle(item)}>
                 {/* Thumbnail placeholder */}
                 <div className="relative h-48 bg-gray-100 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80" alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={item.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {item.type === 'فيديو' && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <PlayCircle className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -204,7 +239,7 @@ export function KnowledgeCenter() {
                 </div>
               ) : (
                 <div className="w-full h-64 sm:h-96 bg-gray-100 mb-10 rounded-lg overflow-hidden relative">
-                  <img src="https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80" alt="cover" className="w-full h-full object-cover" />
+                  <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
                 </div>
               )}
 
