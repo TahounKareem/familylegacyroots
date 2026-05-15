@@ -55,6 +55,13 @@ export function KnowledgeCenter() {
   const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
   const [activeFilter, setActiveFilter] = useState("عام");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (selectedArticle) {
+      setIsPlaying(false);
+    }
+  }, [selectedArticle]);
 
   useEffect(() => {
     const q = query(collection(db, "knowledge_articles"), orderBy("createdAt", "desc"));
@@ -119,18 +126,35 @@ export function KnowledgeCenter() {
 
   return (
     <div className="bg-[#FAF9F6] min-h-screen pb-20">
-      {/* Header Image */}
-      <div className="w-full h-[50vh] relative bg-brand-900 overflow-hidden flex items-center justify-center">
-        <img 
-          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80" 
-          alt="المركز المعرفي" 
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay grayscale"
-        />
-        <div className="relative z-10 text-center">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full mx-auto mb-6 flex items-center justify-center border border-white/30">
-            <Book className="w-10 h-10 text-white" />
+      {/* Header Section */}
+      <div className="w-full bg-brand-900 overflow-hidden relative border-b-4 border-[#C3262A]">
+        {/* Logo at the top */}
+        <div className="relative z-20 flex justify-center pt-8 pb-4">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full mx-auto flex items-center justify-center shadow-xl border-4 border-white overflow-hidden bg-center bg-cover" style={{ backgroundImage: "url('/tree-logo.png')" }}>
+            <span className="sr-only">الشعار</span>
+            {/* If the image fails to load, we can leave the background or show an icon */}
+            <img src="/tree-logo.png" alt="شعار المركز المعرفي" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-white font-bold tracking-tight">المركز المعرفي</h1>
+        </div>
+
+        {/* Content & Background Image */}
+        <div className="relative w-full h-[50vh] sm:h-[60vh] flex items-center justify-center sm:justify-start px-4 sm:px-12 lg:px-24">
+          <img 
+            src="/faces-header.png" 
+            alt="المركز المعرفي" 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 grayscale transition-transform duration-1000 scale-105"
+            onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-brand-900/90 via-brand-900/40 to-transparent"></div>
+          
+          <div className="relative z-10 text-right max-w-3xl ml-auto bg-brand-900/60 sm:bg-brand-900/40 p-6 sm:p-10 rounded-2xl backdrop-blur-sm border border-white/10 shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif text-white font-bold tracking-tight mb-6 leading-tight">
+              المركز المعرفي
+            </h1>
+            <p className="text-lg sm:text-2xl text-brand-50 font-medium leading-relaxed font-serif border-r-4 border-[#C3262A] pr-4">
+              مساحة معرفية حول الأنساب والذاكرة العائلية والتحول الرقمي مقالات ورؤى ودراسات مختارة حول الروايات العائلية والتراث الرقمي وعالَم الأنساب.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -186,7 +210,7 @@ export function KnowledgeCenter() {
                     </div>
                   )}
                   {item.type === 'فيديو' && item.duration && (
-                    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">الموّدة: {item.duration} دقيقة</div>
+                    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">المدة: {item.duration} دقيقة</div>
                    )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
@@ -231,11 +255,22 @@ export function KnowledgeCenter() {
             {/* Scrollable Content */}
             <div className="overflow-y-auto px-6 sm:px-12 py-10">
               {selectedArticle.type === 'فيديو' && selectedArticle.videoUrl ? (
-                <div className="w-full aspect-video bg-black mb-10 rounded-lg overflow-hidden flex items-center justify-center">
-                  <a href={selectedArticle.videoUrl} target="_blank" rel="noreferrer" className="text-white flex flex-col items-center hover:text-[#C3262A] transition-colors">
-                    <PlayCircle className="w-16 h-16 mb-4" />
-                    <span className="font-bold">تشغيل المقطع في نافذة جديدة</span>
-                  </a>
+                <div className="w-full aspect-video bg-gray-100 mb-10 rounded-lg overflow-hidden relative">
+                  {!isPlaying ? (
+                    <div className="absolute inset-0 group cursor-pointer" onClick={() => setIsPlaying(true)}>
+                      <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
+                        <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                  ) : (
+                    <iframe 
+                      src={selectedArticle.videoUrl.includes("youtube.com/watch?v=") ? selectedArticle.videoUrl.replace("watch?v=", "embed/") + (selectedArticle.videoUrl.includes("?") ? "&autoplay=1" : "?autoplay=1") : selectedArticle.videoUrl.includes("youtu.be/") ? selectedArticle.videoUrl.replace("youtu.be/", "youtube.com/embed/") + "?autoplay=1" : selectedArticle.videoUrl} 
+                      className="w-full h-full border-0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                    ></iframe>
+                  )}
                 </div>
               ) : (
                 <div className="w-full h-64 sm:h-96 bg-gray-100 mb-10 rounded-lg overflow-hidden relative">
