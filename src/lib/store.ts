@@ -53,12 +53,14 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل" | "طلب مكتمل" | "تم تسليم الإصدار الأول";
 
 
+export type AppRole = "user" | "admin" | "maestro" | "research" | "marketing" | "accounting" | "compliance" | "shipping" | "customer_service" | "editor";
+
 export interface UserInfo {
 
   id: string;
   name: string;
   email: string;
-  role: "user" | "admin";
+  role: AppRole;
 }
 
 export interface Node {

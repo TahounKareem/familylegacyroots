@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, AppRole } from "@/lib/store";
 import { useNavigate, Navigate, Link } from "react-router";
 import { Home, Eye, EyeOff } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
@@ -44,7 +44,11 @@ export function Auth() {
           
           await updateProfile(user, { displayName: name });
           
-          const role = email.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "admin" : "user";
+          let role: AppRole = "user";
+          const lowerEmail = email.toLowerCase();
+          if (lowerEmail === "kareem.tahoun@adamresearchcenter.net" || lowerEmail === "hassan.alamri@adamresearchcenter.net") {
+            role = "maestro";
+          }
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           
           await setDoc(doc(db, "users", user.uid), {

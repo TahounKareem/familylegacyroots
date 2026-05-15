@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams, useSearchParams, Navigate, useLocation } from "react-router";
 import { Shield, Lock, FileCheck, CheckCircle } from "lucide-react";
 import { termsAr, termsEn } from "../data/legal/terms";

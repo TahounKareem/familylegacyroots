@@ -10,11 +10,11 @@ import { KnowledgeArticle } from "./KnowledgeCenter";
 
 export function AdminPanel() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
-  const [activeTab, setActiveTab] = useState<"orders" | "articles">("orders");
+  const [activeTab, setActiveTab] = useState<string>("orders");
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(null);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
-  const [articleForm, setArticleForm] = useState({ title: "", type: "مقال", content: "", colorType: "brand" });
+  const [articleForm, setArticleForm] = useState<Partial<KnowledgeArticle>>({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
@@ -25,6 +25,8 @@ export function AdminPanel() {
   const [researchRecommendations, setResearchRecommendations] = useState("");
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+
+  const [usersList, setUsersList] = useState<UserInfo[]>([]);
 
   useEffect(() => {
     if (activeTab === "articles") {
@@ -38,7 +40,27 @@ export function AdminPanel() {
       });
       return () => unsubscribe();
     }
+    
+    if (activeTab === "users") {
+      const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+        const data: UserInfo[] = [];
+        snapshot.forEach(doc => {
+          data.push({ id: doc.id, ...doc.data() } as UserInfo);
+        });
+        setUsersList(data);
+      });
+      return () => unsubscribe();
+    }
   }, [activeTab]);
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      await updateDoc(doc(db, "users", userId), { role: newRole });
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء تغيير الصلاحية");
+    }
+  };
 
   const handleSaveArticle = async () => {
     try {
@@ -54,7 +76,7 @@ export function AdminPanel() {
       }
       setIsArticleModalOpen(false);
       setEditingArticle(null);
-      setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" });
+      setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" });
     } catch (e) {
       console.error(e);
       alert("حدث خطأ أثناء حفظ المقال");
@@ -72,7 +94,8 @@ export function AdminPanel() {
     }
   };
 
-  if (!currentUser || currentUser.role !== "admin") {
+  const isStaff = currentUser && ["admin", "maestro", "research", "marketing", "accounting", "compliance", "shipping", "customer_service", "editor"].includes(currentUser.role);
+  if (!currentUser || !isStaff) {
     return <Navigate to="/dashboard" />;
   }
 
@@ -135,16 +158,34 @@ export function AdminPanel() {
     }
   };
 
+  const availableTabs = [];
+  if (currentUser?.role === "maestro" || currentUser?.role === "research" || currentUser?.role === "admin") availableTabs.push({ id: "orders", label: "الطلبات (باحثين/مدير)" });
+  if (currentUser?.role === "maestro" || currentUser?.role === "marketing" || currentUser?.role === "admin") availableTabs.push({ id: "marketing", label: "التسويق (غير مكتملة)" });
+  if (currentUser?.role === "maestro" || currentUser?.role === "editor" || currentUser?.role === "admin") availableTabs.push({ id: "articles", label: "المركز المعرفي" });
+  if (currentUser?.role === "maestro" || currentUser?.role === "admin") availableTabs.push({ id: "users", label: "المستخدمين" });
+
+  const currentTab = availableTabs.find(t => t.id === activeTab) ? activeTab : availableTabs[0]?.id;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex justify-between items-center mb-8 border-b border-brand-200 pb-4">
-        <h1 className="text-3xl font-serif text-brand-900">
-          لوحة تحكم الإدارة
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="bg-brand-50 p-1 rounded-xl flex">
-            <button onClick={() => setActiveTab("orders")} className={`px-4 py-2 rounded-lg font-bold transition-all text-sm ${activeTab === "orders" ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}>الطلبات</button>
-            <button onClick={() => setActiveTab("articles")} className={`px-4 py-2 rounded-lg font-bold transition-all text-sm ${activeTab === "articles" ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}>المركز المعرفي</button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-brand-200 pb-4 gap-4">
+        <div>
+          <h1 className="text-3xl font-serif text-brand-900 mb-2">
+            لوحة تحكم الإدارة
+          </h1>
+          <p className="text-brand-600 text-sm">أهلاً بك، {currentUser?.name} <span className="font-bold text-brand-800 bg-brand-100 px-2 py-0.5 rounded-full mr-2">{currentUser?.role}</span></p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="bg-brand-50 p-1 rounded-xl flex flex-wrap gap-1">
+            {availableTabs.map((tab) => (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)} 
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all text-sm ${currentTab === tab.id ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
           <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
             <Home className="w-5 h-5" /> الرئيسية
@@ -152,7 +193,7 @@ export function AdminPanel() {
         </div>
       </div>
 
-      {activeTab === "orders" ? (
+      {currentTab === "orders" && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-brand-100 flex items-center gap-4">
@@ -286,24 +327,27 @@ export function AdminPanel() {
         </div>
       </div>
       </>
-      ) : (
+      )}
+
+      {currentTab === "articles" && (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
             <h2 className="font-bold text-lg text-brand-900">إدارة المقالات والمركز المعرفي</h2>
             <button 
-              onClick={() => { setEditingArticle(null); setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" }); setIsArticleModalOpen(true); }}
+              onClick={() => { setEditingArticle(null); setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" }); setIsArticleModalOpen(true); }}
               className="bg-brand-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-700 transition"
             >
-              <Plus className="w-5 h-5"/> إضافة مقال
+              <Plus className="w-5 h-5"/> إضافة موضوع
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead className="bg-white text-brand-500 border-b border-brand-100">
                 <tr>
-                  <th className="px-6 py-4 font-medium w-1/2">العنوان</th>
+                  <th className="px-6 py-4 font-medium w-1/3">العنوان</th>
                   <th className="px-6 py-4 font-medium">النوع</th>
-                  <th className="px-6 py-4 font-medium">اللون</th>
+                  <th className="px-6 py-4 font-medium">القسم/التصفية</th>
+                  <th className="px-6 py-4 font-medium">تاريخ النشر</th>
                   <th className="px-6 py-4 font-medium">إجراءات</th>
                 </tr>
               </thead>
@@ -311,15 +355,20 @@ export function AdminPanel() {
                 {articles.map((article) => (
                   <tr key={article.id} className="hover:bg-brand-50/50 transition">
                     <td className="px-6 py-4 font-bold text-brand-900">{article.title}</td>
-                    <td className="px-6 py-4 text-brand-600">{article.type}</td>
+                    <td className="px-6 py-4 text-brand-600 font-medium">
+                       <span className={`px-2 py-1 rounded text-xs ${article.type === 'فيديو' ? 'bg-red-100 text-red-700' : 'bg-brand-100 text-brand-700'}`}>
+                         {article.type}
+                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-brand-600 text-xs">
+                      {article.section} <br/> <span className="text-gray-400">{article.filter}</span>
+                    </td>
                     <td className="px-6 py-4 text-brand-600">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${article.colorType === 'orange' ? 'bg-orange-100 text-orange-700' : article.colorType === 'green' ? 'bg-green-100 text-green-700' : 'bg-brand-100 text-brand-700'}`}>
-                        {article.colorType}
-                      </span>
+                      {article.publishDate || "غير محدد"}
                     </td>
                     <td className="px-6 py-4 flex gap-2">
                       <button 
-                        onClick={() => { setEditingArticle(article); setArticleForm({ title: article.title, type: article.type, content: article.content, colorType: article.colorType || "brand" }); setIsArticleModalOpen(true); }}
+                        onClick={() => { setEditingArticle(article); setArticleForm({ ...article }); setIsArticleModalOpen(true); }}
                         className="flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
                       >
                         <Edit3 className="w-3 h-3" /> تعديل
@@ -335,11 +384,118 @@ export function AdminPanel() {
                 ))}
                 {articles.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-brand-500">
-                      لا يوجد مقالات حالياً في المركز المعرفي
+                    <td colSpan={5} className="px-6 py-12 text-center text-brand-500">
+                      لا يوجد مواضيع حالياً في المركز المعرفي
                     </td>
                   </tr>
                 )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {currentTab === "marketing" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
+            <h2 className="font-bold text-lg text-brand-900">متابعة حسابات المبيعات - الطلبات غير المكتملة</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-white text-brand-500 border-b border-brand-100">
+                <tr>
+                  <th className="px-6 py-4 font-medium">رقم الطلب</th>
+                  <th className="px-6 py-4 font-medium">اسم العميل</th>
+                  <th className="px-6 py-4 font-medium">وسيلة التواصل / البريد</th>
+                  <th className="px-6 py-4 font-medium">تاريخ الإنشاء</th>
+                  <th className="px-6 py-4 font-medium">تفاصيل</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-50">
+                {orders.filter(o => o.status === 'بانتظار الدفع' || o.status === 'بإنتظار إتمام الدفع').map((order) => (
+                  <tr key={order.id} className="hover:bg-brand-50/50 transition">
+                    <td className="px-6 py-4 font-mono text-brand-600 uppercase border-r-2 border-orange-500 bg-orange-50/30">
+                      #{order.orderNumber || order.id.slice(0, 8)}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-brand-900">
+                      {order.data?.firstName ? `${order.data.firstName} ${order.data.familyName}` : "غير محدد"}
+                    </td>
+                    <td className="px-6 py-4 text-brand-600">
+                      لم يتم توفير بريد (تواصل عبر المنصة فقط)
+                    </td>
+                    <td className="px-6 py-4 text-brand-600">
+                      {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button 
+                        onClick={() => setSelectedOrder(order)}
+                        className="flex items-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium"
+                      >
+                         تفاصيل
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {orders.filter(o => o.status === 'بانتظار الدفع' || o.status === 'بإنتظار إتمام الدفع').length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-brand-500">
+                      لا توجد طلبات معلقة (بانتظار الدفع)
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {currentTab === "users" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+            <h2 className="font-bold text-lg text-brand-900">إدارة المستخدمين والصلاحيات</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-white text-brand-500 border-b border-brand-100">
+                <tr>
+                  <th className="px-6 py-4 font-medium">الاسم</th>
+                  <th className="px-6 py-4 font-medium">البريد الإلكتروني</th>
+                  <th className="px-6 py-4 font-medium">تاريخ التسجيل</th>
+                  <th className="px-6 py-4 font-medium">الصلاحيات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-50">
+                {usersList.map((user) => (
+                  <tr key={user.id} className="hover:bg-brand-50/50 transition">
+                    <td className="px-6 py-4 font-bold text-brand-900">{user.name || "بدون اسم"}</td>
+                    <td className="px-6 py-4 text-brand-600 font-mono text-xs">{user.email || "بدون بريد"}</td>
+                    <td className="px-6 py-4 text-brand-600">غير محدد</td>
+                    <td className="px-6 py-4">
+                      {currentUser?.role === "maestro" && user.role !== "maestro" ? (
+                        <select 
+                          value={user.role} 
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          className="border border-brand-200 rounded-md px-2 py-1 text-sm bg-white"
+                        >
+                          <option value="user">مستخدم عادي</option>
+                          <option value="maestro">مايسترو (Maestro)</option>
+                          <option value="admin">مدير نظام (Admin)</option>
+                          <option value="research">مدير أبحاث</option>
+                          <option value="marketing">مدير تسويق</option>
+                          <option value="accounting">مدير حسابات</option>
+                          <option value="compliance">مدير مراجعة وتدقيق</option>
+                          <option value="shipping">مسؤول شحن</option>
+                          <option value="customer_service">خدمة عملاء</option>
+                          <option value="editor">مدير التحرير</option>
+                        </select>
+                      ) : (
+                        <span className="font-bold text-brand-800 bg-brand-100 px-3 py-1 rounded-full text-xs">
+                           {user.role}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -641,68 +797,180 @@ export function AdminPanel() {
       {/* Article Modal */}
       {isArticleModalOpen && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-brand-100 flex justify-between items-center bg-brand-50 sticky top-0">
-              <h2 className="text-xl font-bold font-serif text-brand-900">{editingArticle ? 'تعديل مقال' : 'إضافة مقال جديد'}</h2>
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-brand-100 flex justify-between items-center bg-brand-50 sticky top-0 z-10">
+              <h2 className="text-xl font-bold font-serif text-brand-900">{editingArticle ? 'تعديل الموضوع' : 'إضافة موضوع جديد (مقال/فيديو)'}</h2>
               <button 
-                onClick={() => { setIsArticleModalOpen(false); setEditingArticle(null); setArticleForm({ title: "", type: "مقال", content: "", colorType: "brand" }); }}
+                onClick={() => { setIsArticleModalOpen(false); setEditingArticle(null); setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" }); }}
                 className="p-2 hover:bg-brand-200 rounded-full"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-brand-900 mb-2">عنوان المقال / الدليل</label>
-                <input 
-                  type="text" 
-                  className="w-full p-3 border border-brand-200 rounded-lg"
-                  value={articleForm.title}
-                  onChange={(e) => setArticleForm({...articleForm, title: e.target.value})}
-                  placeholder="مثال: أهمية توثيق شجرة العائلة"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-brand-900 mb-2">التصنيف (النوع)</label>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">نوع المادة</label>
+                  <select 
+                    className="w-full p-3 border border-brand-200 rounded-lg bg-gray-50"
+                    value={articleForm.type}
+                    onChange={(e) => setArticleForm({...articleForm, type: e.target.value as 'مقال' | 'فيديو'})}
+                  >
+                    <option value="مقال">مقال</option>
+                    <option value="فيديو">مقطع فيديو</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">القسم</label>
+                  <select 
+                    className="w-full p-3 border border-brand-200 rounded-lg bg-gray-50"
+                    value={articleForm.section}
+                    onChange={(e) => setArticleForm({...articleForm, section: e.target.value})}
+                  >
+                    <option value="الروايات والذاكرة">الروايات والذاكرة</option>
+                    <option value="قراءات ومراجع">قراءات ومراجع</option>
+                    <option value="عالَم الأنساب">عالَم الأنساب</option>
+                    <option value="الأخبار والفعاليات">الأخبار والفعاليات</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">الفرع / التصفية (كتابة حرة لإنشاء قسم جديد أو اختيار موجود)</label>
                   <input 
                     type="text" 
                     className="w-full p-3 border border-brand-200 rounded-lg"
-                    value={articleForm.type}
-                    onChange={(e) => setArticleForm({...articleForm, type: e.target.value})}
-                    placeholder="مقال، دليل إرشادي، بحث..."
+                    value={articleForm.filter}
+                    onChange={(e) => setArticleForm({...articleForm, filter: e.target.value})}
+                    placeholder="مثال: عام، السعودية، اليمن، الحمض النووي..."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">العنوان الرئيسي</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.title}
+                    onChange={(e) => setArticleForm({...articleForm, title: e.target.value})}
+                    placeholder={articleForm.type === 'فيديو' ? "عنوان الفيديو..." : "عنوان المقال..."}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">نص وصفي حول المادة (اختياري)</label>
+                  <textarea 
+                    className="w-full p-3 border border-brand-200 rounded-lg min-h-[80px]"
+                    value={articleForm.description || ""}
+                    onChange={(e) => setArticleForm({...articleForm, description: e.target.value})}
+                    placeholder="وصف مختصر للمادة..."
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-brand-100 pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">{articleForm.type === 'فيديو' ? 'اسم المنتج' : 'اسم الكاتب'} (اختياري)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.author || ""}
+                    onChange={(e) => setArticleForm({...articleForm, author: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-brand-900 mb-2">اللون المميز للمربع</label>
-                  <select 
+                  <label className="block text-sm font-bold text-brand-900 mb-2">المحرر (اختياري)</label>
+                  <input 
+                    type="text" 
                     className="w-full p-3 border border-brand-200 rounded-lg"
-                    value={articleForm.colorType}
-                    onChange={(e) => setArticleForm({...articleForm, colorType: e.target.value})}
-                  >
-                    <option value="brand">أساسي (بيج/بني)</option>
-                    <option value="orange">برتقالي (للمستندات)</option>
-                    <option value="green">أخضر (للتراجم والأعلام)</option>
-                  </select>
+                    value={articleForm.editor || ""}
+                    onChange={(e) => setArticleForm({...articleForm, editor: e.target.value})}
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">تاريخ النشر (اختياري)</label>
+                  <input 
+                    type="date" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.publishDate || ""}
+                    onChange={(e) => setArticleForm({...articleForm, publishDate: e.target.value})}
+                  />
+                </div>
+
+                {articleForm.type === 'فيديو' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-bold text-brand-900 mb-2">رابط الفيديو (اختياري)</label>
+                      <input 
+                        type="text" 
+                        dir="ltr"
+                        className="w-full p-3 border border-brand-200 rounded-lg text-left"
+                        value={articleForm.videoUrl || ""}
+                        onChange={(e) => setArticleForm({...articleForm, videoUrl: e.target.value})}
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-brand-900 mb-2">مدة المقطع (اختياري)</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-3 border border-brand-200 rounded-lg"
+                        value={articleForm.duration || ""}
+                        onChange={(e) => setArticleForm({...articleForm, duration: e.target.value})}
+                        placeholder="مثال: 05:30"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-bold text-brand-900 mb-2">محتوى المقال (سيظهر في النافذة المنبثقة)</label>
-                <textarea 
-                  className="w-full p-3 border border-brand-200 rounded-lg h-64 text-justify"
-                  value={articleForm.content}
-                  onChange={(e) => setArticleForm({...articleForm, content: e.target.value})}
-                  placeholder="اكتب المحتوى هنا..."
-                />
+
+              {articleForm.type === 'مقال' && (
+                <div className="border-t border-brand-100 pt-6">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">نص المقال (اختياري)</label>
+                  <textarea 
+                    className="w-full p-3 border border-brand-200 rounded-lg h-64 text-justify leading-loose"
+                    value={articleForm.content || ""}
+                    onChange={(e) => setArticleForm({...articleForm, content: e.target.value})}
+                    placeholder="يمكنك استخدام Markdown للعناوين الفرعية والصور وغيرها..."
+                  />
+                </div>
+              )}
+
+              <div className="border-t border-brand-100 pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <h3 className="font-bold text-brand-900 mb-4 border-r-4 border-brand-500 pr-2">النصوص المصاحبة للصورة/الفيديو</h3>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">العنوان (وسط الصورة/الفيديو) (اختياري)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.imageCaption || ""}
+                    onChange={(e) => setArticleForm({...articleForm, imageCaption: e.target.value})}
+                  />
+                </div>
+                {articleForm.type === 'مقال' && (
+                  <div>
+                    <label className="block text-sm font-bold text-brand-900 mb-2">الملكية الفكرية للصورة (اختياري)</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-3 border border-brand-200 rounded-lg"
+                      value={articleForm.imageCopyright || ""}
+                      onChange={(e) => setArticleForm({...articleForm, imageCopyright: e.target.value})}
+                    />
+                  </div>
+                )}
               </div>
+
+              <div className="bg-brand-50 rounded-xl p-4 flex gap-4 text-brand-600 text-sm mt-4 border border-brand-200">
+                 <AlertCircle className="w-5 h-5 shrink-0" />
+                 <p>الحقول الاختيارية التي لا يتم تعبئتها لن تظهر للمستخدم للحفاظ على جمالية العرض.</p>
+              </div>
+
               <div className="pt-4 flex justify-end">
                 <button 
                   onClick={handleSaveArticle}
-                  disabled={!articleForm.title || !articleForm.content}
+                  disabled={!articleForm.title || !articleForm.section}
                   className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 disabled:opacity-50"
                 >
-                  حفظ المقال
+                  حفظ المادة المعرفية
                 </button>
               </div>
             </div>
