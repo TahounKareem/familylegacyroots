@@ -62,6 +62,59 @@ export function AdminPanel() {
     }
   };
 
+  const handleSeedArticles = async () => {
+    try {
+      const dummyData: Omit<KnowledgeArticle, "id">[] = [
+        {
+          title: "كيف توثق سيرة العائلة في بضعة خطوات معدودة",
+          type: "مقال",
+          section: "الروايات والذاكرة",
+          filter: "عام",
+          description: "دليلك الشامل لتوثيق تاريخ العائلة وجمع المعلومات من كبار السن وحفظها للأجيال القادمة.",
+          author: "فريق الإدارة",
+          content: "هذا نص تجريبي للمحتوى المعرفي.\nتأسيس مشروع توثيق العائلة يبدأ بجمع الوثائق...\n\nهذه مقدمة لتخصيص تاريخ الأسرة.\n\n.",
+          createdAt: new Date().toISOString()
+        },
+        {
+          title: "تاريخ الجزيرة العربية خلال القرن الماضي",
+          type: "فيديو",
+          section: "قراءات ومراجع",
+          filter: "مراجع",
+          description: "مقطع فيديو يشرح التطورات التاريخية والاجتماعية في المنطقة خلال الـ 100 عام الماضية.",
+          duration: "12:30",
+          videoUrl: "https://www.youtube.com/watch?v=123456789",
+          createdAt: new Date().toISOString()
+        },
+        {
+          title: "استخدام الحمض النووي في التعرف على الأنساب",
+          type: "مقال",
+          section: "عالَم الأنساب",
+          filter: "الحمض النووي",
+          description: "مقدمة تعريفية عن الجينات وعلاقتها بالبحث النسبي والفحوصات المتاحة حالياً.",
+          author: "خبير الأنساب",
+          content: "يعتبر فحص الحمض النووي (DNA) من أحدث ما توصل إليه العلم... ويعزز ما وجد في المخطوطات والوثائق...",
+          createdAt: new Date().toISOString()
+        },
+        {
+          title: "شراكة استراتيجية مع دور المنشورات والمخطوطات",
+          type: "مقال",
+          section: "الأخبار والفعاليات",
+          filter: "أخبار",
+          description: "إعلان عن توقيع اتفاقية مع أرشيف المخطوطات في إسطنبول لتبادل الوثائق.",
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      for (const article of dummyData) {
+        await addDoc(collection(db, "knowledge_articles"), article);
+      }
+      alert("تمت الإضافة بنجاح");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء الإضافة");
+    }
+  };
+
   const handleSaveArticle = async () => {
     try {
       if (editingArticle) {
@@ -333,12 +386,20 @@ export function AdminPanel() {
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
             <h2 className="font-bold text-lg text-brand-900">إدارة المقالات والمركز المعرفي</h2>
-            <button 
-              onClick={() => { setEditingArticle(null); setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" }); setIsArticleModalOpen(true); }}
-              className="bg-brand-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-700 transition"
-            >
-              <Plus className="w-5 h-5"/> إضافة موضوع
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSeedArticles}
+                className="bg-brand-100 text-brand-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-200 transition"
+              >
+                إضافة محتوى تجريبي
+              </button>
+              <button 
+                onClick={() => { setEditingArticle(null); setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" }); setIsArticleModalOpen(true); }}
+                className="bg-brand-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-700 transition"
+              >
+                <Plus className="w-5 h-5"/> إضافة موضوع
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
