@@ -81,7 +81,11 @@ service cloud.firestore {
     match /legal_consents/{consentId} {
       allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if false; // أمنياً: لا يمسح ولا يتعدل أبداً بعد إنشائه
+      allow update: if request.auth != null && request.resource.data.userId == request.auth.uid && (
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.consentType == resource.data.consentType
+      );
+      allow delete: if false; // أمنياً: لا يمسح أبداً بعد إنشائه
     }
 
     match /order_evidence/{evidenceId} {

@@ -56,6 +56,22 @@ export function ServiceAgreement() {
   const handleProceed = async () => {
     if (!currentUser || !pendingOrderData) return;
     
+    // 1. Record all document consents first to enforce chronological integrity
+    const consentTypes = [
+      "consent_intro",
+      "consent_service_nature",
+      "consent_scope",
+      "consent_lineage_rules",
+      "consent_secretary",
+      "consent_responsibility",
+      "consent_data_protection"
+    ];
+    
+    for (const type of consentTypes) {
+      await recordLegalConsent(type, { version: "v1.0" }, contractId.current, orderId.current);
+    }
+
+    // 2. Generate the actual legal contract record
     await createLegalContractRecord(
       contractId.current,
       orderId.current,
@@ -66,6 +82,7 @@ export function ServiceAgreement() {
       { ...pendingOrderData }
     );
 
+    // 3. Generate canonical order evidence
     await createOrderEvidence(
        orderId.current,
        contractId.current,
@@ -89,22 +106,8 @@ export function ServiceAgreement() {
        }
     );
 
+    // 4. Final step: mark ready
     await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
-
-    // Record consents
-    const consentTypes = [
-      "consent_intro",
-      "consent_service_nature",
-      "consent_scope",
-      "consent_lineage_rules",
-      "consent_secretary",
-      "consent_responsibility",
-      "consent_data_protection"
-    ];
-    
-    for (const type of consentTypes) {
-      await recordLegalConsent(type, { version: "v1.0" }, contractId.current, orderId.current);
-    }
 
     navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
   };

@@ -1,5 +1,5 @@
 import { db, auth } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, setDoc, increment } from "firebase/firestore";
 
 interface LegalSnapshot {
   [key: string]: any;
@@ -66,7 +66,7 @@ function sanitizeSnapshot(obj: any): any {
   return result;
 }
 
-let sessionEventSequence = 0;
+const contractSequences: Record<string, number> = {};
 let currentSessionId = "";
 if (typeof window !== "undefined") {
   currentSessionId = sessionStorage.getItem('legal_session_id') || "";
@@ -81,7 +81,7 @@ interface LegalProfileUpdate {
   latestOrderId?: string;
   activeContractStatus?: string;
   contractsCount?: any; 
-  legalRiskFlag?: boolean;
+  legalRiskFlag?: string;
   lastAgreementVersion?: string;
   lastConsentAt?: any;
   lastPaymentStatus?: string;
@@ -108,7 +108,8 @@ export async function logLegalEvent(eventType: string, metadata: any = {}, contr
   const user = auth.currentUser;
   if (!user) return;
   
-  sessionEventSequence++;
+  const sequenceKey = contractId || orderId || "general";
+  contractSequences[sequenceKey] = (contractSequences[sequenceKey] || 0) + 1;
   const pageUrl = typeof window !== "undefined" ? window.location.pathname : "";
 
   try {
@@ -122,8 +123,8 @@ export async function logLegalEvent(eventType: string, metadata: any = {}, contr
       userAgent: navigator.userAgent,
       sessionId: currentSessionId,
       pageUrl,
-      eventSequence: sessionEventSequence,
-      ipAddress: "captured_by_rules_or_edge" // Real IP usually captured on server-side
+      eventSequence: contractSequences[sequenceKey],
+      ipAddress: "pending_edge_capture" // Real IP and sequencing enforced per-contract
     });
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, "audit_logs");
@@ -142,8 +143,12 @@ export async function createLegalContractRecord(
   const user = auth.currentUser;
   if (!user) return;
 
-  const cleanCustomerSnapshot = { ...customerSnapshot };
-  delete cleanCustomerSnapshot.legalConsent;
+  const cleanCustomerSnapshot = { 
+    id: customerSnapshot.uid || customerSnapshot.id || user.uid,
+    name: customerSnapshot.displayName || customerSnapshot.name || user.displayName || "Unknown",
+    email: customerSnapshot.email || user.email || "Unknown",
+    role: customerSnapshot.role || "user" 
+  };
 
   try {
     const contractRef = doc(db, "legal_contracts", contractId);
@@ -166,8 +171,28 @@ export async function createLegalContractRecord(
       latestContractId: contractId,
       latestOrderId: orderId,
       activeContractStatus: status,
+      contractsCount: increment(1),
+      legalRiskFlag: "none",
       lastAgreementVersion: contractVersion,
     });
+    
+    // Ensure legal versions tracking document exists (Admin/Safe create)
+    try {
+      const adminDoc = doc(db, "legal_versions", contractVersion || "v1.0");
+      await setDoc(adminDoc, {
+          termsVersion: contractVersion || "v1.0",
+          privacyVersion: "v1.0",
+          cookiesVersion: "v1.0",
+          serviceAgreementVersion: contractVersion || "v1.0",
+          refundVersion: "v1.0",
+          billingVersion: "v1.0",
+          activatedAt: serverTimestamp(),
+          isActive: true
+      }, { merge: true });
+    } catch (ignore) {
+      // Ignore permission denied for normal users
+    }
+
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `legal_contracts/${contractId}`);
   }
@@ -201,30 +226,35 @@ export async function recordLegalConsent(
   consentType: string,
   metadata: any = {},
   contractId?: string,
-  orderId?: string
+  orderId?: string,
+  preferences: any = { essential: true, analytics: false, marketing: false }
 ) {
   const user = auth.currentUser;
   if (!user) return;
 
   try {
+    const consentDocId = contractId ? `${contractId}_${consentType}` : `${user.uid}_${consentType}_${Date.now()}`;
     const consentPayload = sanitizeSnapshot({
       userId: user.uid,
       orderId: orderId || null,
       contractId: contractId || null,
       consentType,
+      consentVersion: metadata.version || "v1.0",
       accepted: true,
+      preferences,
       acceptedAt: serverTimestamp(),
       userAgent: navigator.userAgent,
+      ipHash: "hash_placeholder_or_edge_computed",
       ...metadata
     });
-    await addDoc(collection(db, "legal_consents"), consentPayload);
+    await setDoc(doc(db, "legal_consents", consentDocId), consentPayload, { merge: true });
     
     await logLegalEvent("checkbox_checked", { consentType, ...metadata }, contractId, orderId);
     await updateUserLegalProfile({
       lastConsentAt: serverTimestamp()
     });
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, "legal_consents");
+    handleFirestoreError(error, OperationType.WRITE, "legal_consents");
   }
 }
 
