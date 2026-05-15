@@ -1,6 +1,7 @@
 import { doc, getDoc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { useState, useEffect } from "react";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
+import React, { useState, useEffect } from "react";
 import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
 import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { KnowledgeArticle } from "./KnowledgeCenter";
 export function AdminPanel() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
   const [activeTab, setActiveTab] = useState<string>("orders");
+  const [isUploading, setIsUploading] = useState(false);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(null);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
@@ -80,9 +82,38 @@ export function AdminPanel() {
       setIsArticleModalOpen(false);
       setEditingArticle(null);
       setArticleForm({ title: "", type: "مقال", section: "الروايات والذاكرة", filter: "عام" });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("حدث خطأ أثناء حفظ المقال");
+      let errorMessage = "حدث خطأ أثناء حفظ المقال.";
+      if (e.message?.includes("Missing or insufficient permissions") || e.code === "permission-denied") {
+        errorMessage = "ليس لديك صلاحية لإضافة مقال. يرجى التأكد من تحديث قواعد بيانات Firebase Security Rules للسماح بالكتابة في مجموعة knowledge_articles";
+      } else {
+        errorMessage = `حدث خطأ: ${e.message || "خطأ غير معروف"}`;
+      }
+      alert(errorMessage);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("الرجاء اختيار صورة صالحة.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const fileRef = ref(storage, `knowledge_articles/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      setArticleForm({...articleForm, coverImageUrl: url});
+    } catch (e: any) {
+      console.error(e);
+      alert("حدث خطأ أثناء رفع الصورة: " + (e.message || ""));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -944,14 +975,26 @@ export function AdminPanel() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-brand-900 mb-2">رابط صورة الغلاف (اختياري)</label>
-                  <input 
-                    type="url" 
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full p-3 border border-brand-200 rounded-lg text-left dir-ltr"
-                    value={articleForm.coverImageUrl || ""}
-                    onChange={(e) => setArticleForm({...articleForm, coverImageUrl: e.target.value})}
-                  />
-                  <p className="text-xs text-brand-500 mt-1">أضف رابط مباشر للصورة، وإلا سيتم استخدام صورة افتراضية.</p>
+                  <div className="flex gap-2">
+                    <input 
+                      type="url" 
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1 p-3 border border-brand-200 rounded-lg text-left dir-ltr"
+                      value={articleForm.coverImageUrl || ""}
+                      onChange={(e) => setArticleForm({...articleForm, coverImageUrl: e.target.value})}
+                    />
+                    <label className="bg-brand-100 hover:bg-brand-200 text-brand-700 px-4 py-3 rounded-lg font-bold cursor-pointer transition flex items-center justify-center whitespace-nowrap">
+                      {isUploading ? "جاري الرفع..." : "إرفاق صورة"}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-brand-500 mt-1">أضف رابط مباشر للصور أو قم بتحميل ملف صورة.</p>
                 </div>
                 {articleForm.type === 'فيديو' && (
                   <div>
