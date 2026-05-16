@@ -11,6 +11,8 @@ export function Navbar() {
     { text: "الرئيسية", path: "/" },
     { text: "من نحن وماذا نقدم", path: "/about" },
     { text: "سجل تراث العائلة", path: "/services" },
+    { text: "الأسئلة الشائعة", path: "/faq" },
+    { text: "مركز المساعدة", path: "/help-center" },
     { text: "المركز المعرفي", path: "/knowledge" },
     { text: "اتصل بنا", path: "/contact" },
   ];

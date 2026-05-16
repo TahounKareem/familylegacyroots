@@ -21,6 +21,8 @@ export function Footer() {
             <ul className="space-y-4 text-white">
               <li><Link to="/about" className="hover:text-brand-300 transition">من نحن وماذا نقدم</Link></li>
               <li><Link to="/services" className="hover:text-brand-300 transition">سجل تراث العائلة</Link></li>
+              <li><Link to="/faq" className="hover:text-brand-300 transition">الأسئلة الشائعة</Link></li>
+              <li><Link to="/help-center" className="hover:text-brand-300 transition">مركز المساعدة</Link></li>
               <li><Link to="/knowledge" className="hover:text-brand-300 transition">المركز المعرفي</Link></li>
               <li><Link to="/contact" className="hover:text-brand-300 transition">تواصل معنا</Link></li>
             </ul>

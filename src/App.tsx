@@ -5,6 +5,8 @@ import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
 import { KnowledgeCenter } from "./pages/KnowledgeCenter";
+import { FAQ } from "./pages/FAQ";
+import { HelpCenter } from "./pages/HelpCenter";
 import { Contact } from "./pages/Contact";
 import { Auth } from "./pages/Auth";
 import { Dashboard } from "./pages/Dashboard";
@@ -43,6 +45,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/knowledge" element={<KnowledgeCenter />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/help-center" element={<HelpCenter />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/legal/:documentId" element={<Legal />} />
         </Route>

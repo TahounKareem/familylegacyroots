@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3 } from "lucide-react";
+import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3, Share2, Facebook, Twitter, Mail, Copy } from "lucide-react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -56,6 +56,18 @@ export function KnowledgeCenter() {
   const [activeFilter, setActiveFilter] = useState("عام");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const getYoutubeEmbedUrl = (url: string) => {
+    let videoId = '';
+    if (url.includes('youtube.com/watch?v=')) {
+      videoId = url.split('v=')[1].split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('embed/')[1].split('?')[0];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
+  };
 
   useEffect(() => {
     if (selectedArticle) {
@@ -127,31 +139,26 @@ export function KnowledgeCenter() {
   return (
     <div className="bg-[#FAF9F6] min-h-screen pb-20">
       {/* Header Section */}
-      <div className="w-full bg-brand-900 overflow-hidden relative border-b-4 border-[#C3262A]">
+      <div className="w-full bg-white overflow-hidden relative border-b border-gray-200">
         {/* Logo at the top */}
-        <div className="relative z-20 flex justify-center pt-8 pb-4">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full mx-auto flex items-center justify-center shadow-xl border-4 border-white overflow-hidden bg-center bg-cover" style={{ backgroundImage: "url('/tree-logo.png')" }}>
-            <span className="sr-only">الشعار</span>
-            {/* If the image fails to load, we can leave the background or show an icon */}
-            <img src="/tree-logo.png" alt="شعار المركز المعرفي" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />
-          </div>
+        <div className="relative z-20 flex justify-center py-6 bg-white shrink-0">
+          <img src="https://i.postimg.cc/mDCchCVH/logo.jpg" alt="شعار المركز المعرفي" className="h-24 sm:h-32 object-contain" />
         </div>
 
         {/* Content & Background Image */}
-        <div className="relative w-full h-[50vh] sm:h-[60vh] flex items-center justify-center sm:justify-start px-4 sm:px-12 lg:px-24">
+        <div className="relative w-full h-[30vh] sm:h-[40vh] flex items-center justify-center sm:justify-start px-4 sm:px-12 lg:px-24">
           <img 
-            src="/faces-header.png" 
+            src="https://i.postimg.cc/k5tGhK0z/Header.png" 
             alt="المركز المعرفي" 
-            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 grayscale transition-transform duration-1000 scale-105"
-            onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80" }}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 scale-100"
           />
-          <div className="absolute inset-0 bg-gradient-to-l from-brand-900/90 via-brand-900/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-l from-brand-900/50 to-transparent"></div>
           
-          <div className="relative z-10 text-right max-w-3xl ml-auto bg-brand-900/60 sm:bg-brand-900/40 p-6 sm:p-10 rounded-2xl backdrop-blur-sm border border-white/10 shadow-2xl">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif text-white font-bold tracking-tight mb-6 leading-tight">
+          <div className="relative z-10 text-right max-w-2xl ml-auto bg-white/90 p-6 sm:p-8 rounded-2xl backdrop-blur-md border-2 border-[#C3262A] shadow-xl">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-brand-900 font-bold tracking-tight mb-4 leading-tight">
               المركز المعرفي
             </h1>
-            <p className="text-lg sm:text-2xl text-brand-50 font-medium leading-relaxed font-serif border-r-4 border-[#C3262A] pr-4">
+            <p className="text-base sm:text-xl text-brand-700 font-medium leading-relaxed font-serif">
               مساحة معرفية حول الأنساب والذاكرة العائلية والتحول الرقمي مقالات ورؤى ودراسات مختارة حول الروايات العائلية والتراث الرقمي وعالَم الأنساب.
             </p>
           </div>
@@ -227,7 +234,7 @@ export function KnowledgeCenter() {
                     </p>
                   )}
                   <div className="mt-auto pt-4 border-t border-gray-100 text-xs text-gray-400 flex justify-between">
-                    <span>{item.author ? `الكاتب: ${item.author}` : 'إدارة المحتوى'}</span>
+                    <span>{item.author ? (item.type === 'فيديو' ? `المنتج: ${item.author}` : `الكاتب: ${item.author}`) : 'إدارة المحتوى'}</span>
                     {item.editor && <span>تحرير: {item.editor}</span>}
                   </div>
                 </div>
@@ -253,30 +260,60 @@ export function KnowledgeCenter() {
             </div>
             
             {/* Scrollable Content */}
-            <div className="overflow-y-auto px-6 sm:px-12 py-10">
-              {selectedArticle.type === 'فيديو' && selectedArticle.videoUrl ? (
-                <div className="w-full aspect-video bg-gray-100 mb-10 rounded-lg overflow-hidden relative">
-                  {!isPlaying ? (
-                    <div className="absolute inset-0 group cursor-pointer" onClick={() => setIsPlaying(true)}>
-                      <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
-                        <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="overflow-y-auto px-6 sm:px-12 py-10 relative">
+              {/* Share Buttons */}
+              <div className="absolute left-6 top-10 flex flex-col gap-2 z-10">
+                <button onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
+                  alert('تم نسخ الرابط بنجاح');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#C3262A] hover:text-white transition-colors shadow-sm" title="نسخ الرابط">
+                  <Copy className="w-5 h-5" />
+                </button>
+                <button onClick={() => {
+                  const url = window.location.href;
+                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(selectedArticle.title)}&url=${encodeURIComponent(url)}`, '_blank');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#1DA1F2] hover:text-white transition-colors shadow-sm" title="مشاركة على اكس">
+                  <Twitter className="w-5 h-5" />
+                </button>
+                <button onClick={() => {
+                  const url = window.location.href;
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors shadow-sm" title="مشاركة على فيسبوك">
+                  <Facebook className="w-5 h-5" />
+                </button>
+                <button onClick={() => {
+                  const url = window.location.href;
+                  window.location.href = `mailto:?subject=${encodeURIComponent(selectedArticle.title)}&body=${encodeURIComponent('ألق نظرة على هذا المحتوى: ' + selectedArticle.title + '\n\n' + url)}`;
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-colors shadow-sm" title="مشاركة عبر البريد">
+                  <Mail className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="max-w-3xl mx-auto">
+                {selectedArticle.type === 'فيديو' && selectedArticle.videoUrl ? (
+                  <div className="w-full aspect-video bg-gray-100 mb-10 rounded-lg overflow-hidden relative shadow-lg">
+                    {!isPlaying ? (
+                      <div className="absolute inset-0 group cursor-pointer" onClick={() => setIsPlaying(true)}>
+                        <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
+                          <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <iframe 
-                      src={selectedArticle.videoUrl.includes("youtube.com/watch?v=") ? selectedArticle.videoUrl.replace("watch?v=", "embed/") + (selectedArticle.videoUrl.includes("?") ? "&autoplay=1" : "?autoplay=1") : selectedArticle.videoUrl.includes("youtu.be/") ? selectedArticle.videoUrl.replace("youtu.be/", "youtube.com/embed/") + "?autoplay=1" : selectedArticle.videoUrl} 
-                      className="w-full h-full border-0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                      allowFullScreen
-                    ></iframe>
-                  )}
-                </div>
-              ) : (
-                <div className="w-full h-64 sm:h-96 bg-gray-100 mb-10 rounded-lg overflow-hidden relative">
-                  <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
-                </div>
-              )}
+                    ) : (
+                      <iframe 
+                        src={getYoutubeEmbedUrl(selectedArticle.videoUrl)} 
+                        className="w-full h-full border-0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowFullScreen
+                      ></iframe>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-full h-64 sm:h-96 bg-gray-100 mb-10 rounded-lg overflow-hidden relative shadow-lg">
+                    <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
+                  </div>
+                )}
 
               {selectedArticle.imageCaption && (
                 <p className="text-center font-bold text-lg font-serif text-[#C3262A] mb-2">{selectedArticle.imageCaption}</p>
@@ -290,7 +327,7 @@ export function KnowledgeCenter() {
               </h1>
 
               <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-500 mb-12 border-y border-gray-100 py-4">
-                {selectedArticle.author && <span>الكاتب / المنتج: <span className="text-gray-900 font-bold">{selectedArticle.author}</span></span>}
+                {selectedArticle.author && <span>{selectedArticle.type === 'فيديو' ? 'المنتج' : 'الكاتب'}: <span className="text-gray-900 font-bold">{selectedArticle.author}</span></span>}
                 {selectedArticle.editor && <span>تحرير: <span className="text-gray-900 font-bold">{selectedArticle.editor}</span></span>}
                 {selectedArticle.publishDate && <span>تاريخ النشر: <span className="text-gray-900">{selectedArticle.publishDate}</span></span>}
               </div>
@@ -306,10 +343,50 @@ export function KnowledgeCenter() {
                   العودة إلى الصفحة السابقة
                 </button>
               </div>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Banner Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
+        <a href="/" className="block overflow-hidden rounded-2xl shadow-lg border border-brand-200 hover:shadow-2xl transition-all group">
+          <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+        </a>
+      </div>
+
+      {/* Newsletter Section */}
+      <div className="bg-brand-900 text-white py-16 mt-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl font-serif font-bold mb-6">إنضم الى نشرة المركز المعرفي بمنصة سجل تراث العائلة</h2>
+          <p className="text-lg text-brand-100 mb-2 leading-relaxed">
+            وإكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالم الأنساب والتراث الرقمي.
+          </p>
+          <p className="text-sm text-brand-200 mb-8">
+            المحتوى مجاني بالكامل ويمكنك إلغاء الإشتراك في أي وقت.
+          </p>
+          <form className="flex w-full max-w-md mx-auto items-center" onSubmit={(e) => {
+            e.preventDefault();
+            const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
+            if (email) {
+              alert('تم تسجيل بريدك الإلكتروني بنجاح!');
+              (e.currentTarget as HTMLFormElement).reset();
+            }
+          }}>
+            <input 
+              type="email" 
+              name="email"
+              placeholder="أدخل بريدك الإلكتروني..." 
+              required
+              className="flex-1 px-4 py-3 rounded-r-lg text-brand-900 focus:outline-none focus:ring-2 focus:ring-[#C3262A] dir-ltr text-left border-y border-r border-[#C3262A]"
+            />
+            <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-6 py-3 rounded-l-lg font-bold transition-colors border border-[#C3262A] border-r-0">
+              إشتراك
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
