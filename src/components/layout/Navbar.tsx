@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Menu, X, BookOpen, User } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store";
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAppStore();
+  const location = useLocation();
 
   const navLinks = [
     { text: "الرئيسية", path: "/" },
@@ -28,30 +29,33 @@ export function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.path} 
-                to={link.path}
-                className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm"
-              >
-                {link.text}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+              return (
+                <Link 
+                  key={link.path} 
+                  to={link.path}
+                  className={`font-medium transition text-sm ${isActive ? 'text-[#B6191F]' : 'text-[#8E9091] hover:text-[#B6191F]'}`}
+                >
+                  {link.text}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="hidden md:flex items-center gap-4">
             {currentUser ? (
               <div className="flex items-center gap-4">
-                <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
+                <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
+                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
                   تسجيل الخروج
                 </button>
               </div>
             ) : (
-              <Link to="/auth" className="text-[#8E9091] hover:text-brand-500 font-medium transition text-sm">
+              <Link to="/auth" className="text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
                 تسجيل الدخول / إنشاء حساب
               </Link>
             )}
@@ -69,16 +73,19 @@ export function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-brand-50 border-b border-brand-200 py-4 px-4 space-y-4">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.path} 
-              to={link.path}
-              className="block text-brand-800 font-medium"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.text}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+            return (
+              <Link 
+                key={link.path} 
+                to={link.path}
+                className={`block font-medium ${isActive ? 'text-[#B6191F]' : 'text-brand-800'}`}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.text}
+              </Link>
+            );
+          })}
           {currentUser ? (
             <>
               <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
