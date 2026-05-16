@@ -40,6 +40,8 @@ const QA_DB = [
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [isTicketMode, setIsTicketMode] = useState(false);
   const [ticketStatus, setTicketStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const currentUser = useAppStore(state => state.currentUser);
@@ -57,7 +59,7 @@ export function Chatbot() {
       setMessages([{ 
         id: '1', 
         sender: 'bot', 
-        text: 'أهلاً بك في مركز آدم للبحوث. كيف يمكنني مساعدتك اليوم؟ يرجى اختيار أحد الأسئلة الشائعة أو التحدث لفريق الدعم.' 
+        text: 'أهلاً بك. أنا "المرشد الذكي"، المساعد الإرشادي لمنصة سجل تراث العائلة. كيف يمكنني مساعدتك؟' 
       }]);
     }
   }, [isOpen, messages.length]);
@@ -74,33 +76,48 @@ export function Chatbot() {
     }
   }, [messages, isOpen, isTicketMode]);
 
-  const handleQA = (qa: typeof QA_DB[0]) => {
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now().toString(), sender: 'user', text: qa.q }
-    ]);
-    
-    // محاكاة كتابة البوت للحيوية
-    setTimeout(() => {
+  const handleSendMessage = async (text: string = inputText) => {
+    if (!text.trim()) return;
+
+    const newMessages: Message[] = [
+      ...messages,
+      { id: Date.now().toString(), sender: 'user', text: text.trim() }
+    ];
+
+    setMessages(newMessages);
+    setInputText("");
+    setIsTyping(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages })
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      
       setMessages(prev => [
         ...prev,
-        { id: Date.now().toString(), sender: 'bot', text: qa.a }
+        { id: Date.now().toString(), sender: 'bot', text: data.reply }
       ]);
-    }, 600);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now().toString(), sender: 'bot', text: 'عذراً، حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.' }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
-  const handleOpenTicket = () => {
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now().toString(), sender: 'user', text: 'أريد التحدث مع خدمة العملاء' }
-    ]);
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now().toString(), sender: 'bot', text: 'سأقوم بمساعدتك لفتح تذكرة وسيتم الرد عليك عبر البريد الإلكتروني خلال 24 ساعة.' }
-      ]);
-      setIsTicketMode(true);
-    }, 600);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   const submitTicket = async (e: React.FormEvent) => {
@@ -157,11 +174,11 @@ export function Chatbot() {
             <div className="bg-brand-800 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-brand-700 rounded-full flex justify-center items-center">
-                  <span className="font-serif text-lg font-bold">آدم</span>
+                  <span className="font-serif text-lg font-bold">مـ</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold leading-tight text-sm">المساعد الآلي</h3>
-                  <p className="text-xs text-brand-200">مركز آدم للبحوث</p>
+                  <h3 className="font-semibold leading-tight text-sm">المرشد الذكي</h3>
+                  <p className="text-xs text-brand-200">مساعد إرشادي تشغيلي</p>
                 </div>
               </div>
               <button 
@@ -193,23 +210,23 @@ export function Chatbot() {
               ))}
               
               {!isTicketMode && (
-                <div className="flex flex-col gap-2 mt-4 animate-fade-in">
-                  <p className="text-xs text-center text-gray-500 mb-1">اختر استفساراً:</p>
-                  {QA_DB.map((qa, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleQA(qa)}
-                      className="text-right text-sm px-4 py-2 bg-white border border-brand-200 text-brand-800 rounded-xl hover:bg-brand-50 transition shadow-sm"
-                    >
-                      {qa.q}
-                    </button>
-                  ))}
+                <div className="flex flex-col gap-2 mt-2 animate-fade-in">
                   <button
-                    onClick={handleOpenTicket}
-                    className="text-right text-sm px-4 py-2 bg-brand-50 border border-brand-300 text-brand-900 font-semibold rounded-xl hover:bg-brand-100 transition shadow-sm"
+                    onClick={() => setIsTicketMode(true)}
+                    className="text-right text-xs px-4 py-2 bg-brand-50 border border-brand-300 text-brand-900 font-semibold rounded-xl hover:bg-brand-100 transition shadow-sm mx-auto"
                   >
-                    التحدث مع ممثل خدمة العملاء
+                    لفتح تذكرة لفريق الدعم، اضغط هنا
                   </button>
+                </div>
+              )}
+
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-brand-100 text-gray-500 rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm flex gap-1 items-center">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
                 </div>
               )}
 
@@ -275,6 +292,30 @@ export function Chatbot() {
 
               <div ref={messagesEndRef} />
             </div>
+
+            {/* إدخال النص */}
+            {!isTicketMode && (
+              <div className="p-3 bg-white border-t border-brand-100">
+                <div className="relative flex items-center">
+                  <button
+                    onClick={() => handleSendMessage()}
+                    disabled={!inputText.trim() || isTyping}
+                    className="absolute left-2 text-brand-800 disabled:text-gray-300 p-2 hover:bg-brand-50 rounded-full transition"
+                  >
+                    <Send className="w-5 h-5 rtl:rotate-180" />
+                  </button>
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="اكتب رسالتك هنا..."
+                    className="w-full bg-gray-50 border border-gray-200 text-sm rounded-full py-3 pr-4 pl-12 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+            )}
             
           </motion.div>
         )}
