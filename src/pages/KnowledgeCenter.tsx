@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3, Share2, Facebook, Twitter, Mail, Copy } from "lucide-react";
+import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3, Share2, Facebook, Twitter, Mail, Copy, Instagram } from "lucide-react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -56,6 +56,10 @@ export function KnowledgeCenter() {
   const [activeFilter, setActiveFilter] = useState("عام");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isNewsletterPopupOpen, setIsNewsletterPopupOpen] = useState(false);
+
+  // Reusable popup opener
+  const openNewsletter = () => setIsNewsletterPopupOpen(true);
 
   const getYoutubeEmbedUrl = (url: string) => {
     let videoId = '';
@@ -242,6 +246,33 @@ export function KnowledgeCenter() {
             ))}
           </div>
         )}
+
+        {/* Main Page Newsletter and Banner */}
+        <div className="mt-20">
+          {/* Newsletter Trigger */}
+          <div className="bg-white border border-gray-100 rounded-2xl p-8 sm:p-12 text-center shadow-sm relative overflow-hidden group mb-12">
+            <div className="absolute inset-0 bg-[#F2E3DE] opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="relative z-10">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#B6191F] mb-4">اشترك في النشرة البريدية</h2>
+              <p className="text-gray-700 mb-6 leading-relaxed max-w-2xl mx-auto font-medium">
+                كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
+              </p>
+              <button 
+                onClick={openNewsletter}
+                className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-8 py-3.5 rounded-full font-bold transition-transform hover:scale-105 shadow-md"
+              >
+                انضم إلى النشرة البريدية
+              </button>
+            </div>
+          </div>
+
+          {/* Banner Section */}
+          <div className="mb-12">
+            <a href="/services" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+              <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Article Detail Modal */}
@@ -281,6 +312,30 @@ export function KnowledgeCenter() {
                   window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
                 }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors shadow-sm" title="مشاركة على فيسبوك">
                   <Facebook className="w-5 h-5" />
+                </button>
+                <button onClick={() => {
+                   const url = window.location.href;
+                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
+                   alert('تم نسخ الرابط لمشاركته على انستغرام');
+                   window.open('https://instagram.com', '_blank');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-500 hover:text-white transition-colors shadow-sm" title="مشاركة على انستغرام">
+                  <Instagram className="w-5 h-5" />
+                </button>
+                <button onClick={() => {
+                   const url = window.location.href;
+                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
+                   alert('تم نسخ الرابط لمشاركته على تيك توك');
+                   window.open('https://tiktok.com', '_blank');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-sm" title="مشاركة على تيك توك">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                </button>
+                <button onClick={() => {
+                   const url = window.location.href;
+                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
+                   alert('تم نسخ الرابط لمشاركته على سناب شات');
+                   window.open('https://snapchat.com', '_blank');
+                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-yellow-400 hover:text-white transition-colors shadow-sm" title="مشاركة على سناب شات">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M11 2c2 0 3 1.5 3 3v2c0 1 .5 1.5 1 1.5s1-.5 1-1.5c0-1 1-1.5 2-1.5s2 .5 2 1.5c0 2-1.5 3-3 3-1 0-1.5.5-1.5 1.5s.5 1.5 1.5 1.5c1.5 0 2 1 2 2s-.5 2-2 2h-1c-1 0-1.5.5-1.5 1.5 0 .5-.5 1-1.5 1h-3c-1 0-1.5-.5-1.5-1-1-1-1.5-1.5-1.5-1.5h-1c-1.5 0-2-1-2-2s.5-2 2-2c1 0 1.5-.5 1.5-1.5S7.5 13 6.5 13c-1.5 0-3-1-3-3s1-1.5 2-1.5c1 0 2-.5 2-1.5S7 6 7 5c0-1.5 1-3 3-3h1z"/></svg>
                 </button>
                 <button onClick={() => {
                   const url = window.location.href;
@@ -338,59 +393,28 @@ export function KnowledgeCenter() {
                 </div>
               )}
 
-              {/* Banner Section */}
-              <div className="mt-16 mb-12">
-                <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
-                  <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
-                </a>
+              {/* Newsletter Trigger */}
+              <div className="bg-white border inset-0 border-gray-100 rounded-2xl p-8 sm:p-12 text-center shadow-sm relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[#F2E3DE] opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <div className="relative z-10">
+                  <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#B6191F] mb-4">اشترك في النشرة البريدية</h2>
+                  <p className="text-gray-700 mb-6 leading-relaxed max-w-2xl mx-auto font-medium">
+                    كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
+                  </p>
+                  <button 
+                    onClick={openNewsletter}
+                    className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-8 py-3.5 rounded-full font-bold transition-transform hover:scale-105 shadow-md"
+                  >
+                    انضم إلى النشرة البريدية
+                  </button>
+                </div>
               </div>
 
-              {/* Newsletter Section */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-8 sm:p-12 text-center shadow-sm">
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-4">إنضم الى نشرة المركز المعرفي بمنصة سجل تراث العائلة</h2>
-                <p className="text-gray-600 mb-2 leading-relaxed max-w-2xl mx-auto">
-                  وإكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالم الأنساب والتراث الرقمي.
-                </p>
-                <p className="text-sm text-gray-400 mb-8">
-                  المحتوى مجاني بالكامل ويمكنك إلغاء الإشتراك في أي وقت.
-                </p>
-                <form className="flex w-full max-w-md mx-auto items-center" onSubmit={async (e) => {
-                  e.preventDefault();
-                  const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
-                  const email = emailInput.value;
-                  const btn = e.currentTarget.querySelector('button');
-                  if (email && btn) {
-                    try {
-                      btn.disabled = true;
-                      btn.textContent = 'جاري التسجيل...';
-                      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-                      await addDoc(collection(db, 'newsletter_subscribers'), {
-                        email,
-                        subscribedAt: serverTimestamp(),
-                        source: 'knowledge_center_article'
-                      });
-                      alert('تم تسجيل بريدك الإلكتروني بنجاح!');
-                      (e.currentTarget as HTMLFormElement).reset();
-                    } catch (err) {
-                      console.error(err);
-                      alert('حدث خطأ أثناء التسجيل. حاول مرة أخرى.');
-                    } finally {
-                      btn.disabled = false;
-                      btn.textContent = 'إشتراك';
-                    }
-                  }
-                }}>
-                  <input 
-                    type="email" 
-                    name="email"
-                    placeholder="أدخل بريدك الإلكتروني..." 
-                    required
-                    className="flex-1 px-4 py-3 rounded-r-lg text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C3262A] dir-ltr text-left border-y border-r border-gray-200"
-                  />
-                  <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-6 py-3 rounded-l-lg font-bold transition-colors border border-[#C3262A] border-r-0 whitespace-nowrap">
-                    إشتراك
-                  </button>
-                </form>
+              {/* Banner Section */}
+              <div className="mt-12 mb-12">
+                <a href="/services" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                  <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+                </a>
               </div>
 
               <div className="mt-16 text-center border-t border-gray-100 pt-8">
@@ -399,6 +423,70 @@ export function KnowledgeCenter() {
                 </button>
               </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Newsletter Popup */}
+      {isNewsletterPopupOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm shadow-2xl">
+          <div className="relative w-full max-w-2xl bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
+            <button 
+              onClick={() => setIsNewsletterPopupOpen(false)}
+              className="absolute top-4 left-4 text-gray-500 hover:text-gray-800 transition-colors z-10"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="p-8 sm:p-12 text-center">
+              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#B6191F] mb-6 leading-tight max-w-xl mx-auto">
+                انضم إلى نشرة المركز المعرفي بمنصة سجل تراث العائلة واكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالَم الأنساب والتراث الرقمي.
+              </h2>
+              <p className="text-[#801D22] opacity-80 mb-8 font-medium text-lg">
+                المحتوى مجاني بالكامل، ويمكنك إلغاء الاشتراك في أي وقت.
+              </p>
+              <form className="max-w-md mx-auto" onSubmit={async (e) => {
+                  e.preventDefault();
+                  const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                  const email = emailInput.value;
+                  const btn = e.currentTarget.querySelector('button');
+                  if (email && btn) {
+                    try {
+                      btn.disabled = true;
+                      btn.textContent = 'جاري...';
+                      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+                      await addDoc(collection(db, 'newsletter_subscribers'), {
+                        email,
+                        subscribedAt: serverTimestamp(),
+                        source: 'knowledge_center_popup'
+                      });
+                      alert('تم تسجيل بريدك الإلكتروني بنجاح!');
+                      setIsNewsletterPopupOpen(false);
+                    } catch (err) {
+                      console.error(err);
+                      alert('حدث خطأ أثناء التسجيل. قد لا تملك الصلاحية للوصول لجدول النشرات البريدية في قواعد البيانات.');
+                    } finally {
+                      btn.disabled = false;
+                      btn.textContent = 'اشترك';
+                    }
+                  }
+                }}>
+                <input 
+                  type="email" 
+                  name="email"
+                  placeholder="عنوان بريدك الإلكتروني" 
+                  required
+                  className="w-full px-5 py-4 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-6 text-right shadow-inner border border-[#e0c4ba]"
+                />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <button type="submit" className="w-full sm:w-auto bg-[#801D22] hover:bg-[#6b161c] text-white px-10 py-3 rounded-full font-bold transition-transform hover:scale-105 text-lg shadow-md">
+                    اشترك
+                  </button>
+                  <a href="/legal/privacy" className="text-gray-600 hover:text-gray-900 border-b border-gray-400 pb-0.5 text-sm font-medium transition-colors">
+                    سياسة الخصوصية
+                  </a>
+                </div>
+              </form>
             </div>
           </div>
         </div>

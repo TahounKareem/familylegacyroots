@@ -113,19 +113,21 @@ export async function logLegalEvent(eventType: string, metadata: any = {}, contr
   const pageUrl = typeof window !== "undefined" ? window.location.pathname : "";
 
   try {
-    await addDoc(collection(db, "audit_logs"), {
+    const eventPayload = {
       userId: user.uid,
       orderId: orderId || null,
       contractId: contractId || null,
       eventType,
       timestamp: serverTimestamp(),
-      metadata: sanitizeSnapshot(metadata),
+      ...sanitizeSnapshot(metadata),
       userAgent: navigator.userAgent,
       sessionId: currentSessionId,
       pageUrl,
       eventSequence: contractSequences[sequenceKey],
-      ipAddress: "pending_edge_capture" // Real IP and sequencing enforced per-contract
-    });
+      ipAddress: "pending_edge_capture"
+    };
+    
+    await addDoc(collection(db, "audit_logs"), eventPayload);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, "audit_logs");
   }

@@ -4,13 +4,13 @@ import { db, storage } from "@/lib/firebase";
 import React, { useState, useEffect } from "react";
 import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2, HeartHandshake, Package, Shield, Calculator, Quote } from "lucide-react";
+import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2, HeartHandshake, Package, Shield, Calculator, Quote, LogOut } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
 
 export function AdminPanel() {
-  const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
+  const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead, logout } = useAppStore();
   const [activeTab, setActiveTab] = useState<string>("lobby");
   const [isUploading, setIsUploading] = useState(false);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
@@ -245,6 +245,18 @@ export function AdminPanel() {
 
       {currentTab === "lobby" && (
         <div className="space-y-10">
+          <div className="flex justify-end gap-3 mb-2">
+            <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
+              <Home className="w-4 h-4" /> العودة للرئيسية
+            </Link>
+            <button
+              onClick={() => { logout(); window.location.href = '/auth'; }}
+              className="flex items-center gap-2 bg-white text-red-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-red-50 transition shadow-sm font-medium"
+            >
+              <LogOut className="w-4 h-4" /> تسجيل الخروج
+            </button>
+          </div>
+
           <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-brand-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C3262A]/5 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>

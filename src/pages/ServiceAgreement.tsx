@@ -349,7 +349,14 @@ export function ServiceAgreement() {
                   ))}
                 </div>
 
-                {!scrolledToBottom && (
+                {scrolledToBottom ? (
+                  <div className="text-center mt-12 py-8 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <p className="text-emerald-700 font-bold flex items-center justify-center gap-2">
+                      <Check className="w-5 h-5" />
+                      شكرًا لك. لقد أكملت الاطلاع على الاتفاقية. يمكنك الآن الموافقة على الإقرارات بالأسفل.
+                    </p>
+                  </div>
+                ) : (
                   <div className="text-center mt-12 py-8 bg-brand-100/50 rounded-xl border border-brand-200">
                     <p className="text-brand-600 font-medium flex items-center justify-center gap-2">
                       <ArrowRight className="w-5 h-5 animate-pulse" />
@@ -402,7 +409,7 @@ export function ServiceAgreement() {
 
           {!scrolledToBottom && (
              <p className="text-red-500 text-sm mt-4 font-bold flex items-center gap-2">
-               يرجى التمرير وقراءة العقد كاملاً حتى نهايته لتفعيل الإقرار بالموافقة.
+               يرجى الاطلاع على كامل الاتفاقية حتى النهاية قبل المتابعة.
              </p>
           )}
         </div>
