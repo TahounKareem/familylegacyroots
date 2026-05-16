@@ -120,6 +120,14 @@ service cloud.firestore {
       allow write: if isStaff();
     }
     
+    // ==========================================
+    // Newsletter Subscribers Collection
+    // ==========================================
+    match /newsletter_subscribers/{subscriberId} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+    
     // Default Deny
     match /{document=**} {
       allow read, write: if false;
