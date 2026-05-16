@@ -250,21 +250,22 @@ export function KnowledgeCenter() {
         {/* Main Page Newsletter and Banner */}
         <div className="mt-20">
           {/* Newsletter Trigger */}
-          <div className="bg-brand-900 rounded-3xl p-8 sm:p-14 text-center shadow-2xl relative overflow-hidden group mb-12 border border-brand-800">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10 mix-blend-overlay"></div>
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-700 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-brand-800 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+          <div className="bg-[#FAF8F5] border-[3px] border-[#C3262A]/20 rounded-3xl p-8 sm:p-14 text-center shadow-lg relative overflow-hidden group mb-12 hover:border-[#C3262A]/40 transition-colors duration-500 max-w-4xl mx-auto">
+            <div className="absolute inset-0 bg-[#F2E3DE] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-50"></div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-16 h-16 bg-brand-800 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-brand-700/50">
-                <Mail className="w-8 h-8 text-brand-200" />
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-brand-100 text-[#C3262A] group-hover:scale-110 transition-transform duration-500">
+                <Mail className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white mb-4">اشترك في النشرة البريدية</h2>
-              <p className="text-brand-100 mb-8 leading-relaxed max-w-xl mx-auto font-medium text-lg">
+              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#8A1A1E] mb-4">
+                اشترك في النشرة البريدية
+              </h2>
+              <p className="text-brand-800 mb-8 leading-relaxed max-w-xl mx-auto font-medium text-lg">
                 كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
               </p>
               <button 
                 onClick={openNewsletter}
-                className="bg-[#D3A74A] hover:bg-[#b88c32] text-brand-900 px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-xl hover:shadow-2xl flex items-center gap-2"
+                className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-md flex items-center gap-2"
               >
                 انضم إلى النشرة البريدية
                 <ArrowLeft className="w-5 h-5" />
@@ -400,21 +401,22 @@ export function KnowledgeCenter() {
               )}
 
               {/* Newsletter Trigger */}
-              <div className="bg-brand-900 rounded-3xl p-8 sm:p-14 text-center shadow-2xl relative overflow-hidden group mt-12 mb-12 border border-brand-800">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10 mix-blend-overlay"></div>
-                <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-700 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
-                <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-brand-800 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+              <div className="bg-[#FAF8F5] border-[3px] border-[#C3262A]/20 rounded-3xl p-8 sm:p-14 text-center shadow-lg relative overflow-hidden group mt-12 mb-12 hover:border-[#C3262A]/40 transition-colors duration-500 max-w-4xl mx-auto">
+                <div className="absolute inset-0 bg-[#F2E3DE] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+                <div className="absolute -top-24 -right-24 w-48 h-48 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-50"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-16 h-16 bg-brand-800 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-brand-700/50">
-                    <Mail className="w-8 h-8 text-brand-200" />
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-brand-100 text-[#C3262A] group-hover:scale-110 transition-transform duration-500">
+                    <Mail className="w-8 h-8" />
                   </div>
-                  <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white mb-4">اشترك في النشرة البريدية</h2>
-                  <p className="text-brand-100 mb-8 leading-relaxed max-w-xl mx-auto font-medium text-lg">
+                  <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#8A1A1E] mb-4">
+                    اشترك في النشرة البريدية
+                  </h2>
+                  <p className="text-brand-800 mb-8 leading-relaxed max-w-xl mx-auto font-medium text-lg">
                     كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
                   </p>
                   <button 
                     onClick={openNewsletter}
-                    className="bg-[#D3A74A] hover:bg-[#b88c32] text-brand-900 px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-xl hover:shadow-2xl flex items-center gap-2"
+                    className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-md flex items-center gap-2"
                   >
                     انضم إلى النشرة البريدية
                     <ArrowLeft className="w-5 h-5" />
