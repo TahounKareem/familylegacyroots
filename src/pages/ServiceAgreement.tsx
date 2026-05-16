@@ -350,14 +350,21 @@ export function ServiceAgreement() {
                 </div>
 
                 {scrolledToBottom ? (
-                  <div className="text-center mt-12 py-8 bg-emerald-50 rounded-xl border border-emerald-200">
-                    <p className="text-emerald-700 font-bold flex items-center justify-center gap-2">
-                      <Check className="w-5 h-5" />
-                      شكرًا لك. لقد أكملت الاطلاع على الاتفاقية. يمكنك الآن الموافقة على الإقرارات بالأسفل.
-                    </p>
+                  <div className="text-center mt-16 p-12 bg-[#F9F6F0] rounded-2xl border border-brand-200 flex flex-col items-center justify-center gap-6 shadow-inner relative overflow-hidden">
+                    <div className="absolute inset-0 bg-brand-50 opacity-40 mix-blend-multiply pattern-grid-lg"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                      <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2 shadow-sm">
+                        <Check className="w-8 h-8" />
+                      </div>
+                      <h4 className="text-xl font-bold text-brand-900 mb-1">نهاية الوثيقة</h4>
+                      <h4 className="text-lg font-bold text-brand-900 mb-4 font-serif">End of Document</h4>
+                      <p className="text-brand-700 font-medium text-center leading-relaxed max-w-md">
+                        شكرًا لك. لقد أكملت الاطلاع على الاتفاقية بصيغتيها العربية والإنجليزية. يمكنك الآن الانتقال للموافقة على الإقرارات بالأسفل.
+                      </p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center mt-12 py-8 bg-brand-100/50 rounded-xl border border-brand-200">
+                  <div className="text-center mt-12 py-12 bg-brand-50/80 rounded-2xl border border-brand-200 shadow-inner">
                     <p className="text-brand-600 font-medium flex items-center justify-center gap-2">
                       <ArrowRight className="w-5 h-5 animate-pulse" />
                       استمر بالتمرير للأسفل لتمكين الإقرار والموافقة
