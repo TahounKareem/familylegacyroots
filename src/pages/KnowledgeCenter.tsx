@@ -338,8 +338,63 @@ export function KnowledgeCenter() {
                 </div>
               )}
 
-              <div className="mt-16 text-center">
-                <button onClick={() => setSelectedArticle(null)} className="text-[#C3262A] font-bold text-sm hover:underline">
+              {/* Banner Section */}
+              <div className="mt-16 mb-12">
+                <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                  <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+                </a>
+              </div>
+
+              {/* Newsletter Section */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-8 sm:p-12 text-center shadow-sm">
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-4">إنضم الى نشرة المركز المعرفي بمنصة سجل تراث العائلة</h2>
+                <p className="text-gray-600 mb-2 leading-relaxed max-w-2xl mx-auto">
+                  وإكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالم الأنساب والتراث الرقمي.
+                </p>
+                <p className="text-sm text-gray-400 mb-8">
+                  المحتوى مجاني بالكامل ويمكنك إلغاء الإشتراك في أي وقت.
+                </p>
+                <form className="flex w-full max-w-md mx-auto items-center" onSubmit={async (e) => {
+                  e.preventDefault();
+                  const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                  const email = emailInput.value;
+                  const btn = e.currentTarget.querySelector('button');
+                  if (email && btn) {
+                    try {
+                      btn.disabled = true;
+                      btn.textContent = 'جاري التسجيل...';
+                      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+                      await addDoc(collection(db, 'newsletter_subscribers'), {
+                        email,
+                        subscribedAt: serverTimestamp(),
+                        source: 'knowledge_center_article'
+                      });
+                      alert('تم تسجيل بريدك الإلكتروني بنجاح!');
+                      (e.currentTarget as HTMLFormElement).reset();
+                    } catch (err) {
+                      console.error(err);
+                      alert('حدث خطأ أثناء التسجيل. حاول مرة أخرى.');
+                    } finally {
+                      btn.disabled = false;
+                      btn.textContent = 'إشتراك';
+                    }
+                  }
+                }}>
+                  <input 
+                    type="email" 
+                    name="email"
+                    placeholder="أدخل بريدك الإلكتروني..." 
+                    required
+                    className="flex-1 px-4 py-3 rounded-r-lg text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C3262A] dir-ltr text-left border-y border-r border-gray-200"
+                  />
+                  <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-6 py-3 rounded-l-lg font-bold transition-colors border border-[#C3262A] border-r-0 whitespace-nowrap">
+                    إشتراك
+                  </button>
+                </form>
+              </div>
+
+              <div className="mt-16 text-center border-t border-gray-100 pt-8">
+                <button onClick={() => setSelectedArticle(null)} className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors">
                   العودة إلى الصفحة السابقة
                 </button>
               </div>
@@ -348,45 +403,6 @@ export function KnowledgeCenter() {
           </div>
         </div>
       )}
-
-      {/* Banner Section */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
-        <a href="/" className="block overflow-hidden rounded-2xl shadow-lg border border-brand-200 hover:shadow-2xl transition-all group">
-          <img src="https://i.postimg.cc/QM11TcY9/Bar.png" alt="سجل تراث العائلة" className="w-full object-cover group-hover:scale-105 transition-transform duration-700" />
-        </a>
-      </div>
-
-      {/* Newsletter Section */}
-      <div className="bg-brand-900 text-white py-16 mt-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl font-serif font-bold mb-6">إنضم الى نشرة المركز المعرفي بمنصة سجل تراث العائلة</h2>
-          <p className="text-lg text-brand-100 mb-2 leading-relaxed">
-            وإكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالم الأنساب والتراث الرقمي.
-          </p>
-          <p className="text-sm text-brand-200 mb-8">
-            المحتوى مجاني بالكامل ويمكنك إلغاء الإشتراك في أي وقت.
-          </p>
-          <form className="flex w-full max-w-md mx-auto items-center" onSubmit={(e) => {
-            e.preventDefault();
-            const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
-            if (email) {
-              alert('تم تسجيل بريدك الإلكتروني بنجاح!');
-              (e.currentTarget as HTMLFormElement).reset();
-            }
-          }}>
-            <input 
-              type="email" 
-              name="email"
-              placeholder="أدخل بريدك الإلكتروني..." 
-              required
-              className="flex-1 px-4 py-3 rounded-r-lg text-brand-900 focus:outline-none focus:ring-2 focus:ring-[#C3262A] dir-ltr text-left border-y border-r border-[#C3262A]"
-            />
-            <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-6 py-3 rounded-l-lg font-bold transition-colors border border-[#C3262A] border-r-0">
-              إشتراك
-            </button>
-          </form>
-        </div>
-      </div>
     </div>
   );
 }

@@ -116,6 +116,16 @@ const HELP_CENTER_SECTIONS = [
       { q: "متى أستخدم مركز المساعدة؟", a: "يُستخدم “مركز المساعدة” عند الحاجة إلى فهم أوسع للخدمة والإجراءات التشغيلية المرتبطة بها." },
       { q: "متى أستخدم المركز المعرفي؟", a: "يُستخدم “المركز المعرفي” للاطلاع على المقالات والدراسات والرؤى والمواد المعرفية المرتبطة بالروايات والذاكرة وعالَم الأنساب." }
     ]
+  },
+  {
+    title: "ملاحظات تشغيلية مهمة",
+    content: "• قد تختلف بعض الخصائص أو الخدمات أو المزايا بحسب الباقات أو الإصدارات أو المرحلة التشغيلية للمنصة.\n• لا يعني توفر بعض الخصائص التفاعلية داخل المنصة اعتماد جميع البيانات ضمن “السجل الأساسي”.\n• تخضع الخدمات والمنهجيات والإجراءات التشغيلية للعقود والسياسات المعتمدة داخل المنصة وقت التنفيذ.",
+    faqs: []
+  },
+  {
+    title: "ختام",
+    content: "صُمم “مركز المساعدة” ليكون المرجع التشغيلي الرسمي لفهم الخدمات والإجراءات والمراحل المرتبطة بمنصة “سجل تراث العائلة”.",
+    faqs: []
   }
 ];
 
@@ -170,46 +180,38 @@ export function HelpCenter() {
               {openSection === section.title && (
                 <div className="px-6 pb-6 pt-2 border-t border-gray-100">
                   {section.content && (
-                    <p className="text-brand-700 leading-relaxed font-serif mb-6 mt-4 text-right">
+                    <p className="text-brand-700 leading-relaxed font-serif mb-6 mt-4 text-right whitespace-pre-wrap">
                       {section.content}
                     </p>
                   )}
-                  <div className="space-y-3 mt-4">
-                    {section.faqs.map((faq) => (
-                      <div key={faq.q} className="border border-gray-100 rounded-lg overflow-hidden">
-                        <button 
-                          onClick={() => toggleFaq(faq.q)}
-                          className={`w-full flex justify-between items-center p-4 transition-colors ${openFaq === faq.q ? "bg-gray-50 font-bold" : "bg-white hover:bg-gray-50"}`}
-                        >
-                          <h3 className="text-brand-900 text-lg text-right pr-2">{faq.q}</h3>
-                          {openFaq === faq.q ? (
-                            <ChevronUp className="w-5 h-5 text-brand-500 shrink-0" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-brand-400 shrink-0" />
+                  {section.faqs && section.faqs.length > 0 && (
+                    <div className="space-y-3 mt-4">
+                      {section.faqs.map((faq) => (
+                        <div key={faq.q} className="border border-gray-100 rounded-lg overflow-hidden">
+                          <button 
+                            onClick={() => toggleFaq(faq.q)}
+                            className={`w-full flex justify-between items-center p-4 transition-colors ${openFaq === faq.q ? "bg-gray-50 font-bold" : "bg-white hover:bg-gray-50"}`}
+                          >
+                            <h3 className="text-brand-900 text-lg text-right pr-2">{faq.q}</h3>
+                            {openFaq === faq.q ? (
+                              <ChevronUp className="w-5 h-5 text-brand-500 shrink-0" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 text-brand-400 shrink-0" />
+                            )}
+                          </button>
+                          {openFaq === faq.q && (
+                            <div className="p-4 bg-gray-50 border-t border-gray-100 text-brand-700 leading-relaxed font-serif whitespace-pre-wrap text-right">
+                              {faq.a}
+                            </div>
                           )}
-                        </button>
-                        {openFaq === faq.q && (
-                          <div className="p-4 bg-gray-50 border-t border-gray-100 text-brand-700 leading-relaxed font-serif whitespace-pre-wrap text-right">
-                            {faq.a}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ))}
-        </div>
-
-        <div className="mt-16 bg-brand-50 p-6 rounded-xl text-center border border-brand-100">
-          <p className="text-brand-800 text-sm font-bold leading-loose">
-            ملاحظات تشغيلية مهمة<br/>
-            • قد تختلف بعض الخصائص أو الخدمات أو المزايا بحسب الباقات أو الإصدارات أو المرحلة التشغيلية للمنصة.<br/>
-            • لا يعني توفر بعض الخصائص التفاعلية داخل المنصة اعتماد جميع البيانات ضمن “السجل الأساسي”.<br/>
-            • تخضع الخدمات والمنهجيات والإجراءات التشغيلية للعقود والسياسات المعتمدة داخل المنصة وقت التنفيذ.<br/><br/>
-            ختام: صُمم “مركز المساعدة” ليكون المرجع التشغيلي الرسمي لفهم الخدمات والإجراءات والمراحل المرتبطة بمنصة “سجل تراث العائلة”.
-          </p>
         </div>
       </div>
     </div>

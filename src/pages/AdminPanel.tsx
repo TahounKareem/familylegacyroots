@@ -4,14 +4,14 @@ import { db, storage } from "@/lib/firebase";
 import React, { useState, useEffect } from "react";
 import { useAppStore, Order, UserInfo } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2 } from "lucide-react";
+import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2, HeartHandshake, Package, Shield, Calculator, Quote } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
 
 export function AdminPanel() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead } = useAppStore();
-  const [activeTab, setActiveTab] = useState<string>("orders");
+  const [activeTab, setActiveTab] = useState<string>("lobby");
   const [isUploading, setIsUploading] = useState(false);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(null);
@@ -192,40 +192,123 @@ export function AdminPanel() {
     }
   };
 
-  const availableTabs = [];
-  if (currentUser?.role === "maestro" || currentUser?.role === "research" || currentUser?.role === "admin") availableTabs.push({ id: "orders", label: "الطلبات (باحثين/مدير)" });
-  if (currentUser?.role === "maestro" || currentUser?.role === "marketing" || currentUser?.role === "admin") availableTabs.push({ id: "marketing", label: "التسويق (غير مكتملة)" });
-  if (currentUser?.role === "maestro" || currentUser?.role === "editor" || currentUser?.role === "admin") availableTabs.push({ id: "articles", label: "المركز المعرفي" });
-  if (currentUser?.role === "maestro" || currentUser?.role === "admin") availableTabs.push({ id: "users", label: "المستخدمين" });
+  const availableTabs = [
+    { id: "orders", label: "إدارة الطلبات", desc: "متابعة الطلبات الجارية وتحديث حالتها", roles: ["maestro", "research", "admin"], icon: FileText, color: "bg-blue-50 border-blue-200 hover:shadow-blue-100", iconBg: "bg-blue-100 text-blue-600", textColor: "text-blue-900" },
+    { id: "articles", label: "إدارة تحرير المركز المعرفي", desc: "نشر وإدارة المقالات المعرفية والمواد المرئية", roles: ["maestro", "editor", "admin"], icon: Book, color: "bg-purple-50 border-purple-200 hover:shadow-purple-100", iconBg: "bg-purple-100 text-purple-600", textColor: "text-purple-900" },
+    { id: "marketing", label: "إدارة التسويق", desc: "إدارة الحملات الترويجية ومتابعة المبيعات المتروكة", roles: ["maestro", "marketing", "admin"], icon: Send, color: "bg-pink-50 border-pink-200 hover:shadow-pink-100", iconBg: "bg-pink-100 text-pink-600", textColor: "text-pink-900" },
+    { id: "customer_service", label: "إدارة خدمة العملاء", desc: "متابعة استفسارات العملاء وبلاغات الدعم الفني", roles: ["maestro", "customer_service", "admin"], icon: HeartHandshake, color: "bg-orange-50 border-orange-200 hover:shadow-orange-100", iconBg: "bg-orange-100 text-orange-600", textColor: "text-orange-900" },
+    { id: "shipping", label: "إدارة الشحن", desc: "متابعة عمليات التوصيل للإصدارات المطبوعة", roles: ["maestro", "shipping", "admin"], icon: Package, color: "bg-cyan-50 border-cyan-200 hover:shadow-cyan-100", iconBg: "bg-cyan-100 text-cyan-600", textColor: "text-cyan-900" },
+    { id: "accounting", label: "إدارة المحاسبة", desc: "مراجعة المدفوعات والتقارير المالية والتحصيلات", roles: ["maestro", "accounting", "admin"], icon: Calculator, color: "bg-emerald-50 border-emerald-200 hover:shadow-emerald-100", iconBg: "bg-emerald-100 text-emerald-600", textColor: "text-emerald-900" },
+    { id: "compliance", label: "إدارة الإمتثال", desc: "الرقابة وتدقيق سياسات الجودة والشكاوى", roles: ["maestro", "compliance", "admin"], icon: Shield, color: "bg-indigo-50 border-indigo-200 hover:shadow-indigo-100", iconBg: "bg-indigo-100 text-indigo-600", textColor: "text-indigo-900" },
+    { id: "users", label: "إدارة المستخدمين", desc: "مراجعة أذونات المستخدمين وتعديل الصلاحيات", roles: ["maestro", "admin"], icon: Users, color: "bg-rose-50 border-rose-200 hover:shadow-rose-100", iconBg: "bg-rose-100 text-rose-600", textColor: "text-rose-900" },
+  ];
 
-  const currentTab = availableTabs.find(t => t.id === activeTab) ? activeTab : availableTabs[0]?.id;
+  const allowedTabs = availableTabs.filter(tab => tab.roles.includes(currentUser?.role || ''));
+
+  const roleNames: Record<string, string> = {
+    maestro: "المايسترو",
+    research: "مدير البحوث",
+    editor: "مدير التحرير",
+    compliance: "مدير الإمتثال",
+    accounting: "مدير المحاسبة",
+    customer_service: "مدير خدمة العملاء",
+    marketing: "مدير التسويق",
+    shipping: "مدير الشحن",
+    admin: "المدير العام"
+  };
+
+  const currentTab = activeTab === "lobby" ? "lobby" : (allowedTabs.find(t => t.id === activeTab) ? activeTab : "lobby");
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-brand-200 pb-4 gap-4">
-        <div>
-          <h1 className="text-3xl font-serif text-brand-900 mb-2">
-            لوحة تحكم الإدارة
-          </h1>
-          <p className="text-brand-600 text-sm">أهلاً بك، {currentUser?.name} <span className="font-bold text-brand-800 bg-brand-100 px-2 py-0.5 rounded-full mr-2">{currentUser?.role}</span></p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="bg-brand-50 p-1 rounded-xl flex flex-wrap gap-1">
-            {availableTabs.map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)} 
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all text-sm ${currentTab === tab.id ? "bg-white text-brand-900 shadow-sm" : "text-brand-600 hover:bg-brand-100"}`}
-              >
-                {tab.label}
-              </button>
-            ))}
+      {currentTab !== "lobby" && (
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-brand-200 pb-4 gap-4">
+          <div>
+            <h1 className="text-3xl font-serif text-brand-900 mb-2">
+              {allowedTabs.find(t => t.id === currentTab)?.label || "لوحة التحكم"}
+            </h1>
+            <p className="text-brand-600 text-sm">أهلاً بك، {currentUser?.name} <span className="font-bold text-brand-800 bg-brand-100 px-2 py-0.5 rounded-full mr-2">{roleNames[currentUser?.role || ""] || currentUser?.role}</span></p>
           </div>
-          <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
-            <Home className="w-5 h-5" /> الرئيسية
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button
+              onClick={() => setActiveTab("lobby")}
+              className="flex items-center gap-2 bg-[#C3262A] text-white border border-[#C3262A] px-4 py-2 rounded-md hover:bg-[#a61c20] transition shadow-sm font-medium"
+            >
+              العودة إلى صالة الإدارة
+            </button>
+            <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
+              <Home className="w-5 h-5" /> الرئيسية
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
+
+      {currentTab === "lobby" && (
+        <div className="space-y-10">
+          <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-brand-100 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C3262A]/5 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="text-center md:text-right">
+                <h1 className="text-4xl sm:text-5xl font-serif font-bold text-brand-900 mb-4">
+                  مرحباً بك، <span className="text-[#C3262A]">{currentUser?.name}</span>
+                </h1>
+                <p className="text-xl text-brand-700 font-serif mb-6 inline-flex items-center gap-2 justify-center md:justify-start">
+                  أنت تتمتع بصلاحية: 
+                  <span className="font-bold bg-brand-100 text-brand-900 px-4 py-1.5 rounded-full text-lg shadow-sm border border-brand-200">
+                    {roleNames[currentUser?.role || ""] || currentUser?.role}
+                  </span>
+                </p>
+                <div className="flex items-center justify-center md:justify-start gap-2 text-brand-500 text-sm mt-4">
+                  <CheckCircle className="w-4 h-4 text-emerald-500" />
+                  <span>آخر دخول: اليوم</span>
+                </div>
+              </div>
+              
+              <div className="bg-brand-50/80 p-6 rounded-2xl border border-brand-100 max-w-sm text-center italic shadow-inner">
+                <Quote className="w-8 h-8 text-brand-300 mx-auto mb-3" />
+                <p className="font-serif text-brand-800 leading-relaxed font-medium">
+                  "العمل المُنظّم والجهد المخلص هما الركيزتان اللتان تبنيان أثراً لا يُنسى للحاضر والمستقبل. بجهودكم نتجاوز التوقعات ونصنع الفارق الدائم."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-serif font-bold text-brand-900 mb-6 px-2">بوابات الإدارة المتاحة لصلاحياتك:</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {allowedTabs.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex flex-col text-right h-full p-6 bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden`}
+                  >
+                    <div className={`absolute top-0 right-0 w-32 h-32 ${tab.color.split(' ')[0]} rounded-full blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 -translate-y-1/2 translate-x-1/2`}></div>
+                    <div className={`w-14 h-14 ${tab.iconBg} rounded-xl flex items-center justify-center mb-6 shadow-sm border border-white/50 relative z-10`}>
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <h3 className={`text-xl font-bold font-serif ${tab.textColor} mb-3 relative z-10`}>{tab.label}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed relative z-10">{tab.desc}</p>
+                    <div className="mt-auto pt-6 flex items-center justify-end text-brand-600 font-bold text-sm relative z-10 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-4 group-hover:translate-x-0 duration-300">
+                      الدخول للبوابة ←
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            
+            {allowedTabs.length === 0 && (
+              <div className="text-center p-12 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 text-lg">لا توجد لديك صلاحيات لدخول أي من بوابات الإدارة.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {currentTab === "orders" && (
         <>
@@ -431,59 +514,25 @@ export function AdminPanel() {
         </div>
       )}
 
-      {currentTab === "marketing" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
-            <h2 className="font-bold text-lg text-brand-900">متابعة حسابات المبيعات - الطلبات غير المكتملة</h2>
+      {["marketing", "customer_service", "shipping", "accounting", "compliance"].includes(currentTab) && (() => {
+        const tabInfo = allowedTabs.find(t => t.id === currentTab);
+        const Icon = tabInfo?.icon || Package;
+        return (
+          <div className="bg-white rounded-3xl p-12 text-center shadow-lg border border-brand-100 mb-12">
+            <div className="w-24 h-24 mx-auto bg-brand-50 text-[#C3262A] rounded-full flex items-center justify-center mb-6">
+              <Icon className="w-12 h-12" />
+            </div>
+            <h2 className="text-3xl font-serif text-brand-900 font-bold mb-4">جاري العمل على تطوير بوابة {tabInfo?.label}</h2>
+            <p className="text-xl text-brand-600 font-serif mb-8 max-w-2xl mx-auto leading-relaxed">
+              نسعى دائماً لتقديم أفضل تجربة إدارة لتنظيم سير العمل وتحقيق الأهداف. سيتم إطلاق هذه البوابة قريباً جداً بميزات استثنائية تناسب تطلعاتكم بطريقة تسويقية جذابة.
+            </p>
+            <div className="inline-flex items-center gap-2 bg-yellow-50 text-yellow-700 px-6 py-3 rounded-xl font-bold font-serif border border-yellow-200 shadow-sm">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              جاري التنفيذ والتطوير...
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-white text-brand-500 border-b border-brand-100">
-                <tr>
-                  <th className="px-6 py-4 font-medium">رقم الطلب</th>
-                  <th className="px-6 py-4 font-medium">اسم العميل</th>
-                  <th className="px-6 py-4 font-medium">وسيلة التواصل / البريد</th>
-                  <th className="px-6 py-4 font-medium">تاريخ الإنشاء</th>
-                  <th className="px-6 py-4 font-medium">تفاصيل</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-50">
-                {orders.filter(o => o.status === 'بانتظار الدفع' || o.status === 'بإنتظار إتمام الدفع').map((order) => (
-                  <tr key={order.id} className="hover:bg-brand-50/50 transition">
-                    <td className="px-6 py-4 font-mono text-brand-600 uppercase border-r-2 border-orange-500 bg-orange-50/30">
-                      #{order.orderNumber || order.id.slice(0, 8)}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-brand-900">
-                      {order.data?.firstName ? `${order.data.firstName} ${order.data.familyName}` : "غير محدد"}
-                    </td>
-                    <td className="px-6 py-4 text-brand-600">
-                      لم يتم توفير بريد (تواصل عبر المنصة فقط)
-                    </td>
-                    <td className="px-6 py-4 text-brand-600">
-                      {new Date(order.createdAt).toLocaleDateString('ar-SA')}
-                    </td>
-                    <td className="px-6 py-4">
-                      <button 
-                        onClick={() => setSelectedOrder(order)}
-                        className="flex items-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium"
-                      >
-                         تفاصيل
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {orders.filter(o => o.status === 'بانتظار الدفع' || o.status === 'بإنتظار إتمام الدفع').length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-brand-500">
-                      لا توجد طلبات معلقة (بانتظار الدفع)
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {currentTab === "users" && (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
