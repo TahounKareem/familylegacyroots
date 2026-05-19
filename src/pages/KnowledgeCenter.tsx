@@ -62,6 +62,72 @@ export function KnowledgeCenter() {
   // Reusable popup opener
   const openNewsletter = () => setIsNewsletterPopupOpen(true);
 
+  const renderNewsletterPopup = () => {
+    if (!isNewsletterPopupOpen) return null;
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm shadow-2xl">
+        <div className="relative w-full max-w-sm bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
+          <button 
+            onClick={() => setIsNewsletterPopupOpen(false)}
+            className="absolute top-2 left-2 text-gray-500 hover:text-gray-800 transition-colors z-10 p-1"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="p-6 text-center">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#B6191F] mb-3 leading-tight mx-auto">
+              النشرة الإسبوعية
+            </h2>
+            <p className="text-[#801D22] opacity-80 mb-6 font-medium text-sm">
+              انضم إلى نشرتنا لاكتشاف رؤى ومقالات مختارة في عالم الأنساب.
+            </p>
+            <form className="max-w-full mx-auto" onSubmit={async (e) => {
+                e.preventDefault();
+                const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                const email = emailInput.value;
+                const btn = e.currentTarget.querySelector('button');
+                if (email && btn) {
+                  try {
+                    btn.disabled = true;
+                    btn.textContent = 'جاري...';
+                    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+                    await addDoc(collection(db, 'newsletter_subscribers'), {
+                      email,
+                      subscribedAt: serverTimestamp(),
+                      source: 'knowledge_center_popup'
+                    });
+                    alert('تم تسجيل بريدك الإلكتروني بنجاح!');
+                    setIsNewsletterPopupOpen(false);
+                  } catch (err) {
+                    console.error(err);
+                    alert('حدث خطأ أثناء التسجيل. سجل الدخول كإدارة لتتمكن من إضافة البيانات.');
+                  } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'اشتراك';
+                  }
+                }
+              }}>
+              <input 
+                type="email" 
+                name="email"
+                placeholder="عنوان بريدك الإلكتروني" 
+                required
+                className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-4 text-right shadow-inner border border-[#e0c4ba] text-sm"
+              />
+              <button type="submit" className="w-full bg-[#801D22] hover:bg-[#6b161c] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
+                انضم للنشرة البريدية
+              </button>
+              <div className="text-center">
+                <a href="/legal/privacy" className="text-gray-500 hover:text-gray-800 border-b border-transparent hover:border-gray-400 pb-0.5 text-xs transition-colors">
+                  سياسة الخصوصية
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const getYoutubeEmbedUrl = (url: string) => {
     let videoId = '';
     if (url.includes('youtube.com/watch?v=')) {
@@ -153,6 +219,7 @@ export function KnowledgeCenter() {
 
   if (selectedArticle) {
     return (
+      <>
       <div className="bg-[#FAF9F6] min-h-screen pb-20 fade-in">
         <div className="relative w-full h-[50vh] sm:h-[60vh] flex flex-col items-center justify-center border-b border-brand-200 shadow-md overflow-hidden bg-brand-900 group">
           <img 
@@ -161,12 +228,6 @@ export function KnowledgeCenter() {
             className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          
-          {selectedArticle.coverTextOverlay && (
-            <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none p-6 text-center">
-              <h1 className="text-4xl sm:text-6xl font-serif font-bold text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mix-blend-overlay opacity-90">{selectedArticle.coverTextOverlay}</h1>
-            </div>
-          )}
           
           <button 
             onClick={() => setSelectedArticle(null)} 
@@ -277,6 +338,8 @@ export function KnowledgeCenter() {
           </div>
         </div>
       </div>
+      {renderNewsletterPopup()}
+    </>
     );
   }
 
@@ -344,6 +407,11 @@ export function KnowledgeCenter() {
                 {/* Thumbnail placeholder */}
                 <div className="relative h-48 bg-gray-100 overflow-hidden">
                   <img src={item.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {item.coverTextOverlay && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4">
+                      <h3 className="text-xl sm:text-2xl font-serif font-bold text-white text-center drop-shadow-lg opacity-95">{item.coverTextOverlay}</h3>
+                    </div>
+                  )}
                   {item.type === 'فيديو' && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <PlayCircle className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -399,68 +467,7 @@ export function KnowledgeCenter() {
       </div>
 
       {/* Newsletter Popup */}
-      {isNewsletterPopupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm shadow-2xl">
-          <div className="relative w-full max-w-sm bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
-            <button 
-              onClick={() => setIsNewsletterPopupOpen(false)}
-              className="absolute top-2 left-2 text-gray-500 hover:text-gray-800 transition-colors z-10 p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="p-6 text-center">
-              <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#B6191F] mb-3 leading-tight mx-auto">
-                النشرة الإسبوعية
-              </h2>
-              <p className="text-[#801D22] opacity-80 mb-6 font-medium text-sm">
-                انضم إلى نشرتنا لاكتشاف رؤى ومقالات مختارة في عالم الأنساب.
-              </p>
-              <form className="max-w-full mx-auto" onSubmit={async (e) => {
-                  e.preventDefault();
-                  const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
-                  const email = emailInput.value;
-                  const btn = e.currentTarget.querySelector('button');
-                  if (email && btn) {
-                    try {
-                      btn.disabled = true;
-                      btn.textContent = 'جاري...';
-                      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-                      await addDoc(collection(db, 'newsletter_subscribers'), {
-                        email,
-                        subscribedAt: serverTimestamp(),
-                        source: 'knowledge_center_popup'
-                      });
-                      alert('تم تسجيل بريدك الإلكتروني بنجاح!');
-                      setIsNewsletterPopupOpen(false);
-                    } catch (err) {
-                      console.error(err);
-                      alert('حدث خطأ أثناء التسجيل. سجل الدخول كإدارة لتتمكن من إضافة البيانات.');
-                    } finally {
-                      btn.disabled = false;
-                      btn.textContent = 'اشتراك';
-                    }
-                  }
-                }}>
-                <input 
-                  type="email" 
-                  name="email"
-                  placeholder="عنوان بريدك الإلكتروني" 
-                  required
-                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-4 text-right shadow-inner border border-[#e0c4ba] text-sm"
-                />
-                <button type="submit" className="w-full bg-[#801D22] hover:bg-[#6b161c] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
-                  انضم للنشرة البريدية
-                </button>
-                <div className="text-center">
-                  <a href="/legal/privacy" className="text-gray-500 hover:text-gray-800 border-b border-transparent hover:border-gray-400 pb-0.5 text-xs transition-colors">
-                    سياسة الخصوصية
-                  </a>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      {renderNewsletterPopup()}
     </div>
   );
 }

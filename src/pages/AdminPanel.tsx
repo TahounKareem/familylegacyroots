@@ -1153,23 +1153,36 @@ export function AdminPanel() {
                     <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('justifyLeft')} className="px-2 py-1 hover:bg-brand-200 rounded">يسار</button>
                     <button type="button" onMouseDown={(e) => {
                       e.preventDefault();
+                    }} onClick={() => {
                       const selection = window.getSelection();
-                      if (!selection || selection.rangeCount === 0) {
-                        alert('يرجى النقر داخل المربع النصي أولاً في المكان الذي ترغب بوضع الصورة فيه.');
-                        return;
-                      }
+                      if (!selection || selection.rangeCount === 0) return;
                       const range = selection.getRangeAt(0);
                       const url = prompt('أدخل رابط الصورة:');
                       if (url) {
                         selection.removeAllRanges();
                         selection.addRange(range);
-                        const imgHTML = `<img src="${url}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; display: block; margin-left: auto; margin-right: auto;" />`;
-                        document.execCommand('insertHTML', false, imgHTML);
+                        document.execCommand('insertImage', false, url);
+                        
+                        // Try to find the inserted image to style it
+                        setTimeout(() => {
+                           const editor = document.getElementById('article-editor');
+                           if (editor) {
+                             const imgs = editor.getElementsByTagName('img');
+                             if (imgs.length > 0) {
+                               const lastImg = imgs[imgs.length - 1];
+                               lastImg.style.maxWidth = '100%';
+                               lastImg.style.borderRadius = '8px';
+                               lastImg.style.margin = '16px auto';
+                               lastImg.style.display = 'block';
+                             }
+                           }
+                        }, 50);
                       }
                     }} className="px-2 py-1 hover:bg-brand-200 rounded bg-white border border-brand-200 shadow-sm font-bold text-brand-600">إدراج صورة</button>
                   </div>
                 </div>
                 <div 
+                  id="article-editor"
                   className="w-full p-4 border border-brand-200 rounded-lg min-h-[300px] text-justify leading-loose focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white overflow-y-auto"
                   contentEditable
                   onBlur={(e) => setArticleForm({...articleForm, content: e.currentTarget.innerHTML})}
