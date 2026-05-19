@@ -363,20 +363,18 @@ export function OrderFlow() {
                   اختر نموذج قالب التصميم الفني الذي ترغب فيه لسجلك ( نوفر نوعين من التصاميم المميزة لكي يظهر فيه سجلك ) .
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <label className={`cursor-pointer border-2 rounded-xl p-6 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
+                  <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
                     <input type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
-                    <div className="w-24 h-24 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
-                       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
-                       <span className="font-sans font-bold text-lg relative z-10">مودرن</span>
+                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative">
+                       <img src="https://i.postimg.cc/KzTskNLd/Modern.png" alt="مسار مودرن" className="w-full h-full object-cover" />
                     </div>
                     <span className="font-bold text-brand-900 text-lg">نموذج حديث "مودرن"</span>
                   </label>
                   
-                  <label className={`cursor-pointer border-2 rounded-xl p-6 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
+                  <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
                     <input type="radio" name="design" value="كلاسيكي" className="hidden" checked={formData.designTemplate === "كلاسيكي"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
-                    <div className="w-24 h-24 bg-gradient-to-br from-[#8c7355] to-[#4a3a28] rounded-2xl flex items-center justify-center text-white shadow-inner mb-2 overflow-hidden relative">
-                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=200&auto=format&fit=crop')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
-                      <span className="font-serif font-bold text-lg relative z-10">عتيق</span>
+                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative">
+                       <img src="https://i.postimg.cc/cH35gmYj/Classic.png" alt="مسار كلاسيكي" className="w-full h-full object-cover" />
                     </div>
                     <span className="font-bold text-brand-900 text-lg">نموذج كلاسيكي</span>
                   </label>

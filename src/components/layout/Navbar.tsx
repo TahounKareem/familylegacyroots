@@ -35,7 +35,7 @@ export function Navbar() {
                 <Link 
                   key={link.path} 
                   to={link.path}
-                  className={`font-medium transition text-sm ${isActive ? 'text-[#B6191F]' : 'text-[#8E9091] hover:text-[#B6191F]'}`}
+                  className={`font-medium transition text-sm ${isActive ? 'text-[#C3262A] font-bold border-b-2 border-[#C3262A] pb-1' : 'text-[#8E9091] hover:text-[#C3262A]'}`}
                 >
                   {link.text}
                 </Link>
@@ -46,16 +46,16 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {currentUser ? (
               <div className="flex items-center gap-4">
-                <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-2 text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
+                <Link to={currentUser.role === 'user' ? '/dashboard' : '/admin'} className="flex items-center gap-2 text-[#8E9091] hover:text-[#C3262A] font-medium transition text-sm">
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
+                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-[#C3262A] font-medium transition text-sm">
                   تسجيل الخروج
                 </button>
               </div>
             ) : (
-              <Link to="/auth" className="text-[#8E9091] hover:text-[#B6191F] font-medium transition text-sm">
+              <Link to="/auth" className="text-[#8E9091] hover:text-[#C3262A] font-medium transition text-sm">
                 تسجيل الدخول / إنشاء حساب
               </Link>
             )}
@@ -79,7 +79,7 @@ export function Navbar() {
               <Link 
                 key={link.path} 
                 to={link.path}
-                className={`block font-medium ${isActive ? 'text-[#B6191F]' : 'text-brand-800'}`}
+                className={`block font-medium ${isActive ? 'text-[#C3262A] border-r-4 border-[#C3262A] pr-2' : 'text-brand-800'}`}
                 onClick={() => setIsOpen(false)}
               >
                 {link.text}
@@ -88,7 +88,7 @@ export function Navbar() {
           })}
           {currentUser ? (
             <>
-              <Link to={currentUser.role === 'admin' ? '/admin' : '/dashboard'} className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
+              <Link to={currentUser.role === 'user' ? '/dashboard' : '/admin'} className="block text-brand-800 font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
               <button onClick={() => { logout(); window.location.href = '/auth'; setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-medium">تسجيل الخروج</button>
             </>
           ) : (

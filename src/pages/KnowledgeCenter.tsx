@@ -16,6 +16,7 @@ export interface KnowledgeArticle {
   publishDate?: string;
   imageCaption?: string;
   imageCopyright?: string;
+  coverTextOverlay?: string;
   coverImageUrl?: string;
   videoUrl?: string;
   duration?: string;
@@ -80,11 +81,21 @@ export function KnowledgeCenter() {
   }, [selectedArticle]);
 
   useEffect(() => {
-    const q = query(collection(db, "knowledge_articles"), orderBy("createdAt", "desc"));
+    const q = collection(db, "knowledge_articles");
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data: KnowledgeArticle[] = [];
       snapshot.forEach(doc => {
         data.push({ id: doc.id, ...doc.data() } as KnowledgeArticle);
+      });
+
+      // Sort locally to avoid excluding documents that are missing the `createdAt` field
+      data.sort((a: any, b: any) => {
+        const getMs = (dateVal: any) => {
+          if (!dateVal) return 0;
+          if (dateVal.toDate) return dateVal.toDate().getTime();
+          return new Date(dateVal).getTime();
+        };
+        return getMs(b.createdAt) - getMs(a.createdAt);
       });
 
       if (data.length === 0) {
@@ -140,31 +151,149 @@ export function KnowledgeCenter() {
     return true;
   });
 
+  if (selectedArticle) {
+    return (
+      <div className="bg-[#FAF9F6] min-h-screen pb-20 fade-in">
+        <div className="relative w-full h-[50vh] sm:h-[60vh] flex flex-col items-center justify-center border-b border-brand-200 shadow-md overflow-hidden bg-brand-900 group">
+          <img 
+            src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} 
+            alt="صورة المقال" 
+            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          
+          {selectedArticle.coverTextOverlay && (
+            <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none p-6 text-center">
+              <h1 className="text-4xl sm:text-6xl font-serif font-bold text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mix-blend-overlay opacity-90">{selectedArticle.coverTextOverlay}</h1>
+            </div>
+          )}
+          
+          <button 
+            onClick={() => setSelectedArticle(null)} 
+            className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-md px-4 py-2 rounded-full transition shadow-sm font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" /> 
+            <span>العودة للمركز المعرفي</span>
+          </button>
+
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mt-auto pb-12 flex flex-col justify-end h-full">
+            <div className="flex items-center gap-3 text-white/90 font-medium mb-4">
+              <span className="bg-[#C3262A] px-3 py-1 rounded-full text-sm shadow-sm">{selectedArticle.type}</span>
+              <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-sm border border-white/20">{selectedArticle.section} / {selectedArticle.filter}</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white leading-tight drop-shadow-lg mb-4">
+              {selectedArticle.title}
+            </h1>
+            <div className="flex flex-wrap text-sm gap-x-6 gap-y-2 text-white/80">
+              <span className="flex items-center gap-1.5"><Edit3 className="w-4 h-4"/> {selectedArticle.author ? (selectedArticle.type === 'فيديو' ? `المنتج: ${selectedArticle.author}` : `الكاتب: ${selectedArticle.author}`) : 'إدارة المحتوى'}</span>
+              {selectedArticle.editor && <span className="flex items-center gap-1.5"><FileText className="w-4 h-4"/> تحرير: {selectedArticle.editor}</span>}
+              {selectedArticle.publishDate && <span className="flex items-center gap-1.5">تاريخ النشر: {new Date(selectedArticle.publishDate).toLocaleDateString('ar-EG')}</span>}
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* The small text as requested */}
+          {(selectedArticle.imageCaption || selectedArticle.imageCopyright) && (
+            <div className="text-xs text-brand-500 text-right mb-6 -mt-6 pb-4 border-b border-brand-100 flex flex-col gap-1">
+              {selectedArticle.imageCaption && <span className="font-bold text-brand-700">{selectedArticle.imageCaption}</span>}
+              {selectedArticle.imageCopyright && <span>{selectedArticle.imageCopyright}</span>}
+            </div>
+          )}
+
+          {selectedArticle.type === 'فيديو' && selectedArticle.videoUrl ? (
+            <div className="w-full aspect-video bg-gray-100 mb-10 rounded-xl overflow-hidden relative shadow-xl">
+              <iframe 
+                src={getYoutubeEmbedUrl(selectedArticle.videoUrl)} 
+                className="w-full h-full border-0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+                title={selectedArticle.title}
+              ></iframe>
+            </div>
+          ) : null}
+
+          {selectedArticle.content ? (
+            <div 
+              className="prose prose-lg sm:prose-xl max-w-none prose-headings:font-serif prose-headings:text-brand-900 prose-p:text-brand-800 prose-p:leading-loose text-justify font-serif"
+              dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
+            />
+          ) : (
+            selectedArticle.type !== 'فيديو' && (
+              <p className="text-gray-500 italic text-center py-10">المقال لا يحتوي على نص حالياً.</p>
+            )
+          )}
+
+          {/* Share Buttons at the Bottom */}
+          <div className="mt-16 pt-8 border-t border-brand-200">
+            <h3 className="text-lg font-bold text-brand-900 mb-6 text-center font-serif">شارك المعرفة</h3>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button onClick={() => {
+                const url = window.location.href;
+                navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
+                alert('تم نسخ الرابط بنجاح');
+              }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-brand-700 flex items-center gap-2 hover:bg-brand-50 hover:border-brand-300 transition-colors shadow-sm font-medium" title="نسخ الرابط">
+                <Copy className="w-5 h-5" /> نسخ الرابط
+              </button>
+              <button onClick={() => {
+                const url = window.location.href;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(selectedArticle.title)}&url=${encodeURIComponent(url)}`, '_blank');
+              }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2] transition-colors shadow-sm font-medium" title="مشاركة على اكس">
+                <Twitter className="w-5 h-5" /> شارك على X
+              </button>
+              <button onClick={() => {
+                const url = window.location.href;
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+              }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] transition-colors shadow-sm font-medium" title="مشاركة على فيسبوك">
+                <Facebook className="w-5 h-5" /> شارك على فيسبوك
+              </button>
+              <button onClick={() => {
+                const url = window.location.href;
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(selectedArticle.title + ' ' + url)}`, '_blank');
+              }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors shadow-sm font-medium" title="مشاركة على واتساب">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> شارك على واتساب
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-20 flex flex-col gap-8 w-full">
+            {/* Newsletter Image Banner */}
+            <div className="w-full relative rounded-2xl overflow-hidden shadow-sm group">
+              <button onClick={openNewsletter} className="w-full block overflow-hidden cursor-pointer">
+                <img 
+                  src="https://i.postimg.cc/NFp859Nb/News-Letter.png" 
+                  alt="اشترك في النشرة البريدية" 
+                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
+              </button>
+            </div>
+
+            {/* Banner Section */}
+            <div className="mb-12 border-t border-brand-100 pt-8 mt-4 w-full">
+              <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                <img src="https://i.postimg.cc/d3PQr4fd/Banner.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#FAF9F6] min-h-screen pb-20">
       {/* Header Section */}
-      <div className="w-full bg-white overflow-hidden relative border-b border-gray-200">
-        {/* Logo at the top */}
-        <div className="relative z-20 flex justify-center py-6 bg-white shrink-0">
-          <img src="https://i.postimg.cc/mDCchCVH/logo.jpg" alt="شعار المركز المعرفي" className="h-24 sm:h-32 object-contain" />
-        </div>
-
-        {/* Content & Background Image */}
-        <div className="relative w-full h-[30vh] sm:h-[40vh] flex items-center justify-center sm:justify-start px-4 sm:px-12 lg:px-24">
-          <img 
-            src="https://i.postimg.cc/k5tGhK0z/Header.png" 
-            alt="المركز المعرفي" 
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 scale-100"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-brand-900/50 to-transparent"></div>
-          
-          <div className="relative z-10 text-right max-w-2xl ml-auto bg-white/90 p-6 sm:p-8 rounded-2xl backdrop-blur-md border-2 border-[#C3262A] shadow-xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-brand-900 font-bold tracking-tight mb-4 leading-tight">
-              المركز المعرفي
-            </h1>
-            <p className="text-base sm:text-xl text-brand-700 font-medium leading-relaxed font-serif">
-              مساحة معرفية حول الأنساب والذاكرة العائلية والتحول الرقمي مقالات ورؤى ودراسات مختارة حول الروايات العائلية والتراث الرقمي وعالَم الأنساب.
-            </p>
+      <div className="w-full relative border-b border-gray-200 flex flex-col items-center pt-8 pb-12 bg-white">
+        <div className="relative w-full max-w-5xl mx-auto mt-16 sm:mt-20">
+          <div className="absolute -top-16 sm:-top-20 left-1/2 -translate-x-1/2 z-30 w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white">
+            <img src="https://i.postimg.cc/ZqwJsJM3/Knowledge-Center-Logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+          </div>
+          <div className="w-full h-[35vh] sm:h-[45vh] rounded-3xl overflow-hidden shadow-2xl relative z-10">
+            <img 
+              src="https://i.postimg.cc/B6y4sM37/Knowledge-Center-Hero.png" 
+              alt="المركز المعرفي" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </div>
@@ -247,219 +376,46 @@ export function KnowledgeCenter() {
           </div>
         )}
 
-        {/* Main Page Newsletter and Banner */}
-        <div className="mt-20">
-          {/* Newsletter Trigger */}
-          <div className="bg-[#FAF8F5] border-[3px] border-[#C3262A]/20 rounded-2xl p-4 sm:p-5 text-center shadow-lg relative overflow-hidden group mb-6 hover:border-[#C3262A]/40 transition-colors duration-500 max-w-sm mx-auto">
-            <div className="absolute inset-0 bg-[#F2E3DE] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-            <div className="absolute -top-16 -right-16 w-32 h-32 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-50"></div>
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mb-3 shadow-sm border border-brand-100 text-[#C3262A] group-hover:scale-110 transition-transform duration-500">
-                <Mail className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg sm:text-xl font-serif font-bold text-[#8A1A1E] mb-2">
-                اشترك في النشرة البريدية
-              </h2>
-              <p className="text-brand-800 mb-4 leading-relaxed max-w-xs mx-auto font-medium text-xs">
-                كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
-              </p>
-              <button 
-                onClick={openNewsletter}
-                className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-5 py-2 rounded-full font-bold transition-all hover:scale-105 shadow-md flex items-center gap-2 text-xs"
-              >
-                انضم إلى النشرة البريدية
-                <ArrowLeft className="w-3 h-3" />
+          {/* Main Page Newsletter and Banner */}
+          <div className="mt-20 flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Newsletter Image Banner */}
+            <div className="w-full relative rounded-2xl overflow-hidden shadow-sm group">
+              <button onClick={openNewsletter} className="w-full block overflow-hidden cursor-pointer">
+                <img 
+                  src="https://i.postimg.cc/NFp859Nb/News-Letter.png" 
+                  alt="اشترك في النشرة البريدية" 
+                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
               </button>
             </div>
-          </div>
 
-          {/* Banner Section */}
-          <div className="mb-12">
-            <a href="/services" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
-              <img src="https://i.postimg.cc/hGSqYy2j/Banner2.jpg" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
-            </a>
+            {/* Banner Section */}
+            <div className="mb-12 border-t border-brand-100 pt-8 mt-4 w-full">
+              <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                <img src="https://i.postimg.cc/d3PQr4fd/Banner.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+              </a>
+            </div>
           </div>
-        </div>
       </div>
-
-      {/* Article Detail Modal */}
-      {selectedArticle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden rounded-xl animate-in zoom-in-95 duration-300">
-            {/* Header Toolbar */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <span className="text-sm font-bold text-gray-500 flex items-center gap-2">
-                {selectedArticle.type === 'فيديو' ? <PlayCircle className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                {selectedArticle.type}
-              </span>
-              <button onClick={() => setSelectedArticle(null)} className="p-2 hover:bg-gray-100 text-gray-500 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Scrollable Content */}
-            <div className="overflow-y-auto px-6 sm:px-12 py-10 relative">
-              {/* Share Buttons */}
-              <div className="absolute left-6 top-10 flex flex-col gap-2 z-10">
-                <button onClick={() => {
-                  const url = window.location.href;
-                  navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
-                  alert('تم نسخ الرابط بنجاح');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#C3262A] hover:text-white transition-colors shadow-sm" title="نسخ الرابط">
-                  <Copy className="w-5 h-5" />
-                </button>
-                <button onClick={() => {
-                  const url = window.location.href;
-                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(selectedArticle.title)}&url=${encodeURIComponent(url)}`, '_blank');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#1DA1F2] hover:text-white transition-colors shadow-sm" title="مشاركة على اكس">
-                  <Twitter className="w-5 h-5" />
-                </button>
-                <button onClick={() => {
-                  const url = window.location.href;
-                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors shadow-sm" title="مشاركة على فيسبوك">
-                  <Facebook className="w-5 h-5" />
-                </button>
-                <button onClick={() => {
-                   const url = window.location.href;
-                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
-                   alert('تم نسخ الرابط لمشاركته على انستغرام');
-                   window.open('https://instagram.com', '_blank');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-500 hover:text-white transition-colors shadow-sm" title="مشاركة على انستغرام">
-                  <Instagram className="w-5 h-5" />
-                </button>
-                <button onClick={() => {
-                   const url = window.location.href;
-                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
-                   alert('تم نسخ الرابط لمشاركته على تيك توك');
-                   window.open('https://tiktok.com', '_blank');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-sm" title="مشاركة على تيك توك">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-                </button>
-                <button onClick={() => {
-                   const url = window.location.href;
-                   navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
-                   alert('تم نسخ الرابط لمشاركته على سناب شات');
-                   window.open('https://snapchat.com', '_blank');
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-yellow-400 hover:text-white transition-colors shadow-sm" title="مشاركة على سناب شات">
-                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M11 2c2 0 3 1.5 3 3v2c0 1 .5 1.5 1 1.5s1-.5 1-1.5c0-1 1-1.5 2-1.5s2 .5 2 1.5c0 2-1.5 3-3 3-1 0-1.5.5-1.5 1.5s.5 1.5 1.5 1.5c1.5 0 2 1 2 2s-.5 2-2 2h-1c-1 0-1.5.5-1.5 1.5 0 .5-.5 1-1.5 1h-3c-1 0-1.5-.5-1.5-1-1-1-1.5-1.5-1.5-1.5h-1c-1.5 0-2-1-2-2s.5-2 2-2c1 0 1.5-.5 1.5-1.5S7.5 13 6.5 13c-1.5 0-3-1-3-3s1-1.5 2-1.5c1 0 2-.5 2-1.5S7 6 7 5c0-1.5 1-3 3-3h1z"/></svg>
-                </button>
-                <button onClick={() => {
-                  const url = window.location.href;
-                  window.location.href = `mailto:?subject=${encodeURIComponent(selectedArticle.title)}&body=${encodeURIComponent('ألق نظرة على هذا المحتوى: ' + selectedArticle.title + '\n\n' + url)}`;
-                }} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-colors shadow-sm" title="مشاركة عبر البريد">
-                  <Mail className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="max-w-3xl mx-auto">
-                {selectedArticle.type === 'فيديو' && selectedArticle.videoUrl ? (
-                  <div className="w-full aspect-video bg-gray-100 mb-10 rounded-lg overflow-hidden relative shadow-lg">
-                    {!isPlaying ? (
-                      <div className="absolute inset-0 group cursor-pointer" onClick={() => setIsPlaying(true)}>
-                        <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
-                          <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </div>
-                    ) : (
-                      <iframe 
-                        src={getYoutubeEmbedUrl(selectedArticle.videoUrl)} 
-                        className="w-full h-full border-0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
-                      ></iframe>
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-full h-64 sm:h-96 bg-gray-100 mb-10 rounded-lg overflow-hidden relative shadow-lg">
-                    <img src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="cover" className="w-full h-full object-cover" />
-                  </div>
-                )}
-
-              {selectedArticle.imageCaption && (
-                <p className="text-center font-bold text-lg font-serif text-[#C3262A] mb-2">{selectedArticle.imageCaption}</p>
-              )}
-              {selectedArticle.imageCopyright && (
-                <p className="text-center text-xs text-gray-400 mb-10">{selectedArticle.imageCopyright}</p>
-              )}
-
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-gray-900 mb-6 text-center leading-tight">
-                {selectedArticle.title}
-              </h1>
-
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-500 mb-12 border-y border-gray-100 py-4">
-                {selectedArticle.author && <span>{selectedArticle.type === 'فيديو' ? 'المنتج' : 'الكاتب'}: <span className="text-gray-900 font-bold">{selectedArticle.author}</span></span>}
-                {selectedArticle.editor && <span>تحرير: <span className="text-gray-900 font-bold">{selectedArticle.editor}</span></span>}
-                {selectedArticle.publishDate && <span>تاريخ النشر: <span className="text-gray-900">{selectedArticle.publishDate}</span></span>}
-              </div>
-
-              {selectedArticle.content && (
-                <div className="prose prose-lg max-w-none text-gray-800 leading-loose text-justify whitespace-pre-wrap font-serif">
-                  {selectedArticle.content}
-                </div>
-              )}
-
-              {/* Newsletter Trigger */}
-              <div className="bg-[#FAF8F5] border-[3px] border-[#C3262A]/20 rounded-2xl p-4 sm:p-5 text-center shadow-lg relative overflow-hidden group mt-6 mb-6 hover:border-[#C3262A]/40 transition-colors duration-500 max-w-sm mx-auto">
-                <div className="absolute inset-0 bg-[#F2E3DE] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-                <div className="absolute -top-16 -right-16 w-32 h-32 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-50"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mb-3 shadow-sm border border-brand-100 text-[#C3262A] group-hover:scale-110 transition-transform duration-500">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-serif font-bold text-[#8A1A1E] mb-2">
-                    اشترك في النشرة البريدية
-                  </h2>
-                  <p className="text-brand-800 mb-4 leading-relaxed max-w-xs mx-auto font-medium text-xs">
-                    كن أول من يصله أبرز الرؤى والمقالات المتخصصة في عالم الأنساب والذاكرة.
-                  </p>
-                  <button 
-                    onClick={openNewsletter}
-                    className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-5 py-2 rounded-full font-bold transition-all hover:scale-105 shadow-md flex items-center gap-2 text-xs"
-                  >
-                    انضم إلى النشرة البريدية
-                    <ArrowLeft className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Banner Section */}
-              <div className="mt-12 mb-12">
-                <a href="/services" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
-                  <img src="https://i.postimg.cc/hGSqYy2j/Banner2.jpg" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
-                </a>
-              </div>
-
-              <div className="mt-16 text-center border-t border-gray-100 pt-8">
-                <button onClick={() => setSelectedArticle(null)} className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors">
-                  العودة إلى الصفحة السابقة
-                </button>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Newsletter Popup */}
       {isNewsletterPopupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm shadow-2xl">
-          <div className="relative w-full max-w-2xl bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm shadow-2xl">
+          <div className="relative w-full max-w-sm bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
             <button 
               onClick={() => setIsNewsletterPopupOpen(false)}
-              className="absolute top-4 left-4 text-gray-500 hover:text-gray-800 transition-colors z-10"
+              className="absolute top-2 left-2 text-gray-500 hover:text-gray-800 transition-colors z-10 p-1"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
-            <div className="p-8 sm:p-12 text-center">
-              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#B6191F] mb-6 leading-tight max-w-xl mx-auto">
-                انضم إلى نشرة المركز المعرفي بمنصة سجل تراث العائلة واكتشف مقالات ورؤى مختارة حول الروايات والذاكرة وعالَم الأنساب والتراث الرقمي.
+            <div className="p-6 text-center">
+              <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#B6191F] mb-3 leading-tight mx-auto">
+                النشرة الإسبوعية
               </h2>
-              <p className="text-[#801D22] opacity-80 mb-8 font-medium text-lg">
-                المحتوى مجاني بالكامل، ويمكنك إلغاء الاشتراك في أي وقت.
+              <p className="text-[#801D22] opacity-80 mb-6 font-medium text-sm">
+                انضم إلى نشرتنا لاكتشاف رؤى ومقالات مختارة في عالم الأنساب.
               </p>
-              <form className="max-w-md mx-auto" onSubmit={async (e) => {
+              <form className="max-w-full mx-auto" onSubmit={async (e) => {
                   e.preventDefault();
                   const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
                   const email = emailInput.value;
@@ -478,10 +434,10 @@ export function KnowledgeCenter() {
                       setIsNewsletterPopupOpen(false);
                     } catch (err) {
                       console.error(err);
-                      alert('حدث خطأ أثناء التسجيل. قد لا تملك الصلاحية للوصول لجدول النشرات البريدية في قواعد البيانات.');
+                      alert('حدث خطأ أثناء التسجيل. سجل الدخول كإدارة لتتمكن من إضافة البيانات.');
                     } finally {
                       btn.disabled = false;
-                      btn.textContent = 'اشترك';
+                      btn.textContent = 'اشتراك';
                     }
                   }
                 }}>
@@ -490,13 +446,13 @@ export function KnowledgeCenter() {
                   name="email"
                   placeholder="عنوان بريدك الإلكتروني" 
                   required
-                  className="w-full px-5 py-4 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-6 text-right shadow-inner border border-[#e0c4ba]"
+                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-4 text-right shadow-inner border border-[#e0c4ba] text-sm"
                 />
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                  <button type="submit" className="w-full sm:w-auto bg-[#801D22] hover:bg-[#6b161c] text-white px-10 py-3 rounded-full font-bold transition-transform hover:scale-105 text-lg shadow-md">
-                    اشترك
-                  </button>
-                  <a href="/legal/privacy" className="text-gray-600 hover:text-gray-900 border-b border-gray-400 pb-0.5 text-sm font-medium transition-colors">
+                <button type="submit" className="w-full bg-[#801D22] hover:bg-[#6b161c] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
+                  انضم للنشرة البريدية
+                </button>
+                <div className="text-center">
+                  <a href="/legal/privacy" className="text-gray-500 hover:text-gray-800 border-b border-transparent hover:border-gray-400 pb-0.5 text-xs transition-colors">
                     سياسة الخصوصية
                   </a>
                 </div>

@@ -29,15 +29,32 @@ export function AdminPanel() {
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
+  const [userTab, setUserTab] = useState<"team" | "users">("team");
+  const [userSearch, setUserSearch] = useState("");
+  const [userCountryFilter, setUserCountryFilter] = useState("");
+  const [userSortBy, setUserSortBy] = useState<"newest" | "recent_login" | "alpha">("newest");
+  const [editingUserProfile, setEditingUserProfile] = useState<UserInfo | null>(null);
+  const [userProfileForm, setUserProfileForm] = useState<{mobile: string, country: string, passportUrl: string}>({mobile: "", country: "", passportUrl: ""});
 
   useEffect(() => {
     if (activeTab === "articles") {
-      const q = query(collection(db, "knowledge_articles"), orderBy("createdAt", "desc"));
+      const q = collection(db, "knowledge_articles");
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: KnowledgeArticle[] = [];
         snapshot.forEach(doc => {
           data.push({ id: doc.id, ...doc.data() } as KnowledgeArticle);
         });
+        
+        // Sort locally
+        data.sort((a: any, b: any) => {
+          const getMs = (dateVal: any) => {
+            if (!dateVal) return 0;
+            if (dateVal.toDate) return dateVal.toDate().getTime();
+            return new Date(dateVal).getTime();
+          };
+          return getMs(b.createdAt) - getMs(a.createdAt);
+        });
+
         setArticles(data);
       });
       return () => unsubscribe();
@@ -207,14 +224,15 @@ export function AdminPanel() {
 
   const roleNames: Record<string, string> = {
     maestro: "المايسترو",
+    admin: "المدير العام",
     research: "مدير البحوث",
-    editor: "مدير التحرير",
-    compliance: "مدير الإمتثال",
-    accounting: "مدير المحاسبة",
-    customer_service: "مدير خدمة العملاء",
+    editor: "مدير تحرير المركز المعرفي",
     marketing: "مدير التسويق",
-    shipping: "مدير الشحن",
-    admin: "المدير العام"
+    customer_service: "مدير خدمة العملاء",
+    shipping: "مدير إدارة الشحن",
+    accounting: "مدير المحاسبة",
+    compliance: "مدير الإمتثال",
+    user: "مستخدم"
   };
 
   const currentTab = activeTab === "lobby" ? "lobby" : (allowedTabs.find(t => t.id === activeTab) ? activeTab : "lobby");
@@ -546,45 +564,145 @@ export function AdminPanel() {
         );
       })()}
 
-      {currentTab === "users" && (
+      {currentTab === "users" && (() => {
+        let filteredUsers = usersList.filter(u => {
+          if (userTab === "team") return u.role !== "user";
+          return u.role === "user";
+        });
+        
+        if (userSearch) {
+          filteredUsers = filteredUsers.filter(u => `${u.name} ${u.email}`.toLowerCase().includes(userSearch.toLowerCase()));
+        }
+        
+        if (userCountryFilter) {
+          filteredUsers = filteredUsers.filter(u => u.country === userCountryFilter);
+        }
+        
+        filteredUsers.sort((a, b) => {
+          if (userSortBy === "newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          if (userSortBy === "recent_login") return new Date(b.lastLoginAt || 0).getTime() - new Date(a.lastLoginAt || 0).getTime();
+          if (userSortBy === "alpha") return (a.name || "").localeCompare(b.name || "", 'ar');
+          return 0;
+        });
+
+        const formatDate = (d?: string) => {
+          if (!d) return "غير محدد";
+          return new Intl.DateTimeFormat("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute:"2-digit" }).format(new Date(d));
+        };
+
+        const uniqueCountries = Array.from(new Set(usersList.map(u => u.country).filter(Boolean)));
+
+        return (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex flex-col md:flex-row items-center justify-between gap-4">
             <h2 className="font-bold text-lg text-brand-900">إدارة المستخدمين والصلاحيات</h2>
+            
+            <div className="flex bg-white rounded-lg p-1 border border-brand-200">
+              <button 
+                onClick={() => setUserTab("team")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${userTab === "team" ? "bg-brand-900 text-white" : "text-brand-600 hover:bg-brand-50"}`}
+              >
+                فريق العمل
+              </button>
+              <button 
+                onClick={() => setUserTab("users")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${userTab === "users" ? "bg-brand-900 text-white" : "text-brand-600 hover:bg-brand-50"}`}
+              >
+                المستخدمين
+              </button>
+            </div>
           </div>
+          
+          <div className="p-4 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
+            <div className="flex-1 min-w-[200px] relative">
+              <input 
+                type="text" 
+                placeholder="ابحث بالاسم أو البريد..." 
+                value={userSearch}
+                onChange={e => setUserSearch(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 rounded-lg border border-brand-200 focus:ring-2 focus:ring-brand-500 text-sm"
+              />
+              <Search className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
+            </div>
+            
+            <select 
+              value={userCountryFilter}
+              onChange={e => setUserCountryFilter(e.target.value)}
+              className="border border-brand-200 rounded-lg px-4 py-2 text-sm bg-white focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="">جميع الدول</option>
+              {uniqueCountries.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            
+            <select 
+              value={userSortBy}
+              onChange={e => setUserSortBy(e.target.value as any)}
+              className="border border-brand-200 rounded-lg px-4 py-2 text-sm bg-white focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="newest">الأحدث تسجيلاً</option>
+              <option value="recent_login">أحدث دخول</option>
+              <option value="alpha">أبجدياً</option>
+            </select>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead className="bg-white text-brand-500 border-b border-brand-100">
                 <tr>
-                  <th className="px-6 py-4 font-medium">الاسم</th>
-                  <th className="px-6 py-4 font-medium">البريد الإلكتروني</th>
-                  <th className="px-6 py-4 font-medium">تاريخ التسجيل</th>
-                  <th className="px-6 py-4 font-medium">الصلاحيات</th>
+                  <th className="px-4 py-4 font-medium">الاسم</th>
+                  <th className="px-4 py-4 font-medium">البريد الإلكتروني</th>
+                  <th className="px-4 py-4 font-medium">الدولة</th>
+                  <th className="px-4 py-4 font-medium">رقم الجوال</th>
+                  <th className="px-4 py-4 font-medium">أخر دخول</th>
+                  <th className="px-4 py-4 font-medium">الصلاحيات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-50">
-                {usersList.map((user) => (
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-brand-500">لا يوجد مستخدمين يطابقون بحثك</td>
+                  </tr>
+                ) : null}
+                {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-brand-50/50 transition">
-                    <td className="px-6 py-4 font-bold text-brand-900">{user.name || "بدون اسم"}</td>
-                    <td className="px-6 py-4 text-brand-600 font-mono text-xs">{user.email || "بدون بريد"}</td>
-                    <td className="px-6 py-4 text-brand-600">غير محدد</td>
-                    <td className="px-6 py-4">
-                      {currentUser?.role === "maestro" && user.role !== "maestro" ? (
-                        <select 
-                          value={user.role} 
-                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                          className="border border-brand-200 rounded-md px-2 py-1 text-sm bg-white"
-                        >
-                          <option value="user">مستخدم عادي</option>
-                          <option value="maestro">مايسترو (Maestro)</option>
-                          <option value="admin">مدير نظام (Admin)</option>
-                          <option value="research">مدير أبحاث</option>
-                          <option value="marketing">مدير تسويق</option>
-                          <option value="accounting">مدير حسابات</option>
-                          <option value="compliance">مدير مراجعة وتدقيق</option>
-                          <option value="shipping">مسؤول شحن</option>
-                          <option value="customer_service">خدمة عملاء</option>
-                          <option value="editor">مدير التحرير</option>
-                        </select>
+                    <td className="px-4 py-4 font-bold text-brand-900">{user.name || "بدون اسم"}</td>
+                    <td className="px-4 py-4 text-brand-600 font-mono text-xs">{user.email || "بدون بريد"}</td>
+                    <td className="px-4 py-4 text-brand-600 font-medium">{user.country || "غير محدد"}</td>
+                    <td className="px-4 py-4 text-brand-500 text-xs" dir="ltr">{user.mobile || "غير محدد"}</td>
+                    <td className="px-4 py-4 text-brand-500 text-xs">{formatDate(user.lastLoginAt)}</td>
+                    <td className="px-4 py-4 flex items-center gap-2">
+                      {currentUser && (currentUser.role === "maestro" || currentUser.role === "admin") ? (
+                        <>
+                          <select 
+                            value={user.role} 
+                            onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                            className="border border-brand-200 rounded-md px-2 py-1 text-xs bg-brand-50 text-brand-900 font-medium font-sans w-32"
+                          >
+                            <option value="user">مستخدم عادي</option>
+                            <option value="maestro">مايسترو</option>
+                            <option value="admin">مدير العام</option>
+                            <option value="research">مدير البحوث</option>
+                            <option value="editor">مدير تحرير المركز المعرفي</option>
+                            <option value="marketing">مدير التسويق</option>
+                            <option value="customer_service">مدير خدمة العملاء</option>
+                            <option value="shipping">مدير إدارة الشحن</option>
+                            <option value="accounting">مدير المحاسبة</option>
+                            <option value="compliance">مدير الإمتثال</option>
+                          </select>
+                          {user.role !== "user" && (
+                            <button 
+                              onClick={() => {
+                                setEditingUserProfile(user);
+                                setUserProfileForm({ mobile: user.mobile || "", country: user.country || "", passportUrl: user.passportUrl || "" });
+                              }}
+                              className="text-xs font-bold text-brand-600 hover:text-brand-800 bg-white border border-brand-200 px-2 py-1 rounded"
+                            >
+                              تعديل البيانات
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <span className="font-bold text-brand-800 bg-brand-100 px-3 py-1 rounded-full text-xs">
                            {user.role}
@@ -597,7 +715,8 @@ export function AdminPanel() {
             </table>
           </div>
         </div>
-      )}
+      );
+      })()}
 
       {/* Delete Order Modal */}
       {orderToDelete && (
@@ -1018,17 +1137,45 @@ export function AdminPanel() {
                 )}
               </div>
 
-              {articleForm.type === 'مقال' && (
-                <div className="border-t border-brand-100 pt-6">
-                  <label className="block text-sm font-bold text-brand-900 mb-2">نص المقال (اختياري)</label>
-                  <textarea 
-                    className="w-full p-3 border border-brand-200 rounded-lg h-64 text-justify leading-loose"
-                    value={articleForm.content || ""}
-                    onChange={(e) => setArticleForm({...articleForm, content: e.target.value})}
-                    placeholder="يمكنك استخدام Markdown للعناوين الفرعية والصور وغيرها..."
-                  />
+              {/* ALWAYS SHOW RICH TEXT EDITOR, EVEN FOR VIDEOS IF THEY WANT IT */}
+              <div className="border-t border-brand-100 pt-6">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-bold text-brand-900">نص المقال/وصف الفيديو (اخيتاري - محرر نصي يدعم جميع المزايا)</label>
+                  <div className="flex flex-wrap gap-1 text-xs bottom-toolbar bg-brand-50 p-1 rounded-md border border-brand-200">
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('bold')} className="px-2 py-1 hover:bg-brand-200 rounded font-bold">B</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('italic')} className="px-2 py-1 hover:bg-brand-200 rounded italic">I</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('underline')} className="px-2 py-1 hover:bg-brand-200 rounded underline">U</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('fontSize', false, '5')} className="px-2 py-1 hover:bg-brand-200 rounded">تكبير</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('fontSize', false, '3')} className="px-2 py-1 hover:bg-brand-200 rounded">تصغير</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('insertUnorderedList')} className="px-2 py-1 hover:bg-brand-200 rounded">• نقاط</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('justifyRight')} className="px-2 py-1 hover:bg-brand-200 rounded">يمين</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('justifyCenter')} className="px-2 py-1 hover:bg-brand-200 rounded">وسط</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => document.execCommand('justifyLeft')} className="px-2 py-1 hover:bg-brand-200 rounded">يسار</button>
+                    <button type="button" onMouseDown={(e) => {
+                      e.preventDefault();
+                      const selection = window.getSelection();
+                      if (!selection || selection.rangeCount === 0) {
+                        alert('يرجى النقر داخل المربع النصي أولاً في المكان الذي ترغب بوضع الصورة فيه.');
+                        return;
+                      }
+                      const range = selection.getRangeAt(0);
+                      const url = prompt('أدخل رابط الصورة:');
+                      if (url) {
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        const imgHTML = `<img src="${url}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; display: block; margin-left: auto; margin-right: auto;" />`;
+                        document.execCommand('insertHTML', false, imgHTML);
+                      }
+                    }} className="px-2 py-1 hover:bg-brand-200 rounded bg-white border border-brand-200 shadow-sm font-bold text-brand-600">إدراج صورة</button>
+                  </div>
                 </div>
-              )}
+                <div 
+                  className="w-full p-4 border border-brand-200 rounded-lg min-h-[300px] text-justify leading-loose focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white overflow-y-auto"
+                  contentEditable
+                  onBlur={(e) => setArticleForm({...articleForm, content: e.currentTarget.innerHTML})}
+                  dangerouslySetInnerHTML={{ __html: articleForm.content || "" }}
+                ></div>
+              </div>
 
               <div className="border-t border-brand-100 pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -1086,8 +1233,18 @@ export function AdminPanel() {
                 <div className="md:col-span-2">
                   <h3 className="font-bold text-brand-900 mb-4 border-r-4 border-brand-500 pr-2">النصوص المصاحبة للصورة/الفيديو</h3>
                 </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">إلصق عنوان (الصورة/الفيديو) وهو نص يعرض فوق الصورة (اختياري)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg text-center font-bold"
+                    value={articleForm.coverTextOverlay || ""}
+                    onChange={(e) => setArticleForm({...articleForm, coverTextOverlay: e.target.value})}
+                    placeholder="مثال: رحلة البحث في التراث..."
+                  />
+                </div>
                 <div>
-                  <label className="block text-sm font-bold text-brand-900 mb-2">العنوان (وسط الصورة/الفيديو) (اختياري)</label>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">وصف الصورة/الفيديو المصغر (أسفل الصورة) (اختياري)</label>
                   <input 
                     type="text" 
                     className="w-full p-3 border border-brand-200 rounded-lg"
@@ -1095,17 +1252,15 @@ export function AdminPanel() {
                     onChange={(e) => setArticleForm({...articleForm, imageCaption: e.target.value})}
                   />
                 </div>
-                {articleForm.type === 'مقال' && (
-                  <div>
-                    <label className="block text-sm font-bold text-brand-900 mb-2">الملكية الفكرية للصورة (اختياري)</label>
-                    <input 
-                      type="text" 
-                      className="w-full p-3 border border-brand-200 rounded-lg"
-                      value={articleForm.imageCopyright || ""}
-                      onChange={(e) => setArticleForm({...articleForm, imageCopyright: e.target.value})}
-                    />
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-bold text-brand-900 mb-2">الملكية الفكرية (اختياري)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.imageCopyright || ""}
+                    onChange={(e) => setArticleForm({...articleForm, imageCopyright: e.target.value})}
+                  />
+                </div>
               </div>
 
               <div className="bg-brand-50 rounded-xl p-4 flex gap-4 text-brand-600 text-sm mt-4 border border-brand-200">
@@ -1120,6 +1275,76 @@ export function AdminPanel() {
                   className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 disabled:opacity-50"
                 >
                   حفظ المادة المعرفية
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Profile Modal */}
+      {editingUserProfile && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-brand-100 flex justify-between items-center bg-brand-50">
+              <h2 className="text-xl font-bold font-serif text-brand-900">بيانات المستخدم الخاصة بالإدارة</h2>
+              <button 
+                onClick={() => setEditingUserProfile(null)}
+                className="p-2 hover:bg-brand-200 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">رقم الجوال</label>
+                <input 
+                  type="text" 
+                  className="w-full p-3 border border-brand-200 rounded-lg text-left" dir="ltr"
+                  value={userProfileForm.mobile}
+                  onChange={(e) => setUserProfileForm({...userProfileForm, mobile: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">الدولة</label>
+                <input 
+                  type="text" 
+                  className="w-full p-3 border border-brand-200 rounded-lg"
+                  value={userProfileForm.country}
+                  onChange={(e) => setUserProfileForm({...userProfileForm, country: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">رابط صورة باسبور (اختياري)</label>
+                <input 
+                  type="text" 
+                  className="w-full p-3 border border-brand-200 rounded-lg text-left" dir="ltr"
+                  value={userProfileForm.passportUrl}
+                  onChange={(e) => setUserProfileForm({...userProfileForm, passportUrl: e.target.value})}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="pt-4">
+                <button 
+                  onClick={async () => {
+                    try {
+                      const { updateDoc, doc } = await import("firebase/firestore");
+                      const { db } = await import("@/lib/firebase");
+                      await updateDoc(doc(db, "users", editingUserProfile.id), {
+                        mobile: userProfileForm.mobile,
+                        country: userProfileForm.country,
+                        passportUrl: userProfileForm.passportUrl
+                      });
+                      alert('تم الحفظ بنجاح');
+                      setEditingUserProfile(null);
+                    } catch(e) {
+                      console.error(e);
+                      alert('حدث خطأ أثناء الحفظ');
+                    }
+                  }}
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition shadow-md"
+                >
+                  حفظ البيانات
                 </button>
               </div>
             </div>

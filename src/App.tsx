@@ -9,6 +9,7 @@ import { FAQ } from "./pages/FAQ";
 import { HelpCenter } from "./pages/HelpCenter";
 import { Contact } from "./pages/Contact";
 import { Auth } from "./pages/Auth";
+import { AdminAuth } from "./pages/AdminAuth";
 import { Dashboard } from "./pages/Dashboard";
 import { OrderFlow } from "./pages/OrderFlow";
 import { AdminPanel } from "./pages/AdminPanel";
@@ -52,6 +53,7 @@ export default function App() {
         </Route>
         
         <Route path="/auth" element={<Auth />} />
+        <Route path="/Team" element={<AdminAuth />} />
         
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/order" element={<OrderFlow />} />

@@ -46,22 +46,36 @@ export function Auth() {
           
           let role: AppRole = "user";
           const lowerEmail = email.toLowerCase();
-          if (lowerEmail === "kareem.tahoun@adamresearchcenter.net" || lowerEmail === "hassan.alamri@adamresearchcenter.net") {
+          if (lowerEmail === "kareem.tahoun@adamresearchcenter.net") {
             role = "maestro";
+          } else if (lowerEmail === "hassan.alamri@adamresearchcenter.net") {
+            role = "admin";
           }
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           
+          let country = "غير محدد";
+          try {
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            if (data.country_name) country = data.country_name;
+          } catch (e) {
+            console.error("Could not fetch country:", e);
+          }
+
           await setDoc(doc(db, "users", user.uid), {
             id: user.uid,
             name: name,
             email: email,
             role: role,
+            createdAt: new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+            country: country,
             legalConsent: {
               agreedToTerms: agreeTerms,
               agreedToTermsAt: agreeTerms ? new Date().toISOString() : null,
               cookieConsentLevel: cookieConsent,
               cookieConsentAt: cookieConsent !== 'none' ? new Date().toISOString() : null,
-              ipAddress: "تم تسجيلها بواسطة سيرفر أمان النظام", // Usually we track this on backend, but this confirms it's recorded
+              ipAddress: "تم تسجيلها بواسطة سيرفر أمان النظام",
             }
           });
 

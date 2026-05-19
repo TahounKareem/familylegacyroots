@@ -56,11 +56,15 @@ export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظا
 export type AppRole = "user" | "admin" | "maestro" | "research" | "marketing" | "accounting" | "compliance" | "shipping" | "customer_service" | "editor";
 
 export interface UserInfo {
-
   id: string;
   name: string;
   email: string;
   role: AppRole;
+  createdAt?: string;
+  lastLoginAt?: string;
+  country?: string;
+  mobile?: string;
+  passportUrl?: string;
 }
 
 export interface Node {
@@ -286,13 +290,19 @@ export const useAppStore = create<AppState>((set, get) => ({
           
           if (userDoc.exists()) {
             userInfo = userDoc.data() as UserInfo;
+            // Update lastLoginAt
+            try {
+              await setDoc(doc(db, "users", user.uid), { lastLoginAt: new Date().toISOString() }, { merge: true });
+            } catch (e) {}
           } else {
             // First time login fallback (if created externally)
             userInfo = {
               id: user.uid,
               name: user.displayName || "مستخدم",
               email: user.email || "",
-              role: user.email?.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "admin" : "user"
+              role: user.email?.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "maestro" : (user.email?.toLowerCase() === "hassan.alamri@adamresearchcenter.net" ? "admin" : "user"),
+              createdAt: new Date().toISOString(),
+              lastLoginAt: new Date().toISOString()
             };
             await setDoc(doc(db, "users", user.uid), userInfo);
           }
