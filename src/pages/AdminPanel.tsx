@@ -12,6 +12,7 @@ import { KnowledgeArticle } from "./KnowledgeCenter";
 export function AdminPanel() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder, fulfillOrder, markMessagesAsRead, logout } = useAppStore();
   const [activeTab, setActiveTab] = useState<string>("lobby");
+  const [orderTab, setOrderTab] = useState<"orders" | "archive">("orders");
   const [isUploading, setIsUploading] = useState(false);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(null);
@@ -142,6 +143,18 @@ export function AdminPanel() {
         console.error(e);
         alert("حدث خطأ أثناء الحذف");
       }
+    }
+  };
+
+  const handleRestoreOrder = async (order: Order) => {
+    try {
+      await updateDoc(doc(db, "orders", order.id), { isDeleted: false });
+      useAppStore.setState(s => ({
+        orders: s.orders.map(o => o.id === order.id ? { ...o, isDeleted: false } : o)
+      }));
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء الاستعادة");
     }
   };
 
@@ -373,99 +386,177 @@ export function AdminPanel() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
-          <h2 className="font-bold text-lg text-brand-900">إدارة طلبات الأنساب والتسجيل</h2>
+        <div className="px-6 py-4 border-b border-brand-100 flex gap-4 bg-brand-50 items-center justify-between">
+          <div className="flex gap-4">
+            <button 
+              onClick={() => setOrderTab('orders')} 
+              className={`font-bold text-lg pb-2 transition-colors ${orderTab === 'orders' ? 'border-b-2 border-brand-600 text-brand-900' : 'text-brand-500 hover:text-brand-700'}`}
+            >
+              الطلبات النشطة
+            </button>
+            <button 
+              onClick={() => setOrderTab('archive')} 
+              className={`font-bold text-lg pb-2 transition-colors ${orderTab === 'archive' ? 'border-b-2 border-brand-600 text-brand-900' : 'text-brand-500 hover:text-brand-700'}`}
+            >
+              أرشيف الطلبات 
+            </button>
+          </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-right text-sm">
             <thead className="bg-white text-brand-500 border-b border-brand-100">
               <tr>
-                <th className="px-6 py-4 font-medium">رقم الطلب</th>
-                <th className="px-6 py-4 font-medium">اسم العميل وتفصيل العائلة</th>
-                <th className="px-6 py-4 font-medium">الباقة المتفق عليها</th>
-                <th className="px-6 py-4 font-medium">الحالة</th>
-                <th className="px-6 py-4 font-medium">إجراءات الباحث</th>
+                <th className="px-4 py-4 font-medium min-w-[120px]">رقم الطلب</th>
+                <th className="px-4 py-4 font-medium min-w-[120px]">تاريخ الطلب</th>
+                <th className="px-4 py-4 font-medium">أولوية الطلب</th>
+                <th className="px-4 py-4 font-medium min-w-[180px]">اسم العميل وتفصيل العائلة</th>
+                <th className="px-4 py-4 font-medium">نوع السجل</th>
+                <th className="px-4 py-4 font-medium min-w-[150px]">حالة الدفع</th>
+                <th className="px-4 py-4 font-medium min-w-[150px]">حالة الإصدار</th>
+                <th className="px-4 py-4 font-medium min-w-[150px]">الإجراء</th>
+                <th className="px-4 py-4 font-medium min-w-[180px] bg-brand-50 border-r border-brand-100">المعالجة</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-50">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-brand-50/50 transition">
-                  <td className="px-6 py-4 font-mono font-bold text-brand-600 uppercase">#{order.orderNumber || order.id.toUpperCase()}</td>
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-brand-900">{order.data.firstName} بن {order.data.fatherName}</p>
-                    <p className="text-xs text-brand-600 mt-1">عائلة: ( {order.data.familyName} ) | {order.data.homeland}</p>
+              {orders.filter(o => orderTab === 'archive' ? o.isDeleted : !o.isDeleted).map((order) => (
+                <tr key={order.id} className="hover:bg-brand-50/30 transition">
+                  <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">#{order.orderNumber || order.id.toUpperCase().substring(0,6)}</td>
+                  <td className="px-4 py-4 text-xs font-mono">{new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>
+                  <td className="px-4 py-4">
+                    <select 
+                      value={order.priority || "عادي"} 
+                      onChange={async (e) => {
+                         const { updateDoc, doc } = await import("firebase/firestore");
+                         const { db } = await import("@/lib/firebase");
+                         await updateDoc(doc(db, "orders", order.id), { priority: e.target.value });
+                         useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, priority: e.target.value as any } : o) }));
+                      }}
+                      className={`border rounded px-2 py-1 text-xs focus:ring-brand-500 font-bold ${order.priority === 'عاجل' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}
+                    >
+                      <option value="عادي">عادي</option>
+                      <option value="عاجل">عاجل</option>
+                    </select>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${order.plan==='express'?'bg-red-50 text-red-700': order.plan==='invite' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
-                      {order.plan === 'express' ? 'سريع' : order.plan === 'invite' ? 'كود دعوة' : 'مدفوع'}
-                    </span>
+                  <td className="px-4 py-4">
+                    <p className="font-bold text-brand-900 leading-tight">{order.data.firstName} بن {order.data.fatherName}</p>
+                    <p className="text-[10px] text-brand-600 mt-1">عائلة: ({order.data.familyName})<br/>{order.data.homeland}</p>
                   </td>
-                   <td className="px-6 py-4">
+                  <td className="px-4 py-4">
                      <select 
-                       value={order.status} 
-                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                       className="border border-brand-200 rounded px-2 py-1 bg-white text-sm focus:ring-brand-500"
+                      value={order.recordType || "سجل أساسي"} 
+                      onChange={async (e) => {
+                         const { updateDoc, doc } = await import("firebase/firestore");
+                         const { db } = await import("@/lib/firebase");
+                         await updateDoc(doc(db, "orders", order.id), { recordType: e.target.value });
+                         useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, recordType: e.target.value as any } : o) }));
+                      }}
+                      className="border border-brand-200 rounded px-2 py-1 bg-white text-xs text-brand-700 font-bold"
+                    >
+                      <option value="سجل أساسي">سجل أساسي</option>
+                      <option value="الأبواب المغلقة">الأبواب المغلقة</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-4">
+                     <select 
+                      value={order.paymentStatus || (order.plan === 'invite' ? "كود دعوة" : "غير مدفوع")} 
+                      onChange={async (e) => {
+                         const { updateDoc, doc } = await import("firebase/firestore");
+                         const { db } = await import("@/lib/firebase");
+                         await updateDoc(doc(db, "orders", order.id), { paymentStatus: e.target.value });
+                         useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, paymentStatus: e.target.value as any } : o) }));
+                      }}
+                      className="border border-brand-200 rounded px-2 py-1 bg-white text-[11px] text-brand-800"
+                    >
+                      <option value="غير مدفوع">غير مدفوع</option>
+                      <option value="مدفوع بالكامل">مدفوع بالكامل</option>
+                      <option value="مدفوع أول دفعة">مدفوع أول دفعة</option>
+                      <option value="مدفوع ثاني دفعة">مدفوع ثاني دفعة</option>
+                      <option value="مدفوع ثالث دفعة">مدفوع ثالث دفعة</option>
+                      <option value="كود دعوة">كود دعوة</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-4">
+                    <select 
+                       value={order.issueStatus || "طلب غير مكتمل"} 
+                       onChange={async (e) => {
+                          const { updateDoc, doc } = await import("firebase/firestore");
+                          const { db } = await import("@/lib/firebase");
+                          await updateDoc(doc(db, "orders", order.id), { issueStatus: e.target.value });
+                          useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, issueStatus: e.target.value as any } : o) }));
+                       }}
+                       className="border border-brand-200 rounded px-2 py-1 bg-white text-[11px]"
                      >
+                       <option value="طلب غير مكتمل">طلب غير مكتمل</option>
                        <option value="بإنتظار إتمام الدفع">بإنتظار إتمام الدفع</option>
-                       <option value="قيد البحث">قيد البحث والمقارنة</option>
-                       <option value="طلب إيضاح">طلب إيضاح / وثائق ناقصة</option>
-                       <option value="تم الرد">تم الرد (من العميل)</option>
-                       <option value="تم تسليم الإصدار الأول">تم تسليم الإصدار الأول</option>
-                       <option value="طلب مكتمل">طلب مكتمل</option>
-                       <option value="مكتمل">التدقيق المنجز للطباعة</option>
+                       <option value="جاري التنفيذ">جاري التنفيذ</option>
+                       <option value="تم الإصدار">تم الإصدار</option>
+                       <option value="جاري التصويب">جاري التصويب</option>
+                       <option value="تم الإغلاق">تم الإغلاق</option>
+                       {order.recordType === 'الأبواب المغلقة' && (
+                         <>
+                           <option value="يوجد تصويبات">يوجد تصويبات</option>
+                           <option value="قبول توصيات">قبول توصيات</option>
+                         </>
+                       )}
                      </select>
                   </td>
-                  <td className="px-6 py-4 space-y-2">
-                     <div className="flex gap-2">
-                       <button 
-                         onClick={() => setSelectedOrder(order)}
-                         className="flex-1 flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
-                       >
-                         <Eye className="w-3 h-3" /> عرض
+                  <td className="px-4 py-4">
+                     <select 
+                       value={order.actionPhase || "مرحلة البحث"} 
+                       onChange={async (e) => {
+                          const { updateDoc, doc } = await import("firebase/firestore");
+                          const { db } = await import("@/lib/firebase");
+                          await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
+                          useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
+                       }}
+                       className="border border-brand-200 rounded px-2 py-1 bg-white text-[11px]"
+                     >
+                       <option value="مرحلة البحث">مرحلة البحث</option>
+                       <option value="مرحلة التوثيق">مرحلة التوثيق</option>
+                       <option value="تسليم العمل">تسليم العمل</option>
+                       <option value="طلب إيضاح">طلب إيضاح</option>
+                       <option value="قيد الانتظار">قيد الانتظار</option>
+                     </select>
+                  </td>
+                  <td className="px-4 py-4 bg-brand-50/50 border-r border-brand-100 flex flex-col gap-2">
+                     <select 
+                       className="w-full border-brand-200 rounded px-2 py-1.5 text-[11px] bg-white shadow-sm font-bold text-brand-700"
+                       value={order.assignedResearcher || ""}
+                       onChange={async (e) => {
+                          const { updateDoc, doc } = await import("firebase/firestore");
+                          const { db } = await import("@/lib/firebase");
+                          await updateDoc(doc(db, "orders", order.id), { assignedResearcher: e.target.value });
+                          useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, assignedResearcher: e.target.value } : o) }));
+                       }}
+                     >
+                        <option value="">-- تعيين باحث --</option>
+                        {usersList.filter(u => u.role !== 'user').map(u => (
+                          <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                     </select>
+                     
+                     <div className="grid grid-cols-2 gap-1.5">
+                       <button onClick={() => setSelectedOrder(order)} className="flex items-center justify-center gap-1 text-white bg-blue-600 hover:bg-blue-700 py-1.5 rounded text-[10px] shadow-sm font-bold transition">
+                         <Eye className="w-3 h-3" /> عرض بيانات الطلب
                        </button>
-                       <button 
-                         onClick={() => {
-                           setMessagingOrder(order);
-                           if (order.messages?.some(m => m.senderRole === "user" && !m.isRead)) {
-                             markMessagesAsRead(order.id, "admin");
-                           }
-                         }}
-                         className="flex-1 flex items-center justify-center gap-1 text-brand-600 hover:text-brand-800 bg-brand-100 hover:bg-brand-200 px-3 py-1.5 rounded-md transition font-medium text-xs relative"
-                       >
-                         <MessageSquare className="w-3 h-3" /> مراسلة
-                         {order.messages && order.messages.filter(m => m.senderRole === "user" && !m.isRead).length > 0 && (
-                           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-sm">
-                             {order.messages.filter(m => m.senderRole === "user" && !m.isRead).length}
-                           </span>
-                         )}
-                       </button>
-                       <button 
-                         onClick={() => setOrderToDelete(order)}
-                         className="flex-1 flex items-center justify-center gap-1 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition font-medium text-xs"
-                       >
-                         <X className="w-3 h-3" /> حذف
+                       <button onClick={() => { setMessagingOrder(order); markMessagesAsRead(order.id, "admin"); }} className="flex items-center justify-center gap-1 text-white bg-indigo-600 hover:bg-indigo-700 py-1.5 rounded text-[10px] shadow-sm font-bold transition relative">
+                         <MessageSquare className="w-3 h-3" /> طلب إيضاح
+                         {order.messages && order.messages.filter(m => m.senderRole === "user" && !m.isRead).length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full animate-ping"></span>}
                        </button>
                      </div>
-                     {!order.deliveryLink && (
-                       <button 
-                         onClick={() => setDeliveryOrder(order)}
-                         className="w-full flex items-center justify-center gap-1 text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-md transition font-medium text-xs mt-2 w-full"
-                       >
-                         <CheckCircle className="w-3 h-3" /> تسليم الوثيقة للعميل
-                       </button>
-                     )}
-                     {order.deliveryLink && (
-                       <div className="w-full text-center text-xs text-green-700 font-bold bg-green-50 p-1.5 rounded-md mt-2">
-                         تم التسليم
-                       </div>
-                     )}
+                     <button onClick={() => setDeliveryOrder(order)} className="w-full flex items-center justify-center gap-1 text-white bg-emerald-600 hover:bg-emerald-700 py-1.5 rounded text-[10px] shadow-sm font-bold transition mt-0.5">
+                       <FileText className="w-3 h-3" /> تسليم سجل تراث العائلة للعميل
+                     </button>
+                     <button onClick={() => orderTab === 'archive' ? handleRestoreOrder(order) : setOrderToDelete(order)} className={`w-full flex items-center justify-center gap-1 py-1.5 rounded text-[10px] shadow-sm font-bold transition mt-0.5 ${orderTab === 'archive' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'}`}>
+                       {orderTab === 'archive' ? <><CheckCircle className="w-3 h-3"/> استعادة من الأرشيف</> : <><X className="w-3 h-3" /> مسح / أرشيف</>}
+                     </button>
                   </td>
                 </tr>
               ))}
-              {orders.length === 0 && (
+              {orders.filter(o => orderTab === 'archive' ? o.isDeleted : !o.isDeleted).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-brand-500">
-                    لا توجد طلبات في النظام حالياً
+                  <td colSpan={9} className="px-6 py-12 text-center text-brand-500 font-bold bg-brand-50/20">
+                    لا توجد طلبات في هذا القسم حالياً
                   </td>
                 </tr>
               )}
@@ -735,10 +826,12 @@ export function AdminPanel() {
               <button 
                 onClick={async () => {
                    try {
-                     const { deleteDoc, doc } = await import("firebase/firestore");
+                     const { updateDoc, doc } = await import("firebase/firestore");
                      const { db } = await import("@/lib/firebase");
-                     await deleteDoc(doc(db, "orders", orderToDelete.id));
-                     useAppStore.setState(s => ({ orders: s.orders.filter(o => o.id !== orderToDelete.id) }));
+                     await updateDoc(doc(db, "orders", orderToDelete.id), { isDeleted: true });
+                     useAppStore.setState(s => ({ 
+                       orders: s.orders.map(o => o.id === orderToDelete.id ? { ...o, isDeleted: true } : o) 
+                     }));
                      setOrderToDelete(null);
                    } catch(e) { console.error(e); alert("خطأ في الحذف"); }
                 }}
@@ -1077,6 +1170,16 @@ export function AdminPanel() {
                     value={articleForm.description || ""}
                     onChange={(e) => setArticleForm({...articleForm, description: e.target.value})}
                     placeholder="وصف مختصر للمادة..."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-brand-900 mb-2">عنوان الصورة/الفيديو (يعرض كنص فوق الصورة الرئيسية المصغرة)</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-3 border border-brand-200 rounded-lg"
+                    value={articleForm.coverTextOverlay || ""}
+                    onChange={(e) => setArticleForm({...articleForm, coverTextOverlay: e.target.value})}
+                    placeholder="مثال: رحلة البحث في المخطوطات..."
                   />
                 </div>
               </div>

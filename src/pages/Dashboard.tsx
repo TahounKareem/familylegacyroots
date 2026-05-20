@@ -754,22 +754,28 @@ export function Dashboard() {
                         </div>
                       )}
                       
-                      <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0">
-                        <input type="file" className="hidden" ref={chatFileInputRef} onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const file = e.target.files[0];
-                            const storageRef = ref(storage, `chat/${Date.now()}_${file.name}`);
-                            const uploadTask = uploadBytesResumable(storageRef, file);
-                            uploadTask.on('state_changed', null, null, async () => {
-                              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                              setReplyAttachments([...replyAttachments, downloadURL]);
-                            });
-                          }
-                        }} />
-                        <button onClick={() => chatFileInputRef.current?.click()} className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200" title="إرفاق ملف"><Paperclip className="w-5 h-5"/></button>
-                        <input type="text" className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4" placeholder="إكتب رسالتك هنا..." value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSendReply()} />
-                        <button onClick={handleSendReply} className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700">إرسال</button>
-                      </div>
+                      {(order.status === "طلب إيضاح" || order.actionPhase === "طلب إيضاح") ? (
+                        <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0">
+                          <input type="file" className="hidden" ref={chatFileInputRef} onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const file = e.target.files[0];
+                              const storageRef = ref(storage, `chat/${Date.now()}_${file.name}`);
+                              const uploadTask = uploadBytesResumable(storageRef, file);
+                              uploadTask.on('state_changed', null, null, async () => {
+                                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                                setReplyAttachments([...replyAttachments, downloadURL]);
+                              });
+                            }
+                          }} />
+                          <button onClick={() => chatFileInputRef.current?.click()} className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200" title="إرفاق ملف"><Paperclip className="w-5 h-5"/></button>
+                          <input type="text" className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4" placeholder="إكتب ردك على طلب الإيضاح هنا..." value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSendReply()} />
+                          <button onClick={handleSendReply} className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold">إرسال الرد</button>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-brand-50 border-t border-brand-200 text-center text-sm font-bold text-brand-600 absolute bottom-0 left-0 right-0 h-[72px] flex items-center justify-center">
+                          لا يمكنك إرسال رسائل حالياً. المراسلة متاحة فقط للرد على استفسارات فريق البحث.
+                        </div>
+                      )}
                     </div>
                   )}
 

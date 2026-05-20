@@ -105,7 +105,7 @@ export function ServiceAgreement() {
          design_template: pendingOrderData.designTemplate || "-",
          historical_notes: pendingOrderData.historicalNotes || "-",
          productname: "توثيق شجرة العائلة",
-         price_amount: 1999.00,
+         price_amount: 1980.00,
          price_currency: "SAR",
          payment_method: "pending",
          payment_status: "pending",
@@ -120,7 +120,7 @@ export function ServiceAgreement() {
 
   if (!currentUser || !pendingOrderData) return null;
 
-  const priceAmount = "$1999.00";
+  const priceAmount = "تُحدد حسب خيار الدفع";
   const dummyOrderId = orderId.current;
   const dummyInvoiceId = invoiceId.current;
 

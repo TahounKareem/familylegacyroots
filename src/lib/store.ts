@@ -50,6 +50,12 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
+export type OrderPriority = "عادي" | "عاجل";
+export type RecordType = "سجل أساسي" | "الأبواب المغلقة";
+export type PaymentStatus = "مدفوع بالكامل" | "مدفوع أول دفعة" | "مدفوع ثاني دفعة" | "مدفوع ثالث دفعة" | "كود دعوة" | "غير مدفوع" | "دفع جزئي";
+export type IssueStatus = "طلب غير مكتمل" | "بإنتظار إتمام الدفع" | "جاري التنفيذ" | "تم الإصدار" | "جاري التصويب" | "تم الإغلاق" | "يوجد تصويبات" | "قبول توصيات";
+export type ActionPhase = "مرحلة البحث" | "مرحلة التوثيق" | "تسليم العمل" | "طلب إيضاح" | "قيد الانتظار";
+
 export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل" | "طلب مكتمل" | "تم تسليم الإصدار الأول";
 
 
@@ -139,6 +145,14 @@ export interface Order {
   id: string;
   orderNumber?: string;
   userId: string;
+  priority?: OrderPriority;
+  recordType?: RecordType;
+  paymentStatus?: PaymentStatus;
+  issueStatus?: IssueStatus;
+  actionPhase?: ActionPhase;
+  assignedResearcher?: string;
+  isDeleted?: boolean;
+
   plan: "standard" | "express" | "invite" | "paid";
   printRequested: boolean;
   totalAmount: number;

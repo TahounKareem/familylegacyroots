@@ -61,6 +61,7 @@ export function OrderFlow() {
 
   const [agreedToService, setAgreedToService] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentType, setPaymentType] = useState<"full" | "installment">("full");
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
@@ -96,6 +97,11 @@ export function OrderFlow() {
         plan: "invite",
         printRequested: false,
         status: "بإنتظار إتمام الدفع",
+        priority: "عادي",
+        recordType: "سجل أساسي",
+        paymentStatus: "كود دعوة",
+        issueStatus: "جاري التنفيذ",
+        actionPhase: "مرحلة البحث",
         totalAmount: 0,
         data: formData,
       });
@@ -120,7 +126,8 @@ export function OrderFlow() {
       
       const orderId = currentUser.id; // Using User ID as Order ID ensures 1 order per user
       const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();
-      const planPrice = 1999;
+      const planPrice = paymentType === "full" ? 1780 : 693;
+      const totalCost = paymentType === "full" ? 1780 : 1980;
       
       // Save order in Firestore with local pending state 
       await placeOrder({
@@ -131,7 +138,12 @@ export function OrderFlow() {
         plan: "standard",
         printRequested: false,
         status: "بإنتظار إتمام الدفع",
-        totalAmount: planPrice,
+        priority: "عادي",
+        recordType: "سجل أساسي",
+        paymentStatus: paymentType === "full" ? "مدفوع بالكامل" : "مدفوع أول دفعة",
+        issueStatus: "بإنتظار إتمام الدفع", // Will change to جاري التنفيذ after payment hook, but for now we set it as waiting
+        actionPhase: "قيد الانتظار",
+        totalAmount: totalCost,
         data: formData,
       });
 
@@ -426,8 +438,34 @@ export function OrderFlow() {
                     سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
                   </p>
                   
-                  <div className="text-5xl font-mono text-brand-900 mb-8 font-bold border-y border-brand-100 py-6 mx-auto max-w-xs">
-                    $1,999<span className="text-2xl text-brand-500 font-light">.00</span>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch mx-auto max-w-3xl mb-8">
+                    <div 
+                      onClick={() => setPaymentType("full")}
+                      className={`flex-1 border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "full" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold text-brand-900">دفع كامل</h3>
+                        <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-1 rounded-full">خصم خاص</span>
+                      </div>
+                      <div className="text-4xl font-mono text-brand-900 font-bold mt-4 mb-2">
+                        $1,780<span className="text-xl text-brand-500 font-light">.00</span>
+                      </div>
+                      <p className="text-sm text-brand-600 font-medium">دفعة واحدة ميسرة للمبلغ الإجمالي</p>
+                    </div>
+
+                    <div 
+                      onClick={() => setPaymentType("installment")}
+                      className={`flex-1 border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "installment" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold text-brand-900">نظام الدفعات</h3>
+                        <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-1 rounded-full">الإجمالي 1980$</span>
+                      </div>
+                      <div className="text-3xl font-mono text-brand-900 font-bold mt-4 mb-2">
+                        $693<span className="text-xl text-brand-500 font-light">.00</span>
+                      </div>
+                      <p className="text-sm text-brand-600 font-medium leading-relaxed">الدفعة الأولى 35%<br/><span className="text-xs opacity-80">(دفعة ثانية عند التوثيق ونهائية عند التسليم)</span></p>
+                    </div>
                   </div>
                   
                   <button 

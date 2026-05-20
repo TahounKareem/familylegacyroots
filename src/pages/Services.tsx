@@ -380,7 +380,10 @@ export function Services() {
                 <div className="absolute inset-0 bg-[url('https://i.postimg.cc/wMpkC5mC/Pic-Pattern.png')] opacity-10 mix-blend-overlay"></div>
                 <div className="relative z-10">
                   <h3 className="text-3xl font-serif font-bold mb-4">باقة السجل الأساسي</h3>
-                  <div className="text-5xl font-bold text-brand-400 mb-4 font-mono">$1999</div>
+                  <div className="flex flex-col items-center justify-center gap-2 mb-4">
+                    <div className="text-5xl font-bold text-brand-400 font-mono">$1780 <span className="text-xl text-brand-300 font-sans font-normal">(دفع كامل)</span></div>
+                    <div className="text-2xl font-bold text-brand-200 font-mono">أو 3 دفعات ميسرة <span className="text-lg text-brand-300 font-sans font-normal">(إجمالي 1980$)</span></div>
+                  </div>
                   <p className="text-brand-200 text-lg mb-8 max-w-lg mx-auto">للقيمة الأساسية للإصدار الرقمي، يقدم حالياً متضمناً طباعة 10 نسخ ورقية أنيقة + بوستر مشجر عمود النسب.</p>
                   
                   <div className="bg-brand-900/50 rounded-2xl p-6 border border-brand-800 text-right max-w-xl mx-auto mb-10">
