@@ -142,7 +142,7 @@ export function OrderFlow() {
         recordType: "سجل أساسي",
         paymentStatus: paymentType === "full" ? "مدفوع بالكامل" : "مدفوع أول دفعة",
         issueStatus: "بإنتظار إتمام الدفع", // Will change to جاري التنفيذ after payment hook, but for now we set it as waiting
-        actionPhase: "قيد الانتظار",
+        actionPhase: "مرحلة البحث",
         totalAmount: totalCost,
         data: formData,
       });
