@@ -74,10 +74,10 @@ export function KnowledgeCenter() {
             <X className="w-5 h-5" />
           </button>
           <div className="p-6 text-center">
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#B6191F] mb-3 leading-tight mx-auto">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#C3262A] mb-3 leading-tight mx-auto">
               النشرة الإسبوعية
             </h2>
-            <p className="text-[#801D22] opacity-80 mb-6 font-medium text-sm">
+            <p className="text-[#a61c20] opacity-80 mb-6 font-medium text-sm">
               انضم إلى نشرتنا لاكتشاف رؤى ومقالات مختارة في عالم الأنساب.
             </p>
             <form className="max-w-full mx-auto" onSubmit={async (e) => {
@@ -111,9 +111,9 @@ export function KnowledgeCenter() {
                 name="email"
                 placeholder="عنوان بريدك الإلكتروني" 
                 required
-                className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B6191F] mb-4 text-right shadow-inner border border-[#e0c4ba] text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C3262A] mb-4 text-right shadow-inner border border-brand-200 text-sm"
               />
-              <button type="submit" className="w-full bg-[#801D22] hover:bg-[#6b161c] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
+              <button type="submit" className="w-full bg-[#C3262A] hover:bg-[#a61c20] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
                 انضم للنشرة البريدية
               </button>
               <div className="text-center">
