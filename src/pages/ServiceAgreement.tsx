@@ -428,7 +428,7 @@ export function ServiceAgreement() {
             onClick={() => navigate("/order?step=2")} 
             className="px-6 py-3 rounded-2xl font-medium text-brand-600 hover:bg-brand-50 transition flex items-center gap-2"
           >
-           <ArrowRight className="w-5 h-5" /> عودة لتحديد المسار
+           <ArrowRight className="w-5 h-5" /> عودة لتحديد النطاق
           </button>
           
           <button 

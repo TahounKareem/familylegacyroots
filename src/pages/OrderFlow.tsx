@@ -207,11 +207,7 @@ export function OrderFlow() {
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>{
                     setFormData(prev => ({
                       ...prev, 
-                      firstName: e.target.value,
-                      shippingAddress: {
-                        ...prev.shippingAddress,
-                        name: prev.shippingAddress?.name || e.target.value 
-                      }
+                      firstName: e.target.value
                     }));
                   }} placeholder="الاسم الأول" />
                 </div>
@@ -327,83 +323,7 @@ export function OrderFlow() {
                   نقطة العرض الأساسية *
                 </label>
                 <div className="text-sm font-light text-brand-700 mb-6 bg-brand-50 p-6 rounded-xl border border-brand-100 leading-relaxed">
-                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ويمكن لأمين السجل إختيار أحد اسلافه (المشهورين) بدءاً من الأب او أحد الأجداد الذين يختارهم لبدء توثيق عمود النسب ، وبالطبع سيتم سرد سلسلة النسب التي تشمل أمين السجل / العميل تصاعدياً مروراً بنقطة العرض الأساسية التي اختارها .
-                </div>
-                
-                <div className="space-y-4 mb-8">
-                  <label className="flex items-center gap-3 p-4 border border-brand-200 rounded-xl cursor-pointer hover:bg-brand-50 transition">
-                    <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
-                      checked={formData.startingPointType === "أنا أمين السجل"} 
-                      onChange={() => {
-                        setFormData({...formData, startingPointType: "أنا أمين السجل", startingPoint: "أنا أمين السجل"});
-                      }} 
-                    />
-                    <span className="font-medium text-brand-800">أنا أمين السجل سأكون نقطة البدء .</span>
-                  </label>
-                  
-                  <label className="flex items-center gap-3 p-4 border border-brand-200 rounded-xl cursor-pointer hover:bg-brand-50 transition">
-                    <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
-                      checked={formData.startingPointType === "اسم العائلة"} 
-                      onChange={() => {
-                        setFormData({...formData, startingPointType: "اسم العائلة", startingPoint: "اسم العائلة"});
-                      }} 
-                    />
-                    <span className="font-medium text-brand-800">اسم العائلة سيكون نقطة البدء .</span>
-                  </label>
-                  
-                  <div className="border border-brand-200 rounded-xl p-4 transition hover:bg-brand-50">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <div className="pt-1">
-                        <input type="radio" name="startingPointType" className="w-5 h-5 text-brand-600 focus:ring-brand-500 border-gray-300" 
-                          checked={formData.startingPointType === "احد الأسلاف"} 
-                          onChange={() => {
-                            setFormData({...formData, startingPointType: "احد الأسلاف"});
-                          }} 
-                        />
-                      </div>
-                      <span className="font-medium text-brand-800 leading-tight">احد الأسلاف التاليين سيكون نقطة البدء - الجد الثالث بحد اقصى ( حدد مع ذكر الإسم ) .</span>
-                    </label>
-                    
-                    {formData.startingPointType === "احد الأسلاف" && (
-                      <div className="mt-4 mr-8 space-y-4 animate-in fade-in slide-in-from-top-2">
-                        <select className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500"
-                          value={formData.startingPointAncestor || ""}
-                          onChange={(e) => {
-                            const ancestor = e.target.value;
-                            let name = formData.startingPointName || "";
-                            if (ancestor === "الأب") name = formData.fatherName || "";
-                            if (ancestor === "الجد الاول") name = formData.grandfatherName || "";
-                            if (ancestor === "الجد الثاني" || ancestor === "الجد الثالث") name = "";
-                            const newVal = `${ancestor} - ${name}`;
-                            setFormData({...formData, startingPointAncestor: ancestor, startingPointName: name, startingPoint: newVal});
-                          }}
-                        >
-                          <option value="" disabled>اختر السلف...</option>
-                          <option value="الأب">الأب</option>
-                          <option value="الجد الاول">الجد الاول</option>
-                          <option value="الجد الثاني">الجد الثاني</option>
-                          <option value="الجد الثالث">الجد الثالث</option>
-                        </select>
-                        
-                        {(formData.startingPointAncestor === "الجد الثاني" || formData.startingPointAncestor === "الجد الثالث") && (
-                          <input type="text" className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 animate-in fade-in slide-in-from-top-2" 
-                            placeholder="أدخل اسم السلف هنا..."
-                            value={formData.startingPointName || ""}
-                            onChange={(e) => {
-                              const name = e.target.value;
-                              const newVal = `${formData.startingPointAncestor || "السلف"} - ${name}`;
-                              setFormData({...formData, startingPointName: name, startingPoint: newVal});
-                            }}
-                          />
-                        )}
-                        {(formData.startingPointAncestor === "الأب" || formData.startingPointAncestor === "الجد الاول") && (
-                          <div className="text-sm text-brand-600 bg-brand-50 p-3 rounded-lg border border-brand-100">
-                            تم تحديد الاسم تلقائياً: <strong>{formData.startingPointName}</strong>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ومربع أمين السجل هو نقطة الانطلاق في توثيق هذه الشجرة.
                 </div>
               </div>
 
@@ -420,32 +340,47 @@ export function OrderFlow() {
                   </p>
 
                   {/* Visual Tree */}
-                  <div className="flex flex-col items-center select-none pt-4">
-                     {/* Main Node (Record Keeper) */}
-                     <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-3 px-8 text-center relative z-10 font-bold text-lg">
-                        {formData.firstName || "أمين السجل"} {formData.familyName || ""}
+                  <div className="flex flex-col items-center select-none pt-2">
+                     
+                     {/* Family Name */}
+                     <div className="text-brand-300 text-xs tracking-wide opacity-80 uppercase mb-1">العائلة</div>
+                     <div className="bg-brand-900 text-brand-100 border border-brand-500 rounded-full py-1.5 px-6 text-center text-sm z-10 font-bold mb-0">
+                        {formData.familyName || "العائلة"}
                      </div>
+                     <div className="h-4 w-0.5 bg-brand-200/50" />
 
-                     {/* Vertical Line */}
-                     <div className="h-8 w-0.5 bg-brand-200/50" />
+                     {/* Grandfather 1 */}
+                     <div className="bg-brand-800/80 border border-brand-400 rounded-full py-1.5 px-6 text-center text-brand-50 text-sm z-10 font-bold">
+                        {formData.grandfatherName || "الجد الأول"}
+                     </div>
+                     <div className="h-4 w-0.5 bg-brand-200/50" />
+
+                     {/* Father */}
+                     <div className="bg-brand-800/80 border border-brand-400 rounded-full py-2 px-8 text-center text-brand-50 z-10 font-bold">
+                        {formData.fatherName || "الأب"}
+                     </div>
+                     
+                     {/* Vertical Line from Father */}
+                     <div className="h-6 w-0.5 bg-brand-200/50" />
                      
                      {/* Horizontal Line Connecting Branches */}
-                     <div className="w-64 md:w-[28rem] h-0.5 bg-brand-200/50 flex justify-between relative">
+                     <div className="w-64 md:w-[24rem] h-0.5 bg-brand-200/50 flex justify-between relative">
                         <div className="h-6 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
-                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-1/2 -translate-x-1/2 top-0 md:block hidden" />
+                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-1/2 -translate-x-1/2 top-0" />
                         <div className="h-6 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
                      </div>
 
-                     {/* Children Nodes */}
-                     <div className="flex justify-between w-72 md:w-[30rem] mt-6">
-                        <div className="bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
-                           الأبناء / الأحفاد
+                     {/* Children Nodes (Siblings + You) */}
+                     <div className="flex justify-between w-[17rem] md:w-[25rem] mt-6 relative items-start">
+                        <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                           أخ / أخت
                         </div>
-                        <div className="hidden md:block bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
-                           الأبناء / الأحفاد
+                        {/* Record Keeper Box */}
+                        <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-2 px-6 md:px-8 min-w-[80px] text-center relative z-10 font-bold font-serif -mt-2">
+                           {formData.firstName || "أنت"}
                         </div>
-                        <div className="bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
-                           الأبناء / الأحفاد
+                        <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                           أخ / أخت
                         </div>
                      </div>
                   </div>
@@ -460,16 +395,16 @@ export function OrderFlow() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
                     <input type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
-                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative">
-                       <img src="https://i.postimg.cc/KzTskNLd/Modern.png" alt="مسار مودرن" className="w-full h-full object-cover" />
+                    <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
+                       <img src="https://i.postimg.cc/KzTskNLd/Modern.png" alt="مسار مودرن" className="w-full h-full object-contain" />
                     </div>
                     <span className="font-bold text-brand-900 text-lg">نموذج حديث "مودرن"</span>
                   </label>
                   
                   <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
                     <input type="radio" name="design" value="كلاسيكي" className="hidden" checked={formData.designTemplate === "كلاسيكي"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
-                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative">
-                       <img src="https://i.postimg.cc/cH35gmYj/Classic.png" alt="مسار كلاسيكي" className="w-full h-full object-cover" />
+                    <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
+                       <img src="https://i.postimg.cc/cH35gmYj/Classic.png" alt="مسار كلاسيكي" className="w-full h-full object-contain" />
                     </div>
                     <span className="font-bold text-brand-900 text-lg">نموذج كلاسيكي</span>
                   </label>
@@ -580,7 +515,7 @@ export function OrderFlow() {
               onClick={handleNext} 
               disabled={
                 (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.shippingAddress?.name || !formData.shippingAddress?.phone || !formData.shippingAddress?.country || !formData.shippingAddress?.state || !formData.shippingAddress?.street)) ||
-                (step === 2 && !formData.startingPoint)
+                (step === 2 && !formData.designTemplate)
               }
               className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >

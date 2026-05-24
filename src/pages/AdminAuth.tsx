@@ -77,17 +77,9 @@ export function AdminAuth() {
             <span className="text-[#C3262A]">سجل تراث العائلة</span>
           </h1>
           <p className="text-lg text-brand-700 leading-relaxed max-w-lg mb-8 font-medium">
-            مرحباً بك في البوابة السرية لصناع الأثر. كل خطوة تقوم بها هنا تساهم في إحياء الذاكرة وربط الأجيال. معاً نصنع تاريخاً يورث.
+            مرحباً بك في البوابة الخاصة لصناع الأثر. كل خطوة تقوم بها هنا تساهم في إحياء الذاكرة وربط الأجيال. معاً نصنع تاريخاً يورث.
           </p>
           <div className="space-y-4">
-            <div className="flex items-center gap-3 bg-white/60 p-3 rounded-xl border border-brand-100 w-max shadow-sm backdrop-blur-sm">
-              <Lock className="w-5 h-5 text-brand-500" />
-              <span className="text-sm font-bold text-brand-800">نظام مشفر ومحمي بالكامل</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white/60 p-3 rounded-xl border border-brand-100 w-max shadow-sm backdrop-blur-sm">
-              <Users className="w-5 h-5 text-brand-500" />
-              <span className="text-sm font-bold text-brand-800">وصول حصري لفريق الإدارة</span>
-            </div>
           </div>
         </div>
 
@@ -98,7 +90,7 @@ export function AdminAuth() {
             <div className="absolute -bottom-4 -left-4 w-12 h-12 border-4 border-brand-100 rounded-full"></div>
             
             <h2 className="text-2xl font-serif font-bold text-brand-900 mb-2 flex items-center gap-2">
-              <Key className="w-5 h-5 text-[#C3262A]" /> تسجيل دخول الإدارة
+              <Key className="w-5 h-5 text-[#C3262A]" /> تسجيل دخول النظام
             </h2>
             <p className="text-brand-500 text-sm mb-8">يرجى إدخال بيانات الاعتماد الخاصة بك للوصول.</p>
 
@@ -110,7 +102,7 @@ export function AdminAuth() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-brand-800 mb-2">البريد الإلكتروني للإدارة</label>
+                <label className="block text-sm font-bold text-brand-800 mb-2">البريد الإلكتروني</label>
                 <div className="relative">
                   <input
                     type="email"
@@ -125,7 +117,7 @@ export function AdminAuth() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-brand-800 mb-2">كلمة المرور السري</label>
+                <label className="block text-sm font-bold text-brand-800 mb-2">كلمة المرور</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -159,17 +151,11 @@ export function AdminAuth() {
                   {loading ? (
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
-                    "دخول لمنصة الإدارة"
+                    "دخول"
                   )}
                 </button>
               </div>
             </form>
-          </div>
-          
-          <div className="mt-8 text-center text-brand-500 text-sm flex items-center justify-center gap-2 font-medium">
-            <Link to="/" className="hover:text-brand-800 transition flex items-center gap-1">
-              <Home className="w-4 h-4" /> العودة للموقع الرئيسي
-            </Link>
           </div>
         </div>
       </div>

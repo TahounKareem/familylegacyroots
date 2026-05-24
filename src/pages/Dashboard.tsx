@@ -10,7 +10,7 @@ import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder } = useAppStore();
-  const [activeTab, setActiveTab] = useState("حالة السجل");
+  const [activeTab, setActiveTab] = useState("حالة الإصدار");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -62,7 +62,7 @@ export function Dashboard() {
 
   useEffect(() => {
     const order = orders.find(o => o.userId === currentUser?.id);
-    if (activeTab === "رسائل فريق البحث" && totalAdminMessagesUnread > 0 && order) {
+    if (activeTab === "استيضاحات فريق البحث" && totalAdminMessagesUnread > 0 && order) {
       useAppStore.getState().markMessagesAsRead(order.id, "user");
     }
   }, [activeTab, totalAdminMessagesUnread, orders, currentUser]);
@@ -182,10 +182,10 @@ export function Dashboard() {
 
   const SidebarItem = ({ title, isActive, isLocked, info, badge }: { title: string, isActive: boolean, isLocked?: boolean, info?: string, badge?: number }) => (
     <button 
-      disabled={isLocked && title !== "حالة السجل"}
+      disabled={isLocked && title !== "حالة الإصدار"}
       onClick={() => setActiveTab(title)}
       className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative
-        ${isLocked && title !== "حالة السجل" ? "opacity-50 cursor-not-allowed" : ""}
+        ${isLocked && title !== "حالة الإصدار" ? "opacity-50 cursor-not-allowed" : ""}
         ${isActive ? "bg-brand-100 text-brand-900 font-bold" : "text-brand-700 hover:bg-brand-50"}`}
     >
       <div className="flex items-center">
@@ -202,7 +202,7 @@ export function Dashboard() {
           </div>
         )}
       </div>
-      {isLocked && title !== "حالة السجل" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
+      {isLocked && title !== "حالة الإصدار" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
     </button>
   );
 
@@ -248,9 +248,9 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">البوابة الرئيسية</h3>
                 <div className="space-y-1">
-                  <SidebarItem title="حالة السجل" isActive={activeTab === "حالة السجل"} />
+                  <SidebarItem title="حالة الإصدار" isActive={activeTab === "حالة الإصدار"} />
                   <SidebarItem title="بيانات أمين السجل/العميل" isActive={activeTab === "بيانات أمين السجل/العميل"} isLocked={!isPaid} />
-                  <SidebarItem title="نقطة بدء عمود النسب" isActive={activeTab === "نقطة بدء عمود النسب"} isLocked={!isPaid} />
+                  <SidebarItem title="نقطة العرض الأساسية" isActive={activeTab === "نقطة العرض الأساسية"} isLocked={!isPaid} />
                   <SidebarItem title="قالب التصميم المختار" isActive={activeTab === "قالب التصميم المختار"} isLocked={!isPaid} />
                 </div>
               </div>
@@ -267,7 +267,7 @@ export function Dashboard() {
                 </h3>
                 <div className="space-y-1">
                   <SidebarItem title="نبذة وكلمة عن العائلة" isActive={activeTab === "نبذة وكلمة عن العائلة"} isLocked={!isPaid} info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة ، (سيتم إدراجها في القسمالمسمى &#34;بين يدي السجل&#34; وهو القسم الخاص الذي يقع تحت اشرافكم)" />
-                  <SidebarItem title="إدراج مشجر الأحياء" isActive={activeTab === "إدراج مشجر الأحياء"} isLocked={!isPaid} info="مشجر للأحياء من العائلة والأسلاف ضمن عمود النسب : ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام ." />
+                  <SidebarItem title="نافذة الإدراج العائلي" isActive={activeTab === "نافذة الإدراج العائلي"} isLocked={!isPaid} info="مشجر للأحياء من العائلة والأسلاف ضمن عمود النسب : ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام ." />
                   <SidebarItem title="إدراج وثائق" isActive={activeTab === "إدراج وثائق"} isLocked={!isPaid} info="الوثائق : يمكن ادراج اي وثائق يرغب أمين السجل / العميل في ادراجها، مثل مشجرات تقليدية – شهادات – وثائق اثبات شخصية قديمة –وثائق وزاج – ولادة - وثائق صادرة من المحاكم الشرعية فيها معلومات عن العائلة او الأسلاف ..الخ ، ملحوظة : يتعين أن تكون الوثائق المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ." />
                   <SidebarItem title="إدراج صور" isActive={activeTab === "إدراج صور"} isLocked={!isPaid} info="الصور : يمكن لأمين السجل /العميل إدراج صور لأفراد العائلة مثل ( صور الأشخاص المدرجين ضمن مشجر الأحياء ، او صور بقية الأشخاص في عمود النسب الصاعد فقط . ملحوظة : يتعين أن تكون الصور المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ." />
                 </div>
@@ -276,7 +276,7 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">التواصل والتحديثات</h3>
                 <div className="space-y-1">
-                  <SidebarItem title="رسائل فريق البحث" isActive={activeTab === "رسائل فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={totalAdminMessagesUnread} />
+                  <SidebarItem title="استيضاحات فريق البحث" isActive={activeTab === "استيضاحات فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={totalAdminMessagesUnread} />
                 </div>
               </div>
 
@@ -284,7 +284,7 @@ export function Dashboard() {
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">ابق سجلك حياً</h3>
                 <div className="space-y-1">
                   <SidebarItem title="النسخة الرقمية للسجل" isActive={activeTab === "النسخة الرقمية للسجل"} isLocked={!isPaid} />
-                  <SidebarItem title="بوستر مشجر عمود النسب" isActive={activeTab === "بوستر مشجر عمود النسب"} isLocked={!isPaid} />
+                  <SidebarItem title="بوستر عمود النسب" isActive={activeTab === "بوستر عمود النسب"} isLocked={!isPaid} />
                   <SidebarItem title="التصويبات" isActive={activeTab === "التصويبات"} isLocked={!isPaid} info="هذه الخاصية ستظهر عند استلامكم السجل الخاص بكم حيث سيتم تفعيل هذه الخاصية لتتمكنوا من ارسال التصويبات ان وجدت ." />
                 </div>
               </div>
@@ -292,14 +292,14 @@ export function Dashboard() {
               <div>
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">فتح الأبواب المغلقة</h3>
                 <div className="space-y-1">
-                   <SidebarItem title="فتح الأبواب المغلقة ( بحث متقدم )" isActive={activeTab === "فتح الأبواب المغلقة ( بحث متقدم )"} isLocked={!isPaid} info="هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ." />
+                   <SidebarItem title="فتح الأبواب المغلقة" isActive={activeTab === "فتح الأبواب المغلقة"} isLocked={!isPaid} info="بحث متقدم. هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ." />
                 </div>
               </div>
 
               {/* Social Media & Outer Links */}
               <div className="mt-8 pt-6">
                 <div className="space-y-2 mb-6">
-                  <button onClick={() => setActiveTab("حالة السجل")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
+                  <button onClick={() => setActiveTab("حالة الإصدار")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
                     <Compass className="w-4 h-4" />
                     العودة للصفحة الرئيسية
                   </button>
@@ -364,12 +364,12 @@ export function Dashboard() {
                 <div className="space-y-8 animate-in fade-in duration-300">
                   <h2 className="text-3xl font-serif font-bold text-brand-900 mb-8 pb-4 border-b border-brand-100">{activeTab}</h2>
 
-                  {activeTab === "حالة السجل" && (
+                  {activeTab === "حالة الإصدار" && (
                      <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-brand-200">
                          {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-orange-500" />}
                          <div>
-                           <h3 className="text-xl font-bold text-brand-900 mb-2">حالة السجل الحالية: <span className="text-brand-600">{order.status}</span></h3>
+                           <h3 className="text-xl font-bold text-brand-900 mb-2">حالة الإصدار الحالية: <span className="text-brand-600">{order.status}</span></h3>
                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-brand-600 text-sm mt-1">
                              <span className="flex items-center gap-1"><CalendarCheck className="w-4 h-4" /> تاريخ الطلب: <strong className="font-bold">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</strong></span>
                              {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? (
@@ -511,7 +511,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "نقطة بدء عمود النسب" && (
+                  {activeTab === "نقطة العرض الأساسية" && (
                     <div className="p-8 bg-brand-50 rounded-2xl border border-brand-200 text-center">
                       <p className="text-brand-600 mb-4 font-light">بناءً على طلبكم، نقطة الانطلاق المعتمدة لبدء التوثيق لعمود النسب هي:</p>
                       <div className="flex justify-center items-center gap-4 text-3xl font-serif text-brand-900 font-bold border-y-2 border-brand-200 py-6 max-w-md mx-auto">
@@ -573,7 +573,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "إدراج مشجر الأحياء" && (
+                  {activeTab === "نافذة الإدراج العائلي" && (
                     <div className="space-y-4">
                       <p className="text-brand-600 mb-4">أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك المباشر في هذا المخطط).</p>
                       <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
@@ -716,7 +716,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "رسائل فريق البحث" && (
+                  {activeTab === "استيضاحات فريق البحث" && (
                     <div className="bg-white border rounded-2xl flex flex-col h-[600px] border-brand-200 overflow-hidden relative">
                       <div className="bg-brand-50 border-b border-brand-200 p-4">
                         <h4 className="font-bold text-brand-900">تواصل آمن ومباشر</h4>
@@ -809,7 +809,7 @@ export function Dashboard() {
                     </div>
                   )}
                   
-                  {activeTab === "بوستر مشجر عمود النسب" && (
+                  {activeTab === "بوستر عمود النسب" && (
                     <div className="text-center py-24 bg-gradient-to-br from-brand-50 to-white rounded-3xl border border-brand-200 shadow-sm relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-300 via-brand-500 to-brand-300"></div>
                       {!order.posterLink ? (
@@ -892,7 +892,7 @@ export function Dashboard() {
                                     يمكنك طلب الإصدار الثاني بمزايا حصرية وتفاصيل أعمق عن تاريخ عائلتك. قم بدعوة أصدقائك للحصول على "سجل تراث العائلة" واستمتع بتخفيض خاص عند طلبك للإصدار الثاني أو عند استكشافك لخدمة البحث المتقدم "فتح الأبواب المغلقة".
                                   </p>
                                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <button onClick={() => setActiveTab("فتح الأبواب المغلقة ( بحث متقدم )")} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition">
+                                    <button onClick={() => setActiveTab("فتح الأبواب المغلقة")} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition">
                                       خدمة فتح الأبواب المغلقة
                                       <ChevronRight className="w-4 h-4" />
                                     </button>
@@ -968,7 +968,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "فتح الأبواب المغلقة ( بحث متقدم )" && (
+                  {activeTab === "فتح الأبواب المغلقة" && (
                     <div className="py-12 px-4 sm:px-8 bg-white shadow-inner rounded-3xl border border-brand-200">
                       <div className="text-center mb-10">
                         <Telescope className="w-20 h-20 text-brand-600 mx-auto mb-6 opacity-90" />
