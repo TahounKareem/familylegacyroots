@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
-import { orderDetailsContract, mainContractSections } from "@/data/contractContent";
+import { orderDetailsContract } from "@/data/contractContent";
+import { arabicContractText } from "@/data/arabicContract";
 import { logLegalEvent, recordLegalConsent, createLegalContractRecord, createOrderEvidence } from "@/lib/legalService";
 
 export function ServiceAgreement() {
@@ -53,7 +54,7 @@ export function ServiceAgreement() {
     }
   };
 
-  const allChecked = req1 && req2 && req3 && req4 && req5 && req6;
+  const allChecked = req1;
   const canProceed = allChecked && scrolledToBottom;
 
   const handleProceed = async () => {
@@ -140,53 +141,54 @@ export function ServiceAgreement() {
         <div className="bg-brand-50 p-6 md:p-10 rounded-[2rem] border border-brand-200 shadow-sm mb-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
-            <p className="text-brand-600">مراجعة بيانات الطلب قبل الموافقة على العقد</p>
+            <p className="text-brand-600">مراجعة بيانات الطلب والتوقيع الإلكتروني</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm">
+          <div className="grid grid-cols-1 gap-8">
+            <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+              <button 
+                onClick={() => navigate("/order?step=1")}
+                className="absolute top-6 left-6 text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition"
+              >
+                تعديل البيانات
+              </button>
               <h3 className="font-bold text-brand-900 border-b border-brand-100 pb-3 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-brand-600" />
-                ملخص بيانات أمين السجل
+                ملخص بيانات أمين السجل والتسليم
               </h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center"><span className="text-brand-600">الاسم:</span> <strong className="text-brand-900">{pendingOrderData.firstName} {pendingOrderData.fatherName} {pendingOrderData.grandfatherName} {pendingOrderData.familyName}</strong></div>
-                <div className="flex justify-between items-center"><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{pendingOrderData.country}</strong></div>
-                <div className="flex justify-between items-center"><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{pendingOrderData.homeland}</strong></div>
-                <div className="flex justify-between items-center"><span className="text-brand-600">القبيلة:</span> <strong className="text-brand-900">{pendingOrderData.tribeName || "غير محدد"}</strong></div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm">
-              <h3 className="font-bold text-brand-900 border-b border-brand-100 pb-3 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-brand-600" />
-                المسار والمخرجات
-              </h3>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <span className="text-brand-600 block mb-1">نقطة البدء:</span> 
-                  <strong className="text-brand-900">
-                    {pendingOrderData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${pendingOrderData.firstName} بن ${pendingOrderData.fatherName})` :
-                     pendingOrderData.startingPointType === "اسم العائلة" ? `اسم العائلة (${pendingOrderData.familyName})` :
-                     pendingOrderData.startingPointType === "احد الأسلاف" ? `${pendingOrderData.startingPointAncestor || "احد الأسلاف"} (${pendingOrderData.startingPointName})` :
-                     pendingOrderData.startingPoint || "-"}
-                  </strong>
-                </div>
-                <div className="flex justify-between items-center"><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{pendingOrderData.designTemplate}</strong></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-right">
+                <div className="flex flex-col gap-1"><span className="text-brand-600">الاسم الأول:</span> <strong className="text-brand-900">{pendingOrderData.firstName}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">اسم الأب:</span> <strong className="text-brand-900">{pendingOrderData.fatherName}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">اسم الجد:</span> <strong className="text-brand-900">{pendingOrderData.grandfatherName}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">اللقب / العائلة:</span> <strong className="text-brand-900">{pendingOrderData.familyName}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">القبيلة / العائلة:</span> <strong className="text-brand-900">{pendingOrderData.tribeName || "غير محدد"}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{pendingOrderData.country}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{pendingOrderData.homeland}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{pendingOrderData.designTemplate}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">نقطة العرض الأساسية:</span> <strong className="text-brand-900">{pendingOrderData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${pendingOrderData.firstName} بن ${pendingOrderData.fatherName})` : pendingOrderData.startingPointType === "اسم العائلة" ? `اسم العائلة (${pendingOrderData.familyName})` : pendingOrderData.startingPointType === "احد الأسلاف" ? `${pendingOrderData.startingPointAncestor || "احد الأسلاف"} (${pendingOrderData.startingPointName})` : pendingOrderData.startingPoint || "-"}</strong></div>
+                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">عنوان الاستلام:</span> <strong className="text-brand-900">{pendingOrderData.shippingAddress?.name} - {pendingOrderData.shippingAddress?.phone} - {pendingOrderData.shippingAddress?.street}, {pendingOrderData.shippingAddress?.state}, {pendingOrderData.shippingAddress?.country} {pendingOrderData.shippingAddress?.zip}</strong></div>
               </div>
             </div>
             
-            <div className="md:col-span-2 bg-gradient-to-r from-brand-800 to-brand-900 text-white p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center">
-               <div className="mb-4 md:mb-0">
-                  <span className="text-brand-200 block mb-1 font-bold text-sm">الباقة المختارة</span>
-                  <strong className="font-serif text-xl">السجل الأساسي ويشمل:</strong>
-                  <ul className="list-disc list-inside text-brand-100 mt-2 text-sm space-y-1">
-                    <li>نسخة رقمية "الكترونية" لتاريخ العائلة</li>
-                    <li>عدد 10 نسخ ورقية مطبوعة أصلية</li>
-                    <li>بوستر مشجر عمود النسب الشامل</li>
+            <div className="bg-gradient-to-r from-brand-800 to-brand-900 text-white p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center text-right">
+               <div className="mb-4 md:mb-0 w-full md:w-2/3">
+                  <span className="text-brand-200 block mb-2 font-bold text-sm">الباقة المختارة</span>
+                  <ul className="list-disc leading-loose text-brand-100 mt-2 text-sm space-y-1 pl-0 pr-4">
+                    <li>عمل البحث العلمي والتاريخي المتخصص .</li>
+                    <li>توثيق خط نسب أمين السجل /العميل "عمود النسب ".</li>
+                    <li>توثيق المصادر والمراجع للعُقَد النسبية .</li>
+                    <li>توثيق المصادر والمراجع لتراجم الأعلام "السير الذاتية".</li>
+                    <li>تنسيق وموائمة مواد قسم الإدراج الإختياري الخاص بأمين السجل / العميل ، مع بقية الأقسام.</li>
+                    <li>أعمال التصميم والإخراج الفني المحترف.</li>
+                    <li>تسليم العمل "سجل تراث العائلة" على شكل المخرجات التالية:</li>
+                    <ul className="list-circle pr-6.5 text-[13px] opacity-90">
+                      <li>نسخة رقمية "الكترونية"</li>
+                      <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق .</li>
+                      <li>بوستر مشجر عمود النسب الشامل .</li>
+                    </ul>
                   </ul>
                </div>
-               <div className="text-left">
+               <div className="text-left w-full md:w-1/3 flex justify-end">
                   <div className="text-3xl font-mono font-bold">{priceAmount}</div>
                </div>
             </div>
@@ -223,26 +225,19 @@ export function ServiceAgreement() {
             </div>
 
             {/* Text Side */}
-            <div className="flex-1 space-y-5">
+            <div className="flex-1 space-y-5 text-right">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold mb-2">
                 <ShieldCheck className="w-4 h-4" />
-                <span>قبل البدء في التعاقد</span>
+                <span>حماية مشددة لخصوصية عائلتك</span>
               </div>
               
               <h1 className="text-3xl font-serif font-bold text-brand-900 leading-tight">
-                خصوصيتك في أمان… <br/>
-                <span className="text-brand-600">وثقتك مسؤوليتنا</span>
+                خصوصيتك في أمان..
               </h1>
               
               <div className="space-y-4 text-brand-800 leading-relaxed text-sm">
                 <p>
-                  نعرف أن تفاصيل العائلة والأنساب ليست مجرد بيانات… إنها حكايات وذكريات وروابط عزيزة. لذلك نتعامل مع كل ما تشاركه معنا من معلومات أو صور أو وثائق على أنه أمانة نعتز بها، ونحرص أن تبقى في مساحة آمنة تُصان فيها الخصوصية وتُحترم فيها الثقة.
-                </p>
-                <p>
-                  نأخذ السرية والخصوصية بجدية تامة، ونطبّق إجراءات علمية وأخلاقية صارمة لحماية المحتوى من أي وصول غير مصرح به أو استخدام غير ملائم. نعتمد مبدأ «الحد الأدنى الضروري» في التعامل مع البيانات، ونراجع ضوابطنا باستمرار ونطوّرها خطوة بخطوة. 
-                </p>
-                <p className="font-semibold text-brand-900 border-r-4 border-brand-500 pr-4 mt-4 bg-brand-50 p-4 rounded-l-lg">
-                  نريدك أن تشعر بالاطمئنان وأنت تبني شجرة عائلتك معنا، وأن تعرف أن ما يخصك سيبقى محفوظًا بعناية واحترام تماماً كما نحب أن تُحفظ قصص عائلاتنا.
+                  نأخذ السرية والخصوصية على محمل الجد. جميع بياناتك مشفرة ومحفوظة في خوادم آمنة. نحن نقدر ثقتك ونسعى جاهدين لبناء تجربة تليق بك، ونطورها خطوة بخطوة.
                 </p>
               </div>
             </div>
@@ -267,6 +262,7 @@ export function ServiceAgreement() {
                 <h3 className="font-bold text-brand-900 mb-4 text-sm">فهرس العقد</h3>
                 <ul className="space-y-2 text-xs text-brand-700">
                   <li><a href="#order-details" className="hover:text-brand-600 transition">بيانات الطلب (Order Details)</a></li>
+                  {/*
                   {mainContractSections.map((sec, idx) => (
                     <li key={sec.id}>
                       <a href={`#${sec.id}`} className="hover:text-brand-600 transition line-clamp-1" title={sec.arTitle}>
@@ -274,6 +270,7 @@ export function ServiceAgreement() {
                       </a>
                     </li>
                   ))}
+                  */}
                 </ul>
               </div>
             </div>
@@ -297,69 +294,54 @@ export function ServiceAgreement() {
                   <h2 className="text-2xl font-serif font-bold text-brand-900 leading-relaxed whitespace-pre-line">
                     {orderDetailsContract.ar.title}
                   </h2>
-                  <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-brand-600 font-mono">
+                  <div className="my-6 grid grid-cols-1 gap-4 text-xs text-brand-600 font-mono">
                     <p className="whitespace-pre-line text-right">{orderDetailsContract.ar.intro}</p>
-                    <p className="whitespace-pre-line text-left dir-ltr" dir="ltr">{orderDetailsContract.en.intro}</p>
                   </div>
                 </div>
 
                 {/* Order Details Table */}
                 <div className="border border-brand-200 rounded-xl overflow-hidden bg-white text-sm">
                   {[
-                    [orderDetailsContract.ar.fields.orderId, `${dummyOrderId} / ${dummyInvoiceId}`, orderDetailsContract.en.fields.orderId],
-                    [orderDetailsContract.ar.fields.orderDate, new Date().toLocaleDateString('ar-EG'), orderDetailsContract.en.fields.orderDate],
-                    [orderDetailsContract.ar.fields.customerName, `${pendingOrderData.firstName} ${pendingOrderData.fatherName} ${pendingOrderData.familyName}`, orderDetailsContract.en.fields.customerName],
-                    [orderDetailsContract.ar.fields.detailedName, `الجد: ${pendingOrderData.grandfatherName || "-"} | القبيلة: ${pendingOrderData.tribeName || "-"}`, orderDetailsContract.en.fields.detailedName],
-                    [orderDetailsContract.ar.fields.homeland, `الموطن: ${pendingOrderData.homeland || "-"} | نقطة البدء: ${pendingOrderData.startingPoint || "-"}`, orderDetailsContract.en.fields.homeland],
-                    [orderDetailsContract.ar.fields.template, pendingOrderData.designTemplate || "-", orderDetailsContract.en.fields.template],
-                    [orderDetailsContract.ar.fields.notes, pendingOrderData.historicalNotes ? (pendingOrderData.historicalNotes.length > 50 ? pendingOrderData.historicalNotes.substring(0, 50) + '...' : pendingOrderData.historicalNotes) : "-", orderDetailsContract.en.fields.notes],
-                    [orderDetailsContract.ar.fields.email, currentUser.email, orderDetailsContract.en.fields.email],
-                    [orderDetailsContract.ar.fields.phone, pendingOrderData.shippingAddress?.phone || "-", orderDetailsContract.en.fields.phone],
-                    [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`, orderDetailsContract.en.fields.shippingAddress],
-                    [orderDetailsContract.ar.fields.product, `توثيق شجرة العائلة`, orderDetailsContract.en.fields.product]
+                    [orderDetailsContract.ar.fields.orderId, `${dummyOrderId} / ${dummyInvoiceId}`],
+                    [orderDetailsContract.ar.fields.orderDate, new Date().toLocaleDateString('ar-EG')],
+                    [orderDetailsContract.ar.fields.customerName, `${pendingOrderData.firstName} ${pendingOrderData.fatherName} ${pendingOrderData.familyName}`],
+                    [orderDetailsContract.ar.fields.detailedName, `الجد: ${pendingOrderData.grandfatherName || "-"} | القبيلة: ${pendingOrderData.tribeName || "-"}`],
+                    [orderDetailsContract.ar.fields.homeland, `الموطن: ${pendingOrderData.homeland || "-"} | نقطة البدء: ${pendingOrderData.startingPoint || "-"}`],
+                    [orderDetailsContract.ar.fields.template, pendingOrderData.designTemplate || "-"],
+                    [orderDetailsContract.ar.fields.notes, pendingOrderData.historicalNotes ? (pendingOrderData.historicalNotes.length > 50 ? pendingOrderData.historicalNotes.substring(0, 50) + '...' : pendingOrderData.historicalNotes) : "-"],
+                    [orderDetailsContract.ar.fields.email, currentUser.email],
+                    [orderDetailsContract.ar.fields.phone, pendingOrderData.shippingAddress?.phone || "-"],
+                    [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`],
+                    [orderDetailsContract.ar.fields.product, `توثيق شجرة العائلة`]
                   ].map((row, i) => (
                     <div key={i} className={`flex flex-col md:flex-row ${i % 2 === 0 ? 'bg-brand-50/30' : 'bg-white'} border-b border-brand-100 last:border-0`}>
                        <div className="px-4 py-3 md:w-1/3 font-bold text-brand-800 bg-brand-50/50 text-right">{row[0]}</div>
-                       <div className="px-4 py-3 md:w-1/3 font-medium text-brand-900 text-center">{row[1]}</div>
-                       <div className="px-4 py-3 md:w-1/3 font-bold text-brand-800 bg-brand-50/50 text-left dir-ltr" dir="ltr">{row[2]}</div>
+                       <div className="px-4 py-3 md:w-2/3 font-medium text-brand-900 text-center md:text-right">{row[1]}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs text-brand-700 bg-brand-50 p-4 rounded-xl border border-brand-100">
+                <div className="grid grid-cols-1 text-xs text-brand-700 bg-brand-50 p-4 rounded-xl border border-brand-100">
                   <div className="leading-relaxed">☑ {orderDetailsContract.ar.footerCheckbox}</div>
-                  <div className="leading-relaxed text-left dir-ltr" dir="ltr">☑ {orderDetailsContract.en.footerCheckbox}</div>
                 </div>
 
                 <div className="w-full h-px bg-brand-200 my-10"></div>
 
                 {/* Contract Body */}
-                <div className="space-y-10">
-                  {mainContractSections.map((sec) => (
-                    <div key={sec.id} id={sec.id} className="grid grid-cols-1 md:grid-cols-2 gap-8 scroll-mt-10">
-                      <div className="text-right">
-                        <h4 className="font-bold text-brand-900 mb-3 text-lg">{sec.arTitle}</h4>
-                        <p className="text-sm text-brand-800 leading-loose whitespace-pre-line text-justify">{sec.arText}</p>
-                      </div>
-                      <div className="text-left dir-ltr" dir="ltr">
-                        <h4 className="font-bold text-brand-900 mb-3 text-lg">{sec.enTitle || sec.arTitle}</h4>
-                        <p className="text-sm text-brand-800 leading-loose whitespace-pre-line text-justify">{sec.enText || sec.arText}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="bg-white p-6 md:p-10 rounded-2xl border border-brand-100 shadow-sm text-right">
+                  <div className="whitespace-pre-line text-sm text-brand-800 leading-loose text-justify font-serif">
+                    {arabicContractText}
+                  </div>
                 </div>
 
                 {scrolledToBottom ? (
                   <div className="text-center mt-16 p-12 bg-[#F9F6F0] rounded-2xl border border-brand-200 flex flex-col items-center justify-center gap-6 shadow-inner relative overflow-hidden">
                     <div className="absolute inset-0 bg-brand-50 opacity-40 mix-blend-multiply pattern-grid-lg"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2 shadow-sm">
-                        <Check className="w-8 h-8" />
-                      </div>
                       <h4 className="text-xl font-bold text-brand-900 mb-1">نهاية الوثيقة</h4>
                       <h4 className="text-lg font-bold text-brand-900 mb-4 font-serif">End of Document</h4>
                       <p className="text-brand-700 font-medium text-center leading-relaxed max-w-md">
-                        شكرًا لك. لقد أكملت الاطلاع على الاتفاقية بصيغتيها العربية والإنجليزية. يمكنك الآن الانتقال للموافقة على الإقرارات بالأسفل.
+                        شكرًا لك. لقد أكملت الاطلاع على الاتفاقية بالكامل. يمكنك الآن الانتقال للموافقة على الإقرارات بالأسفل.
                       </p>
                     </div>
                   </div>
@@ -383,34 +365,9 @@ export function ServiceAgreement() {
           
           <div className="space-y-4">
             <CheckboxLabel 
-              checked={req1} onChange={(v) => { setReq1(v); if(v) recordLegalConsent("order_accuracy", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أقر بأن جميع بيانات الطلب صحيحة." 
-              textEn="I acknowledge that all order data is correct."
-            />
-            <CheckboxLabel 
-              checked={req2} onChange={(v) => { setReq2(v); if(v) recordLegalConsent("contract_reviewed", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أؤكد اطلاعي الكامل على وثيقة تقديم الخدمة الموضحة أعلاه." 
-              textEn="I confirm my full review of the service provision document outlined above."
-            />
-            <CheckboxLabel 
-              checked={req3} onChange={(v) => { setReq3(v); if(v) recordLegalConsent("execution_terms", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أوافق على شروط تنفيذ الخدمة وإخلاء المسؤولية." 
-              textEn="I agree to the terms of service execution and disclaimer of liability."
-            />
-            <CheckboxLabel 
-              checked={req4} onChange={(v) => { setReq4(v); if(v) recordLegalConsent("refund_acknowledged", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أقر بفهمي لسياسة الإلغاء وعدم الاسترجاع." 
-              textEn="I acknowledge my understanding of the cancellation and non-refund policy."
-            />
-            <CheckboxLabel 
-              checked={req5} onChange={(v) => { setReq5(v); if(v) recordLegalConsent("privacy_acknowledged", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أقر بمراجعتي لسياسة الخصوصية وسرية البيانات." 
-              textEn="I acknowledge my review of the privacy and data confidentiality policy."
-            />
-            <CheckboxLabel 
-              checked={req6} onChange={(v) => { setReq6(v); if(v) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أوافق على إتمام التعاقد الإلكتروني واستخدام السجلات والتوقيع الإلكتروني." 
-              textEn="I agree to complete the electronic contracting and to the use of electronic records and signatures."
+              checked={req1} onChange={(v) => { setReq1(v); if(v) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="أوافق على استخدام التوقيع الإلكتروني والسجلات الإلكترونية وسجل التدقيق (Audit Trail) وشهادة الإكمال (Certificate of Completion) كوسائل إثبات قانونية ملزمة، وأقر بحجيتها الكاملة وعدم اشتراط وجود أصل ورقي." 
+              textEn="I agree to use electronic signatures, electronic records, the Audit Trail (Audit Trail), and the Certificate of Completion (Certificate of Completion) as legally binding means of evidence, and I acknowledge their full legal effect and that no paper original is required."
             />
           </div>
 
@@ -436,7 +393,7 @@ export function ServiceAgreement() {
             disabled={!canProceed}
             className="px-10 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            متابعة لتوقيع العقد والدفع <ArrowLeft className="w-5 h-5" />
+            الإنتقال للدفع <ArrowLeft className="w-5 h-5" />
           </button>
         </div>
 

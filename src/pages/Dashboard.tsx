@@ -249,7 +249,7 @@ export function Dashboard() {
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">البوابة الرئيسية</h3>
                 <div className="space-y-1">
                   <SidebarItem title="حالة الإصدار" isActive={activeTab === "حالة الإصدار"} />
-                  <SidebarItem title="بيانات أمين السجل/العميل" isActive={activeTab === "بيانات أمين السجل/العميل"} isLocked={!isPaid} />
+                  <SidebarItem title="بيانات العميل / أمين السجل" isActive={activeTab === "بيانات العميل / أمين السجل"} isLocked={!isPaid} />
                   <SidebarItem title="نقطة العرض الأساسية" isActive={activeTab === "نقطة العرض الأساسية"} isLocked={!isPaid} />
                   <SidebarItem title="قالب التصميم المختار" isActive={activeTab === "قالب التصميم المختار"} isLocked={!isPaid} />
                 </div>
@@ -301,11 +301,11 @@ export function Dashboard() {
                 <div className="space-y-2 mb-6">
                   <button onClick={() => setActiveTab("حالة الإصدار")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
                     <Compass className="w-4 h-4" />
-                    العودة للصفحة الرئيسية
+                    العودة للوحة التحكم
                   </button>
                   <Link to="/" className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
                     <Home className="w-4 h-4" />
-                    <span className="truncate">العودة لموقع سجل تراث العائلة</span>
+                    <span className="truncate">العودة لصفحة المنصة الرئيسية</span>
                   </Link>
                 </div>
                 
@@ -422,7 +422,7 @@ export function Dashboard() {
                      </div>
                   )}
 
-                  {activeTab === "بيانات أمين السجل/العميل" && (
+                  {activeTab === "بيانات العميل / أمين السجل" && (
                     <div className="space-y-8">
                       <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-brand-900 text-lg p-6 bg-white border border-brand-100 rounded-2xl shadow-sm">
                         <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-brand-400" /> البيانات الأساسية (غير قابلة للتعديل)</div>

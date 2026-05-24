@@ -9,9 +9,9 @@ export function OrderStepper({ currentStep }: OrderStepperProps) {
   const stepsList = [
     { title: "تقديم البيانات", subtitle: "البيانات الأساسية ومعلومات الشحن" },
     { title: "تحديد النطاق", subtitle: "نقطة العرض الأساسية وقالب التصميم" },
-    { title: "العقد والمراجعة", subtitle: "مراجعة الطلب والإقرارات" },
+    { title: "تأكيد الإصدار", subtitle: "مراجعة بيانات الطلب والتوقيع الإلكتروني" },
     { title: "التوقيع الإلكتروني", subtitle: "الإعتماد القانوني" },
-    { title: "بدء التنفيذ", subtitle: "إتمـام الدفـع" }
+    { title: "بدء التنفيذ", subtitle: "إتمام الدفع" }
   ];
 
   return (

@@ -282,8 +282,64 @@ export function OrderFlow() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                      value={formData.shippingAddress?.country || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, country: e.target.value}})} placeholder="الدولة" />
+                    <select 
+                      className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
+                      value={formData.shippingAddress?.country || ""} 
+                      onChange={(e)=>{
+                         const getPhoneCode = (c: string) => {
+                           const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61" };
+                           return codes[c] || "";
+                         };
+                         setFormData(prev => ({
+                           ...prev, 
+                           shippingAddress: {
+                             ...prev.shippingAddress, 
+                             country: e.target.value,
+                             phone: getPhoneCode(e.target.value)
+                           }
+                         }));
+                      }}
+                    >
+                      <option value="" disabled>اختر الدولة...</option>
+                      <optgroup label="شبة الجزيرة العربية">
+                        <option value="السعودية">المملكة العربية السعودية</option>
+                        <option value="اليمن">اليمن</option>
+                        <option value="عمان">سلطنة عمان</option>
+                        <option value="الامارات">الإمارات العربية المتحدة</option>
+                        <option value="الكويت">الكويت</option>
+                        <option value="قطر">قطر</option>
+                        <option value="البحرين">البحرين</option>
+                      </optgroup>
+                      <optgroup label="أسيا العربية ( الهلال الخصيب )">
+                        <option value="العراق">العراق</option>
+                        <option value="سوريا">سوريا</option>
+                        <option value="الاردن">الأردن</option>
+                        <option value="فلسطين">فلسطين</option>
+                      </optgroup>
+                      <optgroup label="شمال أفريقيا">
+                        <option value="مصر">مصر</option>
+                        <option value="ليبيا">ليبيا</option>
+                        <option value="الجزائر">الجزائر</option>
+                        <option value="المغرب">المغرب</option>
+                        <option value="موريتانيا">موريتانيا</option>
+                        <option value="السودان">السودان</option>
+                      </optgroup>
+                      <optgroup label="شرق أفريقيا">
+                        <option value="الصومال">الصومال</option>
+                        <option value="جيبوتي">جيبوتي</option>
+                        <option value="جزر القمر">جزر القمر</option>
+                        <option value="زنجبار">زنجبار</option>
+                      </optgroup>
+                      <optgroup label="أخرى">
+                        <option value="ايران">إيران</option>
+                        <option value="تركيا">تركيا</option>
+                        <option value="افغانستان">أفغانستان</option>
+                        <option value="الهند">الهند</option>
+                        <option value="البرازيل">البرازيل</option>
+                        <option value="الارجنتين">الأرجنتين</option>
+                        <option value="استراليا">أستراليا</option>
+                      </optgroup>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
@@ -314,7 +370,7 @@ export function OrderFlow() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تحديد النطاق</h2>
-                <p className="text-brand-600">حدد المعطيات الأساسية لتوثيق السجل</p>
+                <p className="text-brand-600">تحديد نقطة العرض الأساسية وقالب التصميم</p>
               </div>
 
               <div>
@@ -375,9 +431,30 @@ export function OrderFlow() {
                         <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
                            أخ / أخت
                         </div>
-                        {/* Record Keeper Box */}
-                        <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-2 px-6 md:px-8 min-w-[80px] text-center relative z-10 font-bold font-serif -mt-2">
-                           {formData.firstName || "أنت"}
+                        {/* Record Keeper Box with Children */}
+                        <div className="flex flex-col items-center">
+                          <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-2 px-6 md:px-8 min-w-[80px] text-center relative z-10 font-bold font-serif -mt-2">
+                             {formData.firstName || "أنت"}
+                          </div>
+                          
+                          {/* Vertical Line from You */}
+                          <div className="h-5 w-0.5 bg-brand-200/50" />
+                          
+                          {/* Horizontal Line for Your Children */}
+                          <div className="w-16 md:w-20 h-0.5 bg-brand-200/50 flex justify-between relative">
+                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
+                            <div className="h-4 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
+                          </div>
+                          
+                          {/* Your Children Nodes */}
+                          <div className="flex justify-between w-[5rem] md:w-[6rem] mt-4 relative items-start">
+                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
+                               إبن
+                             </div>
+                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
+                               إبنة
+                             </div>
+                          </div>
                         </div>
                         <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
                            أخ / أخت
@@ -451,38 +528,39 @@ export function OrderFlow() {
                   <div className="w-24 h-24 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Check className="w-12 h-12" />
                   </div>
-                  <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">بدء التنفيذ والإعتماد</h2>
+                  <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">بدء التنفيذ وإتمام الدفع</h2>
                   <p className="text-brand-700 text-lg mb-8 max-w-lg mx-auto">
                     سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch mx-auto max-w-3xl mb-8">
+                  <div className="flex flex-col items-stretch mx-auto max-w-xl mb-8 gap-3">
                     <div 
                       onClick={() => setPaymentType("full")}
-                      className={`flex-1 border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "full" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
+                      className={`w-full border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "full" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-brand-900">دفع كامل</h3>
-                        <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-1 rounded-full">خصم خاص</span>
+                        <h3 className="text-xl font-bold text-brand-900">الدفع الكامل</h3>
                       </div>
                       <div className="text-4xl font-mono text-brand-900 font-bold mt-4 mb-2">
                         $1,780<span className="text-xl text-brand-500 font-light">.00</span>
                       </div>
-                      <p className="text-sm text-brand-600 font-medium">دفعة واحدة ميسرة للمبلغ الإجمالي</p>
                     </div>
 
-                    <div 
-                      onClick={() => setPaymentType("installment")}
-                      className={`flex-1 border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "installment" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-brand-900">نظام الدفعات</h3>
-                        <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-1 rounded-full">الإجمالي 1980$</span>
+                    <div className="w-full">
+                      <div 
+                        onClick={() => setPaymentType(paymentType === "installment" ? "full" : "installment")}
+                        className="bg-white border border-brand-100 rounded-xl p-3 text-center cursor-pointer hover:bg-brand-50 transition w-full"
+                      >
+                         <h3 className="text-sm font-bold text-brand-700">خيارات نظام الدفعات (الإجمالي 1980$)</h3>
                       </div>
-                      <div className="text-3xl font-mono text-brand-900 font-bold mt-4 mb-2">
-                        $693<span className="text-xl text-brand-500 font-light">.00</span>
-                      </div>
-                      <p className="text-sm text-brand-600 font-medium leading-relaxed">الدفعة الأولى 35%<br/><span className="text-xs opacity-80">(دفعة ثانية عند التوثيق ونهائية عند التسليم)</span></p>
+                      {paymentType === "installment" && (
+                        <div className="mt-3 border-2 border-brand-600 bg-brand-50 p-6 rounded-2xl transition shadow-sm animate-in slide-in-from-top-2 duration-300">
+                          <div className="text-3xl font-mono text-brand-900 font-bold mt-2 mb-2">
+                            $693<span className="text-xl text-brand-500 font-light">.00</span>
+                          </div>
+                          <p className="text-sm text-brand-600 font-medium leading-relaxed">الدفعة الأولى 35%<br/><span className="text-xs opacity-80">(دفعة ثانية عند التوثيق ونهائية عند التسليم)</span></p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -530,7 +608,7 @@ export function OrderFlow() {
               {isSubmitting && !showInviteModal ? (
                 <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
-                <>إتمام الدفع واعتماد الطلب <Check className="w-5 h-5 mr-2" /></>
+                <>إتمام الدفع <Check className="w-5 h-5 mr-2" /></>
               )}
             </button>
           )}
