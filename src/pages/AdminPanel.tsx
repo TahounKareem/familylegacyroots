@@ -62,7 +62,7 @@ export function AdminPanel() {
       return () => unsubscribe();
     }
     
-    if (activeTab === "users") {
+    if (activeTab === "users" || activeTab === "customer_service" || activeTab === "orders" || activeTab === "research_management") {
       const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
         const data: UserInfo[] = [];
         snapshot.forEach(doc => {
@@ -224,14 +224,15 @@ export function AdminPanel() {
   };
 
   const availableTabs = [
-    { id: "orders", label: "إدارة الطلبات", desc: "متابعة الطلبات الجارية وتحديث حالتها", roles: ["maestro", "research", "admin"], icon: FileText, color: "bg-blue-50 border-blue-200 hover:shadow-blue-100", iconBg: "bg-blue-100 text-blue-600", textColor: "text-blue-900" },
+    { id: "orders", label: "إدارة الطلبات", desc: "متابعة الطلبات الجارية وتحديث حالتها", roles: ["maestro", "admin"], icon: FileText, color: "bg-blue-50 border-blue-200 hover:shadow-blue-100", iconBg: "bg-blue-100 text-blue-600", textColor: "text-blue-900" },
+    { id: "research_management", label: "إدارة البحوث", desc: "إدارة وتحديد مراحل البحث والتوثيق للطلبات", roles: ["maestro", "admin", "research"], icon: Search, color: "bg-teal-50 border-teal-200 hover:shadow-teal-100", iconBg: "bg-teal-100 text-teal-600", textColor: "text-teal-900" },
     { id: "articles", label: "إدارة تحرير المركز المعرفي", desc: "نشر وإدارة المقالات المعرفية والمواد المرئية", roles: ["maestro", "editor", "admin"], icon: Book, color: "bg-purple-50 border-purple-200 hover:shadow-purple-100", iconBg: "bg-purple-100 text-purple-600", textColor: "text-purple-900" },
     { id: "marketing", label: "إدارة التسويق", desc: "إدارة الحملات الترويجية ومتابعة المبيعات المتروكة", roles: ["maestro", "marketing", "admin"], icon: Send, color: "bg-pink-50 border-pink-200 hover:shadow-pink-100", iconBg: "bg-pink-100 text-pink-600", textColor: "text-pink-900" },
-    { id: "customer_service", label: "إدارة خدمة العملاء", desc: "متابعة استفسارات العملاء وبلاغات الدعم الفني", roles: ["maestro", "customer_service", "admin"], icon: HeartHandshake, color: "bg-orange-50 border-orange-200 hover:shadow-orange-100", iconBg: "bg-orange-100 text-orange-600", textColor: "text-orange-900" },
-    { id: "shipping", label: "إدارة الشحن", desc: "متابعة عمليات التوصيل للإصدارات المطبوعة", roles: ["maestro", "shipping", "admin"], icon: Package, color: "bg-cyan-50 border-cyan-200 hover:shadow-cyan-100", iconBg: "bg-cyan-100 text-cyan-600", textColor: "text-cyan-900" },
+    { id: "customer_service", label: "إدارة خدمة العملاء", desc: "متابعة استفسارات العملاء والطلبات الخاصة بهم", roles: ["maestro", "customer_service", "admin"], icon: HeartHandshake, color: "bg-orange-50 border-orange-200 hover:shadow-orange-100", iconBg: "bg-orange-100 text-orange-600", textColor: "text-orange-900" },
+    { id: "shipping", label: "إدارة الطباعة والتوصيل", desc: "متابعة عمليات التوصيل للإصدارات المطبوعة", roles: ["maestro", "shipping", "admin"], icon: Package, color: "bg-cyan-50 border-cyan-200 hover:shadow-cyan-100", iconBg: "bg-cyan-100 text-cyan-600", textColor: "text-cyan-900" },
     { id: "accounting", label: "إدارة المحاسبة", desc: "مراجعة المدفوعات والتقارير المالية والتحصيلات", roles: ["maestro", "accounting", "admin"], icon: Calculator, color: "bg-emerald-50 border-emerald-200 hover:shadow-emerald-100", iconBg: "bg-emerald-100 text-emerald-600", textColor: "text-emerald-900" },
     { id: "compliance", label: "إدارة الإمتثال", desc: "الرقابة وتدقيق سياسات الجودة والشكاوى", roles: ["maestro", "compliance", "admin"], icon: Shield, color: "bg-indigo-50 border-indigo-200 hover:shadow-indigo-100", iconBg: "bg-indigo-100 text-indigo-600", textColor: "text-indigo-900" },
-    { id: "users", label: "إدارة المستخدمين", desc: "مراجعة أذونات المستخدمين وتعديل الصلاحيات", roles: ["maestro", "admin"], icon: Users, color: "bg-rose-50 border-rose-200 hover:shadow-rose-100", iconBg: "bg-rose-100 text-rose-600", textColor: "text-rose-900" },
+    { id: "users", label: "إدارة المستخدمين", desc: "مراجعة فريق العمل وتعديل الصلاحيات", roles: ["maestro", "admin"], icon: Users, color: "bg-rose-50 border-rose-200 hover:shadow-rose-100", iconBg: "bg-rose-100 text-rose-600", textColor: "text-rose-900" },
   ];
 
   const allowedTabs = availableTabs.filter(tab => tab.roles.includes(currentUser?.role || ''));
@@ -411,15 +412,18 @@ export function AdminPanel() {
                 <th className="px-2 py-3 font-medium">رقم الطلب</th>
                 <th className="px-2 py-3 font-medium">تاريخ الطلب</th>
                 <th className="px-2 py-3 font-medium">الأولوية</th>
+                <th className="px-2 py-3 font-medium">البريد الإلكتروني</th>
                 <th className="px-2 py-3 font-medium">اسم العميل والعائلة</th>
                 <th className="px-2 py-3 font-medium">نوع السجل</th>
                 <th className="px-2 py-3 font-medium">حالة الدفع</th>
-                <th className="px-2 py-3 font-medium">الإصدار</th>
-                <th className="px-2 py-3 font-medium">الإجراء</th>
+                <th className="px-2 py-3 font-medium">الإصدار والإجراء</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-50">
-              {orders.filter(o => orderTab === 'archive' ? o.isDeleted : !o.isDeleted).map((order) => (
+              {orders.filter(o => orderTab === 'archive' ? o.isDeleted : !o.isDeleted).map((order) => {
+                const orderUser = usersList.find(u => u.id === order.userId);
+                const teamMembers = usersList.filter(u => u.role !== 'user');
+                return (
                 <React.Fragment key={order.id}>
                 <tr className="hover:bg-brand-50/30 transition">
                   <td className="px-2 py-3 text-center">
@@ -451,6 +455,9 @@ export function AdminPanel() {
                       <option value="عادي">عادي</option>
                       <option value="عاجل">عاجل</option>
                     </select>
+                  </td>
+                  <td className="px-2 py-3 font-mono text-xs text-brand-600">
+                    {orderUser?.email || "غير متوفر"}
                   </td>
                   <td className="px-2 py-3 min-w-[120px]">
                     <p className="font-bold text-brand-900 leading-tight">{order.data.firstName} بن {order.data.fatherName}</p>
@@ -491,46 +498,47 @@ export function AdminPanel() {
                     </select>
                   </td>
                   <td className="px-2 py-3 bg-brand-50/20">
-                     <select 
-                       value={order.issueStatus || "طلب غير مكتمل"} 
-                       onChange={async (e) => {
-                          const { updateDoc, doc } = await import("firebase/firestore");
-                          const { db } = await import("@/lib/firebase");
-                          await updateDoc(doc(db, "orders", order.id), { issueStatus: e.target.value });
-                          useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, issueStatus: e.target.value as any } : o) }));
-                       }}
-                       className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] font-bold text-brand-800 outline-none cursor-pointer max-w-[90px]"
-                     >
-                       <option value="طلب غير مكتمل">طلب غير مكتمل</option>
-                       <option value="بإنتظار إتمام الدفع">بإنتظار إتمام الدفع</option>
-                       <option value="جاري التنفيذ">جاري التنفيذ</option>
-                       <option value="تم الإصدار">تم الإصدار</option>
-                       <option value="جاري التصويب">جاري التصويب</option>
-                       <option value="تم الإغلاق">تم الإغلاق</option>
-                       {order.recordType === 'الأبواب المغلقة' && (
-                         <>
-                           <option value="يوجد تصويبات">يوجد تصويبات</option>
-                           <option value="قبول توصيات">قبول توصيات</option>
-                         </>
-                       )}
-                     </select>
-                  </td>
-                  <td className="px-2 py-3 bg-brand-50/20">
-                     <select 
-                       value={order.actionPhase || "مرحلة البحث"} 
-                       onChange={async (e) => {
-                          const { updateDoc, doc } = await import("firebase/firestore");
-                          const { db } = await import("@/lib/firebase");
-                          await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
-                          useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
-                       }}
-                       className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] outline-none cursor-pointer max-w-[90px]"
-                     >
-                       <option value="مرحلة البحث">مرحلة البحث</option>
-                       <option value="مرحلة التوثيق">مرحلة التوثيق</option>
-                       <option value="تسليم العمل">تسليم العمل</option>
-                       <option value="طلب إيضاح">طلب إيضاح</option>
-                     </select>
+                     <div className="flex flex-col gap-1">
+                       <select 
+                         value={order.issueStatus || "طلب غير مكتمل"} 
+                         onChange={async (e) => {
+                            const { updateDoc, doc } = await import("firebase/firestore");
+                            const { db } = await import("@/lib/firebase");
+                            await updateDoc(doc(db, "orders", order.id), { issueStatus: e.target.value });
+                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, issueStatus: e.target.value as any } : o) }));
+                         }}
+                         className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] font-bold text-brand-800 outline-none cursor-pointer max-w-[90px]"
+                       >
+                         <option value="طلب غير مكتمل">طلب غير مكتمل</option>
+                         <option value="بإنتظار إتمام الدفع">بإنتظار إتمام الدفع</option>
+                         <option value="جاري التنفيذ">جاري التنفيذ</option>
+                         <option value="تم الإصدار">تم الإصدار</option>
+                         <option value="جاري التصويب">جاري التصويب</option>
+                         <option value="تم الإغلاق">تم الإغلاق</option>
+                         {order.recordType === 'الأبواب المغلقة' && (
+                           <>
+                             <option value="يوجد تصويبات">يوجد تصويبات</option>
+                             <option value="قبول توصيات">قبول توصيات</option>
+                           </>
+                         )}
+                       </select>
+                       <select 
+                         value={order.actionPhase || "مرحلة البحث"} 
+                         onChange={async (e) => {
+                            const { updateDoc, doc } = await import("firebase/firestore");
+                            const { db } = await import("@/lib/firebase");
+                            await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
+                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
+                         }}
+                         className="border border-brand-200 rounded px-1 py-1 bg-brand-100/50 text-[10px] sm:text-[11px] text-brand-700 font-bold outline-none cursor-pointer max-w-[90px]"
+                       >
+                         <option value="مرحلة البحث">مرحلة البحث</option>
+                         <option value="مرحلة التوثيق">مرحلة التوثيق</option>
+                         <option value="مرحلة التصويب">مرحلة التصويب</option>
+                         <option value="جاهز للتسليم">جاهز للتسليم</option>
+                         <option value="طلب إيضاح">طلب إيضاح</option>
+                       </select>
+                     </div>
                   </td>
                 </tr>
                 
@@ -577,7 +585,8 @@ export function AdminPanel() {
                   </tr>
                 )}
                 </React.Fragment>
-              ))}
+                );
+              })}
               {orders.filter(o => orderTab === 'archive' ? o.isDeleted : !o.isDeleted).length === 0 && (
                 <tr>
                   <td colSpan={9} className="px-6 py-12 text-center text-brand-500 font-bold bg-brand-50/20">
@@ -591,6 +600,118 @@ export function AdminPanel() {
       </div>
       </>
       )}
+
+      {currentTab === "research_management" && (() => {
+        return (
+          <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+              <h2 className="font-bold text-lg text-brand-900">إدارة البحوث والتوثيق</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead className="bg-white text-brand-500 border-b border-brand-100">
+                  <tr>
+                    <th className="px-4 py-4 font-medium">رقم الطلب</th>
+                    <th className="px-4 py-4 font-medium">تاريخ الطلب</th>
+                    <th className="px-4 py-4 font-medium">الأولوية</th>
+                    <th className="px-4 py-4 font-medium">اسم العميل والعائلة</th>
+                    <th className="px-4 py-4 font-medium">نوع السجل</th>
+                    <th className="px-4 py-4 font-medium">مرحلة التنفيذ (الإجراء)</th>
+                    <th className="px-4 py-4 font-medium">الإجراءات التسويقية</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-50">
+                  {orders.filter(o => !o.isDeleted).map((order) => (
+                    <React.Fragment key={`rm-${order.id}`}>
+                      <tr className="hover:bg-brand-50/30 transition">
+                        <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
+                          #{order.orderNumber || order.id.toUpperCase().substring(0,6)}
+                        </td>
+                        <td className="px-4 py-4 font-mono text-gray-500 whitespace-nowrap">
+                          {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${order.priority === 'عاجل' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-brand-50 text-brand-700 border-brand-200'} border`}>
+                            {order.priority || 'عادي'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <p className="font-bold text-brand-900 leading-tight">{order.data.firstName} بن {order.data.fatherName}</p>
+                          <p className="text-xs text-brand-600 mt-0.5">({order.data.familyName})</p>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="px-2 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold border border-brand-100">
+                            {order.recordType || "سجل أساسي"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <select 
+                            value={order.actionPhase || "مرحلة البحث"} 
+                            onChange={async (e) => {
+                               const { updateDoc, doc } = await import("firebase/firestore");
+                               const { db } = await import("@/lib/firebase");
+                               await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
+                               useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
+                            }}
+                            className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
+                          >
+                            <option value="مرحلة البحث">مرحلة البحث</option>
+                            <option value="مرحلة التوثيق">مرحلة التوثيق</option>
+                            <option value="طلب إيضاح">طلب إيضاح</option>
+                            <option value="مرحلة التصويب">مرحلة التصويب</option>
+                            <option value="جاهز للتسليم">جاهز للتسليم</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => setExpandedRows(prev => prev.includes(order.id) ? prev.filter(id => id !== order.id) : [...prev, order.id])}
+                              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
+                            >
+                              <Eye className="w-4 h-4" /> عرض الطلب
+                            </button>
+                            <button 
+                              onClick={() => setMessagingOrder(order)}
+                              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
+                            >
+                              <MessageSquare className="w-4 h-4" /> طلب إيضاح
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedRows.includes(order.id) && (
+                        <tr className="bg-brand-50">
+                          <td colSpan={7} className="px-6 py-6 border-b border-brand-100">
+                             <div className="bg-white p-6 rounded-xl shadow-inner mb-6">
+                               <h3 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2">تفاصيل الطلب (للبحث والتوثيق)</h3>
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                                <div><span className="text-brand-500 font-medium ml-2">نقطة العرض الأساسية:</span> <span className="text-brand-800 font-bold">{order.data.startingPointName || order.data.startingPointType || order.data.startingPoint || 'العميل نفسه'}</span></div>
+                                <div><span className="text-brand-500 font-medium ml-2">الدولة والموطن الأصلي:</span> <span className="text-brand-800 font-bold">{order.data.country} / {order.data.homeland}</span></div>
+                                <div><span className="text-brand-500 font-medium ml-2">القالب:</span> <span className="text-brand-800 font-bold">{order.data.designTemplate || "لم يحدد"}</span></div>
+                               </div>
+                               <div className="mt-6">
+                                <h4 className="font-bold text-brand-900 mb-4">بيانات السجل والشجرة</h4>
+                                <div className="h-[400px] border border-brand-100 rounded-lg overflow-hidden bg-white">
+                                  <TreeBuilder initialData={order.data.treeData} readOnly={true} />
+                                </div>
+                               </div>
+                             </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                  {orders.filter(o => !o.isDeleted).length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-brand-500">لا يوجد طلبات حالياً في إدارة البحوث</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
 
       {currentTab === "articles" && (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
@@ -660,7 +781,7 @@ export function AdminPanel() {
         </div>
       )}
 
-      {["marketing", "customer_service", "shipping", "accounting", "compliance"].includes(currentTab) && (() => {
+      {["marketing", "shipping", "accounting", "compliance"].includes(currentTab) && (() => {
         const tabInfo = allowedTabs.find(t => t.id === currentTab);
         const Icon = tabInfo?.icon || Package;
         return (
@@ -680,11 +801,92 @@ export function AdminPanel() {
         );
       })()}
 
+      {currentTab === "customer_service" && (() => {
+        let filteredUsers = usersList.filter(u => u.role === "user");
+        
+        if (userSearch) {
+          filteredUsers = filteredUsers.filter(u => `${u.name} ${u.email}`.toLowerCase().includes(userSearch.toLowerCase()));
+        }
+
+        const formatDate = (d?: string) => {
+          if (!d) return "غير محدد";
+          return new Intl.DateTimeFormat("ar-EG", { year: "numeric", month: "long", day: "numeric" }).format(new Date(d));
+        };
+
+        return (
+        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+            <h2 className="font-bold text-lg text-brand-900">إدارة خدمة العملاء (العملاء والطلبات)</h2>
+          </div>
+          
+          <div className="p-4 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
+            <div className="flex-1 min-w-[200px] relative">
+              <input 
+                type="text" 
+                placeholder="ابحث بالاسم أو البريد..." 
+                value={userSearch}
+                onChange={e => setUserSearch(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 rounded-lg border border-brand-200 focus:ring-2 focus:ring-brand-500 text-sm"
+              />
+              <Search className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-white text-brand-500 border-b border-brand-100">
+                <tr>
+                  <th className="px-4 py-4 font-medium">البريد الإلكتروني</th>
+                  <th className="px-4 py-4 font-medium">الاسم</th>
+                  <th className="px-4 py-4 font-medium">اسم العميل والعائلة</th>
+                  <th className="px-4 py-4 font-medium">رقم الطلب</th>
+                  <th className="px-4 py-4 font-medium">تاريخ الطلب</th>
+                  <th className="px-4 py-4 font-medium">الإصدار (حالة التنفيذ)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-50">
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-brand-500">لا يوجد عملاء يطابقون بحثك</td>
+                  </tr>
+                ) : null}
+                {filteredUsers.map((user) => {
+                  const userOrders = orders.filter(o => o.userId === user.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                  const latestOrder = userOrders[0];
+                  
+                  return (
+                  <tr key={user.id} className="hover:bg-brand-50/50 transition">
+                    <td className="px-4 py-4 text-brand-600 font-mono text-xs">{user.email || "بدون بريد"}</td>
+                    <td className="px-4 py-4 font-bold text-brand-900">{user.name || "بدون اسم"}</td>
+                    <td className="px-4 py-4 text-brand-900 text-xs">
+                      {latestOrder ? `${latestOrder.data.firstName} ${latestOrder.data.familyName}` : "لا يوجد طلب"}
+                    </td>
+                    <td className="px-4 py-4 text-brand-600 font-mono text-xs">
+                      {latestOrder ? `#${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0,6)}` : "-"}
+                    </td>
+                    <td className="px-4 py-4 text-brand-500 text-xs">
+                      {latestOrder ? formatDate(latestOrder.createdAt) : "-"}
+                    </td>
+                    <td className="px-4 py-4">
+                      {latestOrder ? (
+                        <span className="px-2 py-1 rounded bg-brand-50 text-brand-700 text-xs font-bold border border-brand-100">
+                          {latestOrder.issueStatus || "طلب غير مكتمل"}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">لا يوجد بيانات</span>
+                      )}
+                    </td>
+                  </tr>
+                )})}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        );
+      })()}
+
       {currentTab === "users" && (() => {
-        let filteredUsers = usersList.filter(u => {
-          if (userTab === "team") return u.role !== "user";
-          return u.role === "user";
-        });
+        let filteredUsers = usersList.filter(u => u.role !== "user");
         
         if (userSearch) {
           filteredUsers = filteredUsers.filter(u => `${u.name} ${u.email}`.toLowerCase().includes(userSearch.toLowerCase()));
@@ -706,27 +908,12 @@ export function AdminPanel() {
           return new Intl.DateTimeFormat("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute:"2-digit" }).format(new Date(d));
         };
 
-        const uniqueCountries = Array.from(new Set(usersList.map(u => u.country).filter(Boolean)));
+        const uniqueCountries = Array.from(new Set(usersList.filter(u => u.role !== "user").map(u => u.country).filter(Boolean)));
 
         return (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex flex-col md:flex-row items-center justify-between gap-4">
-            <h2 className="font-bold text-lg text-brand-900">إدارة المستخدمين والصلاحيات</h2>
-            
-            <div className="flex bg-white rounded-lg p-1 border border-brand-200">
-              <button 
-                onClick={() => setUserTab("team")}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition ${userTab === "team" ? "bg-brand-900 text-white" : "text-brand-600 hover:bg-brand-50"}`}
-              >
-                فريق العمل
-              </button>
-              <button 
-                onClick={() => setUserTab("users")}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition ${userTab === "users" ? "bg-brand-900 text-white" : "text-brand-600 hover:bg-brand-50"}`}
-              >
-                المستخدمين
-              </button>
-            </div>
+          <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+            <h2 className="font-bold text-lg text-brand-900">فريق العمل (إدارة الصلاحيات)</h2>
           </div>
           
           <div className="p-4 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">

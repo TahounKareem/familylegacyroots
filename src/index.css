@@ -21,8 +21,8 @@
   --color-ink: #1e293b;
   --color-ink-light: #64748b;
 
-  --font-sans: "Tajawal", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --font-serif: "Amiri", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-sans: "Amiri", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-serif: "Tajawal", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 @layer base {

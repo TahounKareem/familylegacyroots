@@ -25,19 +25,19 @@ export function Contact() {
           </form>
         </div>
 
-        <div className="md:w-1/3 bg-brand-950 text-white rounded-3xl p-8 h-fit">
-          <h3 className="font-serif text-xl mb-6">معلومات الاتصال المباشر</h3>
-          <div className="space-y-6 text-sm text-brand-200">
+        <div className="md:w-1/3 bg-brand-50 text-brand-900 rounded-3xl p-8 h-fit border border-brand-100">
+          <h3 className="font-serif text-xl mb-6 font-bold text-brand-900">معلومات الاتصال</h3>
+          <div className="space-y-6 text-sm text-brand-700">
              <div>
-               <p className="font-bold text-white mb-1">الشركة</p>
+               <p className="font-bold text-brand-900 mb-1">الشركة</p>
                <p>GeneaLab LLC</p>
              </div>
              <div>
-               <p className="font-bold text-white mb-1">البريد الإلكتروني</p>
+               <p className="font-bold text-brand-900 mb-1">البريد الإلكتروني</p>
                <p>info@thefamilylegacyroots.com</p>
              </div>
              <div>
-               <p className="font-bold text-white mb-1">العنوان</p>
+               <p className="font-bold text-brand-900 mb-1">العنوان</p>
                <p dir="ltr" className="text-right block">30 N Gould St, STE R<br/>Sheridan, WY 82801, USA</p>
              </div>
           </div>

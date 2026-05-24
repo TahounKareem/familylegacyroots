@@ -1,54 +1,56 @@
 import { Link } from "react-router";
-import { BookOpen, MapPin, Phone, Mail } from "lucide-react";
+import { BookOpen, MapPin, Phone, Mail, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 export function Footer() {
+  const [legalOpen, setLegalOpen] = useState(false);
+
   return (
     <footer className="bg-[#8E9091] text-white pt-16 pb-8 border-t-4 border-brand-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-6 text-white hover:text-brand-300 transition">
               <BookOpen className="w-8 h-8 text-white" />
               <span className="font-serif text-2xl font-bold">سجل تراث العائلة</span>
             </Link>
             <p className="text-white text-sm leading-relaxed mb-6">
-              نحن شركة متخصصة في علم الأنساب "الجينيولوجي" ، نقوم بتوثيق أصول وتاريخ العائلات، عبر منتجنا وعلامتنا التجارية " سجل تراث العائلة" والذي نقدمه في قالب فني أنيق وإحترافي.
+              <span className="block mb-2">منصة متخصصة في توثيق عمود النسب والذاكرة العائلية</span>
+              <span className="block">ضمن سجلات معرفية تجمع البحث التاريخي والإخراج الفاخر.</span>
             </p>
           </div>
           
           <div>
-            <h3 className="font-serif text-lg text-white mb-6">روابط سريعة</h3>
+            <h3 className="font-serif text-lg text-white mb-6">استكشف المنصة</h3>
             <ul className="space-y-4 text-white">
               <li><Link to="/about" className="hover:text-brand-300 transition">من نحن وماذا نقدم</Link></li>
               <li><Link to="/services" className="hover:text-brand-300 transition">سجل تراث العائلة</Link></li>
-              <li><Link to="/faq" className="hover:text-brand-300 transition">الأسئلة الشائعة</Link></li>
-              <li><Link to="/help-center" className="hover:text-brand-300 transition">مركز المساعدة</Link></li>
               <li><Link to="/knowledge" className="hover:text-brand-300 transition">المركز المعرفي</Link></li>
               <li><Link to="/contact" className="hover:text-brand-300 transition">تواصل معنا</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-serif text-lg text-white mb-6">الوثائق القانونية</h3>
             <ul className="space-y-4 text-white">
-              <li><Link to="/legal/terms" className="hover:text-brand-300 transition">شروط استخدام الموقع والمنصة</Link></li>
-              <li><Link to="/legal/privacy" className="hover:text-brand-300 transition">سياسة الخصوصية وسرية البيانات</Link></li>
-              <li><Link to="/legal/cookies" className="hover:text-brand-300 transition">سياسة ملفات تعريف الارتباط</Link></li>
-              <li><Link to="/legal/refund" className="hover:text-brand-300 transition">سياسة الإلغاء وعدم الاسترجاع</Link></li>
-              <li><Link to="/legal/payments" className="hover:text-brand-300 transition">سياسة الدفع والفوترة والمعاملات المالية</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-serif text-lg text-white mb-6">التواصل</h3>
-            <ul className="space-y-4 text-white">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-white shrink-0 mt-0.5" />
-                <span dir="ltr" className="text-right">30 N Gould St, STE R, Sheridan, WY 82801, USA</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-white shrink-0" />
-                <span>info@thefamilylegacyroots.com</span>
+              <li><Link to="/faq" className="hover:text-brand-300 transition">الأسئلة الشائعة</Link></li>
+              <li><Link to="/guide" className="hover:text-brand-300 transition">الدليل الإرشادي</Link></li>
+              <li>
+                <button 
+                  onClick={() => setLegalOpen(!legalOpen)} 
+                  className="hover:text-brand-300 transition w-full text-right flex items-center justify-between"
+                >
+                  الوثائق القانونية
+                  <ChevronDown className={`w-4 h-4 transform transition-transform ${legalOpen ? "rotate-180" : ""}`} />
+                </button>
+                {legalOpen && (
+                  <ul className="space-y-3 mt-3 pr-4 border-r-2 border-white/20 text-sm">
+                    <li><Link to="/legal/terms" className="hover:text-brand-300 transition">شروط استخدام الموقع والمنصة</Link></li>
+                    <li><Link to="/legal/privacy" className="hover:text-brand-300 transition">سياسة الخصوصية وسرية البيانات</Link></li>
+                    <li><Link to="/legal/cookies" className="hover:text-brand-300 transition">سياسة ملفات تعريف الارتباط</Link></li>
+                    <li><Link to="/legal/refund" className="hover:text-brand-300 transition">سياسة الإلغاء وعدم الاسترجاع</Link></li>
+                    <li><Link to="/legal/payments" className="hover:text-brand-300 transition">سياسة الدفع والفوترة والمعاملات المالية</Link></li>
+                  </ul>
+                )}
               </li>
             </ul>
           </div>
@@ -82,12 +84,13 @@ export function Footer() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.08 0C9.69-.02 7.74.83 6.09 2.5c-.8.81-1.37 1.83-1.63 3.02-.12.56-.21 1.13-.34 1.69-.17.72-.4 1.41-.85 2-.45.58-1 .99-1.74 1.12a2.31 2.31 0 0 0-.25.06c-.84.28-1.12 1.34-.51 1.96.22.22.48.42.76.57.85.45 1.76.77 2.7 1 .2.05.37.24.48.42.17.27.15.54 0 .8-.49.92-.99 1.84-1.55 2.72-.51.81-1.22 1.4-2.1 1.82-.47.22-.64.58-.59 1 .05.41.36.78.85.98.54.21 1.11.31 1.68.4.92.14 1.84.22 2.77.25 1.13.04 2.21.32 3.23.82.78.38 1.54.78 2.32 1.14.47.22 1 0 1.25-.46.06-.11.1-.23.15-.35.15-.35.29-.68.58-.92.83-.69 1.82-.93 2.87-1 1.09-.07 2.18-.08 3.27-.12.18-.01.37-.02.55-.03 1.07-.07 1.8-.83 1.69-1.86-.06-.5-.38-.85-.85-1.07-.85-.4-1.52-1.01-2-1.8-.57-.89-1.06-1.81-1.55-2.73-.13-.25-.13-.5 0-.75.1-.2.27-.38.48-.44.97-.24 1.9-.57 2.77-1.04.38-.2.7-.47 1-.84.45-.55.33-1.38-.27-1.76-.11-.07-.22-.12-.34-.17a4.93 4.93 0 0 1-1.95-1.34c-.4-.48-.65-1.06-.79-1.68-.13-.57-.22-1.13-.34-1.69-.26-1.19-.83-2.21-1.63-3.02C16.42.83 14.47-.02 12.08 0zm1.75 3.03c.5.09 1 .28 1.41.59.51.37.84.87 1.05 1.46.22.61.34 1.25.43 1.89.06.41.13.82.35 1.18.23.36.56.63.95.83.25.13.52.22.79.31a3 3 0 0 0 .5-.47c-.5-.11-1-.18-1.49-.33-.64-.21-.99-.68-1.03-1.35-.04-.6 0-1.21.05-1.81.08-.85.22-1.69.58-2.46.33-.71.85-1.25 1.55-1.59.69-.34 1.43-.46 2.19-.53.49-.04 1-.03 1.49 0 .15.86-.18 1.61-.75 2.17-.67.66-1.52.92-2.45.98-.67.04-1.35.01-2.02.04-.66.03-1.07.45-1.07 1.1 0 .66.42 1.06 1.05 1.09.73.04 1.46.03 2.19 0 1.15-.05 2.16-.48 2.92-1.36.65-.75.98-1.65 1.01-2.65.02-.91-.18-1.78-.6-2.58-.2-.37-.44-.71-.72-1.01A5.3 5.3 0 0 0 18.06 1.3c-.63-.25-1.3-.4-1.98-.44-.1-.01-.2 0-.3.01.21.84-.04 1.58-.6 2.16z"/></svg>
             </a>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-2 pb-4">
-            <span>© 2026</span>
-            <div className="bg-white/90 p-1.5 rounded-md mx-1">
-              <img src="https://i.postimg.cc/87JZxTP1/Genealab.png" alt="GeneaLab LLC" className="h-4 w-auto object-contain" />
+          <div className="flex flex-col items-center justify-center gap-1 mt-4 text-center">
+            <p className="text-xl font-bold font-serif mb-4 text-white">ما لا يُوثق اليوم… قد يصبح مجرد رواية غامضة غدًا.</p>
+            <div className="bg-white p-2 rounded-md mb-2 mt-4 inline-block">
+              <img src="https://i.postimg.cc/cHChY5vS/Genea-Lab-Logo.jpg" alt="GeneaLab LLC" className="h-8 w-auto object-contain block" />
             </div>
-            <span>جميع الحقوق محفوظة.</span>
+            <p className="text-[#D1D5DB] text-xs">تعمل المنصة من خلال شركة جينيا لاب المسجلة في ولاية وايومنغ الأمريكية.</p>
+            <p className="text-[#D1D5DB] text-xs mt-1">© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router";
-import { Check, ArrowRight, ArrowLeft, UserPlus, X } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, UserPlus, X, GitMerge } from "lucide-react";
 import { useAppStore, FamilyData } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 
@@ -198,13 +198,22 @@ export function OrderFlow() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تقديم البيانات</h2>
-                <p className="text-brand-600">أدخل بيانات أمين السجل / العميل المعتمد للتواصل</p>
+                <p className="text-brand-600">أدخل بيانات العميل / أمين السجل</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 border-b border-brand-100 pb-12">
                 <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل وأمين السجل) *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
+                  <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل / أمين السجل) *</label>
+                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>{
+                    setFormData(prev => ({
+                      ...prev, 
+                      firstName: e.target.value,
+                      shippingAddress: {
+                        ...prev.shippingAddress,
+                        name: prev.shippingAddress?.name || e.target.value 
+                      }
+                    }));
+                  }} placeholder="الاسم الأول" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">اسم الأب *</label>
@@ -215,7 +224,7 @@ export function OrderFlow() {
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">اسم العائلة / اللقب *</label>
+                  <label className="block text-sm font-medium text-brand-800 mb-2">إسم العائلة *</label>
                   <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
                 </div>
                 <div>
@@ -224,7 +233,30 @@ export function OrderFlow() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
-                  <input type="text" placeholder="مثال: السعودية، الكويت، مصر..." className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.country} onChange={(e)=>setFormData({...formData, country: e.target.value})} />
+                  <select 
+                    className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
+                    value={formData.country} 
+                    onChange={(e)=>{
+                       const getPhoneCode = (c: string) => {
+                         const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61" };
+                         return codes[c] || "";
+                       };
+                       setFormData(prev => ({
+                         ...prev, 
+                         country: e.target.value,
+                         shippingAddress: {
+                           ...prev.shippingAddress,
+                           country: prev.shippingAddress?.country || e.target.value,
+                           phone: getPhoneCode(e.target.value)
+                         }
+                       }));
+                    }}
+                  >
+                    <option value="">اختر الدولة</option>
+                    {["السعودية", "اليمن", "عمان", "الامارات", "الكويت", "قطر", "البحرين", "العراق", "سوريا", "الاردن", "فلسطين", "مصر", "ليبيا", "الجزائر", "المغرب", "موريتانيا", "السودان", "الصومال", "جيبوتي", "جزر القمر", "زنجبار", "ايران", "تركيا", "افغانستان", "الهند", "البرازيل", "الارجنتين", "استراليا"].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
@@ -244,7 +276,13 @@ export function OrderFlow() {
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">رقم الهاتف *</label>
                     <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
-                      value={formData.shippingAddress?.phone || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: e.target.value}})} placeholder="+0000000000" dir="ltr" />
+                      value={formData.shippingAddress?.phone || ""} onChange={(e)=>{
+                         const val = e.target.value;
+                         if (/^[\d+]*$/.test(val)) {
+                            setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: val}});
+                         }
+                      }} placeholder="+0000000000" dir="ltr" />
+                    <p className="text-xs text-brand-500 mt-1">يجب إدخال أرقام فقط مع رمز الدولة (مثال: +96650...)</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
@@ -279,17 +317,17 @@ export function OrderFlow() {
           {step === 2 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تحديد المسار</h2>
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تحديد النطاق</h2>
                 <p className="text-brand-600">حدد المعطيات الأساسية لتوثيق السجل</p>
               </div>
 
               <div>
                 <label className="flex items-center gap-2 text-xl font-medium text-brand-900 mb-2">
                   <UserPlus className="w-6 h-6 text-brand-600" />
-                  نقطة بدء عمود النسب *
+                  نقطة العرض الأساسية *
                 </label>
                 <div className="text-sm font-light text-brand-700 mb-6 bg-brand-50 p-6 rounded-xl border border-brand-100 leading-relaxed">
-                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ويمكن لأمين السجل إختيار أحد اسلافه (المشهورين) بدءاً من الأب او أحد الأجداد الذين يختارهم لبدء توثيق عمود النسب ، وبالطبع سيتم سرد سلسلة النسب التي تشمل أمين السجل / العميل تصاعدياً مروراً بنقطة البدء التي اختارها .
+                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ويمكن لأمين السجل إختيار أحد اسلافه (المشهورين) بدءاً من الأب او أحد الأجداد الذين يختارهم لبدء توثيق عمود النسب ، وبالطبع سيتم سرد سلسلة النسب التي تشمل أمين السجل / العميل تصاعدياً مروراً بنقطة العرض الأساسية التي اختارها .
                 </div>
                 
                 <div className="space-y-4 mb-8">
@@ -365,6 +403,51 @@ export function OrderFlow() {
                         )}
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-brand-900 to-brand-800 rounded-3xl p-8 text-white mb-12 shadow-xl border border-brand-700 relative overflow-hidden mt-8">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] mix-blend-overlay pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-brand-50/10 p-3 rounded-full backdrop-blur-sm mb-4">
+                    <GitMerge className="w-8 h-8 text-brand-100" />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-center mb-4">أمين السجل.. جذع المبنى ومركز التوثيق</h3>
+                  <p className="text-brand-100 text-center max-w-2xl leading-relaxed mb-10 text-sm md:text-base">
+                   بصفتك أمين السجل، أنت تمثل الحلقة الجوهرية التي تربط الماضي بالمستقبل. اسمك هو نقطة الانطلاق في توثيق هذه الشجرة، ومن خلالك تتفرع الأغصان لتمتد إلى الأبناء والأحفاد المحتمل إضافتهم لاحقاً، مرسخةً إرث العائلة للأجيال القادمة.
+                  </p>
+
+                  {/* Visual Tree */}
+                  <div className="flex flex-col items-center select-none pt-4">
+                     {/* Main Node (Record Keeper) */}
+                     <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-3 px-8 text-center relative z-10 font-bold text-lg">
+                        {formData.firstName || "أمين السجل"} {formData.familyName || ""}
+                     </div>
+
+                     {/* Vertical Line */}
+                     <div className="h-8 w-0.5 bg-brand-200/50" />
+                     
+                     {/* Horizontal Line Connecting Branches */}
+                     <div className="w-64 md:w-[28rem] h-0.5 bg-brand-200/50 flex justify-between relative">
+                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
+                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-1/2 -translate-x-1/2 top-0 md:block hidden" />
+                        <div className="h-6 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
+                     </div>
+
+                     {/* Children Nodes */}
+                     <div className="flex justify-between w-72 md:w-[30rem] mt-6">
+                        <div className="bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                           الأبناء / الأحفاد
+                        </div>
+                        <div className="hidden md:block bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                           الأبناء / الأحفاد
+                        </div>
+                        <div className="bg-brand-800/80 border border-brand-300/30 rounded-xl py-2 w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                           الأبناء / الأحفاد
+                        </div>
+                     </div>
                   </div>
                 </div>
               </div>

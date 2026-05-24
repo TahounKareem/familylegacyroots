@@ -28,11 +28,23 @@ export function Auth() {
       return;
     }
     
+    // Password strictness validation
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_#^\-])[A-Za-z\d@$!%*?&_#^\-]{8,}$/;
+    if (!isLogin && !passwordRegex.test(password)) {
+      setError("كلمة المرور يجب أن تتكون من 8 أحرف كحد أدنى وتتضمن حرفاً كبيراً ورقم ورمز.");
+      return;
+    }
+    
     if (email && password) {
       setLoading(true);
       try {
         if (isLogin) {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          
+          if (!passwordRegex.test(password)) {
+            alert("إشعار أمان: نظراً لسياسات الأمان الجديدة، يرجى تغيير كلمة المرور الخاصة بك لتتوافق مع المتطلبات الحالية (8 أحرف كحد أدنى تتضمن حرفاً كبيراً ورقم ورمز) وذلك من خلال خيار استعادة كلمة المرور.");
+          }
+
           if (!userCredential.user.emailVerified) {
             await signOut(auth);
             setError("برجاء تفعيل حسابك أولاً من خلال الرابط المرسل إلى بريدك الإلكتروني.");

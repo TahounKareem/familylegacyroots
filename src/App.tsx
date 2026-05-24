@@ -47,7 +47,7 @@ export default function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/knowledge" element={<KnowledgeCenter />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/help-center" element={<HelpCenter />} />
+          <Route path="/guide" element={<HelpCenter />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/legal/:documentId" element={<Legal />} />
         </Route>

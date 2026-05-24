@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play, FolderPlus, Database, SearchCheck, Gift } from "lucide-react";
+import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play, FolderPlus, Database, SearchCheck, Gift, Network, FileText, Clock, Users } from "lucide-react";
 
 export function Home() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -21,24 +21,27 @@ export function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <span className="inline-block py-1 px-3 rounded-full bg-white/20 text-white text-sm font-semibold mb-6 tracking-wide uppercase">
-                إرث يمتد لأجيال
-              </span>
-              <h1 className="font-serif text-5xl lg:text-7xl font-bold leading-tight mb-6 text-white">
-                وثق جذورك<br />
-                <span className="text-white font-light italic">وإحفظ تراثك</span>
+              <h1 className="font-serif text-5xl lg:text-7xl leading-tight mb-6 text-white flex flex-col gap-2">
+                <span className="font-bold">سجل يوثق</span>
+                <span>عمود النسب</span>
+                <span>والذاكرة العائلية</span>
               </h1>
               <p className="text-xl text-white mb-10 leading-relaxed max-w-lg">
-                عمل بحثي احترافي لمعرفة اصل انتسابك من خلال البحث العميق وتوثيق عمود نسبك ، وتصميم "سجل تراث عائلتك" بأسلوب فني يبرز جذور الإنتماء.
+                مشروع توثيق عائلي يجمع البحث التاريخي والروايات والوثائق ضمن سجل فاخر يوثق عمود النسب والامتداد العائلي.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#journey" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group">
-                  إبدأ رحلة توثيق سجل تراثك
+              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <a href="#journey" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group w-fit">
+                  ابدأ سجل عائلتك
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </a>
               </div>
             </motion.div>
           </div>
+        </div>
+        <div className="absolute bottom-8 left-0 right-0 w-full flex justify-center z-10 px-4">
+          <span className="inline-block py-1 px-4 rounded-full bg-white/20 text-white text-sm font-semibold tracking-wide uppercase shadow-sm">
+            كل جيل يحمل جزءًا من الرواية… حتى يأتي من يجمعها في سجل واحد
+          </span>
         </div>
       </section>
 
@@ -49,8 +52,11 @@ export function Home() {
           <h2 className="font-serif text-4xl text-brand-900 mb-8 leading-normal">
             ما هو "سجل تراث العائلة"؟
           </h2>
-          <p className="text-xl text-brand-800 leading-relaxed font-light max-w-3xl mx-auto mb-16">
-            ليس مجرد كتاب، بل هو وثيقة تاريخية موثقة تُورّث للأجيال القادمة. حيث نقوم ببحث الروايات المتناثرة، وتوثيق الإنتساب ، وتنسيق الوثائق التاريخية في قالب منهجي وفني فاخر.
+          <p className="text-xl text-brand-800 leading-relaxed font-light max-w-3xl mx-auto mb-4">
+            سجل تراث العائلة مشروع توثيق يجمع الروايات والوثائق وعمود النسب ضمن سجل معرفي مصمم للأجيال القادمة
+          </p>
+          <p className="text-lg text-brand-600 font-medium mb-16">
+            عمود النسب • الوثائق • الروايات • الأرشفة الرقمية
           </p>
 
           {/* Engraved Video Container */}
@@ -71,7 +77,7 @@ export function Home() {
                   />
                   <div className="absolute inset-0 bg-brand-950/30 group-hover:bg-brand-950/10 transition-colors duration-500"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 bg-brand-600/90 hover:bg-brand-500 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-110">
+                    <div className="w-20 h-20 bg-transparent border-2 border-white hover:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-110">
                       <Play className="w-8 h-8 text-white ml-2" fill="currentColor" />
                     </div>
                   </div>
@@ -96,30 +102,30 @@ export function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4">رحلة توثيق سجل تراث عائلتك</h2>
-            <p className="text-brand-600 text-lg max-w-2xl mx-auto">منهجية بحثية علمية تضمن لكم الحصول على سجل تاريخي موثق.</p>
+            <p className="text-brand-600 text-lg max-w-2xl mx-auto">رحلة بحث وتوثيق تحفظ امتداد العائلة ورواياتها ضمن سجل معرفي موثق</p>
           </div>
           
           <div className="grid md:grid-cols-4 gap-8">
             {[
               {
                 icon: FolderPlus,
-                title: "إنشئ سجلك",
-                desc: "خطوتك الأولى لتدوين تاريخ عائلتك العريق وانشاء حساب خاص بك على منصتنا."
+                title: "ابدأ سجل عائلتك",
+                desc: "أنشئ حسابك وابدأ رحلة توثيق الروايات والامتداد العائلي ضمن منصتنا."
               },
               {
                 icon: Database,
-                title: "حدثنا عنك",
-                desc: "إدرج بياناتك الأساسية لنتمكن من البحث عن انتسابكم وادرج ماترغب في عرضه في سجلك بخصوصية تامة."
+                title: "حدثنا عن عائلتك",
+                desc: "شارك المعلومات الأساسية المرتبطة بعائلتك لنبدأ دراسة الامتداد العائلي وعمود النسب."
               },
               {
                 icon: SearchCheck,
                 title: "نقوم بالبحث والتوثيق",
-                desc: "سيقوم فريقنا بالبحث العلمي عن أصل الإنتساب وأعمال التوثيق ألأكاديمي والإخراج الفني لسجل تراثك."
+                desc: "يعمل فريقنا على البحث والتوثيق وإعداد السجل وفق منهجية معرفية متخصصة."
               },
               {
                 icon: Gift,
                 title: "استلم السجل",
-                desc: "نقوم بتسليمك سجل تراث عائلتك الموثق في نسخ رقمية وورقية أنيقة بالإضافة الي بوستر مشجر عمود النسب."
+                desc: "تتسلم سجل تراث عائلتك بنسخته المطبوعة والرقمية ضمن إخراج أنيق قابل للحفظ والتحديث."
               }
             ].map((feature, idx) => (
                <motion.div 
@@ -146,8 +152,8 @@ export function Home() {
             transition={{ delay: 0.5 }}
             className="mt-16 text-center flex justify-center"
           >
-            <Link to="/auth" className="inline-flex items-center justify-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-xl font-semibold transition shadow-lg text-lg group">
-              إبدأ رحلة توثيق سجلك العائلي
+            <Link to="/auth" className="inline-flex items-center justify-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-xl font-semibold transition shadow-lg text-lg group w-fit">
+              ابدأ سجل عائلتك
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </Link>
           </motion.div>
@@ -159,21 +165,20 @@ export function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-brand-50 rounded-[3rem] p-8 md:p-16 shadow-xl border border-brand-100">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              
-              <div>
-                 <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن هذا السجل؟</h2>
+                            <div>
+                 <h2 className="font-serif text-4xl mb-8 font-bold text-brand-900">لمن صُمم سجل تراث العائلة؟</h2>
                  <ul className="space-y-6">
                    {[
-                     "لمن يريد ان يعرف أصل عائلته وتوثيق عمود النسب.",
-                     "للأجيال الباحثة عن الانتماء ومعرفة جذورها.",
-                     "لمن يرغب في حفظ إرث أجداده.",
-                     "لمن يرغب في تقديم هدية قيمة لعائلته."
+                     { text: "لمن يرغب في توثيق عمود نسب عائلته ضمن سجل معرفي موثق.", icon: Network },
+                     { text: "للعائلات التي تخشى ضياع الروايات والوثائق عبر الأجيال.", icon: FileText },
+                     { text: "لمن يسعى لحفظ الذاكرة العائلية ضمن سجل مطبوع ورقمي فاخر.", icon: Clock },
+                     { text: "كهدية معرفية تحفظ امتداد العائلة للأبناء والأحفاد.", icon: Users }
                    ].map((item, i) => (
                      <li key={i} className="flex gap-4 items-start">
-                       <span className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shrink-0 shadow-sm">
-                         <ChevronLeft className="w-5 h-5 text-white" />
+                       <span className="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center shrink-0 shadow-sm">
+                         <item.icon className="w-5 h-5 text-white" />
                        </span>
-                       <span className="text-xl text-brand-800 mt-1 font-medium">{item}</span>
+                       <span className="text-xl text-brand-800 mt-1.5 font-medium">{item.text}</span>
                      </li>
                    ))}
                  </ul>
