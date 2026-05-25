@@ -398,6 +398,18 @@ export function OrderFlow() {
                   {/* Visual Tree */}
                   <div className="flex flex-col items-center select-none pt-2">
                      
+                     {/* Beyond Family - Box 2 */}
+                     <div className="bg-brand-900/40 text-brand-200 border border-brand-500/50 rounded-full py-1 px-4 text-center text-xs z-10 border-dashed mb-0">
+                        الجد الأعلى
+                     </div>
+                     <div className="h-4 w-0.5 border-l-2 border-brand-200/40 border-dashed mb-1" />
+
+                     {/* Beyond Family - Box 1 */}
+                     <div className="bg-brand-900/60 text-brand-100 border border-brand-500/70 rounded-full py-1.5 px-5 text-center text-xs z-10 border-dashed mb-0">
+                        القبيلة / الفخذ
+                     </div>
+                     <div className="h-4 w-0.5 border-l-2 border-brand-200/40 border-dashed" />
+
                      {/* Family Name */}
                      <div className="text-brand-300 text-xs tracking-wide opacity-80 uppercase mb-1">العائلة</div>
                      <div className="bg-brand-900 text-brand-100 border border-brand-500 rounded-full py-1.5 px-6 text-center text-sm z-10 font-bold mb-0">
@@ -440,14 +452,22 @@ export function OrderFlow() {
                           {/* Vertical Line from You */}
                           <div className="h-5 w-0.5 bg-brand-200/50" />
                           
-                          {/* Horizontal Line for Your Children */}
-                          <div className="w-16 md:w-20 h-0.5 bg-brand-200/50 flex justify-between relative">
+                          {/* Horizontal Line for Your Children (4 children) */}
+                          <div className="w-32 md:w-40 h-0.5 bg-brand-200/50 flex justify-between relative">
                             <div className="h-4 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
+                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-[33%] top-0" />
+                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-[66%] top-0" />
                             <div className="h-4 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
                           </div>
                           
                           {/* Your Children Nodes */}
-                          <div className="flex justify-between w-[5rem] md:w-[6rem] mt-4 relative items-start">
+                          <div className="flex justify-between w-[9.5rem] md:w-[11.5rem] mt-4 relative items-start gap-1">
+                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
+                               إبن
+                             </div>
+                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
+                               إبنة
+                             </div>
                              <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
                                إبن
                              </div>

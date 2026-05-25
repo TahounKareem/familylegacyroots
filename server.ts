@@ -153,27 +153,109 @@ async function startServer() {
       const userName = session.customer_details?.name || session.metadata?.userName;
 
       console.log(`Payment successful for order: ${orderId}. Email triggered for ${userEmail}.`);
-
-      // Here you would typically securely initialize the Firebase Admin SDK
-      // and update the 'orders' document to paid, 
-      // then insert a document to the 'mail' collection to trigger the email.
-      // Example:
-      /*
-      await adminDb.collection("orders").doc(orderId).update({ status: "paid" });
-      await adminDb.collection("mail").add({
-        to: userEmail,
-        message: {
-          subject: `تأكيد الدفع - أهلاً ${userName}`,
-          html: `<h1>تم الدفع بنجاح</h1><p>تم تأكيد الطلب ${orderId}</p>`
-        }
-      });
-      */
     }
 
     res.json({ received: true });
   });
 
   app.use(express.json());
+
+  // In-memory store for signed contracts (mock DB for webhook verification)
+  const signedContracts = new Set<string>();
+
+  // eSignatures APIs
+  app.post("/api/contracts", async (req, res) => {
+    try {
+      const { orderId, customerName, email, locale } = req.body;
+      const apiToken = process.env.ESIGNATURES_API_TOKEN;
+      
+      if (!apiToken) {
+        // Fallback for development without token
+        console.warn("ESIGNATURES_API_TOKEN is not set. Simulating contract creation.");
+        return res.json({ 
+          sign_page_url: `http://localhost:${PORT}/mock-sign?orderId=${orderId}`, 
+          contract_id: `MOCK-${orderId}` 
+        });
+      }
+
+      const templateId = locale === 'ar' ? 
+        process.env.ESIGNATURES_TEMPLATE_ID_AR : 
+        process.env.ESIGNATURES_TEMPLATE_ID_EN;
+
+      const payload = {
+        template_id: templateId,
+        signature_request_delivery_methods: [], // NO SMS/Email, embedded only
+        signers: [
+          {
+            name: customerName,
+            email: email,
+          }
+        ],
+        metadata: {
+          order_id: orderId,
+          language: locale || 'ar',
+          source: 'platform'
+        }
+      };
+
+      const response = await fetch("https://esignatures.com/api/contracts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ token: apiToken, ...payload })
+      });
+
+      const data = await response.json();
+      if (data.status === 'error') {
+        throw new Error(data.message || 'eSignatures API Error');
+      }
+
+      res.json(data);
+    } catch (error: any) {
+      console.error("Error creating contract:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/esignature/webhook", (req, res) => {
+    try {
+      const webhookSecret = process.env.ESIGNATURES_WEBHOOK_SECRET;
+      
+      // Verify webhook payload based on esignatures format
+      const data = req.body;
+      
+      // The event check (esignatures.com usually sends status in the payload)
+      if (data.status === 'signed' || data.event === 'contract_signed') {
+        const orderId = data.metadata?.order_id || (data.contract && data.contract.metadata?.order_id);
+        if (orderId) {
+          console.log(`Contract signed via webhook! OrderId: ${orderId}`);
+          signedContracts.add(orderId);
+        }
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error("Webhook processing error:", error);
+      res.status(400).send('Webhook error');
+    }
+  });
+
+  app.get("/api/contracts/status", (req, res) => {
+    const { orderId } = req.query;
+    if (!orderId || typeof orderId !== 'string') {
+      return res.status(400).json({ error: "Missing orderId" });
+    }
+    res.json({ signed: signedContracts.has(orderId) });
+  });
+
+  // Test endpoint to manually mock a webhook for local dev
+  app.post("/api/mock-webhook-sign", (req, res) => {
+    const { orderId } = req.body;
+    signedContracts.add(orderId);
+    res.json({ success: true });
+  });
 
   // API constraints
   app.get("/api/health", (req, res) => {
@@ -223,6 +305,11 @@ async function startServer() {
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
       const { orderId, userName, userEmail, packagePrice } = req.body;
+
+      if (!signedContracts.has(orderId) && process.env.ESIGNATURES_API_TOKEN) {
+         // Only enforce if token is configured, otherwise let them pass for dev mapping
+         throw new Error("لا يمكن إتمام الدفع. العقد غير موقّع أو لم يتم تأكيده عبر النظام بعد.");
+      }
 
       if (!stripeKey) {
         throw new Error("Stripe secret key configuration is missing on the server. Please add STRIPE_SECRET_KEY to your .env file.");

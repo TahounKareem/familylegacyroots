@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3, Share2, Facebook, Twitter, Mail, Copy, Instagram, ArrowLeft } from "lucide-react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export interface KnowledgeArticle {
@@ -57,76 +57,55 @@ export function KnowledgeCenter() {
   const [activeFilter, setActiveFilter] = useState("عام");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isNewsletterPopupOpen, setIsNewsletterPopupOpen] = useState(false);
 
-  // Reusable popup opener
-  const openNewsletter = () => setIsNewsletterPopupOpen(true);
-
-  const renderNewsletterPopup = () => {
-    if (!isNewsletterPopupOpen) return null;
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm shadow-2xl">
-        <div className="relative w-full max-w-sm bg-[#F2E3DE] rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" dir="rtl">
-          <button 
-            onClick={() => setIsNewsletterPopupOpen(false)}
-            className="absolute top-2 left-2 text-gray-500 hover:text-gray-800 transition-colors z-10 p-1"
-          >
-            <X className="w-5 h-5" />
+  // Newsletter Inline Component
+  const NewsletterInline = () => (
+    <div className="relative mx-auto rounded-2xl w-full max-w-2xl overflow-hidden shadow-md group mt-8">
+      <img 
+        src="https://i.postimg.cc/xCwMPv5v/News-Letter-(2).png" 
+        alt="اشترك في النشرة البريدية" 
+        className="w-full h-auto object-cover" 
+      />
+      <div className="absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[50%] sm:w-[40%] flex flex-col justify-center">
+        <form onSubmit={async (e) => {
+            e.preventDefault();
+            const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+            const email = emailInput.value;
+            const btn = e.currentTarget.querySelector('button');
+            if (email && btn) {
+              try {
+                btn.disabled = true;
+                btn.textContent = 'جاري...';
+                await addDoc(collection(db, 'newsletter_subscribers'), {
+                  email,
+                  subscribedAt: serverTimestamp(),
+                  source: 'knowledge_center_inline'
+                });
+                alert('تم تسجيل بريدك الإلكتروني بنجاح!');
+                emailInput.value = '';
+              } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء التسجيل.');
+              } finally {
+                btn.disabled = false;
+                btn.textContent = 'انضم';
+              }
+            }
+          }} className="flex flex-row gap-2 relative z-10 w-full" dir="rtl">
+          <input 
+            type="email" 
+            name="email"
+            placeholder="البريد الإلكتروني" 
+            required
+            className="flex-1 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/95 focus:bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C3262A] text-[10px] sm:text-xs text-right font-medium"
+          />
+          <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-bold transition-colors text-[10px] sm:text-xs shadow-sm whitespace-nowrap">
+            انضم
           </button>
-          <div className="p-6 text-center">
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#C3262A] mb-3 leading-tight mx-auto">
-              النشرة الإسبوعية
-            </h2>
-            <p className="text-[#a61c20] opacity-80 mb-6 font-medium text-sm">
-              انضم إلى نشرتنا لاكتشاف رؤى ومقالات مختارة في عالم الأنساب.
-            </p>
-            <form className="max-w-full mx-auto" onSubmit={async (e) => {
-                e.preventDefault();
-                const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
-                const email = emailInput.value;
-                const btn = e.currentTarget.querySelector('button');
-                if (email && btn) {
-                  try {
-                    btn.disabled = true;
-                    btn.textContent = 'جاري...';
-                    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-                    await addDoc(collection(db, 'newsletter_subscribers'), {
-                      email,
-                      subscribedAt: serverTimestamp(),
-                      source: 'knowledge_center_popup'
-                    });
-                    alert('تم تسجيل بريدك الإلكتروني بنجاح!');
-                    setIsNewsletterPopupOpen(false);
-                  } catch (err) {
-                    console.error(err);
-                    alert('حدث خطأ أثناء التسجيل. سجل الدخول كإدارة لتتمكن من إضافة البيانات.');
-                  } finally {
-                    btn.disabled = false;
-                    btn.textContent = 'اشتراك';
-                  }
-                }
-              }}>
-              <input 
-                type="email" 
-                name="email"
-                placeholder="عنوان بريدك الإلكتروني" 
-                required
-                className="w-full px-4 py-3 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C3262A] mb-4 text-right shadow-inner border border-brand-200 text-sm"
-              />
-              <button type="submit" className="w-full bg-[#C3262A] hover:bg-[#a61c20] text-white px-8 py-2.5 rounded-full font-bold transition-transform hover:scale-105 text-sm shadow-md mb-3">
-                انضم للنشرة البريدية
-              </button>
-              <div className="text-center">
-                <a href="/legal/privacy" className="text-gray-500 hover:text-gray-800 border-b border-transparent hover:border-gray-400 pb-0.5 text-xs transition-colors">
-                  سياسة الخصوصية
-                </a>
-              </div>
-            </form>
-          </div>
-        </div>
+        </form>
       </div>
-    );
-  };
+    </div>
+  );
 
   const getYoutubeEmbedUrl = (url: string) => {
     let videoId = '';
@@ -221,34 +200,38 @@ export function KnowledgeCenter() {
     return (
       <>
       <div className="bg-[#FAF9F6] min-h-screen pb-20 fade-in">
-        <div className="relative w-full h-[50vh] sm:h-[60vh] flex flex-col items-center justify-center border-b border-brand-200 shadow-md overflow-hidden bg-brand-900 group">
-          <img 
-            src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} 
-            alt="صورة المقال" 
-            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          
-          <button 
-            onClick={() => setSelectedArticle(null)} 
-            className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-md px-4 py-2 rounded-full transition shadow-sm font-medium"
-          >
-            <ArrowLeft className="w-5 h-5" /> 
-            <span>العودة للمركز المعرفي</span>
-          </button>
+        <div className="relative w-full bg-brand-900 group">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative aspect-video sm:aspect-[21/9] w-full mt-4 rounded-b-3xl overflow-hidden shadow-md">
+              <img 
+                src={selectedArticle.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} 
+                alt="صورة المقال" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              
+              <button 
+                onClick={() => setSelectedArticle(null)} 
+                className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-md px-4 py-2 rounded-full transition shadow-sm font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" /> 
+                <span>العودة للمركز المعرفي</span>
+              </button>
 
-          <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mt-auto pb-12 flex flex-col justify-end h-full">
-            <div className="flex items-center gap-3 text-white/90 font-medium mb-4">
-              <span className="bg-[#C3262A] px-3 py-1 rounded-full text-sm shadow-sm">{selectedArticle.type}</span>
-              <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-sm border border-white/20">{selectedArticle.section} / {selectedArticle.filter}</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white leading-tight drop-shadow-lg mb-4">
-              {selectedArticle.title}
-            </h1>
-            <div className="flex flex-wrap text-sm gap-x-6 gap-y-2 text-white/80">
-              <span className="flex items-center gap-1.5"><Edit3 className="w-4 h-4"/> {selectedArticle.author ? (selectedArticle.type === 'فيديو' ? `المنتج: ${selectedArticle.author}` : `الكاتب: ${selectedArticle.author}`) : 'إدارة المحتوى'}</span>
-              {selectedArticle.editor && <span className="flex items-center gap-1.5"><FileText className="w-4 h-4"/> تحرير: {selectedArticle.editor}</span>}
-              {selectedArticle.publishDate && <span className="flex items-center gap-1.5">تاريخ النشر: {new Date(selectedArticle.publishDate).toLocaleDateString('ar-EG')}</span>}
+              <div className="absolute inset-0 z-10 p-6 flex flex-col justify-end">
+                <div className="flex items-center gap-3 text-white/90 font-medium mb-4">
+                  <span className="bg-[#C3262A] px-3 py-1 rounded-full text-sm shadow-sm">{selectedArticle.type}</span>
+                  <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-sm border border-white/20">{selectedArticle.section} / {selectedArticle.filter}</span>
+                </div>
+                <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white leading-tight drop-shadow-lg mb-4 max-w-4xl">
+                  {selectedArticle.title}
+                </h1>
+                <div className="flex flex-wrap text-sm gap-x-6 gap-y-2 text-white/80">
+                  <span className="flex items-center gap-1.5"><Edit3 className="w-4 h-4"/> {selectedArticle.author ? (selectedArticle.type === 'فيديو' ? `المنتج: ${selectedArticle.author}` : `الكاتب: ${selectedArticle.author}`) : 'إدارة المحتوى'}</span>
+                  {selectedArticle.editor && <span className="flex items-center gap-1.5"><FileText className="w-4 h-4"/> تحرير: {selectedArticle.editor}</span>}
+                  {selectedArticle.publishDate && <span className="flex items-center gap-1.5">تاريخ النشر: {new Date(selectedArticle.publishDate).toLocaleDateString('ar-EG')}</span>}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -317,28 +300,19 @@ export function KnowledgeCenter() {
             </div>
           </div>
 
-          <div className="mt-20 flex flex-col gap-8 w-full">
-            {/* Newsletter Image Banner */}
-            <div className="w-full relative rounded-2xl overflow-hidden shadow-sm group">
-              <button onClick={openNewsletter} className="w-full block overflow-hidden cursor-pointer">
-                <img 
-                  src="https://i.postimg.cc/NFp859Nb/News-Letter.png" 
-                  alt="اشترك في النشرة البريدية" 
-                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700" 
-                />
-              </button>
-            </div>
+            <div className="mt-20 flex flex-col gap-8 w-full max-w-4xl mx-auto">
+              {/* Banner Section */}
+              <div className="mb-4 border-t border-brand-100 pt-8 mt-4 w-full">
+                <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                  <img src="https://i.postimg.cc/d3PQr4fd/Banner.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
+                </a>
+              </div>
 
-            {/* Banner Section */}
-            <div className="mb-12 border-t border-brand-100 pt-8 mt-4 w-full">
-              <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
-                <img src="https://i.postimg.cc/d3PQr4fd/Banner.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
-              </a>
+              {/* Newsletter Inline */}
+              <NewsletterInline />
             </div>
           </div>
-        </div>
       </div>
-      {renderNewsletterPopup()}
     </>
     );
   }
@@ -405,7 +379,7 @@ export function KnowledgeCenter() {
             {displayedArticles.map((item) => (
               <div key={item.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all cursor-pointer group flex flex-col h-full" onClick={() => setSelectedArticle(item)}>
                 {/* Thumbnail placeholder */}
-                <div className="relative h-48 bg-gray-100 overflow-hidden">
+                <div className="relative aspect-video bg-gray-100 overflow-hidden">
                   <img src={item.coverImageUrl || "https://images.unsplash.com/photo-1577493341514-fc5685514add?auto=format&fit=crop&q=80"} alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {item.coverTextOverlay && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4">
@@ -446,28 +420,17 @@ export function KnowledgeCenter() {
 
           {/* Main Page Newsletter and Banner */}
           <div className="mt-20 flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Newsletter Image Banner */}
-            <div className="w-full relative rounded-2xl overflow-hidden shadow-sm group">
-              <button onClick={openNewsletter} className="w-full block overflow-hidden cursor-pointer">
-                <img 
-                  src="https://i.postimg.cc/NFp859Nb/News-Letter.png" 
-                  alt="اشترك في النشرة البريدية" 
-                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700" 
-                />
-              </button>
-            </div>
-
             {/* Banner Section */}
-            <div className="mb-12 border-t border-brand-100 pt-8 mt-4 w-full">
+            <div className="mb-4 border-t border-brand-100 pt-8 mt-4 w-full">
               <a href="/" className="block overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
                 <img src="https://i.postimg.cc/d3PQr4fd/Banner.png" alt="سجل تراث العائلة" className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity" />
               </a>
             </div>
+
+            {/* Newsletter Inline */}
+            <NewsletterInline />
           </div>
       </div>
-
-      {/* Newsletter Popup */}
-      {renderNewsletterPopup()}
     </div>
   );
 }

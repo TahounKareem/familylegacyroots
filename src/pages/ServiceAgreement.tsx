@@ -160,88 +160,47 @@ export function ServiceAgreement() {
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الاسم الأول:</span> <strong className="text-brand-900">{pendingOrderData.firstName}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">اسم الأب:</span> <strong className="text-brand-900">{pendingOrderData.fatherName}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">اسم الجد:</span> <strong className="text-brand-900">{pendingOrderData.grandfatherName}</strong></div>
-                <div className="flex flex-col gap-1"><span className="text-brand-600">اللقب / العائلة:</span> <strong className="text-brand-900">{pendingOrderData.familyName}</strong></div>
-                <div className="flex flex-col gap-1"><span className="text-brand-600">القبيلة / العائلة:</span> <strong className="text-brand-900">{pendingOrderData.tribeName || "غير محدد"}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">العائلة:</span> <strong className="text-brand-900">{pendingOrderData.familyName}</strong></div>
+                <div className="flex flex-col gap-1"><span className="text-brand-600">القبيلة:</span> <strong className="text-brand-900">{pendingOrderData.tribeName || "غير محدد"}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{pendingOrderData.country}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{pendingOrderData.homeland}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{pendingOrderData.designTemplate}</strong></div>
-                <div className="flex flex-col gap-1"><span className="text-brand-600">نقطة العرض الأساسية:</span> <strong className="text-brand-900">{pendingOrderData.startingPointType === "أنا أمين السجل" ? `أنا أمين السجل (${pendingOrderData.firstName} بن ${pendingOrderData.fatherName})` : pendingOrderData.startingPointType === "اسم العائلة" ? `اسم العائلة (${pendingOrderData.familyName})` : pendingOrderData.startingPointType === "احد الأسلاف" ? `${pendingOrderData.startingPointAncestor || "احد الأسلاف"} (${pendingOrderData.startingPointName})` : pendingOrderData.startingPoint || "-"}</strong></div>
-                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">عنوان الاستلام:</span> <strong className="text-brand-900">{pendingOrderData.shippingAddress?.name} - {pendingOrderData.shippingAddress?.phone} - {pendingOrderData.shippingAddress?.street}, {pendingOrderData.shippingAddress?.state}, {pendingOrderData.shippingAddress?.country} {pendingOrderData.shippingAddress?.zip}</strong></div>
+                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">نقطة العرض الأساسية:</span> <strong className="text-brand-900">أمين السجل ({pendingOrderData.firstName} {pendingOrderData.fatherName} {pendingOrderData.familyName})</strong></div>
+                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">العنوان البريدي:</span> <strong className="text-brand-900">{pendingOrderData.shippingAddress?.name} - {pendingOrderData.shippingAddress?.phone} - {pendingOrderData.shippingAddress?.street}, {pendingOrderData.shippingAddress?.state}, {pendingOrderData.shippingAddress?.country} {pendingOrderData.shippingAddress?.zip}</strong></div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-brand-800 to-brand-900 text-white p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center text-right">
-               <div className="mb-4 md:mb-0 w-full md:w-2/3">
-                  <span className="text-brand-200 block mb-2 font-bold text-sm">الباقة المختارة</span>
-                  <ul className="list-disc leading-loose text-brand-100 mt-2 text-sm space-y-1 pl-0 pr-4">
-                    <li>عمل البحث العلمي والتاريخي المتخصص .</li>
-                    <li>توثيق خط نسب أمين السجل /العميل "عمود النسب ".</li>
-                    <li>توثيق المصادر والمراجع للعُقَد النسبية .</li>
+            <div className="bg-[#F2E3DE] text-brand-900 p-6 rounded-2xl shadow-sm border border-brand-200 flex flex-col text-right h-full">
+               <div className="mb-2">
+                  <span className="text-[#C3262A] block mb-3 font-bold text-base border-b border-brand-200/50 pb-2">الباقة المختارة</span>
+                  <ul className="list-disc text-[#541214] mt-2 text-xs sm:text-sm space-y-2 pr-4 pl-2 leading-relaxed">
+                    <li>عمل البحث العلمي والتاريخي المتخصص.</li>
+                    <li>توثيق خط نسب أمين السجل / العميل "عمود النسب".</li>
+                    <li>توثيق المصادر والمراجع للعُقَد النسبية.</li>
                     <li>توثيق المصادر والمراجع لتراجم الأعلام "السير الذاتية".</li>
-                    <li>تنسيق وموائمة مواد قسم الإدراج الإختياري الخاص بأمين السجل / العميل ، مع بقية الأقسام.</li>
+                    <li>تنسيق وموائمة مواد قسم الإدراج الإختياري الخاص بأمين السجل / العميل، مع بقية الأقسام.</li>
                     <li>أعمال التصميم والإخراج الفني المحترف.</li>
-                    <li>تسليم العمل "سجل تراث العائلة" على شكل المخرجات التالية:</li>
-                    <ul className="list-circle pr-6.5 text-[13px] opacity-90">
-                      <li>نسخة رقمية "الكترونية"</li>
-                      <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق .</li>
-                      <li>بوستر مشجر عمود النسب الشامل .</li>
+                    <li className="font-semibold text-brand-900">تسليم العمل "سجل تراث العائلة" على شكل المخرجات التالية:</li>
+                    <ul className="list-circle pr-6 text-xs opacity-90 space-y-1">
+                      <li>نسخة رقمية "الكترونية".</li>
+                      <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق.</li>
+                      <li>بوستر مشجر عمود النسب الشامل.</li>
                     </ul>
                   </ul>
-               </div>
-               <div className="text-left w-full md:w-1/3 flex justify-end">
-                  <div className="text-3xl font-mono font-bold">{priceAmount}</div>
                </div>
             </div>
           </div>
         </div>
 
         {/* Privacy Trust Layer */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-brand-100 p-8 mb-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 opacity-60"></div>
-          
-          <div className="flex flex-col md:flex-row gap-10 items-center">
-            {/* Image / Visual Side */}
-            <div className="w-full md:w-1/3 shrink-0 relative">
-              <div className="aspect-square rounded-2xl overflow-hidden shadow-lg border-4 border-white">
-                <img 
-                  src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&q=80&w=800" 
-                  alt="Family Connection and Trust" 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-              </div>
-              
-              {/* Floating Badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white p-3 rounded-2xl shadow-xl border border-brand-100 flex items-center gap-3">
-                <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div className="text-right pr-2">
-                  <p className="text-sm font-bold text-brand-900">حماية مشددة</p>
-                  <p className="text-xs text-brand-500">لخصوصية عائلتك</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Text Side */}
-            <div className="flex-1 space-y-5 text-right">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold mb-2">
-                <ShieldCheck className="w-4 h-4" />
-                <span>حماية مشددة لخصوصية عائلتك</span>
-              </div>
-              
-              <h1 className="text-3xl font-serif font-bold text-brand-900 leading-tight">
-                خصوصيتك في أمان..
-              </h1>
-              
-              <div className="space-y-4 text-brand-800 leading-relaxed text-sm">
-                <p>
-                  نأخذ السرية والخصوصية على محمل الجد. جميع بياناتك مشفرة ومحفوظة في خوادم آمنة. نحن نقدر ثقتك ونسعى جاهدين لبناء تجربة تليق بك، ونطورها خطوة بخطوة.
-                </p>
-              </div>
-            </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-brand-100 p-4 mb-8 max-w-lg mx-auto text-center flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2 text-brand-700 font-bold mb-1">
+            <ShieldCheck className="w-5 h-5" />
+            <span>حماية مشددة لخصوصية عائلتك</span>
           </div>
+          <p className="text-brand-600 text-xs sm:text-sm leading-relaxed max-w-xs">
+            بياناتك مشفرة ومحفوظة في خوادم آمنة. الخصوصية خط أحمر لا يمكن المساس به.
+          </p>
         </div>
 
         <div className="bg-white rounded-[2rem] shadow-sm border border-brand-200 overflow-hidden mb-8">

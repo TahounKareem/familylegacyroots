@@ -39,7 +39,7 @@ export function Home() {
           </div>
         </div>
         <div className="absolute bottom-8 left-0 right-0 w-full flex justify-center z-10 px-4">
-          <span className="inline-block py-1 px-4 rounded-full bg-white/20 text-white text-sm font-semibold tracking-wide uppercase shadow-sm">
+          <span className="inline-block py-2 px-6 rounded-full bg-white/20 text-white text-base md:text-lg font-serif font-semibold tracking-wide shadow-sm">
             كل جيل يحمل جزءًا من الرواية… حتى يأتي من يجمعها في سجل واحد
           </span>
         </div>
