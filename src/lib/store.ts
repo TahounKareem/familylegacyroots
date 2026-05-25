@@ -136,6 +136,15 @@ export interface FamilyData {
     state: string;
     street: string;
     zip?: string;
+  };
+  hasDeliveryAddress?: boolean;
+  deliveryAddress?: {
+    name: string;
+    phone: string;
+    country: string;
+    state: string;
+    street: string;
+    zip?: string;
     notes?: string;
   };
   treeData: TreeData;

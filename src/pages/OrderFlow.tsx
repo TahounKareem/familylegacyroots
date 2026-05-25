@@ -234,7 +234,7 @@ export function OrderFlow() {
                     value={formData.country} 
                     onChange={(e)=>{
                        const getPhoneCode = (c: string) => {
-                         const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61" };
+                         const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61", "المملكة المتحدة": "+44", "كندا": "+1", "فرنسا": "+33", "المانيا": "+49", "اسبانيا": "+34", "ايطاليا": "+39", "ماليزيا": "+60", "اندونيسيا": "+62" };
                          return codes[c] || "";
                        };
                        setFormData(prev => ({
@@ -248,10 +248,53 @@ export function OrderFlow() {
                        }));
                     }}
                   >
-                    <option value="">اختر الدولة</option>
-                    {["السعودية", "اليمن", "عمان", "الامارات", "الكويت", "قطر", "البحرين", "العراق", "سوريا", "الاردن", "فلسطين", "مصر", "ليبيا", "الجزائر", "المغرب", "موريتانيا", "السودان", "الصومال", "جيبوتي", "جزر القمر", "زنجبار", "ايران", "تركيا", "افغانستان", "الهند", "البرازيل", "الارجنتين", "استراليا"].map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    <option value="" disabled>اختر الدولة...</option>
+                    <optgroup label="شبة الجزيرة العربية">
+                      <option value="السعودية">المملكة العربية السعودية</option>
+                      <option value="اليمن">اليمن</option>
+                      <option value="عمان">سلطنة عمان</option>
+                      <option value="الامارات">الإمارات العربية المتحدة</option>
+                      <option value="الكويت">الكويت</option>
+                      <option value="قطر">قطر</option>
+                      <option value="البحرين">البحرين</option>
+                    </optgroup>
+                    <optgroup label="أسيا العربية ( الهلال الخصيب )">
+                      <option value="العراق">العراق</option>
+                      <option value="سوريا">سوريا</option>
+                      <option value="الاردن">الأردن</option>
+                      <option value="فلسطين">فلسطين</option>
+                    </optgroup>
+                    <optgroup label="شمال أفريقيا">
+                      <option value="مصر">مصر</option>
+                      <option value="ليبيا">ليبيا</option>
+                      <option value="الجزائر">الجزائر</option>
+                      <option value="المغرب">المغرب</option>
+                      <option value="موريتانيا">موريتانيا</option>
+                      <option value="السودان">السودان</option>
+                    </optgroup>
+                    <optgroup label="شرق أفريقيا">
+                      <option value="الصومال">الصومال</option>
+                      <option value="جيبوتي">جيبوتي</option>
+                      <option value="جزر القمر">جزر القمر</option>
+                      <option value="زنجبار">زنجبار</option>
+                    </optgroup>
+                    <optgroup label="باقي دول العالم">
+                      <option value="المملكة المتحدة">المملكة المتحدة (بريطانيا)</option>
+                      <option value="كندا">كندا</option>
+                      <option value="فرنسا">فرنسا</option>
+                      <option value="المانيا">ألمانيا</option>
+                      <option value="اسبانيا">إسبانيا</option>
+                      <option value="ايطاليا">إيطاليا</option>
+                      <option value="تركيا">تركيا</option>
+                      <option value="ايران">إيران</option>
+                      <option value="افغانستان">أفغانستان</option>
+                      <option value="الهند">الهند</option>
+                      <option value="ماليزيا">ماليزيا</option>
+                      <option value="اندونيسيا">إندونيسيا</option>
+                      <option value="البرازيل">البرازيل</option>
+                      <option value="الارجنتين">الأرجنتين</option>
+                      <option value="استراليا">أستراليا</option>
+                    </optgroup>
                   </select>
                 </div>
                 <div className="md:col-span-2">
@@ -261,8 +304,8 @@ export function OrderFlow() {
               </div>
 
               <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200 mt-8">
-                <h3 className="text-xl font-bold text-brand-900 mb-2 flex items-center gap-2">محطة استلام السجل المطبوع</h3>
-                <p className="text-sm text-brand-600 mb-6">احرص على دقة بيانات الشحن لضمان تسليم النسخ الورقية بأمان.</p>
+                <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">العنوان البريدي</h3>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
@@ -278,7 +321,6 @@ export function OrderFlow() {
                             setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: val}});
                          }
                       }} placeholder="+0000000000" dir="ltr" />
-                    <p className="text-xs text-brand-500 mt-1">يجب إدخال أرقام فقط مع رمز الدولة (مثال: +96650...)</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
@@ -287,7 +329,7 @@ export function OrderFlow() {
                       value={formData.shippingAddress?.country || ""} 
                       onChange={(e)=>{
                          const getPhoneCode = (c: string) => {
-                           const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61" };
+                           const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61", "المملكة المتحدة": "+44", "كندا": "+1", "فرنسا": "+33", "المانيا": "+49", "اسبانيا": "+34", "ايطاليا": "+39", "ماليزيا": "+60", "اندونيسيا": "+62" };
                            return codes[c] || "";
                          };
                          setFormData(prev => ({
@@ -330,11 +372,19 @@ export function OrderFlow() {
                         <option value="جزر القمر">جزر القمر</option>
                         <option value="زنجبار">زنجبار</option>
                       </optgroup>
-                      <optgroup label="أخرى">
-                        <option value="ايران">إيران</option>
+                      <optgroup label="باقي دول العالم">
+                        <option value="المملكة المتحدة">المملكة المتحدة (بريطانيا)</option>
+                        <option value="كندا">كندا</option>
+                        <option value="فرنسا">فرنسا</option>
+                        <option value="المانيا">ألمانيا</option>
+                        <option value="اسبانيا">إسبانيا</option>
+                        <option value="ايطاليا">إيطاليا</option>
                         <option value="تركيا">تركيا</option>
+                        <option value="ايران">إيران</option>
                         <option value="افغانستان">أفغانستان</option>
                         <option value="الهند">الهند</option>
+                        <option value="ماليزيا">ماليزيا</option>
+                        <option value="اندونيسيا">إندونيسيا</option>
                         <option value="البرازيل">البرازيل</option>
                         <option value="الارجنتين">الأرجنتين</option>
                         <option value="استراليا">أستراليا</option>
@@ -347,7 +397,7 @@ export function OrderFlow() {
                       value={formData.shippingAddress?.state || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي (اختياري)</label>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
                     <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                       value={formData.shippingAddress?.zip || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
                   </div>
@@ -356,11 +406,122 @@ export function OrderFlow() {
                     <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                       value={formData.shippingAddress?.street || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-brand-800 mb-2">ملاحظات الشحن (اختياري)</label>
-                    <textarea className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 h-24 resize-none" 
-                      value={formData.shippingAddress?.notes || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, notes: e.target.value}})} placeholder="أي ملاحظات تفصيلية لشركة الشحن..." />
-                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-brand-200">
+                  <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
+                      checked={formData.hasDeliveryAddress || false}
+                      onChange={(e)=>setFormData({...formData, hasDeliveryAddress: e.target.checked})}
+                    />
+                    <span className="font-medium text-brand-900">لدي عنوان أخر للتوصيل</span>
+                  </label>
+
+                  {formData.hasDeliveryAddress && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم للتوصيل *</label>
+                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                          value={formData.deliveryAddress?.name || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">رقم الهاتف للتوصيل *</label>
+                        <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
+                          value={formData.deliveryAddress?.phone || ""} onChange={(e)=>{
+                             const val = e.target.value;
+                             if (/^[\d+]*$/.test(val)) {
+                                setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, phone: val}});
+                             }
+                          }} placeholder="+0000000000" dir="ltr" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">الدولة للتوصيل *</label>
+                        <select 
+                          className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
+                          value={formData.deliveryAddress?.country || ""} 
+                          onChange={(e)=>{
+                             const getPhoneCode = (c: string) => {
+                               const codes: Record<string, string> = { "السعودية": "+966", "اليمن": "+967", "عمان": "+968", "الامارات": "+971", "الكويت": "+965", "قطر": "+974", "البحرين": "+973", "العراق": "+964", "سوريا": "+963", "الاردن": "+962", "فلسطين": "+970", "مصر": "+20", "ليبيا": "+218", "الجزائر": "+213", "المغرب": "+212", "موريتانيا": "+222", "السودان": "+249", "الصومال": "+252", "جيبوتي": "+253", "جزر القمر": "+269", "زنجبار": "+255", "ايران": "+98", "تركيا": "+90", "افغانستان": "+93", "الهند": "+91", "البرازيل": "+55", "الارجنتين": "+54", "استراليا": "+61", "المملكة المتحدة": "+44", "كندا": "+1", "فرنسا": "+33", "المانيا": "+49", "اسبانيا": "+34", "ايطاليا": "+39", "ماليزيا": "+60", "اندونيسيا": "+62" };
+                               return codes[c] || "";
+                             };
+                             setFormData(prev => ({
+                               ...prev, 
+                               deliveryAddress: {
+                                 ...prev.deliveryAddress, 
+                                 country: e.target.value,
+                                 phone: getPhoneCode(e.target.value)
+                               }
+                             }));
+                          }}
+                        >
+                          <option value="" disabled>اختر الدولة...</option>
+                          <optgroup label="شبة الجزيرة العربية">
+                            <option value="السعودية">المملكة العربية السعودية</option>
+                            <option value="اليمن">اليمن</option>
+                            <option value="عمان">سلطنة عمان</option>
+                            <option value="الامارات">الإمارات العربية المتحدة</option>
+                            <option value="الكويت">الكويت</option>
+                            <option value="قطر">قطر</option>
+                            <option value="البحرين">البحرين</option>
+                          </optgroup>
+                          <optgroup label="أسيا العربية ( الهلال الخصيب )">
+                            <option value="العراق">العراق</option>
+                            <option value="سوريا">سوريا</option>
+                            <option value="الاردن">الأردن</option>
+                            <option value="فلسطين">فلسطين</option>
+                          </optgroup>
+                          <optgroup label="شمال أفريقيا">
+                            <option value="مصر">مصر</option>
+                            <option value="ليبيا">ليبيا</option>
+                            <option value="الجزائر">الجزائر</option>
+                            <option value="المغرب">المغرب</option>
+                            <option value="موريتانيا">موريتانيا</option>
+                            <option value="السودان">السودان</option>
+                          </optgroup>
+                          <optgroup label="شرق أفريقيا">
+                            <option value="الصومال">الصومال</option>
+                            <option value="جيبوتي">جيبوتي</option>
+                            <option value="جزر القمر">جزر القمر</option>
+                            <option value="زنجبار">زنجبار</option>
+                          </optgroup>
+                          <optgroup label="باقي دول العالم">
+                            <option value="المملكة المتحدة">المملكة المتحدة (بريطانيا)</option>
+                            <option value="كندا">كندا</option>
+                            <option value="فرنسا">فرنسا</option>
+                            <option value="المانيا">ألمانيا</option>
+                            <option value="اسبانيا">إسبانيا</option>
+                            <option value="ايطاليا">إيطاليا</option>
+                            <option value="تركيا">تركيا</option>
+                            <option value="ايران">إيران</option>
+                            <option value="افغانستان">أفغانستان</option>
+                            <option value="الهند">الهند</option>
+                            <option value="ماليزيا">ماليزيا</option>
+                            <option value="اندونيسيا">إندونيسيا</option>
+                            <option value="البرازيل">البرازيل</option>
+                            <option value="الارجنتين">الأرجنتين</option>
+                            <option value="استراليا">أستراليا</option>
+                          </optgroup>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة للتوصيل *</label>
+                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                          value={formData.deliveryAddress?.state || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
+                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                          value={formData.deliveryAddress?.zip || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي للتوصيل *</label>
+                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                          value={formData.deliveryAddress?.street || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

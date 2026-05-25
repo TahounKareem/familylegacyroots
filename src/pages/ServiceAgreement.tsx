@@ -54,7 +54,7 @@ export function ServiceAgreement() {
     }
   };
 
-  const allChecked = req1;
+  const allChecked = req1 && req2;
   const canProceed = allChecked && scrolledToBottom;
 
   const handleProceed = async () => {
@@ -273,24 +273,47 @@ export function ServiceAgreement() {
                     [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`],
                     [orderDetailsContract.ar.fields.product, `توثيق شجرة العائلة`]
                   ].map((row, i) => (
-                    <div key={i} className={`flex flex-col md:flex-row ${i % 2 === 0 ? 'bg-brand-50/30' : 'bg-white'} border-b border-brand-100 last:border-0`}>
-                       <div className="px-4 py-3 md:w-1/3 font-bold text-brand-800 bg-brand-50/50 text-right">{row[0]}</div>
-                       <div className="px-4 py-3 md:w-2/3 font-medium text-brand-900 text-center md:text-right">{row[1]}</div>
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-b border-brand-100 last:border-0 hover:bg-brand-50/50 transition">
+                      <div className="bg-brand-50/50 px-4 py-3 font-bold text-brand-900 border-l border-brand-100/50 text-right">
+                        {row[0]}
+                      </div>
+                      <div className="px-4 py-3 text-brand-700 text-right md:col-span-3">
+                        {row[1]}
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 text-xs text-brand-700 bg-brand-50 p-4 rounded-xl border border-brand-100">
-                  <div className="leading-relaxed">☑ {orderDetailsContract.ar.footerCheckbox}</div>
-                </div>
-
-                <div className="w-full h-px bg-brand-200 my-10"></div>
-
-                {/* Contract Body */}
-                <div className="bg-white p-6 md:p-10 rounded-2xl border border-brand-100 shadow-sm text-right">
-                  <div className="whitespace-pre-line text-sm text-brand-800 leading-loose text-justify font-serif">
-                    {arabicContractText}
-                  </div>
+                {/* Contract Body (Dual Column Layout) */}
+                <div className="bg-white rounded-2xl border border-brand-100 shadow-sm overflow-hidden">
+                  {mainContractSections.map((sec, idx) => (
+                    <div key={sec.id} id={sec.id} className="border-b border-brand-100 last:border-0 relative">
+                      {(sec.arTitle || sec.enTitle) && (
+                        <div className="bg-brand-50/50 p-4 md:px-8 border-b border-brand-100/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <h3 className="font-bold text-brand-900 text-right">{sec.arTitle}</h3>
+                           <h3 className="font-bold text-brand-900 text-left font-serif" dir="ltr">{sec.enTitle}</h3>
+                        </div>
+                      )}
+                      
+                      <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 leading-relaxed text-sm">
+                        
+                        {/* Arabic Column */}
+                        <div className="text-right text-brand-800 space-y-4">
+                          {sec.arText.split('\n').map((paragraph, i) => (
+                            <p key={i} className="text-justify whitespace-pre-wrap">{paragraph}</p>
+                          ))}
+                        </div>
+                        
+                        {/* English Column */}
+                        <div className="text-left text-brand-800 space-y-4 font-serif" dir="ltr">
+                          {sec.enText.split('\n').map((paragraph, i) => (
+                            <p key={i} className="text-justify whitespace-pre-wrap">{paragraph}</p>
+                          ))}
+                        </div>
+                        
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {scrolledToBottom ? (
@@ -307,9 +330,9 @@ export function ServiceAgreement() {
                 ) : (
                   <div className="text-center mt-12 py-12 bg-brand-50/80 rounded-2xl border border-brand-200 shadow-inner">
                     <p className="text-brand-600 font-medium flex items-center justify-center gap-2">
-                      <ArrowRight className="w-5 h-5 animate-pulse" />
-                      استمر بالتمرير للأسفل لتمكين الإقرار والموافقة
-                      <ArrowLeft className="w-5 h-5 animate-pulse" />
+                       <ArrowRight className="w-5 h-5 animate-pulse" />
+                       استمر بالتمرير للأسفل لتمكين الإقرار والموافقة
+                       <ArrowLeft className="w-5 h-5 animate-pulse" />
                     </p>
                   </div>
                 )}
@@ -323,6 +346,11 @@ export function ServiceAgreement() {
           <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الإقرار والموافقة القانونية <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgement & Agreement</span></h3>
           
           <div className="space-y-4">
+            <CheckboxLabel 
+              checked={req2} onChange={(v) => { setReq2(v); if(v) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+              textAr="تُعد صفحة بيانات الطلب هذه جزءًا لا يتجزأ من هذا العقد ومكملة لأحكامه، وتُقدَّم على أي وصف تجاري أو مراسلات سابقة فيما يخص تحديد المنتج والقيمة وبيانات العميل. وفي حال التعارض، تُقدَّم بيانات الطلب فيما يتعلق بالبيانات التعريفية للصفقة، وتبقى شروط العقد وأحكامه نافذة." 
+              textEn="This Order Details page forms an integral part of, and supplements, this Agreement and prevails over any prior commercial description or communications regarding identification of the product/service, price, and customer information. In the event of any conflict, the Order Details shall control with respect to the identifying information of the transaction, and the remaining terms and conditions of this Agreement shall remain in full force and effect."
+            />
             <CheckboxLabel 
               checked={req1} onChange={(v) => { setReq1(v); if(v) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
               textAr="أوافق على استخدام التوقيع الإلكتروني والسجلات الإلكترونية وسجل التدقيق (Audit Trail) وشهادة الإكمال (Certificate of Completion) كوسائل إثبات قانونية ملزمة، وأقر بحجيتها الكاملة وعدم اشتراط وجود أصل ورقي." 
