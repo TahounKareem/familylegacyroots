@@ -134,8 +134,18 @@ export function ServiceAgreement() {
     setIsSigning(true);
     setSignTimeLeft(60); // give them standard 60 sec countdown to avoid immediate skip
     
-    // Using standard window.open since modern browsers handle this okay or in new tabs
-    const signWindow = window.open('https://signnow.com/s/lFJhpFvv', '_blank');
+    // Popup size calculation to make it a neat side/centered window
+    const popupWidth = 800;
+    const popupHeight = 850;
+    const left = window.screen.width / 2 - popupWidth / 2;
+    const top = window.screen.height / 2 - popupHeight / 2;
+    
+    // Using a sized popup window rather than a full tab to reduce distraction
+    const signWindow = window.open(
+      'https://signnow.com/s/lFJhpFvv', 
+      'SignNowPopup', 
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no`
+    );
 
     if (!signWindow) {
       alert("تم حظر النوافذ المنبثقة (Popups). يرجى السماح بفتح النوافذ أو إيقاف مانع الإعلانات لمتابعة التوقيع.");
@@ -436,7 +446,11 @@ export function ServiceAgreement() {
             
             <button
               onClick={() => {
-                const signWindow = window.open('https://signnow.com/s/lFJhpFvv', '_blank');
+                const popupWidth = 800;
+                const popupHeight = 850;
+                const left = window.screen.width / 2 - popupWidth / 2;
+                const top = window.screen.height / 2 - popupHeight / 2;
+                const signWindow = window.open('https://signnow.com/s/lFJhpFvv', 'SignNowPopup', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no`);
                 if (!signWindow) alert("تم حظر النوافذ المنبثقة.");
               }}
               className="mt-2 text-sm text-brand-600 underline font-medium hover:text-brand-800"
