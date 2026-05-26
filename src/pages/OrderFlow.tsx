@@ -69,7 +69,13 @@ export function OrderFlow() {
 
   const handleNext = () => {
     if (step === 1) setStep(2);
-    else if (step === 2) navigate("/service-agreement");
+    else if (step === 2) {
+      if (!formData.designTemplate) {
+        alert("يرجى اختيار قالب التصميم قبل المتابعة");
+        return;
+      }
+      navigate("/service-agreement");
+    }
   };
 
   const handlePrev = () => {

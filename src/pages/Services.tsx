@@ -358,39 +358,39 @@ export function Services() {
             </section>
 
             <section id="investment" className="mt-16 pt-16 border-t border-brand-100 scroll-mt-32">
-              <div className="bg-brand-950 text-white rounded-[2rem] p-6 lg:p-12 shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://i.postimg.cc/wMpkC5mC/Pic-Pattern.png')] opacity-10 mix-blend-overlay"></div>
+              <div className="bg-[#fef1f2] rounded-[2rem] p-6 lg:p-12 shadow-sm border border-[#fbd3d5] relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://i.postimg.cc/wMpkC5mC/Pic-Pattern.png')] opacity-[0.03] mix-blend-multiply"></div>
                 <div className="relative z-10 w-full">
                   <div className="text-center mb-10">
-                    <h3 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-white text-center">الاستثمار في حفظ إرث العائلة</h3>
-                    <div className="inline-block bg-brand-900/50 px-8 py-5 rounded-3xl border border-brand-800 shadow-inner max-w-full">
-                      <div className="text-5xl lg:text-6xl font-bold text-brand-400 font-mono mb-2" dir="ltr">$1,980</div>
-                      <p className="text-brand-200 text-base lg:text-lg font-medium px-2">يشمل الإصدار الأساسي من "سجل تراث العائلة"</p>
+                    <h3 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-brand-900 text-center">الاستثمار في حفظ إرث العائلة</h3>
+                    <div className="inline-block bg-white px-8 py-5 rounded-3xl border border-[#fbd3d5] shadow-sm max-w-full">
+                      <div className="text-5xl lg:text-6xl font-bold text-brand-600 font-mono mb-2" dir="ltr">$1,980</div>
+                      <p className="text-brand-700 text-base lg:text-lg font-medium px-2">يشمل الإصدار الأساسي من "سجل تراث العائلة"</p>
                     </div>
                   </div>
                   
-                  <div className="bg-brand-900/50 rounded-[2rem] p-6 lg:p-8 border border-brand-800 mb-10 w-full max-w-3xl mx-auto shadow-inner text-right">
-                    <h4 className="font-bold text-2xl mb-6 font-serif text-brand-300 text-center border-b border-brand-800 pb-4">خيارات تنفيذ المشروع</h4>
+                  <div className="bg-white rounded-[2rem] p-6 lg:p-8 border border-[#fbd3d5] mb-10 w-full max-w-3xl mx-auto shadow-sm text-right">
+                    <h4 className="font-bold text-2xl mb-6 font-serif text-brand-900 text-center border-b border-brand-100 pb-4">خيارات تنفيذ المشروع</h4>
                     
                     <div className="space-y-4 w-full">
-                      <div className="bg-brand-800/60 p-4 lg:p-5 rounded-2xl border border-brand-700 transition-colors hover:bg-brand-800 cursor-pointer overflow-hidden" onClick={() => setShowFullPaymentInfo(!showFullPaymentInfo)}>
+                      <div className="bg-[#fef1f2] p-4 lg:p-5 rounded-2xl border border-[#fbd3d5] transition-colors hover:bg-[#fae1e3] cursor-pointer overflow-hidden" onClick={() => setShowFullPaymentInfo(!showFullPaymentInfo)}>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                           <div className="flex items-center gap-3 w-full sm:w-auto">
-                             <div className="bg-brand-900/80 p-2 lg:p-3 rounded-full shrink-0">
-                               <Sparkles className="text-brand-400 w-5 h-5 lg:w-6 lg:h-6"/>
+                             <div className="bg-white p-2 lg:p-3 rounded-full shrink-0 shadow-sm border border-[#fbd3d5]">
+                               <Sparkles className="text-brand-500 w-5 h-5 lg:w-6 lg:h-6"/>
                              </div>
-                             <span className="font-bold text-base lg:text-lg text-white leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
+                             <span className="font-bold text-base lg:text-lg text-brand-900 leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
                           </div>
-                          <Info className="w-6 h-6 text-brand-300 shrink-0 self-end sm:self-auto" />
+                          <Info className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
                         </div>
                         <AnimatePresence>
                           {showFullPaymentInfo && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                               <div className="mt-6 pt-2 space-y-4 text-center">
-                                <div className="text-lg lg:text-xl text-center mb-4 bg-brand-950 rounded-xl py-4 border border-brand-800 shadow-inner mx-auto max-w-xs">
-                                   قيمة السداد المبكر: <br/><span className="font-bold text-brand-400 font-mono text-3xl block mt-2" dir="ltr">$1,780</span>
+                                <div className="text-lg lg:text-xl text-center mb-4 bg-white rounded-xl py-4 border border-[#fbd3d5] shadow-sm mx-auto max-w-xs">
+                                   قيمة السداد المبكر: <br/><span className="font-bold text-brand-600 font-mono text-3xl block mt-2" dir="ltr">$1,780</span>
                                 </div>
-                                <p className="text-sm lg:text-base text-brand-200 bg-brand-900/50 p-5 rounded-xl leading-relaxed text-right border-r-4 border-r-brand-400 w-full">
+                                <p className="text-sm lg:text-base text-brand-800 bg-white p-5 rounded-xl leading-relaxed text-right border-r-4 border-r-brand-400 w-full shadow-sm">
                                   تتضمن الامتيازات اولوية الجدولة لمراحل البحث والتوثيق والتسليم باللإضافة الي التوصيل السريع.
                                 </p>
                               </div>
@@ -399,21 +399,21 @@ export function Services() {
                         </AnimatePresence>
                       </div>
 
-                      <div className="bg-brand-800/60 p-4 lg:p-5 rounded-2xl border border-brand-700 transition-colors hover:bg-brand-800 cursor-pointer overflow-hidden" onClick={() => setShowFlexiblePaymentInfo(!showFlexiblePaymentInfo)}>
+                      <div className="bg-[#fef1f2] p-4 lg:p-5 rounded-2xl border border-[#fbd3d5] transition-colors hover:bg-[#fae1e3] cursor-pointer overflow-hidden" onClick={() => setShowFlexiblePaymentInfo(!showFlexiblePaymentInfo)}>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                           <div className="flex items-center gap-3 w-full sm:w-auto">
-                             <div className="bg-brand-900/80 p-2 lg:p-3 rounded-full shrink-0">
-                               <Coins className="text-brand-400 w-5 h-5 lg:w-6 lg:h-6"/>
+                             <div className="bg-white p-2 lg:p-3 rounded-full shrink-0 shadow-sm border border-[#fbd3d5]">
+                               <Coins className="text-brand-500 w-5 h-5 lg:w-6 lg:h-6"/>
                              </div>
-                             <span className="font-bold text-base lg:text-lg text-white">خيار الدفع المرن</span>
+                             <span className="font-bold text-base lg:text-lg text-brand-900">خيار الدفع المرن</span>
                           </div>
-                          <Info className="w-6 h-6 text-brand-300 shrink-0 self-end sm:self-auto" />
+                          <Info className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
                         </div>
                         <AnimatePresence>
                           {showFlexiblePaymentInfo && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                              <div className="mt-6 text-sm lg:text-base text-brand-200 bg-brand-900/50 p-6 rounded-xl space-y-4 shadow-inner text-right border-r-4 border-r-brand-400">
-                                <p className="font-bold text-white border-b border-brand-800 pb-2 mb-4">يمكن توزيع قيمة المشروع على 3 مراحل ميسرة:</p>
+                              <div className="mt-6 text-sm lg:text-base text-brand-800 bg-white p-6 rounded-xl space-y-4 shadow-sm text-right border-r-4 border-r-brand-400">
+                                <p className="font-bold text-brand-900 border-b border-brand-100 pb-2 mb-4">يمكن توزيع قيمة المشروع على 3 مراحل ميسرة:</p>
                                 <ul className="space-y-4 font-medium">
                                   <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة أولى: 35% عند تفعيل الطلب – مرحلة البحث</li>
                                   <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثانية: 35% عند انتهاء مرحلة التوثيق</li>
@@ -426,18 +426,18 @@ export function Services() {
                       </div>
                     </div>
 
-                    <div className="text-xs lg:text-sm text-brand-300 mt-8 pt-5 border-t border-brand-800/50 font-light opacity-80 leading-relaxed text-center">
+                    <div className="text-xs lg:text-sm text-brand-600 mt-8 pt-5 border-t border-[#fbd3d5] font-light leading-relaxed text-center">
                       * نقبل عددًا محدودًا من مشاريع التوثيق شهريًا حفاظًا على جودة البحث والتوثيق.<br/>
                       * تنطبق الشروط والأحكام على جميع الخدمات.
                     </div>
                   </div>
 
                   <div className="text-center pt-4 max-w-2xl mx-auto px-4">
-                    <p className="text-brand-200 text-lg lg:text-xl mb-8 leading-relaxed font-light">
+                    <p className="text-brand-700 text-lg lg:text-xl mb-8 leading-relaxed font-light">
                       بعض الروايات تضيع… لأنها لم تُوثق.<br/>
-                      <span className="font-bold text-white mt-1 block">ابدأ اليوم إنشاء سجل عائلي يوثق عمود نسبكم ويحفظ الذاكرة العائلية للأجيال القادمة.</span>
+                      <span className="font-bold text-brand-900 mt-1 block">ابدأ اليوم إنشاء سجل عائلي يوثق عمود نسبكم ويحفظ الذاكرة العائلية للأجيال القادمة.</span>
                     </p>
-                    <Link to="/order" className="inline-flex items-center justify-center bg-brand-500 hover:bg-brand-400 text-white text-xl lg:text-2xl px-12 py-5 lg:py-6 rounded-2xl font-bold transition shadow-[0_0_40px_-10px_rgba(200,30,30,0.5)] hover:shadow-[0_0_60px_-10px_rgba(200,30,30,0.7)] hover:-translate-y-1 w-full sm:w-auto">
+                    <Link to="/order" className="inline-flex items-center justify-center bg-brand-500 hover:bg-brand-400 text-white text-xl lg:text-2xl px-12 py-5 lg:py-6 rounded-2xl font-bold transition shadow-[0_0_40px_-10px_rgba(185,28,34,0.3)] hover:shadow-[0_0_60px_-10px_rgba(185,28,34,0.5)] hover:-translate-y-1 w-full sm:w-auto">
                       ابدأ سجل عائلتك
                     </Link>
                   </div>

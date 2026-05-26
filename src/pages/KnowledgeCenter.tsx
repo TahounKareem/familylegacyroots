@@ -66,7 +66,7 @@ export function KnowledgeCenter() {
         alt="اشترك في النشرة البريدية" 
         className="w-full h-auto object-cover" 
       />
-      <div className="absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[50%] sm:w-[40%] flex flex-col justify-center">
+      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 w-[25%] sm:w-[20%] flex flex-col justify-end">
         <form onSubmit={async (e) => {
             e.preventDefault();
             const emailInput = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
