@@ -58,6 +58,18 @@ export function ServiceAgreement() {
   const canProceed = allChecked && scrolledToBottom;
 
   const [isSigning, setIsSigning] = useState(false);
+  const [showManuallySignedModal, setShowManuallySignedModal] = useState(false);
+  const [signTimeLeft, setSignTimeLeft] = useState(60); // 60 seconds wait time to be logical as requested
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showManuallySignedModal && signTimeLeft > 0) {
+      timer = setTimeout(() => {
+        setSignTimeLeft(signTimeLeft - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [showManuallySignedModal, signTimeLeft]);
 
   const handleProceed = async () => {
     if (!currentUser || !pendingOrderData) return;
@@ -120,41 +132,19 @@ export function ServiceAgreement() {
 
     // Launch Popup for Signature Verification
     setIsSigning(true);
+    setSignTimeLeft(60); // give them standard 60 sec countdown to avoid immediate skip
     
-    // Popup size calculation to make it a neat side/centered window
-    const popupWidth = 800;
-    const popupHeight = 850;
-    const left = window.screen.width / 2 - popupWidth / 2;
-    const top = window.screen.height / 2 - popupHeight / 2;
-    
-    const signWindow = window.open(
-      'https://signnow.com/s/WsUj1c9g', 
-      'SignNow', 
-      `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
-    );
+    // Using standard window.open since modern browsers handle this okay or in new tabs
+    const signWindow = window.open('https://signnow.com/s/lFJhpFvv', '_blank');
 
     if (!signWindow) {
-      alert("تم حظر النوافذ المنبثقة (Popups). يرجى السماح بها لفتح صفحة التوقيع.");
+      alert("تم حظر النوافذ المنبثقة (Popups). يرجى السماح بفتح النوافذ أو إيقاف مانع الإعلانات لمتابعة التوقيع.");
       setIsSigning(false);
       return;
     }
 
-    const openTime = Date.now();
-    
-    // Track if user has signed by checking when the window is closed
-    const timer = setInterval(() => {
-      if (signWindow.closed) {
-        clearInterval(timer);
-        const closeTime = Date.now();
-        // Assuming signing the document takes at least 15 seconds
-        if (closeTime - openTime > 15000) {
-          navigate("/order?payment=true", { replace: true });
-        } else {
-          alert("المعذرة، يبدو أنك أغلقت النافذة المنبثقة قبل إتمام قراءة العقد والتوقيع عليه إلكترونياً. يرجى المحاولة مرة أخرى.");
-          setIsSigning(false);
-        }
-      }
-    }, 1000);
+    // Now simply show the helper modal since we don't have programmatic access
+    setShowManuallySignedModal(true);
   };
 
   if (!currentUser || !pendingOrderData) return null;
@@ -422,6 +412,40 @@ export function ServiceAgreement() {
           body { display: none !important; }
         }
       `}} />
+
+      {/* Manual Signature Confirmation Modal */}
+      {showManuallySignedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center border-2 border-brand-200">
+            <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-serif text-brand-900 mb-4 font-bold">تأكيد التوقيع الإلكتروني</h2>
+            <p className="text-brand-700 leading-relaxed mb-8">
+              لقد قمنا بفتح صفحة التوقيع في نافذة جديدة. يرجى إتمام عملية التوقيع بالمنصة الخارجية (SignNow).<br/><br/>
+              هل أتممت التوقيع الإلكتروني بنجاح وترغب في الانتقال لصفحة الدفع؟
+            </p>
+
+            <button
+              onClick={() => navigate("/order?payment=true", { replace: true })}
+              disabled={signTimeLeft > 0}
+              className="w-full mb-4 px-6 py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              {signTimeLeft > 0 ? `يرجى الانتظار (${signTimeLeft} ثانية)...` : 'نعم، أتممت التوقيع ومتابعة الدفع'}
+            </button>
+            
+            <button
+              onClick={() => {
+                const signWindow = window.open('https://signnow.com/s/lFJhpFvv', '_blank');
+                if (!signWindow) alert("تم حظر النوافذ المنبثقة.");
+              }}
+              className="mt-2 text-sm text-brand-600 underline font-medium hover:text-brand-800"
+            >
+              لم تفتح معي النافذة. انقر هنا للمحاولة مرة أخرى.
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

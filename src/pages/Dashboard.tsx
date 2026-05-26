@@ -397,7 +397,7 @@ export function Dashboard() {
                   {activeTab === "بيانات العميل / أمين السجل" && (
                     <div className="space-y-8">
                       <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-brand-900 text-lg p-6 bg-white border border-brand-100 rounded-2xl shadow-sm">
-                        <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-brand-400" /> البيانات الأساسية (غير قابلة للتعديل)</div>
+                        <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-brand-400" /> البيانات الأساسية</div>
                         <div><span className="block text-sm text-brand-500 mb-1">الاسم الأول:</span> <strong>{order.data.firstName}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">اسم الأب:</span> <strong>{order.data.fatherName}</strong></div>
                         <div><span className="block text-sm text-brand-500 mb-1">اسم الجد:</span> <strong>{order.data.grandfatherName}</strong></div>
@@ -408,7 +408,7 @@ export function Dashboard() {
                       </div>
 
                       <div className="p-6 bg-brand-50 border border-brand-200 rounded-2xl shadow-sm">
-                        <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-4 mb-4 flex items-center gap-2 text-lg"><MapPin className="w-5 h-5 text-brand-600" /> بيانات التواصل والشحن (قابلة للتعديل)</h3>
+                        <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-4 mb-4 flex items-center gap-2 text-lg"><MapPin className="w-5 h-5 text-brand-600" /> بيانات التواصل والعنوان البريدي</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
@@ -489,10 +489,10 @@ export function Dashboard() {
                       <div className="flex justify-center items-center gap-4 text-3xl font-serif text-brand-900 font-bold border-y-2 border-brand-200 py-6 max-w-md mx-auto">
                         <UserPlus className="w-10 h-10 text-brand-600" />
                         <span>
-                          {order.data.startingPointType === "أنا أمين السجل" ? order.data.firstName :
+                          {order.data.startingPointType === "أنا أمين السجل" ? `${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() :
                            order.data.startingPointType === "اسم العائلة" ? `عائلة (${order.data.familyName})` :
                            order.data.startingPointType === "احد الأسلاف" ? order.data.startingPointName :
-                           order.data.startingPoint}
+                           order.data.startingPoint || `${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() || 'لم يتم التحديد'}
                         </span>
                       </div>
                     </div>
