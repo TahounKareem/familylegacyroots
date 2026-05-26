@@ -173,7 +173,7 @@ async function startServer() {
         // Fallback for development without token
         console.warn("ESIGNATURES_API_TOKEN is not set. Simulating contract creation.");
         return res.json({ 
-          sign_page_url: `http://localhost:${PORT}/mock-sign?orderId=${orderId}`, 
+          sign_page_url: `/api/mock-sign-page?orderId=${orderId}`, 
           contract_id: `MOCK-${orderId}` 
         });
       }
@@ -255,6 +255,34 @@ async function startServer() {
     const { orderId } = req.body;
     signedContracts.add(orderId);
     res.json({ success: true });
+  });
+
+  app.get("/api/mock-sign-page", (req, res) => {
+    const { orderId } = req.query;
+    res.send(`
+      <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="utf-8">
+          <title>محاكاة توقيع العقد</title>
+        </head>
+        <body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; flex-direction:column; background:#f8f9fa;">
+          <h2>محاكي التوقيع (وضع التطوير)</h2>
+          <p>أنت ترى هذه الصفحة لأنه لم يتم إعداد مفتاح API الخاص بـ eSignatures.</p>
+          <button onclick="sign()" style="padding:15px 30px; font-size:18px; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:10px; font-weight:bold;">اضغط هنا لمحاكاة التوقيع</button>
+          <script>
+            function sign() {
+              fetch('/api/mock-webhook-sign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: '${orderId}' })
+              }).then(() => {
+                document.body.innerHTML = '<h3 style="color:green; text-align:center;">تم التوقيع بنجاح! يمكنك الآن إغلاق هذه النافذة والعودة للمنصة لاستكمال طلبك.</h3>';
+              });
+            }
+          </script>
+        </body>
+      </html>
+    `);
   });
 
   // API constraints

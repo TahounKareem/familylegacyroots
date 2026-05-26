@@ -35,7 +35,8 @@ export function ESignature() {
         });
         const data = await response.json();
         if (data.sign_page_url) {
-          setSignUrl(data.sign_page_url.includes('?') ? data.sign_page_url + "&embedded=yes" : data.sign_page_url + "?embedded=yes");
+          // Remove embedded constraint to allow opening in new tab
+          setSignUrl(data.sign_page_url);
           
           // Poll for status
           interval = setInterval(async () => {
@@ -110,12 +111,24 @@ export function ESignature() {
                <p className="text-brand-600 max-w-sm">تم توثيق العقد إلكترونياً. يمكنك الآن الانتقال للدفع لإتمام طلبك.</p>
             </div>
           ) : signUrl ? (
-             <div className="flex-1 w-full bg-[#f8f9fa] rounded-2xl overflow-hidden min-h-[600px] shadow-inner relative border border-gray-200">
-               <iframe 
-                 src={signUrl} 
-                 className="absolute inset-0 w-full h-full border-0"
-                 allow="geolocation; camera"
-               />
+             <div className="flex-1 flex flex-col items-center justify-center bg-[#f8f9fa] rounded-2xl p-8 min-h-[400px] shadow-inner border border-gray-200">
+               <div className="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+                 <PenTool className="w-12 h-12" />
+               </div>
+               <h3 className="text-2xl font-bold text-brand-900 mb-2">توقيع العقد خارجياً</h3>
+               <p className="text-brand-600 max-w-md text-center mb-8">
+                 لتوفير أقصى درجات الأمان وحل مشكلة العرض، يرجى الضغط على الزر أدناه لفتح صفحة التوقيع في نافذة جديدة. 
+                 <br/><br/>
+                 (بعد إنتهاء التوقيع، سيتم تفعيل زر الاستمرار تلقائياً)
+               </p>
+               <a 
+                 href={signUrl} 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="px-8 py-4 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow-lg flex items-center gap-3 animate-pulse-slow"
+               >
+                 فتح صفحة التوقيع في نافذة جديدة <ArrowLeft className="w-6 h-6" />
+               </a>
              </div>
           ) : null}
         </div>
