@@ -183,7 +183,7 @@ async function startServer() {
         process.env.ESIGNATURES_TEMPLATE_ID_EN;
 
       const payload = {
-        template_id: templateId || "1e7a31ca-f0dc-480a-a209-de74843b9857", // Using the template ID from their previous iframe
+        template_id: templateId || "f7cd8527-0d1a-449d-92c4-21a75150863f", // Using the template ID dynamically generated for this account
         signature_request_delivery_methods: [], // NO SMS/Email, embedded only
         signers: [
           {

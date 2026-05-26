@@ -33,11 +33,14 @@ export function ESignature() {
           })
         });
         const data = await res.json();
-        if (data.sign_page_url) {
-          const urlStr = data.sign_page_url;
+        const urlStr = data?.data?.contract?.signers?.[0]?.sign_page_url || data?.contract?.signers?.[0]?.sign_page_url;
+        
+        if (urlStr) {
           const separator = urlStr.includes('?') ? '&' : '?';
           const redirectParams = `embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`;
           setSignUrl(urlStr + separator + redirectParams);
+        } else {
+          throw new Error("لم يتم العثور على رابط التوقيع في الرد");
         }
       } catch (err) {
         console.error("Failed to generate contract:", err);
@@ -159,10 +162,12 @@ export function ESignature() {
           </button>
           
           <button 
-            disabled={true}
-            className={`px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 bg-gray-200 text-gray-400 cursor-not-allowed`}
+            onClick={() => navigate("/order?payment=true")}
+            disabled={!isSigned}
+            className={`px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 ${isSigned ? 'bg-brand-600 text-white hover:bg-brand-500 cursor-pointer animate-pulse-slow' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
           >
-             في انتظار التوقيع للمتابعة <Loader2 className="w-5 h-5 animate-spin md:w-6 md:h-6" />
+             {isSigned ? 'لقد أتممت التوقيع - المتابعة للدفع' : 'في انتظار التوقيع للمتابعة'} 
+             {isSigned ? <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" /> : <Loader2 className="w-5 h-5 animate-spin md:w-6 md:h-6" />}
           </button>
         </div>
       </div>
