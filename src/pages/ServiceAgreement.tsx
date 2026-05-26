@@ -116,6 +116,9 @@ export function ServiceAgreement() {
     // 4. Final step: mark ready
     await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
 
+    // Open signing link in new tab
+    window.open("https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857", "_blank");
+
     navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
   };
 
@@ -213,33 +216,13 @@ export function ServiceAgreement() {
              <div className="text-xs text-brand-400 font-mono opacity-80">Ref: {dummyOrderId}</div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4">
-            
-            {/* Sticky Nav */}
-            <div className="hidden md:block col-span-1 border-l border-brand-100 bg-brand-50/50 p-6 relative">
-              <div className="sticky top-6">
-                <h3 className="font-bold text-brand-900 mb-4 text-sm">فهرس العقد</h3>
-                <ul className="space-y-2 text-xs text-brand-700">
-                  <li><a href="#order-details" className="hover:text-brand-600 transition">بيانات الطلب (Order Details)</a></li>
-                  {/*
-                  {mainContractSections.map((sec, idx) => (
-                    <li key={sec.id}>
-                      <a href={`#${sec.id}`} className="hover:text-brand-600 transition line-clamp-1" title={sec.arTitle}>
-                        {sec.arTitle}
-                      </a>
-                    </li>
-                  ))}
-                  */}
-                </ul>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1">
             {/* Viewer */}
             <div 
               ref={scrollContainerRef}
               onScroll={handleScroll}
               onCopy={handleCopy}
-              className="col-span-1 md:col-span-3 h-[600px] overflow-y-auto relative bg-[#faf9f7] select-none"
+              className="h-[600px] overflow-y-auto relative bg-[#faf9f7] select-none"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23e0dcd3' font-family='Arial' font-weight='bold' opacity='0.4' text-anchor='middle' transform='rotate(-45 100 100)'%3E${encodeURIComponent(pendingOrderData.firstName + " " + pendingOrderData.familyName)} - ${new Date().toLocaleDateString()}%3C/text%3E%3C/svg%3E")`,
                 backgroundRepeat: 'repeat'
@@ -259,19 +242,22 @@ export function ServiceAgreement() {
                 </div>
 
                 {/* Order Details Table */}
-                <div className="border border-brand-200 rounded-xl overflow-hidden bg-white text-sm">
+                <div className="border border-brand-200 rounded-xl overflow-hidden bg-white text-sm tracking-wide">
                   {[
-                    [orderDetailsContract.ar.fields.orderId, `${dummyOrderId} / ${dummyInvoiceId}`],
+                    [orderDetailsContract.ar.fields.orderId, `${dummyOrderId}`],
+                    [orderDetailsContract.ar.fields.invoiceId, `${dummyInvoiceId}`],
                     [orderDetailsContract.ar.fields.orderDate, new Date().toLocaleDateString('ar-EG')],
                     [orderDetailsContract.ar.fields.customerName, `${pendingOrderData.firstName} ${pendingOrderData.fatherName} ${pendingOrderData.familyName}`],
-                    [orderDetailsContract.ar.fields.detailedName, `الجد: ${pendingOrderData.grandfatherName || "-"} | القبيلة: ${pendingOrderData.tribeName || "-"}`],
-                    [orderDetailsContract.ar.fields.homeland, `الموطن: ${pendingOrderData.homeland || "-"} | نقطة البدء: ${pendingOrderData.startingPoint || "-"}`],
-                    [orderDetailsContract.ar.fields.template, pendingOrderData.designTemplate || "-"],
-                    [orderDetailsContract.ar.fields.notes, pendingOrderData.historicalNotes ? (pendingOrderData.historicalNotes.length > 50 ? pendingOrderData.historicalNotes.substring(0, 50) + '...' : pendingOrderData.historicalNotes) : "-"],
                     [orderDetailsContract.ar.fields.email, currentUser.email],
                     [orderDetailsContract.ar.fields.phone, pendingOrderData.shippingAddress?.phone || "-"],
                     [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`],
-                    [orderDetailsContract.ar.fields.product, `توثيق شجرة العائلة`]
+                    [orderDetailsContract.ar.fields.product, `خدمة توثيق عمود النسب واصدار سجل تراث العائلة (السجل الأساسي -  البوابة الرئيسية)`],
+                    [orderDetailsContract.ar.fields.amount, `1980 SAR`],
+                    [orderDetailsContract.ar.fields.paymentMethod, `pending`],
+                    [orderDetailsContract.ar.fields.paymentStatus, `pending`],
+                    [orderDetailsContract.ar.fields.estimatedTime, `من 90 إلى 180 يوم .`],
+                    [orderDetailsContract.ar.fields.revisionTime, `15 يوم من تاريخ اصدار سجل تراث العائلة ( السجل الأساسي -  البوابة الرئيسية)`],
+                    [orderDetailsContract.ar.fields.deliveryChannel, `عبر حسابكم على المنصة`]
                   ].map((row, i) => (
                     <div key={i} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-b border-brand-100 last:border-0 hover:bg-brand-50/50 transition">
                       <div className="bg-brand-50/50 px-4 py-3 font-bold text-brand-900 border-l border-brand-100/50 text-right">
@@ -380,7 +366,7 @@ export function ServiceAgreement() {
             disabled={!canProceed}
             className="px-10 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            الإنتقال للدفع <ArrowLeft className="w-5 h-5" />
+            تأكيد الإصدار والتوقيع <ArrowLeft className="w-5 h-5" />
           </button>
         </div>
 
