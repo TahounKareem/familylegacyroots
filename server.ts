@@ -178,8 +178,9 @@ async function startServer() {
       let documentId = "";
       
       try {
-        console.log(`Copying SignNow template: ${SIGNNOW_TEMPLATE_ID}`);
-        const copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
+        console.log(`Copying SignNow document/template: ${SIGNNOW_TEMPLATE_ID}`);
+        // Try /document/:id/copy first, since user provided a document ID
+        let copyRes = await fetch(`https://api.signnow.com/document/${SIGNNOW_TEMPLATE_ID}/copy`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
@@ -187,11 +188,26 @@ async function startServer() {
           },
           body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
         });
-        
-        const copyText = await copyRes.text();
+        let copyText = await copyRes.text();
+        let copyData = JSON.parse(copyText);
+
+        // If it failed because it's a template, try /template/:id/copy
+        if (copyData.errors && copyData.errors[0]?.code === 65582) {
+          console.log("Not found as document, trying as template...");
+          copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
+          });
+          copyText = await copyRes.text();
+          copyData = JSON.parse(copyText);
+        }
+
         console.log("SignNow copy response:", copyText);
         
-        const copyData = JSON.parse(copyText);
         if (copyData.id) {
           documentId = copyData.id;
           console.log(`Generated Document ID: ${documentId}`);
@@ -200,7 +216,9 @@ async function startServer() {
         }
       } catch (e: any) {
          console.error("SignNow template copy error:", e);
-         return res.json({ signUrl: `https://app.signnow.com/webapp/document/mock-signing?document_id=mock`, error: "Failed to copy template. " + e.message });
+         // Return a safe local mock URL so the user is not blocked
+         const origin = req.headers.origin || "http://localhost:3000";
+         return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "تم تحويلك لصفحة التوقيع البديلة (Mock) بسبب تعذر الوصول لـ SignNow" });
       }
 
       // Step 2: Generate embedded invite for the document
@@ -232,13 +250,15 @@ async function startServer() {
         
         if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
            console.error("SignNow Invite Error:", inviteData);
-           return res.json({ signUrl: "https://app.signnow.com/webapp/document/mock-signing?document_id=" + documentId, error: "API Failed to generate embedded link, using fallback. " + JSON.stringify(inviteData) });
+           const origin = req.headers.origin || "http://localhost:3000";
+           return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "API Failed to generate embedded link, using fallback. " + JSON.stringify(inviteData) });
         }
 
         res.json({ signUrl: inviteData.data[0].link });
       } catch (e: any) {
         console.error("SignNow invite error:", e);
-        return res.json({ signUrl: "https://app.signnow.com/webapp/document/mock-signing?document_id=" + documentId, error: "API Request exception. " + e.message });
+        const origin = req.headers.origin || "http://localhost:3000";
+        return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "API Request exception. " + e.message });
       }
 
     } catch (error: any) {

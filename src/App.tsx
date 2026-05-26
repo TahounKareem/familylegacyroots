@@ -22,6 +22,7 @@ import { ShippingDetails } from "./pages/ShippingDetails";
 import { ServiceAgreement } from "./pages/ServiceAgreement";
 import { ESignature } from "./pages/ESignature";
 import { ESignatureSuccess } from "./pages/ESignatureSuccess";
+import { MockSignature } from "./pages/MockSignature";
 
 export default function App() {
   const initializeFirebase = useAppStore(state => state.initializeFirebase);
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="/service-agreement" element={<ServiceAgreement />} />
         <Route path="/e-signature" element={<ESignature />} />
         <Route path="/e-signature-success" element={<ESignatureSuccess />} />
+        <Route path="/mock-signature" element={<MockSignature />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
       <CookieBanner />
