@@ -16,23 +16,47 @@ export function ESignature() {
   }, [currentUser, pendingOrderData, navigate]);
 
   useEffect(() => {
-    if (!currentUser) return;
-    
-    // Poll the backend to check if the contract has been signed
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/contracts/status?orderId=${currentUser.id}`);
-        const data = await res.json();
-        if (data.signed) {
-          setIsSigned(true);
-          clearInterval(interval);
-        }
-      } catch (err) {
-        console.error("Error polling contract status:", err);
+    // 1. Listen for messages from eSignatures iframe
+    const handleMessage = (event: MessageEvent) => {
+      console.log("Iframe message received:", event.origin, event.data);
+      
+      // Handle different possible payload formats from eSignatures
+      const isSignedStr = typeof event.data === "string" && 
+        (event.data.includes("signed") || event.data === "contract_signed" || event.data === "esignature_success");
+        
+      const isSignedObj = typeof event.data === "object" && event.data !== null && 
+        (event.data.status === "signed" || event.data.event === "contract_signed" || event.data.event === "signer_signed");
+      
+      if (isSignedStr || isSignedObj) {
+        console.log("Signature confirmed via postMessage!");
+        setIsSigned(true);
       }
-    }, 3000);
+    };
 
-    return () => clearInterval(interval);
+    window.addEventListener("message", handleMessage);
+
+    // 2. Poll the backend as a fallback (if webhook is active)
+    let interval: NodeJS.Timeout | null = null;
+    if (currentUser) {
+      interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/contracts/status?orderId=${currentUser.id}`);
+          const data = await res.json();
+          if (data.signed) {
+            console.log("Signature confirmed via Webhook polling!");
+            setIsSigned(true);
+            if (interval) clearInterval(interval);
+          }
+        } catch (err) {
+          // Silent catch for poll error
+        }
+      }, 5000);
+    }
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      if (interval) clearInterval(interval);
+    };
   }, [currentUser]);
 
   const handleProceed = () => {
@@ -63,7 +87,7 @@ export function ESignature() {
                <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200" style={{ height: '700px' }}>
                  {/* eSignatures Iframe */}
                  <iframe 
-                   src="https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857?embedded=yes" 
+                   src={`https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857?embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`} 
                    width="100%" 
                    height="100%" 
                    style={{ border: 'none', minHeight: '700px' }}
