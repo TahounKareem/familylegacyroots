@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { CheckCircle, ArrowLeft, ArrowRight, Info, PenTool } from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, Info, PenTool, Loader2 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 
@@ -8,6 +8,8 @@ export function ESignature() {
   const { currentUser, pendingOrderData } = useAppStore();
   const navigate = useNavigate();
   const [isSigned, setIsSigned] = useState(false);
+  const [signUrl, setSignUrl] = useState<string | null>(null);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(true);
 
   useEffect(() => {
     if (!currentUser || !pendingOrderData) {
@@ -16,11 +18,41 @@ export function ESignature() {
   }, [currentUser, pendingOrderData, navigate]);
 
   useEffect(() => {
+    async function initContract() {
+      if (!currentUser?.id) return;
+      try {
+        setIsLoadingUrl(true);
+        const res = await fetch("/api/contracts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: currentUser.id,
+            customerName: currentUser.name || pendingOrderData?.familyName || "Client",
+            email: currentUser.email,
+            locale: "ar"
+          })
+        });
+        const data = await res.json();
+        if (data.sign_page_url) {
+          const urlStr = data.sign_page_url;
+          const separator = urlStr.includes('?') ? '&' : '?';
+          const redirectParams = `embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`;
+          setSignUrl(urlStr + separator + redirectParams);
+        }
+      } catch (err) {
+        console.error("Failed to generate contract:", err);
+      } finally {
+        setIsLoadingUrl(false);
+      }
+    }
+    initContract();
+  }, [currentUser, pendingOrderData]);
+
+  useEffect(() => {
     // 1. Listen for messages from eSignatures iframe
     const handleMessage = (event: MessageEvent) => {
       console.log("Iframe message received:", event.origin, event.data);
       
-      // Handle different possible payload formats from eSignatures
       const isSignedStr = typeof event.data === "string" && 
         (event.data.includes("signed") || event.data === "contract_signed" || event.data === "esignature_success");
         
@@ -36,7 +68,7 @@ export function ESignature() {
 
     window.addEventListener("message", handleMessage);
 
-    // 2. Poll the backend as a fallback (if webhook is active)
+    // 2. Poll the backend as a fallback
     let interval: NodeJS.Timeout | null = null;
     if (currentUser) {
       interval = setInterval(async () => {
@@ -65,7 +97,6 @@ export function ESignature() {
     <div className="bg-brand-50 min-h-screen py-12 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-[85vh]">
         
-        {/* Same step as contract review */}
         <OrderStepper currentStep={3} />
 
         <div className="bg-white p-4 md:p-8 rounded-[2rem] shadow-xl border border-brand-100 flex-1 flex flex-col items-center justify-center text-center relative overflow-hidden mb-8">
@@ -77,20 +108,30 @@ export function ESignature() {
                </div>
                <h2 className="text-2xl font-bold text-brand-900 mb-2">توقيع عقد تقديم الخدمة</h2>
                <p className="text-brand-600 max-w-lg mb-6 text-sm">
-                 يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع يمكنك الضغط على زر "المتابعة" بالأسفل للذهاب لصفحة الدفع.
+                 يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع سيتم توجيهك تلقائياً لصفحة الدفع.
                </p>
                
-               <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200" style={{ height: '700px' }}>
-                 {/* eSignatures Iframe */}
-                 <iframe 
-                   src={`https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857?embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`} 
-                   width="100%" 
-                   height="100%" 
-                   style={{ border: 'none', minHeight: '700px' }}
-                   id="eSignaturesIframe"
-                   title="eSignatures Contract"
-                   sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-                 />
+               <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200 flex items-center justify-center relative" style={{ height: '750px' }}>
+                 {isLoadingUrl ? (
+                   <div className="flex flex-col items-center justify-center text-brand-500">
+                     <Loader2 className="w-10 h-10 animate-spin mb-4" />
+                     <p>جاري تجهيز عقد الخدمة...</p>
+                   </div>
+                 ) : signUrl ? (
+                   <iframe 
+                     src={signUrl}
+                     width="100%" 
+                     height="100%" 
+                     style={{ border: 'none', minHeight: '750px', position: 'absolute', top: 0, left: 0 }}
+                     id="eSignaturesIframe"
+                     title="eSignatures Contract"
+                     sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+                   />
+                 ) : (
+                   <div className="text-red-500 font-medium p-4">
+                     حدث خطأ أثناء استخراج رابط التوقيع. يرجى المحاولة مرة أخرى أو تحديث الصفحة.
+                   </div>
+                 )}
                </div>
              </>
            ) : (
@@ -100,8 +141,9 @@ export function ESignature() {
                </div>
                <h2 className="text-3xl font-bold text-brand-900 mb-4">تم التوقيع بنجاح</h2>
                <p className="text-brand-600 max-w-lg mb-8 text-lg leading-relaxed">
-                 لقد قمت بإتمام التوقيع الإلكتروني بنجاح. يمكنك الآن متابعة الرحلة لإتمام عملية الدفع وتفعيل طلبك.
+                 لقد قمت بإتمام التوقيع الإلكتروني بنجاح. جاري التحويل لصفحة الدفع...
                </p>
+               <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
              </div>
            )}
         </div>
@@ -117,10 +159,10 @@ export function ESignature() {
           </button>
           
           <button 
-            onClick={() => navigate("/order?payment=true")}
-            className="px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 bg-brand-600 text-white hover:bg-brand-500 cursor-pointer"
+            disabled={true}
+            className={`px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 bg-gray-200 text-gray-400 cursor-not-allowed`}
           >
-            لقد أتممت التوقيع - المتابعة للدفع <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
+             في انتظار التوقيع للمتابعة <Loader2 className="w-5 h-5 animate-spin md:w-6 md:h-6" />
           </button>
         </div>
       </div>

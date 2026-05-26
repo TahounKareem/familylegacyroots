@@ -167,7 +167,7 @@ async function startServer() {
   app.post("/api/contracts", async (req, res) => {
     try {
       const { orderId, customerName, email, locale } = req.body;
-      const apiToken = process.env.ESIGNATURES_API_TOKEN;
+      const apiToken = process.env.ESIGNATURES_API_TOKEN || "7a11f980-20ff-4e8a-98ce-6877582db521";
       
       if (!apiToken) {
         // Fallback for development without token
@@ -183,7 +183,7 @@ async function startServer() {
         process.env.ESIGNATURES_TEMPLATE_ID_EN;
 
       const payload = {
-        template_id: templateId,
+        template_id: templateId || "1e7a31ca-f0dc-480a-a209-de74843b9857", // Using the template ID from their previous iframe
         signature_request_delivery_methods: [], // NO SMS/Email, embedded only
         signers: [
           {
@@ -198,7 +198,7 @@ async function startServer() {
         }
       };
 
-      const response = await fetch("https://esignatures.com/api/contracts", {
+      const response = await fetch("https://esignatures.io/api/contracts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
