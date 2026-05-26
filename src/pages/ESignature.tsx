@@ -10,6 +10,7 @@ export function ESignature() {
   const [isSigned, setIsSigned] = useState(false);
   const [signUrl, setSignUrl] = useState<string | null>(null);
   const [isLoadingUrl, setIsLoadingUrl] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentUser || !pendingOrderData) {
@@ -22,6 +23,8 @@ export function ESignature() {
       if (!currentUser?.id) return;
       try {
         setIsLoadingUrl(true);
+        setErrorMsg(null);
+        
         const res = await fetch("/api/contracts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -33,6 +36,11 @@ export function ESignature() {
           })
         });
         const data = await res.json();
+        
+        if (!res.ok || data.error) {
+          throw new Error(data.error || "فشل في إنشاء العقد من الخادم");
+        }
+        
         const urlStr = data?.data?.contract?.signers?.[0]?.sign_page_url || data?.contract?.signers?.[0]?.sign_page_url;
         
         if (urlStr) {
@@ -40,10 +48,11 @@ export function ESignature() {
           const redirectParams = `embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`;
           setSignUrl(urlStr + separator + redirectParams);
         } else {
-          throw new Error("لم يتم العثور على رابط التوقيع في الرد");
+          throw new Error("لم يتم العثور على رابط التوقيع في الرد: " + JSON.stringify(data));
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to generate contract:", err);
+        setErrorMsg(err.message || "حدث خطأ غير معروف");
       } finally {
         setIsLoadingUrl(false);
       }
