@@ -190,6 +190,7 @@ async function startServer() {
           {
             name: customerName || "Client",
             email: email || "user@example.com",
+            redirect_url: clientOrigin ? `${clientOrigin}/e-signature-success` : '',
           }
         ],
         metadata: orderId || ''

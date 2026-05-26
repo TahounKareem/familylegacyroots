@@ -62,7 +62,7 @@ export function KnowledgeCenter() {
   const NewsletterInline = () => (
     <div className="relative mx-auto rounded-2xl w-full max-w-2xl overflow-hidden shadow-md group mt-8">
       <img 
-        src="https://i.postimg.cc/xCwMPv5v/News-Letter-(2).png" 
+        src="https://i.postimg.cc/76PGqB6Y/News-Letter-N.jpg" 
         alt="اشترك في النشرة البريدية" 
         className="w-full h-auto object-cover" 
       />
@@ -91,15 +91,15 @@ export function KnowledgeCenter() {
                 btn.textContent = 'انضم';
               }
             }
-          }} className="flex flex-row gap-2 relative z-10 w-full" dir="rtl">
+          }} className="flex flex-col gap-2 relative z-10 w-full" dir="rtl">
           <input 
             type="email" 
             name="email"
             placeholder="البريد الإلكتروني" 
             required
-            className="flex-1 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/95 focus:bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C3262A] text-[10px] sm:text-xs text-right font-medium"
+            className="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/95 focus:bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C3262A] text-[10px] sm:text-xs text-right font-medium"
           />
-          <button type="submit" className="bg-[#C3262A] hover:bg-[#a61c20] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-bold transition-colors text-[10px] sm:text-xs shadow-sm whitespace-nowrap">
+          <button type="submit" className="w-full bg-[#C3262A] hover:bg-[#a61c20] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-bold transition-colors text-[10px] sm:text-xs shadow-sm">
             انضم
           </button>
         </form>

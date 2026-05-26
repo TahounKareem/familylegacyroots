@@ -45,8 +45,8 @@ export function ESignature() {
         const urlStr = data?.data?.contract?.signers?.[0]?.sign_page_url || data?.contract?.signers?.[0]?.sign_page_url;
         
         if (urlStr) {
-          const separator = urlStr.includes('?') ? '&' : '?';
-          setSignUrl(urlStr + separator + 'embedded=yes');
+          // Remove embedded since we want a popup/new window experience
+          setSignUrl(urlStr);
         } else {
           throw new Error("لم يتم العثور على رابط التوقيع في الرد: " + JSON.stringify(data));
         }
@@ -123,25 +123,37 @@ export function ESignature() {
                  يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع سيتم توجيهك تلقائياً لصفحة الدفع.
                </p>
                
-               <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200 flex items-center justify-center relative" style={{ height: '750px' }}>
+               <div className="w-full bg-[#f8f9fa] rounded-2xl p-8 shadow-inner border border-gray-200 flex flex-col items-center justify-center relative min-h-[400px]">
                  {isLoadingUrl ? (
                    <div className="flex flex-col items-center justify-center text-brand-500">
                      <Loader2 className="w-10 h-10 animate-spin mb-4" />
                      <p>جاري تجهيز عقد الخدمة...</p>
                    </div>
                  ) : signUrl ? (
-                   <iframe 
-                     src={signUrl}
-                     width="100%" 
-                     height="100%" 
-                     style={{ border: 'none', minHeight: '750px', position: 'absolute', top: 0, left: 0 }}
-                     id="eSignaturesIframe"
-                     title="eSignatures Contract"
-                     sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-                   />
+                   <div className="flex flex-col items-center space-y-6">
+                     <p className="text-gray-700 text-lg">الرجاء الضغط على الزر أدناه لفتح وثيقة العقد في صفحة جديدة وبدء التوقيع.</p>
+                     <button
+                       onClick={() => window.open(signUrl, 'sign_popup', 'width=800,height=800')}
+                       className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg shadow-lg flex items-center gap-3 transition"
+                     >
+                       <PenTool className="w-6 h-6" />
+                       فتح لـتـوقيـع الـعـقـد
+                     </button>
+                     <p className="text-sm text-gray-500 max-w-sm mt-4">
+                       بعد التوقيع، سيتم تحديث هذه الصفحة والمتابعة تلقائياً. في حال لم يحدث ذلك، يرجى تحديث الصفحة.
+                     </p>
+                     {(currentUser?.role === 'admin' || currentUser?.role === 'maestro') && (
+                       <button
+                         onClick={() => { setIsSigned(true); navigate("/order?payment=true", { replace: true }); }}
+                         className="mt-8 text-xs underline text-red-500"
+                       >
+                         تخطي للإختبار (المدير العام)
+                       </button>
+                     )}
+                   </div>
                  ) : (
                    <div className="text-red-500 font-medium p-4">
-                     {errorMsg || "حدث خطأ أثناء استخراج رابط التوقيع. يرجى مراجعة إعدادات قالب eSignatures.io الخاص بك."}
+                     {errorMsg || "حدث خطأ أثناء استخراج رابط التوقيع. يرجى מراجعة إعدادات قالب eSignatures.io الخاص بك."}
                    </div>
                  )}
                </div>

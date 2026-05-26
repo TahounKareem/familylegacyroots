@@ -1,34 +1,38 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { motion, AnimatePresence } from "motion/react";
-import { ArrowUp, BookOpen, Layers, CheckCircle2, Bookmark, Info, Users, Image as ImageIcon, FileText } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowUp, BookOpen, Clock, ShieldCheck, CheckCircle2, Bookmark, Info, Users, FileText, Lock, Coins, Sparkles, LayoutList } from 'lucide-react';
 
 export function Services() {
-  const [activeSection, setActiveSection] = useState("");
+  const [activeSection, setActiveSection] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showFlexiblePaymentInfo, setShowFlexiblePaymentInfo] = useState(false);
+  const [showFullPaymentInfo, setShowFullPaymentInfo] = useState(false);
 
   const sections = [
-    { id: "memory", title: "ذاكرة العائلة" },
-    { id: "what-is", title: "ما هو سجل تراث العائلة؟" },
-    { id: "methodology", title: "المنهجية المعتمدة" },
-    { id: "scope", title: "نطاق السجل" },
-    { id: "role", title: "دور أمين السجل / العميل" },
-    { id: "contents", title: "محتويات السجل" },
+    { id: 'memory', title: 'ذاكرة العائلة' },
+    { id: 'what-is', title: 'ما هو سجل تراث العائلة؟' },
+    { id: 'why-different', title: 'لماذا هذا السجل مختلف؟' },
+    { id: 'methodology', title: 'المنهجية المعتمدة' },
+    { id: 'content-model', title: 'نموذج لمحتوى السجل' },
+    { id: 'basic-edition', title: 'الإصدار الأساسي' },
+    { id: 'advanced-research', title: 'البحث المتقدم' },
+    { id: 'what-is-included', title: 'ما الذي يشمله السجل؟' },
+    { id: 'curator', title: 'أمين السجل' },
+    { id: 'timeline', title: 'مدة العمل' },
+    { id: 'privacy', title: 'الخصوصية وحماية البيانات' },
+    { id: 'investment', title: 'الاستثمار في حفظ إرث العائلة' },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show/hide scroll to top button
       if (window.scrollY > 300) {
         setShowScrollTop(true);
       } else {
         setShowScrollTop(false);
       }
-
-      // Determine active section
       const sectionElements = sections.map((s) => document.getElementById(s.id));
-      let currentActive = "";
-      
+      let currentActive = '';
       for (const el of sectionElements) {
         if (el) {
           const rect = el.getBoundingClientRect();
@@ -42,32 +46,32 @@ export function Services() {
         setActiveSection(currentActive);
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [activeSection]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       const y = element.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="bg-brand-50 min-h-screen pb-20 relative">
-      {/* Hero Section */}
       <div className="bg-white py-16 mb-12 shadow-sm border-b border-brand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <BookOpen className="w-12 h-12 text-brand-600 mx-auto mb-6" />
-          <h1 className="font-serif text-5xl font-bold text-brand-900 mb-6">سجل تراث العائلة</h1>
-          <p className="text-xl text-brand-700 max-w-2xl mx-auto font-light">
-            نوثق تاريخ وعراقة عائلتكم في قالب فني أنيق وإحترافي
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold text-brand-900 mb-6">سجل تراث العائلة</h1>
+          <p className="text-xl text-brand-700 max-w-2xl mx-auto font-light leading-relaxed">
+            <span className="font-bold">سجل يوثق عمود النسب والذاكرة العائلية</span><br/><br/>
+            نوثق الروايات والوثائق وعمود النسب ضمن سجل عائلي يجمع البحث التاريخي والإخراج الأنيق.<br/>
+            كل جيل يحمل جزءًا من الرواية… حتى يأتي من يجمعها في سجل واحد.
           </p>
         </div>
       </div>
@@ -75,7 +79,6 @@ export function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* Index Sidebar (Sticky) */}
           <div className="lg:w-1/4">
             <div className="sticky top-28 space-y-6">
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-brand-100 hidden lg:block">
@@ -90,8 +93,8 @@ export function Services() {
                       onClick={() => scrollToSection(sec.id)}
                       className={`text-right w-full transition-colors duration-200 text-sm md:text-base ${
                         activeSection === sec.id
-                          ? "text-brand-600 font-bold"
-                          : "text-brand-700 hover:text-brand-500 font-medium"
+                          ? 'text-brand-600 font-bold'
+                          : 'text-brand-700 hover:text-brand-500 font-medium'
                       }`}
                     >
                       {sec.title}
@@ -103,308 +106,344 @@ export function Services() {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:w-3/4 space-y-16 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-brand-100">
+          <div className="lg:w-3/4 space-y-16 bg-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-sm border border-brand-100 overflow-hidden">
             
-            {/* Section 1 */}
             <section id="memory" className="scroll-mt-32">
               <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <Bookmark className="w-8 h-8 text-brand-500" />
-                ذاكرة العائلة
+                <Bookmark className="w-8 h-8 text-brand-500 shrink-0" /> ذاكرة العائلة
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
-                <p>في الذاكرة الجمعية للعائلات، لا يُذكر النسب بوصفه معلومات، بل بوصفه امتداداً ، امتداد أسماء، وامتداد روايات، وامتداد شعور بالانتماء يتوارثه الناس كما يتوارثون الأسماء نفسها.</p>
-                <p>غير أن الزمن لا يحفظ الروايات كما قيلت، بل كما أُعيد سردها، ومع مرور الأجيال، يصبح الأصل أقل وضوحًا، لا لغيابه، بل لتراكم ما فوقه.</p>
-                <p>من هنا، لم يكن السؤال: كم نعرف؟ بل: كيف نُثبت ما نعرف؟ ولهذا، لم يُنشأ هذا العمل ليكون حكاية، ولا ليجمع كل ما يُقال، بل ليكون سجلًا.</p>
-                <p>والسجل، في تقاليده الأقدم، لا يُكتب استعجالاً، ولا يُغلق ادّعاءً، بل يُبنى على ما أُتيح، ويُقدَّم بوصفه معرفة محكومة بزمنها ومنهجها.</p>
-                <p>على هذا الأساس، يأتي "سجل تراث العائلة" بوصفه عملاً بحثياً يهدف إلى توثيق عمود نسب واحد صاعد، وفق ما تسمح به المصادر، وبما ينسجم مع أصول التوثيق العلمي.</p>
-                <ul className="list-disc list-inside space-y-2 mt-4 pr-4">
-                  <li>ليس طلبه الاتساع، بل الثبات.</li>
-                  <li>وليس غايته الجمع فقط، بل الدقة التي يمكن البناء عليها مستقبلاً .</li>
-                </ul>
+                <p>في الذاكرة العائلية لا يُذكر النسب بوصفه أسماء فقط، بل بوصفه امتدادًا للرواية والانتماء والهوية.</p>
+                <p>ومع مرور الزمن، تصبح بعض الروايات أقل وضوحًا، ليس لغيابها، بل لتراكم ما فوقها واختلاطها بما يُروى عبر الأجيال.</p>
+                <p>ومن هنا جاءت فكرة "سجل تراث العائلة"… ليس بوصفه مشجرة تقليدية، ولا مجرد تجميع للروايات، بل بوصفه سجلًا بحثيًا يوثق عمود النسب ضمن إطار علمي ومنهجي واضح.</p>
+                <p>نحن لا نسعى إلى جمع كل شيء، بل إلى توثيق ما يمكن إثباته بصورة مهنية مسؤولة، وبناء سجل معرفي يمكن الرجوع إليه والبناء عليه مستقبلًا.</p>
               </div>
             </section>
 
-            {/* Section 2 */}
-            <section id="what-is" className="scroll-mt-32">
+            <section id="what-is" className="scroll-mt-32 border-t border-brand-100 pt-16">
               <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <Info className="w-8 h-8 text-brand-500" />
-                ما هو سجل تراث العائلة؟
+                <Info className="w-8 h-8 text-brand-500 shrink-0" /> ما هو سجل تراث العائلة؟
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
-                <p>سجل توثيق العائلة هو منتج بحثي يُعد في صيغة وثيقة مكتوبة ، يهدف إلى تنظيم المعرفة النسبية ضمن إطار محدد وواضح.</p>
-                <p>يعتمد السجل على نقطة بدء معتمدة تمكنا من توثيق "عمود النسب" ، ويُبنى وفق تسلسل تصاعدي، مع الالتزام بما يتوافر من مصادر وبيانات قابلة للفحص والتحليل.</p>
-                <p>لا يتعامل السجل مع المعرفة بوصفها تراكمًا مفتوحًا، بل بوصفها مادة تحتاج إلى:</p>
-                <ul className="list-disc list-inside space-y-2 pr-4 bg-brand-50/50 p-4 rounded-xl">
-                  <li>تحديد</li>
-                  <li>تصنيف</li>
-                  <li>وربط منهجي</li>
+                <p>"سجل تراث العائلة" هو مشروع توثيق عن العائلة يجمع:</p>
+                <ul className="list-disc list-inside space-y-2 pr-4 bg-brand-50 p-6 rounded-2xl">
+                  <li>عمود النسب،</li>
+                  <li>الروايات،</li>
+                  <li>الوثائق،</li>
+                  <li>والمراجع المرتبطة بالعائلة،</li>
                 </ul>
-                <p>ويُنظر إلى السجل في صورته النهائية على أنه وثيقة مرجعية ضمن نطاقها، لا تمثّل كل ما يمكن معرفته، بل ما أمكن توثيقه على وجه مهني مسؤول.</p>
+                <p>ضمن سجل معرفي أنيق يُصمم ليبقى مرجعًا للأجيال القادمة.<br/><br/>ويُبنى السجل وفق:</p>
+                <ul className="list-disc list-inside space-y-2 pr-4 bg-brand-50 p-6 rounded-2xl">
+                  <li>منهجية بحثية واضحة،</li>
+                  <li>نطاق محدد،</li>
+                  <li>ومعالجة توثيقية متخصصة.</li>
+                </ul>
               </div>
             </section>
 
-            {/* Section 3 */}
+            <section id="why-different" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                <Sparkles className="w-8 h-8 text-brand-500 shrink-0" /> لماذا هذا السجل مختلف؟
+              </h2>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
+                <p>الاختلاف لا يكمن في حجم السجل أو عدد الأسماء الواردة فيه، بل في طريقة التعامل مع المعرفة النسبية ذاتها.<br/>يعتمد «سجل تراث العائلة» على:</p>
+                <ul className="list-disc list-inside space-y-2 pr-4">
+                  <li>توثيق عمود نسب واحد واضح ومحدد.</li>
+                  <li>الفصل بين الرواية والتوثيق.</li>
+                  <li>الاعتماد على مصادر ومراجع قابلة للمراجعة.</li>
+                  <li>تقديم السجل ضمن قالب بحثي وفني متوازن.</li>
+                </ul>
+                <p className="mt-4 font-medium pt-2 border-t border-brand-100">نحن لا نقدم مشجرة واسعة بلا معايير، بل سجلًا يُبنى على الوضوح والدقة والمنهجية.</p>
+              </div>
+            </section>
+
             <section id="methodology" className="scroll-mt-32 border-t border-brand-100 pt-16">
               <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <Layers className="w-8 h-8 text-brand-500" />
-                المنهجية المعتمدة
+                <FileText className="w-8 h-8 text-brand-500 shrink-0" /> المنهجية المعتمدة
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-6">
-                <p>تستند المنهجية المتبعة في إعداد السجل إلى مبادئ البحث التوثيقي المعتمدة في الدراسات التاريخية والنسبية. وتشمل هذه المنهجية، على وجه الخصوص:</p>
-                <ul className="space-y-3 pr-4">
-                  <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-500 shrink-0" /> تحديد نقطة بدء واضحة ومعتمدة لبدء توثيق عمود النسب .</li>
-                  <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-500 shrink-0" /> جمع البيانات من مصدر مسؤول واحد (أمين السجل / العميل) .</li>
-                  <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-500 shrink-0" /> الاستعانة بمصادر بحثية معتبرة و موثوقة .</li>
-                  <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-500 shrink-0" /> تحليل الربط النسبي وفق ما تسمح به المعطيات.</li>
-                  <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-500 shrink-0" /> صياغة النتائج في صورة وثيقة متماسكة.</li>
-                </ul>
-                <p>ويُراعى في جميع مراحل الإعداد الفصل بين:</p>
-                <ul className="list-disc list-inside space-y-2 pr-4">
-                  <li>ما ثبت توثيقه</li>
-                  <li>ما يرد بوصفه رواية</li>
-                  <li>وما لم تتوافر له قرائن كافية</li>
-                </ul>
-                <p>ويُعد هذا الفصل عنصراً جوهرياً في سلامة السجل وقابليته للاعتماد.</p>
-                
-                <h3 className="font-serif text-2xl font-bold text-brand-900 mt-10 mb-4">لماذا هذا السجل مختلف؟</h3>
-                <p>لا يتمثّل الاختلاف في الشكل أو الحجم، بل في طريقة التعامل مع المعرفة ذاتها. فالسجل لا يُقاس بعدد الأسماء التي يتضمنها، بل بوضوح المعايير التي أُدرجت بها تلك الأسماء.</p>
-                <p>إن قيمة هذا العمل تكمن في كونه يقدّم معرفة محددة النطاق، موثقة بقدر ما أُتيح لها، وقابلة للفهم والمراجعة في سياقها الصحيح.</p>
-                <p>ومن هذا المنطلق، يُنظر إلى السجل لا بوصفه نهاية، بل بوصفه أساسًا معرفيًا يمكن البناء عليه في مراحل لاحقة، ضمن أطر واضحة ومستقلة.</p>
-
-                <h3 className="font-serif text-2xl font-bold text-brand-900 mt-10 mb-4">كيف يُنشأ السجل؟</h3>
-                <p>لا يُنشأ السجل دفعة واحدة، ولا يُكتب بوصفه نتيجة فورية، بل يُبنى بناءاً على عدة اعتبارات، كما تُبنى الأعمال التي يُراد لها البقاء.</p>
-                <p>تبدأ العملية بتحديد نقطة البدء، وهي النقطة التي يُبنى عليها عمود النسب، ويُعتمد فيها مرجع واحد مسؤول عن تقديم البيانات الأولية ممثلة في شخص (أمين السجل/العميل) .</p>
-                <p>بعد ذلك، تُجمع المعطيات المتاحة، وتُقابل بما يمكن الرجوع إليه من مصادر، ويُحلَّل الربط النسبي ضمن ما يسمح به المنهج.</p>
-                <p>وفي المرحلة الأخيرة من هذا السجل الأساسي، تُصاغ النتائج في صورة سجل مكتوب، يُقدَّم بوصفه وثيقة توثيقية تعكس ما أمكن إثباته.</p>
+                <p>تستند منهجية إعداد السجل إلى مبادئ البحث التوثيقي المعتمدة في الدراسات التاريخية والنسبية.<br/><strong className="text-brand-900 text-xl block mt-4 mb-2">مراحل العمل</strong></p>
+                <div className="space-y-4">
+                  <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">1</div> تحديد نقطة البداية</h3>
+                    <p className="pr-8 text-brand-700">اعتماد نقطة العرض الأساسية التي يُبنى عليها عمود النسب.</p>
+                  </div>
+                  <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">2</div> جمع الروايات والبيانات</h3>
+                    <p className="pr-8 text-brand-700">جمع الروايات والمعطيات من أمين السجل بوصفه المرجع الأساسي للمشروع.</p>
+                  </div>
+                  <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">3</div> البحث والتحليل</h3>
+                    <p className="pr-8 text-brand-700">مراجعة المصادر والمراجع وتحليل الروابط النسبية وفق المعطيات المتاحة.</p>
+                  </div>
+                  <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">4</div> بناء عمود النسب</h3>
+                    <p className="pr-8 text-brand-700">ربط طبقات الامتداد العائلي ضمن إطار بحثي واضح.</p>
+                  </div>
+                  <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">5</div> إعداد السجل النهائي</h3>
+                    <p className="pr-8 text-brand-700">إخراج السجل ضمن وثيقة عائلية تجمع البحث التاريخي والتصميم الأنيق.</p>
+                  </div>
+                </div>
               </div>
             </section>
 
-            {/* Section 4 */}
-            <section id="scope" className="scroll-mt-32 border-t border-brand-100 pt-16">
+            <section id="content-model" className="scroll-mt-32 border-t border-brand-100 pt-16">
               <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <FileText className="w-8 h-8 text-brand-500" />
-                نطاق السجل
+                <LayoutList className="w-8 h-8 text-brand-500 shrink-0" /> نموذج لمحتوى السجل
+              </h2>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-6">
+                <p>يصدر "سجل تراث العائلة" ضمن عدة أقسام مترابطة تشكل البنية المعرفية للسجل، وهنا نموذج لمحتوى سجل يتضمن أهم الأقسام الرئيسية :</p>
+                
+                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-200 shadow-sm space-y-8">
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">التقديم العام</h3>
+                    <p>مقدمة تعريفية بالسجل ونقطة العرض الأساسية والامتداد النسبي المرتبط بالعائلة.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">السجل النسبي</h3>
+                    <p>القسم البحثي الرئيسي في السجل، ويتضمن:</p>
+                    <ul className="space-y-2 mt-3 pr-4">
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> مفاتيح السجل النسبي.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> عمود النسب.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> فروع العائلة الرئيسية.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> الانتساب الموروث.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> تراجم العقد النسبية.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> توثيق المصادر والمراجع.</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">عمود النسب</h3>
+                    <p>القسم المركزي في السجل، ويشمل: طبقات الامتداد النسبي، العلاقات بين الأجيال، توثيق التسلسل النسبي، والمراجع المرتبطة بكل طبقة من طبقات العمود.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">توثيق المصادر والمراجع</h3>
+                    <p>يتضمن: مصادر العقد النسبية، المراجع التاريخية، تراجم الشخصيات الواردة في السجل، والوثائق المتاحة المرتبطة بالبحث.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">مساحة الإدراج الاختياري</h3>
+                    <p>يوفر السجل مساحة اختيارية تتيح لأمين السجل إضافة بعض المواد العائلية الخاصة التي تضيف بعدًا إنسانيًا وتاريخيًا للسجل. وقد تشمل:</p>
+                    <ul className="space-y-2 mt-3 pr-4">
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> كلمة خاصة للعائلة.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> نبذة تاريخية عن العائلة.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> صورًا ووثائق مختارة.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> بعض الروايات أو القصص العائلية.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> معلومات مرتبطة ببعض أفراد العائلة.</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-brand-900 text-xl border-b border-brand-100 pb-2 mb-3">إبقاء السجل حيًا</h3>
+                    <p>يتيح هذا القسم:</p>
+                    <ul className="space-y-2 mt-3 pr-4">
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> الوصول إلى النسخة الرقمية،</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> تحديث البيانات،</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> إصدار نسخ إضافية،</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> وربط السجل برمز QR للقراءة الرقمية.</li>
+                      <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-400"></div> خدمة الأبحاث المتقدمة "فتح الأبواب المغلقة" ، بناءاً على توصيات فريق البحث بعد اصدار السجل الأساسي.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="basic-edition" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                <BookOpen className="w-8 h-8 text-brand-500 shrink-0" /> الإصدار الأساسي
+              </h2>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
+                <p>يمثل «الإصدار الأساسي» المرحلة الجوهرية في رحلة التوثيق، وهو العمل الذي يتم خلاله توثيق عمود النسب وإعداد السجل الأساسي للعائلة.</p>
+                <p>ويُعد هذا الإصدار القاعدة التي يمكن البناء عليها مستقبلًا في حال الحاجة إلى مسارات بحثية إضافية أو أبحاث متقدمة.</p>
+              </div>
+            </section>
+
+            <section id="advanced-research" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                <Sparkles className="w-8 h-8 text-brand-500 shrink-0" /> البحث المتقدم
+              </h2>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
+                <p>في بعض الحالات، قد يقترح فريق البحث مسارات إضافية لتعميق التوثيق أو معالجة بعض الجوانب التي تحتاج إلى أعمال بحثية متقدمة.</p>
+                <p>وتشمل هذه المسارات — عند الحاجة — أنواعًا متخصصة من البحث، مثل:</p>
+                <ul className="list-disc list-inside space-y-2 pr-4 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                  <li>البحث في الوثائق والسجلات الرسمية.</li>
+                  <li>البحث في الأرشيفات التاريخية.</li>
+                  <li>دراسة بعض القرائن المرتبطة بالبحث.</li>
+                  <li>تحليل وتفسير نتائج الحمض النووي وربطها بالسياق النسبي.</li>
+                </ul>
+                <p>ويتم تقديم أي توصيات بحثية متقدمة بعد صدور الإصدار الأساسي من السجل.</p>
+              </div>
+            </section>
+
+            <section id="what-is-included" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                <CheckCircle2 className="w-8 h-8 text-brand-500 shrink-0" /> ما الذي يشمله السجل؟
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-8">
                 
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-3">البحث العلمي والتوثيق:</h3>
-                  <p>يقوم سجل توثيق العائلة على توثيق عمود نسب واحد صاعد، يبدأ من نقطة محددة – يحددها امين (السجل/العميل) كأحد اجداده الذين يختارهم على سبيل المثال - ، ويُبنى تسلسلياً وفق ما يتاح من معطيات.</p>
-                  <p className="mt-4">هذا التحديد ليس خياراً شكلياً ، بل هو ما يمنح السجل:</p>
-                  <ul className="list-disc list-inside space-y-2 mt-2 pr-4">
-                    <li>تماسكه</li>
-                    <li>قابليته للفهم</li>
-                    <li>وصلاحيته كمرجع</li>
-                  </ul>
-                  <p className="mt-4 text-brand-600 bg-brand-50 p-4 rounded-xl border border-brand-100">ويُعتمد هذا النطاق كاملاً قبل بدء العمل البحثي، وفق شروط وأحكام عقد تقديم الخدمة.</p>
+                <div className="bg-green-50 p-6 md:p-8 rounded-3xl border border-green-200 shadow-sm">
+                   <h3 className="font-bold text-green-900 text-2xl mb-4 border-b border-green-200 pb-3 font-serif">يشمل الإصدار الأساسي من «سجل تراث العائلة»:</h3>
+                   <ul className="space-y-3 pr-4 text-green-900 font-medium">
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> البحث العلمي والتاريخي المتخصص.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق المصادر والمراجع.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق تراجم الشخصيات الواردة في عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> مواءمة مواد الإدراج الاختياري ضمن السجل.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> التصميم والإخراج الفني الاحترافي.</li>
+                   </ul>
+                   <h3 className="font-bold text-green-900 mt-8 mb-4 border-b border-green-200 pb-3 text-xl font-serif">ويتم تسليم العمل عبر:</h3>
+                   <ul className="space-y-3 pr-4 text-green-900 font-medium">
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> نسخة رقمية إلكترونية.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> 10 نسخ مطبوعة بإخراج أنيق.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> بوستر لمخطط عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> حافظة أنيقة للبوستر.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> شحن الباقة.</li>
+                   </ul>
                 </div>
 
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-3">عمود النسب (نقطة البدء):</h3>
-                  <p>يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ويمكن لأمين السجل إختيار أحد اسلافه (المشهورين) بدءاً من الأب او أحد الأجداد الذين يختارهم لبدء توثيق عمود النسب ، وبالطبع سيتم سرد سلسلة النسب التي تشمل أمين السجل / العميل تصاعدياً مروراً بنقطة البدء التي اختارها .</p>
+                <div className="bg-red-50 p-6 md:p-8 rounded-3xl border border-red-200 mt-8 shadow-sm">
+                   <h3 className="font-bold text-red-900 text-2xl mb-4 border-b border-red-200 pb-3 font-serif">ما الذي لا يشمله السجل؟</h3>
+                   <p className="mb-4 text-red-900 font-medium">يركز الإصدار الأساسي على توثيق عمود النسب ضمن النطاق المتفق عليه. ولذلك، لا يشمل:</p>
+                   <ul className="space-y-3 pr-4 text-red-900">
+                      <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> تشجير العائلة الموسع.</li>
+                      <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> التوسع خارج نطاق عمود النسب المتعاقد عليه.</li>
+                      <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> أعمال الحمض النووي أو تفسيرها ضمن الإصدار الأساسي.</li>
+                      <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> الأبحاث المتقدمة في الأرشيفات الحكومية والتاريخية.</li>
+                   </ul>
+                   <p className="mt-6 text-red-900 font-medium p-4 bg-white rounded-xl border border-red-100 shadow-sm border-r-4 border-r-red-400">وفي حال الحاجة إلى أي أعمال بحثية إضافية، فقد يقترح فريق البحث مسارات متقدمة مستقلة بعد صدور الإصدار الأساسي.</p>
                 </div>
 
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-3">السجل الأساسي:</h3>
-                  <p>نقدم خدمات توثيق الأنساب " عمود النسب" وفق نموذج مرحلي يبدأ بخدمة أساسية إلزامية وهي خدمة اصدار السجل الأساسي "سجل تراث العائلة" .</p>
-                  <p>يعتبر هذا الأصدار من "سجل تراث العائلة" هو السجل الأساسي ، وهو العمل الجوهري الذي تكون من خلالة رحلة توثيق عمود النسب ، وبعد صدور هذا السجل الأساسي ، قد يقترح فريق البحث بعض التوصيات في بعض الحالات التي لاتتوفر فيها مصادر كافية أو يحتاج البحث الى بحث متقدم من نوع آخر ، وهنا تأتي خدمة "فتح الأبواب المغلقة" لتفتح ابواباً آخرى من البحث عند رغبة (أمين السجل/العميل) في ذلك .</p>
+                <div className="mt-8 rounded-[2rem] overflow-hidden shadow-lg border border-brand-100 bg-white p-2">
+                  <img src="https://i.postimg.cc/13fQKqzZ/img1.png" alt="مخطط السجل" className="w-full h-auto object-cover rounded-2xl" />
                 </div>
-
-                <div className="bg-brand-50 rounded-2xl p-6 border border-brand-200">
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-3">خدمة فتح الأبواب المغلقة:</h3>
-                  <p>خدمة اختيارية تُقدَّم بعد تثبيت الأصل، وتهدف إلى تعميق التوثيق عبر أدوات بحث متقدمة، تُفعّل جزئيًا أو كليًا حسب مقتضيات البحث العلمي .</p>
-                  <h4 className="font-bold text-brand-900 mt-6 mb-2">كيف تعمل خدمة فتح الأبواب المغلقة</h4>
-                  <p>بعد الإنتهاء من مرحلة إصدار السجل الأساسي والذي فيه يتم تثبيت الأصل ، يتم — عند الرغبة — فتح الأبواب المغلقة للبحث المتقدم.</p>
-                  <p className="mt-4 font-bold text-brand-900">تشمل خدمة "فتح الأبواب المغلقة" على انواع من البحوث المتخصصة والمعمقة ، من أجل فتح بعض الأبواب المغلقة والتي ابرزها الأصدار الأساسي للسجل ، وقد تكون على سبيل المثال أحد هذه الأنواع من الأعمال البحثية:</p>
-                  <ul className="list-disc list-inside space-y-2 mt-2 pr-4">
-                    <li>البحث في الوثائق والسجلات الرسمية.</li>
-                    <li>البحث في الأراشيف الحكومية التاريخية.</li>
-                    <li>تفسير نتائج الحمض النووي وربطها بالسياق النسبي</li>
-                  </ul>
-                  <div className="mt-4 p-4 bg-white rounded-xl border border-brand-100 text-sm">
-                    <strong>ملحوظة:</strong> سيتم تقديم توصيات علمية من فريق البحث حول إمكانية توسيع البحث المتقدم وذلك عبر المنصة بعد صدور سجل تراث العائلة – السجل الأساسي الخاص بكم .
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-3">الإدراج الإختياري:</h3>
-                  <p>قسم الإدراج الإختياري هو القسم الذي يقدمه (أمين السجل / العميل) – عند رغبته – ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم (بين يدي السجل ) من أجل جعل السجل أكثر خصوصية للعائلة والذي قد يشمل على سبيل المثال مايلي:</p>
-                  <ul className="space-y-3 mt-4 pr-4">
-                    <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2 rounded-full bg-brand-400 shrink-0"></div> <strong>كلمة لأمين السجل / العميل.</strong></li>
-                    <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2 rounded-full bg-brand-400 shrink-0"></div> <strong>نبذة تاريخية عن العائلة.</strong></li>
-                    <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2 rounded-full bg-brand-400 shrink-0"></div> <strong>مشجر الأحياء:</strong> ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام .</li>
-                    <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2 rounded-full bg-brand-400 shrink-0"></div> <strong>الصور:</strong> يمكن لأمين السجل /العميل إدراج صور لأفراد العائلة مثل ( صور الأشخاص المدرجين ضمن مشجر الأحياء ، او صور بقية الأشخاص في عمود النسب الصاعد فقط .</li>
-                    <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2 rounded-full bg-brand-400 shrink-0"></div> <strong>الوثائق:</strong> يمكن ادراج اي وثائق يرغب أمين السجل / العميل في ادراجها.</li>
-                  </ul>
-                  <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-100 text-sm">
-                    <strong>ملحوظة:</strong> يتعين أن تكون الصور والوثائق المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة .
-                  </div>
-                  <div className="mt-4 p-4 bg-white shadow-sm rounded-xl border border-brand-100">
-                    <strong className="text-brand-900 block mb-2">الخصوصية:</strong>
-                    <p className="text-sm">جميع الإدراجات المقدمة من أمين السجل / العميل يتم التعامل معها بخصوصية وسرية تامة ، عبر المنصة ، والتي تحضى بأعلى معايير الأمان التقني والتشفير ، كما اننا نأخذ مسائل الخصوصية والإمتثال للقوانين الخاصة بالخصوصية وسرية البيانات بجدية تامة وتخضع أعمالنا البحثية لمعايير حماية الخصوصية وسرية البيانات كما تنص عليه القوانين الأمريكية ، وقوانين الخصوصية وسرية البيانات (GDPR ) الأوربية ، والقوانين المحلية الأخرى المرعية في معالجة البيانات.</p>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-brand-100">
-                  <div className="bg-white p-6 rounded-2xl border border-brand-200">
-                    <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">مدة العمل:</h3>
-                    <p>يتم عمل البحث خلال مدة لاتتجاوز 90 يوماً تبدأ من تاريخ الإشتراك في الباقة ، وحسب ما تنص عليه شروط وأحكام عقد تقديم الخدمة.</p>
-                  </div>
-                  <div className="bg-white p-6 rounded-2xl border border-brand-200">
-                    <h3 className="font-serif text-xl font-bold text-brand-900 mb-3">شروط وأحكام الخدمة:</h3>
-                    <p>يتضمن عقد الخدمة الموقع من قبل العميل شروط وأحكام الخدمة بالتفصيل ، ويعتبر العقد هو المرجع في تقديم هذه الخدمة ، وننصح العميل بقراءة الشروط والأحكام بعناية .</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-brand-900 mb-6">ما الذي يشمله السجل الأساسي / وما الذي لا يشمله؟</h3>
-                  
-                  <div className="bg-green-50/50 p-6 rounded-2xl border border-green-100 mb-6">
-                    <h4 className="font-bold text-green-800 text-xl mb-4">مايشتمل عليه السجل الأساسي:</h4>
-                    <p className="mb-4">لا يُقاس السجل بما يستوعبه، بل بما يُحسن تنظيمه، لذلك، يركّز هذا العمل على ما يمكن تثبيته ضمن المسار المعتمد، ويُبقي ما عدا ذلك خارج نطاق الإصدار الأساسي، وهذا السجل الأساسي يشمل الأعمال والمخرجات التالية:</p>
-                    <ul className="space-y-3 pr-4 text-green-900">
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> عمل البحث العلمي والتاريخي المتخصص .</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> توثيق خط نسب أمين السجل /العميل "عمود النسب ".</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> توثيق المصادر والمراجع للعُقَد النسبية .</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> توثيق المصادر والمراجع لتراجم الأعلام "السير الذاتية".</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> تنسيق وموائمة مواد قسم الإدراج الإختياري الخاص بأمين السجل / العميل ، مع بقية الأقسام.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> أعمال التصميم والإخراج الفني المحترف.</li>
-                      <li className="flex gap-3 items-start">
-                        <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> 
-                        <div>
-                          <strong>تسليم العمل "سجل تراث العائلة" على شكل المخرجات التالية:</strong>
-                          <ul className="list-disc list-inside mt-2 pr-4 space-y-1">
-                            <li>نسخة رقمية "الكترونية"</li>
-                            <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق .</li>
-                            <li>بوستر مشجر عمود النسب الشامل .</li>
-                          </ul>
-                        </div>
-                      </li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" /> تكاليف الشحن للباقة .</li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-red-50/50 p-6 rounded-2xl border border-red-100">
-                    <h4 className="font-bold text-red-800 text-xl mb-4">مالايشتمل عليه السجل:</h4>
-                    <p className="text-red-900 leading-relaxed mb-4">لاتشمل أعمال السجل الأساسي أي اعمال خارج النطاق المذكور اعلاه ، لايمكن توسعة البحث خارج النطاق المتعاقد عليه ، لايشمل تشجير العائلة او اي طبقة من طبقات النسب ، لايشمل اعمال فحص او تفسير الحمض النووي ، او البحوث المتقدمة في الأراشيف الحكومية او غيرها .</p>
-                    <div className="bg-white p-4 rounded-xl border border-red-200 text-sm text-brand-800">
-                      <strong>ملحوظة:</strong> عند حاجة العمل الي اي من الأعمال البحثية المتقدمة ، فسوف يقترح ويوصي فريق البحث بما هو مفيد ومنتج لعمل بحث متقدم عبر خدمة "فتح الأبواب المغلقة" لكن بعد صدور السجل الأساسي الذي هو القاعدة الأساسية لأي اعمال بحث موسع ومتقدم .
-                    </div>
-                  </div>
-                </div>
-
               </div>
             </section>
 
-            {/* Section 5 */}
-            <section id="role" className="scroll-mt-32 border-t border-brand-100 pt-16">
-              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <Users className="w-8 h-8 text-brand-500" />
-                دور أمين السجل / العميل
+            <section id="curator" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                <Users className="w-8 h-8 text-brand-500 shrink-0" /> أمين السجل
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
-                <p>في السجلات، لا تُبنى المعرفة على تعدد الأصوات، بل على وضوح المرجع. لهذا، يُعتمد في هذا العمل أمين سجل واحد، يكون نقطة البدء في عمود النسب، والمرجع المسؤول عن تقديم البيانات والتواصل ويعني أن العمل يُدار عبر قناة واضحة، تحفظ دقة المعلومات واستقرار مسار التوثيق.</p>
-                <div className="bg-brand-50 p-6 rounded-2xl mt-6 border border-brand-100">
-                  <h3 className="font-bold text-brand-900 mb-3 text-xl">مسؤلية أمين السجل / العميل:</h3>
-                  <p>سيكون أمين السجل / العميل مسؤلاً عن التعاقد مع شركتنا ، وسيكون المصدر الوحيد المخول بتقديم البيانات عبر المنصة الكترونياً وحصرياً ، والتي تتيح له رفع وتبادل البيانات بخصوصية وسرية تامة ، وسيكون مسؤلاً عن صحة البيانات المقدمة من قبله وعن مراعاته للحقوق والخصوصية وسرية البيانات للأشخاص الذين يريد إدراجهم في السجل ، وفق ما ينص عليه عقد تقديم الخدمة .</p>
-                </div>
+                <p>يعتمد المشروع على أمين سجل واحد يمثل المرجع الأساسي للمشروع، ويعتبر "العميل" هو أمين السجل ونقطة العرض الأساسية لعمود النسب ويتولى:</p>
+                <ul className="list-disc list-inside space-y-2 pr-4 bg-brand-50 p-6 rounded-2xl border border-brand-100 font-medium">
+                  <li>تقديم البيانات الأولية،</li>
+                  <li>متابعة مراحل العمل،</li>
+                  <li>التواصل مع فريق البحث،</li>
+                  <li>وإدارة الإدراجات المرتبطة بالسجل.</li>
+                </ul>
+                <p>ويهدف ذلك إلى الحفاظ على دقة المعلومات واستقرار مسار التوثيق.</p>
               </div>
             </section>
 
-            {/* Section 6 */}
-            <section id="contents" className="scroll-mt-32 border-t border-brand-100 pt-16">
-              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-brand-500" />
-                محتويات السجل
+            <section id="timeline" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                <Clock className="w-8 h-8 text-brand-500 shrink-0" /> مدة العمل
               </h2>
-              <p className="text-brand-800 leading-relaxed font-light text-lg mb-8">
-                يخرج السجل الأساسي " سجل تراث العائلة" على شكل كتاب أنيق ، فيه توثيق لعمود النسب بالاضافة الى تاريخ ومآثر العائلة ، مقسم الي عدة أقسام كمايلي:
-              </p>
-
-              <div className="space-y-8">
-                <div className="flex gap-6 items-start">
-                  <div className="w-12 h-12 rounded-full border-2 border-brand-200 text-brand-500 flex items-center justify-center font-serif text-xl font-bold shrink-0 mt-1">1</div>
-                  <div>
-                    <h3 className="font-serif text-2xl font-bold text-brand-900 mb-2">تقديم عام</h3>
-                    <p className="text-brand-700 leading-relaxed text-lg font-light">عبارة عن مقدمه عامة يتم فيها إستهلال سجل تراث عائلتكم ، وتحديد نقطة بدء عمود نسبكم والإنتساب الذي ينتمي اليه أمين السجل / العميل.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-6 items-start">
-                  <div className="w-12 h-12 rounded-full border-2 border-brand-200 text-brand-500 flex items-center justify-center font-serif text-xl font-bold shrink-0 mt-1">2</div>
-                  <div className="w-full">
-                    <h3 className="font-serif text-2xl font-bold text-brand-900 mb-4">السجل النسبي</h3>
-                    <p className="text-brand-700 leading-relaxed text-lg font-light mb-4">هنا يكمن البحث العلمي والعمود الفقري لسجل تراث العائلة ، حيث يتم توثيق الإنتساب وتشجير توثيق عمود نسب أمين السجل ، بالتفصيل وعبر البحث العميق ، سيتم فيه عرض مايلي :</p>
-                    <ul className="list-disc list-inside space-y-2 pr-4 text-brand-800 font-medium mb-6">
-                      <li>مفاتيح السجل النسبي.</li>
-                      <li>فروع العائلة الرئيسية .</li>
-                      <li>قسم الإنتساب الموروث (الإلتقاء النسبي).</li>
-                      <li>قسم عمود النسب الموروث (العمود، وتراجم العقد النسبية).</li>
-                      <li>قسم عمود النسب التراثي (العمود، وتراجم العقد النسبية).</li>
-                      <li>قسم عمود النسب التاريخي القديم (العمود، وتراجم العقد النسبية).</li>
-                      <li>توثيق المصادر والمراجع المعتمدة (مصادر العقد، منابع التراجم، والوثائق).</li>
-                      <li>بوستر مشجر توثيق عمود نسب أمين سجل العائلة .</li>
-                    </ul>
-                    <div className="bg-brand-50 p-4 rounded-xl border border-brand-100 text-sm text-brand-700">
-                      <strong>ملحوظة:</strong> قد تتغير نقاط ومحتويات السجل النسبي من سجل لآخر بناءا على توفر المصادر ونتائج البحث .
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-6 items-start">
-                  <div className="w-12 h-12 rounded-full border-2 border-brand-200 text-brand-500 flex items-center justify-center font-serif text-xl font-bold shrink-0 mt-1">3</div>
-                  <div>
-                    <h3 className="font-serif text-2xl font-bold text-brand-900 mb-2">ابق سجلك حياً</h3>
-                    <p className="text-brand-700 leading-relaxed text-lg font-light">في هذا القسم كل ماتحتاجه لجعل سجلك حياً ، حيث ستتعرف فيه على طريقة الحصول على سجلك بصيغة رقمية ، وربط السجل برمز استجابة سريع (QR Code) لتسهيل قراءته الكترونياً أو طباعة نسخ إضافية أخرى ، بالاضافة الى معرفة طريقة التصويبات والتحديثات ليكون سجلك دائماً محدثاً وحياً بكل يسر وسهولة.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-6 items-start">
-                  <div className="w-12 h-12 rounded-full border-2 border-brand-200 text-brand-500 flex items-center justify-center font-serif text-xl font-bold shrink-0 mt-1">4</div>
-                  <div>
-                    <h3 className="font-serif text-2xl font-bold text-brand-900 mb-2">مساحة الإدراج الإختياري الخاصة بكم</h3>
-                    <p className="text-brand-500 font-medium mb-3">تحت مسمى "بين يدي السجل" ( من إعداد أمين السجل / العميل)</p>
-                    <p className="text-brand-700 leading-relaxed text-lg font-light mb-4">هذا القسم يعتبر مساحة خاصة بكم ، يقوم فيها (أمين السجل/العميل) - عند رغبته - بكتابة أو إدراج مايرغب في اضافته للسجل ، وعلى سبيل المثال : يمكن لأمين السجل/العميل ؛ كتابة مقدمة يخاطب فيها عائلته ، وكذلك يمكنه اضافة نبذة تاريخية قصيرة عن العائلة وايراد بعض القصص عن العائلة يتحدث فيها عن عادات ومآثر العائلة ؛ او عن سير اي شخصيات بارزة فيها ؛ كما يمكنه اضافة اي وثائق او صور لأفراد العائلة والشهادات التاريخية وغيرها، كل ذلك بخصوصية وموثوقية عبر حسابه المنشأ في المنصة .</p>
-                    <div className="bg-brand-50 p-4 rounded-xl border border-brand-100 text-sm text-brand-700">
-                      <strong>ملحوظة:</strong> هذا القسم إختياري ( ننصح به لجعل سجلكم أكثر غنىً وثراءاً ، تنطبق الشروط والأحكام الواردة في عقد تقديم الخدمة على مساحة الإدراج الإختياري ).
-                    </div>
-                  </div>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
+                <p>تختلف مدة إعداد السجل بحسب: طبيعة البحث، توفر المصادر والروايات، نطاق المعالجة، ومستوى استكمال البيانات المطلوبة.</p>
+                <div className="bg-brand-50 p-8 flex flex-col items-center justify-center rounded-3xl border border-brand-100 shadow-inner mt-6 max-w-sm mx-auto">
+                  <span className="text-xl font-bold text-brand-900 mb-3 text-center">وعادةً ما تتراوح مدة إعداد السجل بين:</span>
+                  <span className="text-4xl text-brand-600 mb-4 font-mono font-bold" dir="ltr">90 - 180 <span className="text-2xl font-sans">يوماً</span></span>
+                  <span className="text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-lg shadow-sm">بحسب طبيعة المشروع</span>
                 </div>
               </div>
             </section>
 
-            {/* Pricing Box CTA */}
-            <div className="mt-16 pt-16 border-t border-brand-100">
-              <div className="bg-brand-950 text-white rounded-[2rem] p-8 md:p-12 text-center shadow-2xl relative overflow-hidden">
+            <section id="privacy" className="scroll-mt-32 border-t border-brand-100 pt-16">
+              <h2 className="font-serif text-3xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                <Lock className="w-8 h-8 text-brand-500 shrink-0" /> الخصوصية وحماية البيانات
+              </h2>
+              <div className="text-brand-800 leading-relaxed font-light text-lg space-y-4">
+                <p>نتعامل مع جميع البيانات والوثائق المقدمة عبر المنصة بسرية وخصوصية عالية.</p>
+                <p>كما تخضع أعمال المعالجة والتوثيق لمعايير حماية البيانات والخصوصية المعمول بها، بما يشمل القوانين الأمريكية ومعايير الخصوصية الدولية ذات الصلة.</p>
+              </div>
+            </section>
+
+            <section id="investment" className="mt-16 pt-16 border-t border-brand-100 scroll-mt-32">
+              <div className="bg-brand-950 text-white rounded-[2rem] p-6 lg:p-12 shadow-2xl relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://i.postimg.cc/wMpkC5mC/Pic-Pattern.png')] opacity-10 mix-blend-overlay"></div>
-                <div className="relative z-10">
-                  <h3 className="text-3xl font-serif font-bold mb-4">باقة السجل الأساسي</h3>
-                  <div className="flex flex-col items-center justify-center gap-2 mb-4">
-                    <div className="text-5xl font-bold text-brand-400 font-mono">$1780 <span className="text-xl text-brand-300 font-sans font-normal">(دفع كامل)</span></div>
-                    <div className="text-2xl font-bold text-brand-200 font-mono">أو 3 دفعات ميسرة <span className="text-lg text-brand-300 font-sans font-normal">(إجمالي 1980$)</span></div>
+                <div className="relative z-10 w-full">
+                  <div className="text-center mb-10">
+                    <h3 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-white text-center">الاستثمار في حفظ إرث العائلة</h3>
+                    <div className="inline-block bg-brand-900/50 px-8 py-5 rounded-3xl border border-brand-800 shadow-inner max-w-full">
+                      <div className="text-5xl lg:text-6xl font-bold text-brand-400 font-mono mb-2" dir="ltr">$1,980</div>
+                      <p className="text-brand-200 text-base lg:text-lg font-medium px-2">يشمل الإصدار الأساسي من "سجل تراث العائلة"</p>
+                    </div>
                   </div>
-                  <p className="text-brand-200 text-lg mb-8 max-w-lg mx-auto">للقيمة الأساسية للإصدار الرقمي، يقدم حالياً متضمناً طباعة 10 نسخ ورقية أنيقة + بوستر مشجر عمود النسب.</p>
                   
-                  <div className="bg-brand-900/50 rounded-2xl p-6 border border-brand-800 text-right max-w-xl mx-auto mb-10">
-                    <h4 className="font-bold text-xl mb-4 font-serif text-brand-300 border-b border-brand-800 pb-3">في "سجل تراث العائلة" تحصل على:</h4>
-                    <ul className="space-y-3 text-brand-100">
-                      <li>✓ بحث علمي وتاريخي</li>
-                      <li>✓ توثيق خط نسب محدد "عمود النسب"</li>
-                      <li>✓ توثيق المصادر والمراجع للعقد النسبية والسير الذاتية</li>
-                      <li>✓ بوستر مشجر عمود النسب</li>
-                      <li>✓ تصدر في نسخة رقمية وورقية أنيقة</li>
-                      <li>✓ مدة الإنجاز والتسليم: خلال 90 يوماً</li>
-                      <li className="text-brand-400 text-sm font-light mt-4">- تنطبق الشروط والأحكام على الخدمة.</li>
-                    </ul>
+                  <div className="bg-brand-900/50 rounded-[2rem] p-6 lg:p-8 border border-brand-800 mb-10 w-full max-w-3xl mx-auto shadow-inner text-right">
+                    <h4 className="font-bold text-2xl mb-6 font-serif text-brand-300 text-center border-b border-brand-800 pb-4">خيارات تنفيذ المشروع</h4>
+                    
+                    <div className="space-y-4 w-full">
+                      <div className="bg-brand-800/60 p-4 lg:p-5 rounded-2xl border border-brand-700 transition-colors hover:bg-brand-800 cursor-pointer overflow-hidden" onClick={() => setShowFullPaymentInfo(!showFullPaymentInfo)}>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                             <div className="bg-brand-900/80 p-2 lg:p-3 rounded-full shrink-0">
+                               <Sparkles className="text-brand-400 w-5 h-5 lg:w-6 lg:h-6"/>
+                             </div>
+                             <span className="font-bold text-base lg:text-lg text-white leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
+                          </div>
+                          <Info className="w-6 h-6 text-brand-300 shrink-0 self-end sm:self-auto" />
+                        </div>
+                        <AnimatePresence>
+                          {showFullPaymentInfo && (
+                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                              <div className="mt-6 pt-2 space-y-4 text-center">
+                                <div className="text-lg lg:text-xl text-center mb-4 bg-brand-950 rounded-xl py-4 border border-brand-800 shadow-inner mx-auto max-w-xs">
+                                   قيمة السداد المبكر: <br/><span className="font-bold text-brand-400 font-mono text-3xl block mt-2" dir="ltr">$1,780</span>
+                                </div>
+                                <p className="text-sm lg:text-base text-brand-200 bg-brand-900/50 p-5 rounded-xl leading-relaxed text-right border-r-4 border-r-brand-400 w-full">
+                                  تتضمن الامتيازات اولوية الجدولة لمراحل البحث والتوثيق والتسليم باللإضافة الي التوصيل السريع.
+                                </p>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      <div className="bg-brand-800/60 p-4 lg:p-5 rounded-2xl border border-brand-700 transition-colors hover:bg-brand-800 cursor-pointer overflow-hidden" onClick={() => setShowFlexiblePaymentInfo(!showFlexiblePaymentInfo)}>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                             <div className="bg-brand-900/80 p-2 lg:p-3 rounded-full shrink-0">
+                               <Coins className="text-brand-400 w-5 h-5 lg:w-6 lg:h-6"/>
+                             </div>
+                             <span className="font-bold text-base lg:text-lg text-white">خيار الدفع المرن</span>
+                          </div>
+                          <Info className="w-6 h-6 text-brand-300 shrink-0 self-end sm:self-auto" />
+                        </div>
+                        <AnimatePresence>
+                          {showFlexiblePaymentInfo && (
+                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                              <div className="mt-6 text-sm lg:text-base text-brand-200 bg-brand-900/50 p-6 rounded-xl space-y-4 shadow-inner text-right border-r-4 border-r-brand-400">
+                                <p className="font-bold text-white border-b border-brand-800 pb-2 mb-4">يمكن توزيع قيمة المشروع على 3 مراحل ميسرة:</p>
+                                <ul className="space-y-4 font-medium">
+                                  <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة أولى: 35% عند تفعيل الطلب – مرحلة البحث</li>
+                                  <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثانية: 35% عند انتهاء مرحلة التوثيق</li>
+                                  <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثالثة: 30% عند انتهاء العمل وتسليم السجل</li>
+                                </ul>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    <div className="text-xs lg:text-sm text-brand-300 mt-8 pt-5 border-t border-brand-800/50 font-light opacity-80 leading-relaxed text-center">
+                      * نقبل عددًا محدودًا من مشاريع التوثيق شهريًا حفاظًا على جودة البحث والتوثيق.<br/>
+                      * تنطبق الشروط والأحكام على جميع الخدمات.
+                    </div>
                   </div>
 
-                  <Link to="/order" className="inline-block bg-brand-500 hover:bg-brand-400 text-white text-xl px-12 py-5 rounded-xl font-bold transition shadow-xl hover:shadow-brand-500/20 hover:-translate-y-1">
-                    إبدأ رحلة توثيق سجل تراثك
-                  </Link>
+                  <div className="text-center pt-4 max-w-2xl mx-auto px-4">
+                    <p className="text-brand-200 text-lg lg:text-xl mb-8 leading-relaxed font-light">
+                      بعض الروايات تضيع… لأنها لم تُوثق.<br/>
+                      <span className="font-bold text-white mt-1 block">ابدأ اليوم إنشاء سجل عائلي يوثق عمود نسبكم ويحفظ الذاكرة العائلية للأجيال القادمة.</span>
+                    </p>
+                    <Link to="/order" className="inline-flex items-center justify-center bg-brand-500 hover:bg-brand-400 text-white text-xl lg:text-2xl px-12 py-5 lg:py-6 rounded-2xl font-bold transition shadow-[0_0_40px_-10px_rgba(200,30,30,0.5)] hover:shadow-[0_0_60px_-10px_rgba(200,30,30,0.7)] hover:-translate-y-1 w-full sm:w-auto">
+                      ابدأ سجل عائلتك
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
 
           </div>
         </div>
@@ -427,4 +466,3 @@ export function Services() {
     </div>
   );
 }
-
