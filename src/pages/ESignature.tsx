@@ -32,7 +32,8 @@ export function ESignature() {
             orderId: currentUser.id,
             customerName: currentUser.name || pendingOrderData?.familyName || "Client",
             email: currentUser.email,
-            locale: "ar"
+            locale: "ar",
+            clientOrigin: window.location.origin
           })
         });
         const data = await res.json();
@@ -45,8 +46,7 @@ export function ESignature() {
         
         if (urlStr) {
           const separator = urlStr.includes('?') ? '&' : '?';
-          const redirectParams = `embedded=yes&redirect_url=${encodeURIComponent(window.location.origin + "/e-signature-success")}`;
-          setSignUrl(urlStr + separator + redirectParams);
+          setSignUrl(urlStr + separator + 'embedded=yes');
         } else {
           throw new Error("لم يتم العثور على رابط التوقيع في الرد: " + JSON.stringify(data));
         }
@@ -141,7 +141,7 @@ export function ESignature() {
                    />
                  ) : (
                    <div className="text-red-500 font-medium p-4">
-                     حدث خطأ أثناء استخراج رابط التوقيع. يرجى المحاولة مرة أخرى أو تحديث الصفحة.
+                     {errorMsg || "حدث خطأ أثناء استخراج رابط التوقيع. يرجى مراجعة إعدادات قالب eSignatures.io الخاص بك."}
                    </div>
                  )}
                </div>

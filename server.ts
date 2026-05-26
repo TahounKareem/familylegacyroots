@@ -166,40 +166,26 @@ async function startServer() {
   // eSignatures APIs
   app.post("/api/contracts", async (req, res) => {
     try {
-      const { orderId, customerName, email, locale } = req.body;
-      const apiToken = process.env.ESIGNATURES_API_TOKEN || "7a11f980-20ff-4e8a-98ce-6877582db521";
-      
-      if (!apiToken) {
-        // Fallback for development without token
-        console.warn("ESIGNATURES_API_TOKEN is not set. Simulating contract creation.");
-        return res.json({ 
-          sign_page_url: `/api/mock-sign-page?orderId=${orderId}`, 
-          contract_id: `MOCK-${orderId}` 
-        });
-      }
-
-      const templatesResponse = await fetch(`https://esignatures.io/api/templates?token=${apiToken}`);
-      const templatesData = await templatesResponse.json();
-      const availableTemplates = templatesData.data || [];
+      const { orderId, customerName, email, locale, clientOrigin } = req.body;
+      const apiToken = process.env.ESIGNATURES_API_TOKEN;
       
       let templateId = locale === 'ar' ? 
         process.env.ESIGNATURES_TEMPLATE_ID_AR : 
         process.env.ESIGNATURES_TEMPLATE_ID_EN;
 
-      // Ensure the templateId exists in the account, otherwise fallback to the first available template
-      const templateExists = availableTemplates.some((t: any) => t.template_id === templateId);
-      if (!templateExists && availableTemplates.length > 0) {
-        console.warn(`Template ID ${templateId} not found. Falling back to available template ${availableTemplates[0].template_id}`);
-        templateId = availableTemplates[0].template_id;
+      // Fallback for missing AR template when environment variable might not be updated
+      if (!templateId || templateId === 'c8e8fbd7-bc64-4e24-a519-9fdf9361be40') {
+         templateId = 'e347a18f-35ab-4129-b41d-3d52fcb2fbdc';
       }
 
-      if (!templateId) {
-        throw new Error("لا يوجد قالب متوفر في حساب مساحة التوقيع ESIGNATURES_TEMPLATE_ID_AR. الرجاء إنشاء قالب أولاً.");
+      // Strict requirement for token and template
+      if (!apiToken || !templateId) {
+        throw new Error("لم يتم إعداد مساحة التوقيع (eSignatures) بشكل صحيح، يرجى التواصل مع الدعم الفني.");
       }
 
       const payload = {
         template_id: templateId,
-        signature_request_delivery_methods: [], // NO SMS/Email, embedded only
+        signature_request_delivery_methods: [],
         signers: [
           {
             name: customerName || "Client",
@@ -220,8 +206,8 @@ async function startServer() {
 
       const data = await response.json();
       if (data.status === 'error') {
-        console.error("eSignatures Error Details:", data);
-        throw new Error(data.data?.error_message || data.message || 'eSignatures API Error');
+        console.error("eSignatures API Error:", data);
+        return res.status(400).json({ error: data.data?.error_message || data.message || 'eSignatures API Error' });
       }
 
       res.json(data);
@@ -269,33 +255,7 @@ async function startServer() {
     res.json({ success: true });
   });
 
-  app.get("/api/mock-sign-page", (req, res) => {
-    const { orderId } = req.query;
-    res.send(`
-      <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="utf-8">
-          <title>محاكاة توقيع العقد</title>
-        </head>
-        <body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; flex-direction:column; background:#f8f9fa;">
-          <h2>محاكي التوقيع (وضع التطوير)</h2>
-          <p>أنت ترى هذه الصفحة لأنه لم يتم إعداد مفتاح API الخاص بـ eSignatures.</p>
-          <button onclick="sign()" style="padding:15px 30px; font-size:18px; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:10px; font-weight:bold;">اضغط هنا لمحاكاة التوقيع</button>
-          <script>
-            function sign() {
-              fetch('/api/mock-webhook-sign', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId: '${orderId}' })
-              }).then(() => {
-                document.body.innerHTML = '<h3 style="color:green; text-align:center;">تم التوقيع بنجاح! يمكنك الآن إغلاق هذه النافذة والعودة للمنصة لاستكمال طلبك.</h3>';
-              });
-            }
-          </script>
-        </body>
-      </html>
-    `);
-  });
+
 
   // API constraints
   app.get("/api/health", (req, res) => {
