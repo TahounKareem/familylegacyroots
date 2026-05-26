@@ -4,8 +4,20 @@ import { CheckCircle } from 'lucide-react';
 export function ESignatureSuccess() {
   useEffect(() => {
     // Notify the parent window that signing was successfully completed
-    if (window.parent) {
+    if (window.parent && window.parent !== window) {
       window.parent.postMessage("esignature_success", "*");
+      
+      // Also try to direct navigate the top window
+      try {
+        if (window.parent) {
+          window.parent.location.href = window.location.origin + "/order?payment=true";
+        }
+      } catch (err) {
+        console.error("Could not navigate parent window directly:", err);
+      }
+    } else {
+      // If opened normally and not in an iframe, redirect
+      window.location.href = "/order?payment=true";
     }
   }, []);
 

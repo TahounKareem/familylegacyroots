@@ -30,6 +30,7 @@ export function ESignature() {
       if (isSignedStr || isSignedObj) {
         console.log("Signature confirmed via postMessage!");
         setIsSigned(true);
+        navigate("/order?payment=true", { replace: true });
       }
     };
 
@@ -46,6 +47,7 @@ export function ESignature() {
             console.log("Signature confirmed via Webhook polling!");
             setIsSigned(true);
             if (interval) clearInterval(interval);
+            navigate("/order?payment=true", { replace: true });
           }
         } catch (err) {
           // Silent catch for poll error
@@ -57,7 +59,7 @@ export function ESignature() {
       window.removeEventListener("message", handleMessage);
       if (interval) clearInterval(interval);
     };
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   return (
     <div className="bg-brand-50 min-h-screen py-12 animate-in fade-in duration-500">
