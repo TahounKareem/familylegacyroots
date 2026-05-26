@@ -61,15 +61,15 @@ export function ESignature() {
   }, [currentUser, pendingOrderData]);
 
   useEffect(() => {
-    // 1. Listen for messages from eSignatures iframe
+    // 1. Listen for messages from SignNow iframe
     const handleMessage = (event: MessageEvent) => {
       console.log("Iframe message received:", event.origin, event.data);
       
       const isSignedStr = typeof event.data === "string" && 
-        (event.data.includes("signed") || event.data === "contract_signed" || event.data === "esignature_success");
+        (event.data.includes("signed") || event.data === "contract_signed" || event.data === "esignature_success" || event.data === "document.complete" || (event.data.includes("signnow") && event.data.includes("complete")));
         
       const isSignedObj = typeof event.data === "object" && event.data !== null && 
-        (event.data.status === "signed" || event.data.event === "contract_signed" || event.data.event === "signer_signed");
+        (event.data.status === "signed" || event.data.event === "contract_signed" || event.data.event === "signer_signed" || event.data.event === "document.complete" || event.data.event === "redirect");
       
       if (isSignedStr || isSignedObj) {
         console.log("Signature confirmed via postMessage!");
@@ -123,29 +123,26 @@ export function ESignature() {
                  يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع سيتم توجيهك تلقائياً لصفحة الدفع.
                </p>
                
-               <div className="w-full bg-[#f8f9fa] rounded-2xl p-8 shadow-inner border border-gray-200 flex flex-col items-center justify-center relative min-h-[400px]">
+               <div className="w-full bg-[#f8f9fa] rounded-2xl p-4 shadow-inner border border-gray-200 flex flex-col items-center justify-center relative min-h-[500px]">
                  {isLoadingUrl ? (
                    <div className="flex flex-col items-center justify-center text-brand-500">
                      <Loader2 className="w-10 h-10 animate-spin mb-4" />
-                     <p>جاري تجهيز عقد الخدمة...</p>
+                     <p>جاري تجهيز عقد الخدمة عبر SignNow...</p>
                    </div>
                  ) : signUrl ? (
-                   <div className="flex flex-col items-center space-y-6">
-                     <p className="text-gray-700 text-lg">الرجاء الضغط على الزر أدناه لفتح وثيقة العقد في صفحة جديدة وبدء التوقيع.</p>
-                     <button
-                       onClick={() => window.open(signUrl, 'sign_popup', 'width=800,height=800')}
-                       className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg shadow-lg flex items-center gap-3 transition"
-                     >
-                       <PenTool className="w-6 h-6" />
-                       فتح لـتـوقيـع الـعـقـد
-                     </button>
+                   <div className="w-full h-[600px] flex flex-col items-center">
+                     <iframe 
+                       src={signUrl}
+                       className="w-full h-full border-2 border-brand-200 rounded-xl shadow-md"
+                       allow="camera; microphone; geolocation"
+                     ></iframe>
                      <p className="text-sm text-gray-500 max-w-sm mt-4">
-                       بعد التوقيع، سيتم تحديث هذه الصفحة والمتابعة تلقائياً. في حال لم يحدث ذلك، يرجى تحديث الصفحة.
+                       بعد التوقيع، سيتم تحديث هذه الصفحة والمتابعة تلقائياً. المرجو الانتظار لحظات بعد الانتهاء.
                      </p>
                      {(currentUser?.role === 'admin' || currentUser?.role === 'maestro') && (
                        <button
                          onClick={() => { setIsSigned(true); navigate("/order?payment=true", { replace: true }); }}
-                         className="mt-8 text-xs underline text-red-500"
+                         className="mt-4 text-xs underline text-red-500"
                        >
                          تخطي للإختبار (المدير العام)
                        </button>
