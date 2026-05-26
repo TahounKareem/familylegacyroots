@@ -178,12 +178,27 @@ async function startServer() {
         });
       }
 
-      const templateId = locale === 'ar' ? 
+      const templatesResponse = await fetch(`https://esignatures.io/api/templates?token=${apiToken}`);
+      const templatesData = await templatesResponse.json();
+      const availableTemplates = templatesData.data || [];
+      
+      let templateId = locale === 'ar' ? 
         process.env.ESIGNATURES_TEMPLATE_ID_AR : 
         process.env.ESIGNATURES_TEMPLATE_ID_EN;
 
+      // Ensure the templateId exists in the account, otherwise fallback to the first available template
+      const templateExists = availableTemplates.some((t: any) => t.template_id === templateId);
+      if (!templateExists && availableTemplates.length > 0) {
+        console.warn(`Template ID ${templateId} not found. Falling back to available template ${availableTemplates[0].template_id}`);
+        templateId = availableTemplates[0].template_id;
+      }
+
+      if (!templateId) {
+        throw new Error("لا يوجد قالب متوفر في حساب مساحة التوقيع ESIGNATURES_TEMPLATE_ID_AR. الرجاء إنشاء قالب أولاً.");
+      }
+
       const payload = {
-        template_id: templateId || "1e7a31ca-f0dc-480a-a209-de74843b9857", // Using the template ID from their previous iframe
+        template_id: templateId,
         signature_request_delivery_methods: [], // NO SMS/Email, embedded only
         signers: [
           {
