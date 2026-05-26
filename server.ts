@@ -169,36 +169,38 @@ async function startServer() {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
       
       const SIGNNOW_API_KEY = process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
-      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID;
+      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "2a574ca2a0294a419348dd8dd90194dc373622e0";
 
       if (!SIGNNOW_API_KEY) {
         throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
       }
 
-      // Step 1: Default Document ID if Template is not setup (Note: in a real app, we copy a template first)
-      // Since no template ID is provided by the user, we assume they will provide one or use a dummy ID for testing UI
-      // In a real environment, they must set SIGNNOW_TEMPLATE_ID in the environment variables
-      let documentId = "dummy_document_id";
+      let documentId = "";
       
-      if (SIGNNOW_TEMPLATE_ID) {
+      try {
+        console.log(`Copying SignNow template: ${SIGNNOW_TEMPLATE_ID}`);
         const copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId}` })
+          body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
         });
-        const copyData = await copyRes.json();
+        
+        const copyText = await copyRes.text();
+        console.log("SignNow copy response:", copyText);
+        
+        const copyData = JSON.parse(copyText);
         if (copyData.id) {
           documentId = copyData.id;
+          console.log(`Generated Document ID: ${documentId}`);
         } else {
-           throw new Error("فشل استنساخ قالب العقد من SignNow.");
+           throw new Error("فشل استنساخ قالب العقد من SignNow: " + JSON.stringify(copyData));
         }
-      } else {
-        // Fallback for demonstration if no template ID is provided (we don't have a real document to embed)
-        console.warn("SIGNNOW_TEMPLATE_ID not provided. Using a mock response for UI testing.");
-        return res.json({ signUrl: `https://app.signnow.com/webapp/document/mock-signing?document_id=mock` });
+      } catch (e: any) {
+         console.error("SignNow template copy error:", e);
+         return res.json({ signUrl: `https://app.signnow.com/webapp/document/mock-signing?document_id=mock`, error: "Failed to copy template. " + e.message });
       }
 
       // Step 2: Generate embedded invite for the document
@@ -206,31 +208,39 @@ async function startServer() {
         invites: [
           {
             email: email || "user@example.com",
-            role_id: "", // Will use default role if empty, or we can use freeform
+            role_id: "", // Will use freeform or default if empty
             order: 1,
             auth_method: "none"
           }
         ]
       };
 
-      const inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
+      try {
+        console.log(`Generating invite for Document ID: ${documentId}`);
+        const inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
 
-      const inviteData = await inviteRes.json();
-      
-      if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
-         console.error("SignNow API Error:", inviteData);
-         // Generate a mock signing link if the API fails just so the user isn't hard-blocked in preview
-         return res.json({ signUrl: "https://app.signnow.com/webapp/document/mock-signing?document_id=" + documentId, error: "API Failed to generate embedded link, using fallback" });
+        const inviteText = await inviteRes.text();
+        console.log("SignNow invite response:", inviteText);
+        const inviteData = JSON.parse(inviteText);
+        
+        if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
+           console.error("SignNow Invite Error:", inviteData);
+           return res.json({ signUrl: "https://app.signnow.com/webapp/document/mock-signing?document_id=" + documentId, error: "API Failed to generate embedded link, using fallback. " + JSON.stringify(inviteData) });
+        }
+
+        res.json({ signUrl: inviteData.data[0].link });
+      } catch (e: any) {
+        console.error("SignNow invite error:", e);
+        return res.json({ signUrl: "https://app.signnow.com/webapp/document/mock-signing?document_id=" + documentId, error: "API Request exception. " + e.message });
       }
 
-      res.json({ signUrl: inviteData.data[0].link });
     } catch (error: any) {
       console.error("Error creating contract:", error);
       res.status(500).json({ error: error.message });

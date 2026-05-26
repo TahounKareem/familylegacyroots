@@ -38,7 +38,7 @@ export function OrderFlow() {
     country: "",
     homeland: "",
     startingPoint: "",
-    designTemplate: "فاخر",
+    designTemplate: "" as "فاخر" | "مودرن" | "كلاسيك", // temporarily allow empty string, or update type in lib/store.ts
     documents: [],
     photos: [],
     historicalNotes: "",
