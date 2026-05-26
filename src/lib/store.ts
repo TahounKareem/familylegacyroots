@@ -136,6 +136,7 @@ export interface FamilyData {
     state: string;
     street: string;
     zip?: string;
+    notes?: string;
   };
   hasDeliveryAddress?: boolean;
   deliveryAddress?: {

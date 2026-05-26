@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
-import { orderDetailsContract } from "@/data/contractContent";
+import { orderDetailsContract, mainContractSections } from "@/data/contractContent";
 import { arabicContractText } from "@/data/arabicContract";
 import { logLegalEvent, recordLegalConsent, createLegalContractRecord, createOrderEvidence } from "@/lib/legalService";
 

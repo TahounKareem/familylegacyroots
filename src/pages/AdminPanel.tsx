@@ -692,7 +692,7 @@ export function AdminPanel() {
                                <div className="mt-6">
                                 <h4 className="font-bold text-brand-900 mb-4">بيانات السجل والشجرة</h4>
                                 <div className="h-[400px] border border-brand-100 rounded-lg overflow-hidden bg-white">
-                                  <TreeBuilder initialData={order.data.treeData} readOnly={true} />
+                                  <TreeBuilder initialNodes={order.data.treeData?.nodes} initialEdges={order.data.treeData?.edges} readOnly={true} />
                                 </div>
                                </div>
                              </div>
