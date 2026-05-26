@@ -116,9 +116,6 @@ export function ServiceAgreement() {
     // 4. Final step: mark ready
     await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
 
-    // Open signing link in new tab
-    window.open("https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857", "_blank");
-
     navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
   };
 
