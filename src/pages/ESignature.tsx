@@ -16,25 +16,24 @@ export function ESignature() {
   }, [currentUser, pendingOrderData, navigate]);
 
   useEffect(() => {
-    // Listen for messages from the eSignatures iframe
-    const handleMessage = (event: MessageEvent) => {
-      // Allow messages from eSignatures specifically, or be permissive based on string
-      console.log("Iframe message received:", event.origin, event.data);
-      
-      // Usually eSignatures sends 'signed' or a status object
-      if (
-        event.data === "signed" || 
-        event.data?.status === "signed" || 
-        event.data === "contract_signed" ||
-        event.data?.event === "contract_signed"
-      ) {
-        setIsSigned(true);
+    if (!currentUser) return;
+    
+    // Poll the backend to check if the contract has been signed
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/contracts/status?orderId=${currentUser.id}`);
+        const data = await res.json();
+        if (data.signed) {
+          setIsSigned(true);
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error("Error polling contract status:", err);
       }
-    };
+    }, 3000);
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   const handleProceed = () => {
     if (isSigned) {

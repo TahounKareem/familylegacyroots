@@ -110,7 +110,7 @@ export function Auth() {
         } else if (err.code === "auth/invalid-credential") {
           errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
         } else if (err.code === "auth/network-request-failed") {
-          errorMessage = "حدث خطأ في الاتصال بخوادم المصادقة (Network Request Failed). يُرجى التحقق من اتصال الإنترنت، وتجربة إيقاف وتفعيل الواي فاي، أو إيقاف إضافات حجب الإعلانات (Ad-blockers) و VPN التي قد تعيق الاتصال.";
+          errorMessage = "حدث خطأ في الاتصال بخوادم المصادقة (Network Request Failed). الغالب أن النطاق الحالي غير مضاف في قائمة النطاقات المسموحة (Authorized Domains) في إعدادات Firebase أو تمت إعاقته بسبب إضافة حجب إعلانات.";
         } else if (err.code === "permission-denied") {
           errorMessage = "مرفوض: يرجى التأكد من تفعيل وتحديث Security Rules في Firestore." + (err.message || "");
         } else if (err.message) {
