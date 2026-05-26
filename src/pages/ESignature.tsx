@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { CheckCircle, ArrowLeft, Info, PenTool } from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, Info, PenTool } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 
@@ -61,15 +61,16 @@ export function ESignature() {
                  يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع بنجاح سيتم تفعيل زر المتابعة لصفحة الدفع.
                </p>
                
-               <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200" style={{ height: '600px' }}>
+               <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200" style={{ height: '700px' }}>
                  {/* eSignatures Iframe */}
                  <iframe 
                    src="https://esignatures.com/signl/1e7a31ca-f0dc-480a-a209-de74843b9857?embedded=yes" 
                    width="100%" 
                    height="100%" 
-                   style={{ border: 'none', minHeight: '600px' }}
+                   style={{ border: 'none', minHeight: '700px' }}
                    id="eSignaturesIframe"
                    title="eSignatures Contract"
+                   sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
                  />
                </div>
              </>
@@ -84,21 +85,24 @@ export function ESignature() {
                </p>
              </div>
            )}
-
-           <div className="bg-blue-50 border border-blue-100 text-blue-700 p-4 rounded-xl flex flex-col sm:flex-row items-center gap-4 w-full text-sm text-right mt-6">
-             <Info className="w-6 h-6 flex-shrink-0" />
-             <p>نحن نستخدم تقنية (Iframe) آمنة للتوقيع الإلكتروني لتوفير تجربة متصلة داخل المنصة دون تحويلك لمواقع خارجية.</p>
-           </div>
         </div>
 
         {/* Action Bar */}
-        <div className="flex justify-center items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100 mb-8 mt-auto sticky bottom-8">
+        <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100 mb-8 mt-auto sticky bottom-8">
+          <button 
+            type="button" 
+            onClick={() => navigate("/service-agreement")} 
+            className="px-6 py-3 rounded-2xl font-medium text-brand-600 hover:bg-brand-50 transition flex items-center gap-2"
+          >
+           <ArrowRight className="w-5 h-5" /> عودة
+          </button>
+          
           <button 
             onClick={handleProceed}
             disabled={!isSigned}
-            className={`px-10 py-4 rounded-2xl font-bold text-lg transition shadow-lg flex items-center gap-3 ${isSigned ? 'bg-brand-600 text-white hover:bg-brand-500 animate-pulse-slow cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-70'}`}
+            className={`px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 ${isSigned ? 'bg-brand-600 text-white hover:bg-brand-500 animate-pulse-slow cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-70'}`}
           >
-            المتابعة لصفحة الدفع <ArrowLeft className="w-6 h-6" />
+            المتابعة لصفحة الدفع <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
       </div>
