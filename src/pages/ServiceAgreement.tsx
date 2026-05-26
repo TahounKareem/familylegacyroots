@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight } from "lucide-react";
+import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight, Loader2, PenTool } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { orderDetailsContract, mainContractSections } from "@/data/contractContent";
@@ -56,6 +56,8 @@ export function ServiceAgreement() {
 
   const allChecked = req1 && req2;
   const canProceed = allChecked && scrolledToBottom;
+
+  const [isSigning, setIsSigning] = useState(false);
 
   const handleProceed = async () => {
     if (!currentUser || !pendingOrderData) return;
@@ -116,7 +118,43 @@ export function ServiceAgreement() {
     // 4. Final step: mark ready
     await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
 
-    navigate("/e-signature", { state: { contractId: contractId.current, orderId: orderId.current }});
+    // Launch Popup for Signature Verification
+    setIsSigning(true);
+    
+    // Popup size calculation to make it a neat side/centered window
+    const popupWidth = 800;
+    const popupHeight = 850;
+    const left = window.screen.width / 2 - popupWidth / 2;
+    const top = window.screen.height / 2 - popupHeight / 2;
+    
+    const signWindow = window.open(
+      'https://signnow.com/s/WsUj1c9g', 
+      'SignNow', 
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
+    );
+
+    if (!signWindow) {
+      alert("تم حظر النوافذ المنبثقة (Popups). يرجى السماح بها لفتح صفحة التوقيع.");
+      setIsSigning(false);
+      return;
+    }
+
+    const openTime = Date.now();
+    
+    // Track if user has signed by checking when the window is closed
+    const timer = setInterval(() => {
+      if (signWindow.closed) {
+        clearInterval(timer);
+        const closeTime = Date.now();
+        // Assuming signing the document takes at least 15 seconds
+        if (closeTime - openTime > 15000) {
+          navigate("/order?payment=true", { replace: true });
+        } else {
+          alert("المعذرة، يبدو أنك أغلقت النافذة المنبثقة قبل إتمام قراءة العقد والتوقيع عليه إلكترونياً. يرجى المحاولة مرة أخرى.");
+          setIsSigning(false);
+        }
+      }
+    }, 1000);
   };
 
   if (!currentUser || !pendingOrderData) return null;
@@ -360,10 +398,18 @@ export function ServiceAgreement() {
           
           <button 
             onClick={handleProceed} 
-            disabled={!canProceed}
-            className="px-10 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!canProceed || isSigning}
+            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 ${isSigning ? 'bg-orange-500 text-white animate-pulse-slow cursor-wait' : 'bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed'}`}
           >
-            تأكيد الإصدار والتوقيع <ArrowLeft className="w-5 h-5" />
+            {isSigning ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> جاري التوقيع...
+              </>
+            ) : (
+              <>
+                وقع إلكترونياً <PenTool className="w-5 h-5" />
+              </>
+            )}
           </button>
         </div>
 
