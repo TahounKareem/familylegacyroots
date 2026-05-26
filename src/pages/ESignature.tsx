@@ -59,12 +59,6 @@ export function ESignature() {
     };
   }, [currentUser]);
 
-  const handleProceed = () => {
-    if (isSigned) {
-      navigate("/order?payment=true");
-    }
-  };
-
   return (
     <div className="bg-brand-50 min-h-screen py-12 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-[85vh]">
@@ -81,7 +75,7 @@ export function ESignature() {
                </div>
                <h2 className="text-2xl font-bold text-brand-900 mb-2">توقيع عقد تقديم الخدمة</h2>
                <p className="text-brand-600 max-w-lg mb-6 text-sm">
-                 يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع بنجاح سيتم تفعيل زر المتابعة لصفحة الدفع.
+                 يرجى قراءة العقد والتوقيع عليه مباشرة من خلال النموذج أدناه. بعد إتمام التوقيع يمكنك الضغط على زر "المتابعة" بالأسفل للذهاب لصفحة الدفع.
                </p>
                
                <div className="w-full bg-[#f8f9fa] rounded-2xl overflow-hidden shadow-inner border border-gray-200" style={{ height: '700px' }}>
@@ -121,11 +115,10 @@ export function ESignature() {
           </button>
           
           <button 
-            onClick={handleProceed}
-            disabled={!isSigned}
-            className={`px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 ${isSigned ? 'bg-brand-600 text-white hover:bg-brand-500 animate-pulse-slow cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-70'}`}
+            onClick={() => navigate("/order?payment=true")}
+            className="px-8 md:px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition shadow-lg flex items-center gap-3 bg-brand-600 text-white hover:bg-brand-500 cursor-pointer"
           >
-            المتابعة لصفحة الدفع <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
+            لقد أتممت التوقيع - المتابعة للدفع <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
       </div>
