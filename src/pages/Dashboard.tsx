@@ -5,12 +5,12 @@ import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home, Send } from "lucide-react";
+import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home, Send, MoreVertical, Camera } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder } = useAppStore();
-  const [activeTab, setActiveTab] = useState("حالة الإصدار");
+  const [activeTab, setActiveTab] = useState("خريطة الطريق");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -25,10 +25,33 @@ export function Dashboard() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
+  const profilePhotoInputRef = useRef<HTMLInputElement>(null);
   const [replyAttachments, setReplyAttachments] = useState<string[]>([]);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
 
   const [pendingUpload, setPendingUpload] = useState<{file: File, arrayName: "documents"|"photos"} | null>(null);
+
+  const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+    
+    setIsUploading(true);
+    try {
+      const storageRef = ref(storage, `users/${currentUser.id}/profile_${Date.now()}`);
+      const uploadTask = await uploadBytesResumable(storageRef, file);
+      const url = await getDownloadURL(uploadTask.ref);
+      
+      await updateDoc(doc(db, "users", currentUser.id), {
+        photoUrl: url
+      });
+      useAppStore.setState({ currentUser: { ...currentUser, photoUrl: url } });
+    } catch (err) {
+      console.error("Profile photo upload failed", err);
+      alert("حدث خطأ أثناء رفع الصورة الشخصية.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
   const [mediaMeta, setMediaMeta] = useState({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
 
   // Check for Stripe success redirect
@@ -71,6 +94,9 @@ export function Dashboard() {
 
   const userOrders = orders.filter(o => o.userId === currentUser.id);
   const order = userOrders[0]; // ONLY 1 order allowed
+  
+  // If user just registered and has no order setup, redirect them to complete their data
+  if (!order) return <Navigate to="/order" replace />;
   
   const isPaid = order && order.status !== "بانتظار الدفع" && order.status !== "بإنتظار إتمام الدفع";
 
@@ -182,11 +208,11 @@ export function Dashboard() {
 
   const SidebarItem = ({ title, isActive, isLocked, info, badge }: { title: string, isActive: boolean, isLocked?: boolean, info?: string, badge?: number }) => (
     <button 
-      disabled={isLocked && title !== "حالة الإصدار"}
+      disabled={isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق"}
       onClick={() => setActiveTab(title)}
-      className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative
-        ${isLocked && title !== "حالة الإصدار" ? "opacity-50 cursor-not-allowed" : ""}
-        ${isActive ? "bg-brand-100 text-brand-900 font-bold" : "text-brand-700 hover:bg-brand-50"}`}
+      className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative font-sans text-sm border
+        ${isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق" ? "opacity-50 cursor-not-allowed" : ""}
+        ${isActive ? "bg-brand-50 border-brand-200 text-black font-bold" : "text-black border-transparent hover:bg-brand-50 hover:border-brand-200"}`}
     >
       <div className="flex items-center">
         <span>{title}</span>
@@ -195,14 +221,14 @@ export function Dashboard() {
         )}
         {info && (
           <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
-            <div className="w-4 h-4 rounded-full bg-brand-200 text-brand-600 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-300">i</div>
+            <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-200">i</div>
             <div className="absolute bottom-full mb-2 right-0 w-60 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
               {info}
             </div>
           </div>
         )}
       </div>
-      {isLocked && title !== "حالة الإصدار" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
+      {isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
     </button>
   );
 
@@ -211,10 +237,19 @@ export function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Greeting */}
-        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-[60]">
+        <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-[60] sticky top-4">
           <div className="flex flex-col md:flex-row items-center gap-4 relative">
-             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="w-14 h-14 rounded-full bg-brand-100 border border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl hover:bg-brand-200 transition shrink-0 uppercase">
-               {currentUser.name?.charAt(0) || "U"}
+             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="relative shrink-0 group">
+               {currentUser.photoUrl ? (
+                 <img src={currentUser.photoUrl} alt="Profile" className="w-16 h-16 rounded-full border-2 border-brand-200 shadow-sm object-cover group-hover:border-brand-500 transition-colors" />
+               ) : (
+                 <div className="w-16 h-16 rounded-full bg-brand-100 border-2 border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl group-hover:bg-brand-200 group-hover:border-brand-400 transition uppercase">
+                   {currentUser.name?.charAt(0) || "U"}
+                 </div>
+               )}
+               <div className="absolute bottom-0 left-0 bg-white rounded-full p-1 border border-brand-200 shadow-sm">
+                 <MoreVertical className="w-4 h-4 text-brand-500" />
+               </div>
              </button>
              <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
                 <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">أهلاً بك، {currentUser.name}</h1>
@@ -225,7 +260,7 @@ export function Dashboard() {
              {showProfileMenu && (
                <>
                  <div className="fixed inset-0 z-30" onClick={() => setShowProfileMenu(false)}></div>
-                 <div className="absolute top-16 right-0 md:right-1/2 md:translate-x-12 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
+                 <div className="absolute top-20 right-0 md:right-0 md:translate-x-0 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
                    <button onClick={() => { setActiveTab("الملف الشخصي"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><User className="w-4 h-4 text-brand-500" /> الملف الشخصي</button>
                    <button onClick={() => { setActiveTab("إعدادات"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><Settings className="w-4 h-4 text-brand-500" /> إعدادات</button>
                    <button onClick={() => { setActiveTab("عقد تسجيل الخدمة"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل الخدمة</button>
@@ -248,6 +283,7 @@ export function Dashboard() {
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">البوابة الرئيسية</h3>
                 <div className="space-y-1">
+                  <SidebarItem title="خريطة الطريق" isActive={activeTab === "خريطة الطريق"} />
                   <SidebarItem title="حالة الإصدار" isActive={activeTab === "حالة الإصدار"} />
                   <SidebarItem title="بيانات العميل / أمين السجل" isActive={activeTab === "بيانات العميل / أمين السجل"} isLocked={!isPaid} />
                   <SidebarItem title="نقطة العرض الأساسية" isActive={activeTab === "نقطة العرض الأساسية"} isLocked={!isPaid} />
@@ -335,6 +371,56 @@ export function Dashboard() {
                 /* PAID CONTENT */
                 <div className="space-y-8 animate-in fade-in duration-300">
                   <h2 className="text-3xl font-serif font-bold text-brand-900 mb-8 pb-4 border-b border-brand-100">{activeTab}</h2>
+
+                  {activeTab === "خريطة الطريق" && (
+                    <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
+                      <div className="flex items-center gap-4 mb-6">
+                         <Compass className="w-12 h-12 text-brand-600" />
+                         <div>
+                           <h2 className="text-2xl font-bold font-serif text-brand-900 mb-2">خريطة الطريق لتوثيق سجل تراث عائلتك</h2>
+                           <p className="text-brand-700">دليلك الإرشادي خطوة بخطوة للوصول إلى سجل عائلي متكامل.</p>
+                         </div>
+                      </div>
+
+                      <div className="bg-white p-6 rounded-xl border border-brand-100 shadow-sm mb-6 flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                           <div className={`w-3 h-3 rounded-full uppercase ${(order.status === 'مكتمل' || order.status === 'طلب مكتمل') ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
+                           <span className="font-bold text-brand-900">حالة السجل الحالية:</span>
+                           <span className="text-brand-600 text-sm font-medium border border-brand-200 bg-brand-50 px-3 py-1 rounded-full">{order.status}</span>
+                         </div>
+                         {totalAdminMessagesUnread > 0 && (
+                           <button onClick={() => setActiveTab("استيضاحات فريق البحث")} className="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1 rounded-full font-bold flex items-center gap-1 hover:bg-red-100 transition">
+                             <AlertCircle className="w-4 h-4" /> يوجد استيضاحات جديدة ({totalAdminMessagesUnread})
+                           </button>
+                         )}
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <button onClick={() => setActiveTab("بيانات العميل / أمين السجل")} className="p-5 bg-white border border-brand-200 rounded-xl hover:border-brand-400 hover:shadow-md transition text-right group">
+                          <CheckCircle className="w-8 h-8 text-green-500 mb-3" />
+                          <h4 className="font-bold text-brand-900 mb-1">البيانات الأساسية</h4>
+                          <p className="text-xs text-brand-600">اكتمل إدخال بيانات أمين السجل التي تم إنشاء الطلب بها.</p>
+                        </button>
+                        
+                        <button onClick={() => isPaid ? setActiveTab("إدراج وثائق") : null} className={`p-5 bg-white border border-brand-200 rounded-xl transition text-right group ${isPaid ? 'hover:border-brand-400 hover:shadow-md' : 'opacity-70 cursor-not-allowed'}`}>
+                          <UploadCloud className={`w-8 h-8 mb-3 ${isPaid ? 'text-brand-500' : 'text-gray-400'}`} />
+                          <h4 className="font-bold text-brand-900 mb-1 flex justify-between items-center">
+                            إدراج الوثائق {!isPaid && <Lock className="w-3 h-3 text-brand-400" />}
+                          </h4>
+                          <p className="text-xs text-brand-600 leading-relaxed">أضف وثائق أو شهادات تثري السجل وتدعم المحتوى العائلي (اختياري).</p>
+                        </button>
+                        
+                        <button onClick={() => isPaid ? setActiveTab("نبذة وكلمة عن العائلة") : null} className={`p-5 bg-white border border-brand-200 rounded-xl transition text-right group ${isPaid ? 'hover:border-brand-400 hover:shadow-md' : 'opacity-70 cursor-not-allowed'}`}>
+                          <FileText className={`w-8 h-8 mb-3 ${isPaid ? 'text-brand-500' : 'text-gray-400'}`} />
+                          <h4 className="font-bold text-brand-900 mb-1 flex justify-between items-center">
+                            بين يدي السجل {!isPaid && <Lock className="w-3 h-3 text-brand-400" />}
+                          </h4>
+                          <p className="text-xs text-brand-600 leading-relaxed">دوّن كلمة باسم العائلة، هجرتها التاريخية، أو نبذة عن أبطالها.</p>
+                        </button>
+                      </div>
+
+                    </div>
+                  )}
 
                   {activeTab === "حالة الإصدار" && (
                      <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
@@ -486,13 +572,13 @@ export function Dashboard() {
                   {activeTab === "نقطة العرض الأساسية" && (
                     <div className="p-8 bg-brand-50 rounded-2xl border border-brand-200 text-center">
                       <p className="text-brand-600 mb-4 font-light">بناءً على طلبكم، نقطة الانطلاق المعتمدة لبدء التوثيق لعمود النسب هي:</p>
-                      <div className="flex justify-center items-center gap-4 text-3xl font-serif text-brand-900 font-bold border-y-2 border-brand-200 py-6 max-w-md mx-auto">
+                      <div className="flex justify-center items-center gap-4 text-3xl font-serif text-brand-900 font-bold border-y-2 border-brand-200 py-6 max-w-lg mx-auto">
                         <UserPlus className="w-10 h-10 text-brand-600" />
                         <span>
-                          {order.data.startingPointType === "أنا أمين السجل" ? `${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() :
-                           order.data.startingPointType === "اسم العائلة" ? `عائلة (${order.data.familyName})` :
-                           order.data.startingPointType === "احد الأسلاف" ? order.data.startingPointName :
-                           order.data.startingPoint || `${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() || 'لم يتم التحديد'}
+                          {order.data.startingPointType === "أنا أمين السجل" ? `أمين السجل: ${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() :
+                           order.data.startingPointType === "اسم العائلة" ? `عائلة: ${order.data.familyName}` :
+                           order.data.startingPointType === "احد الأسلاف" ? `الجد: ${order.data.startingPointName}` :
+                           `أمين السجل: ${order.data.firstName || ''} ${order.data.familyName || ''}`.trim()}
                         </span>
                       </div>
                     </div>
@@ -983,6 +1069,31 @@ export function Dashboard() {
                   {activeTab === "الملف الشخصي" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
                        <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><User className="w-8 h-8 text-brand-600" /> الملف الشخصي</h3>
+                       
+                       <div className="mb-8 flex items-center gap-6 p-6 bg-brand-50 rounded-2xl border border-brand-100">
+                         <div className="relative group">
+                           {currentUser.photoUrl ? (
+                             <img src={currentUser.photoUrl} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover" />
+                           ) : (
+                             <div className="w-24 h-24 rounded-full bg-white border-4 border-brand-100 shadow-md flex items-center justify-center text-brand-600 font-bold text-4xl uppercase">
+                               {currentUser.name?.charAt(0) || "U"}
+                             </div>
+                           )}
+                           <button 
+                             type="button"
+                             onClick={() => profilePhotoInputRef.current?.click()}
+                             className="absolute bottom-0 left-0 bg-brand-600 text-white p-2 rounded-full shadow-lg hover:bg-brand-500 transition-colors"
+                           >
+                             <Camera className="w-4 h-4" />
+                           </button>
+                           <input type="file" className="hidden" ref={profilePhotoInputRef} onChange={handleProfilePhotoUpload} accept="image/*" />
+                         </div>
+                         <div>
+                           <h4 className="font-bold text-brand-900 text-lg">الصورة الشخصية</h4>
+                           <p className="text-sm text-brand-600 mt-1">يُفضل رفع صورة شخصية واضحة (اختياري)</p>
+                         </div>
+                       </div>
+
                        <form onSubmit={async (e) => {
                          e.preventDefault();
                          const formData = new FormData(e.currentTarget);

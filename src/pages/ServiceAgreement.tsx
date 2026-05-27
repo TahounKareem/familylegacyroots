@@ -4,6 +4,7 @@ import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, Arr
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { orderDetailsContract, mainContractSections } from "@/data/contractContent";
+import { AccordionContract } from "@/components/AccordionContract";
 import { arabicContractText } from "@/data/arabicContract";
 import { logLegalEvent, recordLegalConsent, createLegalContractRecord, createOrderEvidence } from "@/lib/legalService";
 
@@ -55,10 +56,11 @@ export function ServiceAgreement() {
   };
 
   const allChecked = req1 && req2;
-  const canProceed = allChecked && scrolledToBottom;
+  const canProceed = allChecked;
 
   const [isSigning, setIsSigning] = useState(false);
   const [showManuallySignedModal, setShowManuallySignedModal] = useState(false);
+  const [signedInternally, setSignedInternally] = useState(false);
   const [signTimeLeft, setSignTimeLeft] = useState(60); // 60 seconds wait time to be logical as requested
 
   useEffect(() => {
@@ -241,129 +243,18 @@ export function ServiceAgreement() {
           </p>
         </div>
 
-        <div className="bg-white rounded-[2rem] shadow-sm border border-brand-200 overflow-hidden mb-8">
-          
-          <div className="bg-brand-900 text-brand-50 px-8 py-4 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <FileText className="w-5 h-5 text-brand-300" />
-               <span className="font-bold tracking-wide">عقد تقديم الخدمة - Contract of Service</span>
-             </div>
-             <div className="text-xs text-brand-400 font-mono opacity-80">Ref: {dummyOrderId}</div>
-          </div>
-
-          <div className="grid grid-cols-1">
-            {/* Viewer */}
-            <div 
-              ref={scrollContainerRef}
-              onScroll={handleScroll}
-              onCopy={handleCopy}
-              className="h-[600px] overflow-y-auto relative bg-[#faf9f7] select-none"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23e0dcd3' font-family='Arial' font-weight='bold' opacity='0.4' text-anchor='middle' transform='rotate(-45 100 100)'%3E${encodeURIComponent(pendingOrderData.firstName + " " + pendingOrderData.familyName)} - ${new Date().toLocaleDateString()}%3C/text%3E%3C/svg%3E")`,
-                backgroundRepeat: 'repeat'
-              }}
-            >
-              
-              <div className="p-8 md:p-12 space-y-12">
-                
-                {/* Order Details Header */}
-                <div id="order-details" className="text-center border-b border-brand-200 pb-8">
-                  <h2 className="text-2xl font-serif font-bold text-brand-900 leading-relaxed whitespace-pre-line">
-                    {orderDetailsContract.ar.title}
-                  </h2>
-                  <div className="my-6 grid grid-cols-1 gap-4 text-xs text-brand-600 font-mono">
-                    <p className="whitespace-pre-line text-right">{orderDetailsContract.ar.intro}</p>
-                  </div>
-                </div>
-
-                {/* Order Details Table */}
-                <div className="border border-brand-200 rounded-xl overflow-hidden bg-white text-sm tracking-wide">
-                  {[
-                    [orderDetailsContract.ar.fields.orderId, `${dummyOrderId}`],
-                    [orderDetailsContract.ar.fields.invoiceId, `${dummyInvoiceId}`],
-                    [orderDetailsContract.ar.fields.orderDate, new Date().toLocaleDateString('ar-EG')],
-                    [orderDetailsContract.ar.fields.customerName, `${pendingOrderData.firstName} ${pendingOrderData.fatherName} ${pendingOrderData.familyName}`],
-                    [orderDetailsContract.ar.fields.email, currentUser.email],
-                    [orderDetailsContract.ar.fields.phone, pendingOrderData.shippingAddress?.phone || "-"],
-                    [orderDetailsContract.ar.fields.shippingAddress, `${pendingOrderData.shippingAddress?.street}, ${pendingOrderData.shippingAddress?.state}, ${pendingOrderData.shippingAddress?.country}`],
-                    [orderDetailsContract.ar.fields.product, `خدمة توثيق عمود النسب واصدار سجل تراث العائلة (السجل الأساسي -  البوابة الرئيسية)`],
-                    [orderDetailsContract.ar.fields.amount, `1980 SAR`],
-                    [orderDetailsContract.ar.fields.paymentMethod, `pending`],
-                    [orderDetailsContract.ar.fields.paymentStatus, `pending`],
-                    [orderDetailsContract.ar.fields.estimatedTime, `من 90 إلى 180 يوم .`],
-                    [orderDetailsContract.ar.fields.revisionTime, `15 يوم من تاريخ اصدار سجل تراث العائلة ( السجل الأساسي -  البوابة الرئيسية)`],
-                    [orderDetailsContract.ar.fields.deliveryChannel, `عبر حسابكم على المنصة`]
-                  ].map((row, i) => (
-                    <div key={i} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-b border-brand-100 last:border-0 hover:bg-brand-50/50 transition">
-                      <div className="bg-brand-50/50 px-4 py-3 font-bold text-brand-900 border-l border-brand-100/50 text-right">
-                        {row[0]}
-                      </div>
-                      <div className="px-4 py-3 text-brand-700 text-right md:col-span-3">
-                        {row[1]}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Contract Body (Dual Column Layout) */}
-                <div className="bg-white rounded-2xl border border-brand-100 shadow-sm overflow-hidden">
-                  {mainContractSections.map((sec, idx) => (
-                    <div key={sec.id} id={sec.id} className="border-b border-brand-100 last:border-0 relative">
-                      {(sec.arTitle || sec.enTitle) && (
-                        <div className="bg-brand-50/50 p-4 md:px-8 border-b border-brand-100/50 grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <h3 className="font-bold text-brand-900 text-right">{sec.arTitle}</h3>
-                           <h3 className="font-bold text-brand-900 text-left font-serif" dir="ltr">{sec.enTitle}</h3>
-                        </div>
-                      )}
-                      
-                      <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 leading-relaxed text-sm">
-                        
-                        {/* Arabic Column */}
-                        <div className="text-right text-brand-800 space-y-4">
-                          {sec.arText.split('\n').map((paragraph, i) => (
-                            <p key={i} className="text-justify whitespace-pre-wrap">{paragraph}</p>
-                          ))}
-                        </div>
-                        
-                        {/* English Column */}
-                        <div className="text-left text-brand-800 space-y-4 font-serif" dir="ltr">
-                          {sec.enText.split('\n').map((paragraph, i) => (
-                            <p key={i} className="text-justify whitespace-pre-wrap">{paragraph}</p>
-                          ))}
-                        </div>
-                        
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {scrolledToBottom ? (
-                  <div className="text-center mt-16 p-12 bg-[#F9F6F0] rounded-2xl border border-brand-200 flex flex-col items-center justify-center gap-6 shadow-inner relative overflow-hidden">
-                    <div className="absolute inset-0 bg-brand-50 opacity-40 mix-blend-multiply pattern-grid-lg"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      <h4 className="text-xl font-bold text-brand-900 mb-1">نهاية الوثيقة</h4>
-                      <h4 className="text-lg font-bold text-brand-900 mb-4 font-serif">End of Document</h4>
-                      <p className="text-brand-700 font-medium text-center leading-relaxed max-w-md">
-                        شكرًا لك. لقد أكملت الاطلاع على الاتفاقية بالكامل. يمكنك الآن الانتقال للموافقة على الإقرارات بالأسفل.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center mt-12 py-12 bg-brand-50/80 rounded-2xl border border-brand-200 shadow-inner">
-                    <p className="text-brand-600 font-medium flex items-center justify-center gap-2">
-                       <ArrowRight className="w-5 h-5 animate-pulse" />
-                       استمر بالتمرير للأسفل لتمكين الإقرار والموافقة
-                       <ArrowLeft className="w-5 h-5 animate-pulse" />
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <AccordionContract 
+          sections={mainContractSections}
+          orderDetailsContract={orderDetailsContract}
+          dummyOrderId={dummyOrderId}
+          dummyInvoiceId={dummyInvoiceId}
+          pendingOrderData={pendingOrderData}
+          currentUser={currentUser}
+        />
+        <div className="mb-8"></div>
+        
         {/* Requirements Checkboxes */}
-        <div className={`bg-white rounded-3xl p-8 border ${scrolledToBottom ? 'border-brand-300 shadow-md' : 'border-brand-100 opacity-60 pointer-events-none'} transition-all duration-500 mb-8`}>
+        <div className="bg-white rounded-3xl p-8 border border-brand-300 shadow-md transition-all duration-500 mb-8">
           <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الإقرار والموافقة القانونية <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgement & Agreement</span></h3>
           
           <div className="space-y-4">
@@ -379,11 +270,6 @@ export function ServiceAgreement() {
             />
           </div>
 
-          {!scrolledToBottom && (
-             <p className="text-red-500 text-sm mt-4 font-bold flex items-center gap-2">
-               يرجى الاطلاع على كامل الاتفاقية حتى النهاية قبل المتابعة.
-             </p>
-          )}
         </div>
 
         {/* Action Bar */}
@@ -398,19 +284,27 @@ export function ServiceAgreement() {
           
           <button 
             onClick={handleProceed} 
-            disabled={!canProceed || isSigning}
-            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 ${isSigning ? 'bg-orange-500 text-white animate-pulse-slow cursor-wait' : 'bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed'}`}
+            disabled={!canProceed || isSigning || signedInternally}
+            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 ${isSigning ? 'bg-orange-500 text-white animate-pulse-slow cursor-wait' : signedInternally ? 'bg-green-600 text-white cursor-default' : 'bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed'}`}
           >
             {isSigning ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" /> جاري التوقيع...
               </>
+            ) : signedInternally ? (
+              <>أتممت التوقيع <Check className="w-5 h-5" /></>
             ) : (
               <>
                 وقع إلكترونياً <PenTool className="w-5 h-5" />
               </>
             )}
           </button>
+          
+          {signedInternally && (
+             <button onClick={() => navigate("/order?step=4")} className="px-6 py-3 bg-brand-900 text-white rounded-2xl font-bold shadow-md hover:bg-brand-800 transition mr-2 flex items-center gap-2">
+               المتابعة <ArrowLeft className="w-5 h-5" />
+             </button>
+          )}
         </div>
 
       </div>
@@ -428,16 +322,20 @@ export function ServiceAgreement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center border-2 border-brand-200">
             <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10" />
+              <PenTool className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-serif text-brand-900 mb-4 font-bold">تأكيد التوقيع الإلكتروني</h2>
+            <h2 className="text-2xl font-bold text-brand-900 mb-4">التوقيع الإلكتروني المستقل</h2>
             <p className="text-brand-700 leading-relaxed mb-8">
-              لقد قمنا بفتح صفحة التوقيع في نافذة جديدة. يرجى إتمام عملية التوقيع بالمنصة الخارجية (SignNow).<br/><br/>
-              هل أتممت التوقيع الإلكتروني بنجاح وترغب في الانتقال لصفحة الدفع؟
+              نظرًا لأهمية التوقيع والاعتماد، قمنا بفتح نافذة التوقيع بشكل مستقل وآمن عبر منصة SignNow لضمان عدم وجود أي قيود من المتصفح (موانع الاطارات الإعلانية).
+              <br /><br />
+              يرجى إتمام التوقيع في النافذة الأخرى، ثم العودة إلى هنا وتأكيد ذلك. (يفتح التوقيع في شاشة منفصلة).
             </p>
-
+            
             <button
-              onClick={() => navigate("/order?payment=true", { replace: true })}
+              onClick={() => {
+                setShowManuallySignedModal(false);
+                setSignedInternally(true);
+              }}
               disabled={signTimeLeft > 0}
               className="w-full mb-4 px-6 py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >

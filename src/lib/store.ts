@@ -71,6 +71,7 @@ export interface UserInfo {
   country?: string;
   mobile?: string;
   passportUrl?: string;
+  photoUrl?: string;
 }
 
 export interface Node {
@@ -196,9 +197,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   orders: [],
   isAuthReady: false,
-  pendingOrderData: null,
+  pendingOrderData: (typeof window !== "undefined" && localStorage.getItem('pendingOrderData')) ? JSON.parse(localStorage.getItem('pendingOrderData')!) : null,
   
-  setPendingOrderData: (data) => set({ pendingOrderData: data }),
+  setPendingOrderData: (data) => {
+    if (data) localStorage.setItem('pendingOrderData', JSON.stringify(data));
+    else localStorage.removeItem('pendingOrderData');
+    set({ pendingOrderData: data });
+  },
   
   login: (user) => set({ currentUser: user }),
   

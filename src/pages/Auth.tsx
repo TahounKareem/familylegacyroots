@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAppStore, AppRole } from "@/lib/store";
 import { useNavigate, Navigate, Link } from "react-router";
-import { Home, Eye, EyeOff } from "lucide-react";
+import { Home, Eye, EyeOff, UserPlus } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -160,12 +160,6 @@ export function Auth() {
         <h2 className="mt-6 text-center text-3xl font-serif font-bold text-brand-900">
           {isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}
         </h2>
-        <p className="mt-2 text-center text-sm text-brand-700">
-          أو{" "}
-          <button onClick={() => setIsLogin(!isLogin)} className="font-medium text-brand-600 hover:text-brand-500 transition border-b border-brand-600">
-            {isLogin ? "سجل كعضو جديد" : "سجل دخولك لحسابك"}
-          </button>
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -199,7 +193,8 @@ export function Auth() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-brand-200 rounded-lg shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+                  className="appearance-none block w-full px-3 py-2 border border-brand-200 rounded-lg shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 text-left dir-ltr"
+                  dir="ltr"
                 />
               </div>
             </div>
@@ -212,7 +207,8 @@ export function Auth() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-brand-200 rounded-lg shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 pl-10"
+                  className="appearance-none block w-full px-3 py-2 border border-brand-200 rounded-lg shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 pl-10 text-left dir-ltr"
+                  dir="ltr"
                 />
                 <button
                   type="button"
@@ -272,6 +268,33 @@ export function Auth() {
             </div>
           </form>
         </div>
+
+        {isLogin ? (
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-brand-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-brand-50 text-brand-500">مستخدم جديد؟</span>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-center relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-brand-500 rounded-[2rem] blur opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+              <button 
+                onClick={() => setIsLogin(false)} 
+                className="relative flex items-center justify-center gap-2 w-full py-4 bg-white border border-brand-200 rounded-[2rem] text-brand-700 font-bold hover:text-brand-900 transition shadow-sm hover:shadow-md"
+              >
+                <UserPlus className="w-5 h-5 text-brand-600" />
+                إنشاء حساب جديد الآن
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8 text-center text-sm text-brand-700">
+            لديك حساب بالفعل؟ <button onClick={() => setIsLogin(true)} className="font-medium text-brand-600 hover:text-brand-500 transition border-b border-brand-600">تسجيل الدخول</button>
+          </div>
+        )}
       </div>
     </div>
   );
