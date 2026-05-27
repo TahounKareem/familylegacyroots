@@ -129,34 +129,11 @@ export function ServiceAgreement() {
        }
     );
 
-    // 4. Final step: mark ready
-    await logLegalEvent("contract_ready_for_signature", { version: "v1.0" }, contractId.current, orderId.current);
-
-    // Launch Popup for Signature Verification
-    setIsSigning(true);
-    setSignTimeLeft(60); // give them standard 60 sec countdown to avoid immediate skip
+    // 4. Final step: mark ready (signature bypassed by request)
+    await logLegalEvent("contract_bypassed_signature_agreed", { version: "v1.0" }, contractId.current, orderId.current);
     
-    // Popup size calculation to make it a neat side/centered window
-    const popupWidth = 800;
-    const popupHeight = 850;
-    const left = window.screen.width / 2 - popupWidth / 2;
-    const top = window.screen.height / 2 - popupHeight / 2;
-    
-    // Using a sized popup window rather than a full tab to reduce distraction
-    const signWindow = window.open(
-      'https://signnow.com/s/lFJhpFvv', 
-      'SignNowPopup', 
-      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no`
-    );
-
-    if (!signWindow) {
-      alert("تم حظر النوافذ المنبثقة (Popups). يرجى السماح بفتح النوافذ أو إيقاف مانع الإعلانات لمتابعة التوقيع.");
-      setIsSigning(false);
-      return;
-    }
-
-    // Now simply show the helper modal since we don't have programmatic access
-    setShowManuallySignedModal(true);
+    // Jump straight to payment step
+    navigate("/order?step=4");
   };
 
   if (!currentUser || !pendingOrderData) return null;
@@ -284,27 +261,11 @@ export function ServiceAgreement() {
           
           <button 
             onClick={handleProceed} 
-            disabled={!canProceed || isSigning || signedInternally}
-            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 ${isSigning ? 'bg-orange-500 text-white animate-pulse-slow cursor-wait' : signedInternally ? 'bg-green-600 text-white cursor-default' : 'bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed'}`}
+            disabled={!canProceed}
+            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            {isSigning ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" /> جاري التوقيع...
-              </>
-            ) : signedInternally ? (
-              <>أتممت التوقيع <Check className="w-5 h-5" /></>
-            ) : (
-              <>
-                وقع إلكترونياً <PenTool className="w-5 h-5" />
-              </>
-            )}
+            المتابعة لإتمام الدفع وبدء التنفيذ <ArrowLeft className="w-5 h-5" />
           </button>
-          
-          {signedInternally && (
-             <button onClick={() => navigate("/order?step=4")} className="px-6 py-3 bg-brand-900 text-white rounded-2xl font-bold shadow-md hover:bg-brand-800 transition mr-2 flex items-center gap-2">
-               المتابعة <ArrowLeft className="w-5 h-5" />
-             </button>
-          )}
         </div>
 
       </div>
@@ -317,47 +278,6 @@ export function ServiceAgreement() {
         }
       `}} />
 
-      {/* Manual Signature Confirmation Modal */}
-      {showManuallySignedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center border-2 border-brand-200">
-            <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <PenTool className="w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-bold text-brand-900 mb-4">التوقيع الإلكتروني المستقل</h2>
-            <p className="text-brand-700 leading-relaxed mb-8">
-              نظرًا لأهمية التوقيع والاعتماد، قمنا بفتح نافذة التوقيع بشكل مستقل وآمن عبر منصة SignNow لضمان عدم وجود أي قيود من المتصفح (موانع الاطارات الإعلانية).
-              <br /><br />
-              يرجى إتمام التوقيع في النافذة الأخرى، ثم العودة إلى هنا وتأكيد ذلك. (يفتح التوقيع في شاشة منفصلة).
-            </p>
-            
-            <button
-              onClick={() => {
-                setShowManuallySignedModal(false);
-                setSignedInternally(true);
-              }}
-              disabled={signTimeLeft > 0}
-              className="w-full mb-4 px-6 py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {signTimeLeft > 0 ? `يرجى الانتظار (${signTimeLeft} ثانية)...` : 'نعم، أتممت التوقيع ومتابعة الدفع'}
-            </button>
-            
-            <button
-              onClick={() => {
-                const popupWidth = 800;
-                const popupHeight = 850;
-                const left = window.screen.width / 2 - popupWidth / 2;
-                const top = window.screen.height / 2 - popupHeight / 2;
-                const signWindow = window.open('https://signnow.com/s/lFJhpFvv', 'SignNowPopup', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no`);
-                if (!signWindow) alert("تم حظر النوافذ المنبثقة.");
-              }}
-              className="mt-2 text-sm text-brand-600 underline font-medium hover:text-brand-800"
-            >
-              لم تفتح معي النافذة. انقر هنا للمحاولة مرة أخرى.
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

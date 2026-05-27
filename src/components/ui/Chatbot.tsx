@@ -95,18 +95,25 @@ export function Chatbot() {
         body: JSON.stringify({ messages: newMessages })
       });
 
-      if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Network response was not ok');
+      }
       
       setMessages(prev => [
         ...prev,
         { id: Date.now().toString(), sender: 'bot', text: data.reply }
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
+      const errorMessage = error.message.includes('API key') 
+        ? 'عذراً، مفتاح API الخاص بـ Gemini غير مهيأ. يرجى إضافته في إعدادات التطبيق.' 
+        : 'عذراً، حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.';
+        
       setMessages(prev => [
         ...prev,
-        { id: Date.now().toString(), sender: 'bot', text: 'عذراً، حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.' }
+        { id: Date.now().toString(), sender: 'bot', text: errorMessage }
       ]);
     } finally {
       setIsTyping(false);
