@@ -49,7 +49,7 @@ export function Footer() {
               <h3 className="font-serif text-lg text-white mb-6">استكشف المنصة</h3>
               <ul className="space-y-4 text-white">
                 <li><Link to="/services" className="hover:text-brand-300 transition">سجل تراث العائلة</Link></li>
-                <li><Link to="/about" className="hover:text-brand-300 transition">من نحن وماذا نقدم</Link></li>
+                <li><Link to="/about" className="hover:text-brand-300 transition">من نحن</Link></li>
                 <li><Link to="/knowledge" className="hover:text-brand-300 transition">المركز المعرفي</Link></li>
                 <li><Link to="/contact" className="hover:text-brand-300 transition">تواصل معنا</Link></li>
               </ul>

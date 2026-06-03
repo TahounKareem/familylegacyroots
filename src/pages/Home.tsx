@@ -30,10 +30,10 @@ export function Home() {
                 مشروع توثيق عائلي يجمع البحث التاريخي والروايات والوثائق ضمن سجل فاخر يوثق عمود النسب والامتداد العائلي.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <a href="#journey" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group w-fit">
+                <Link to="/auth" className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 group w-fit">
                   ابدأ سجل عائلتك
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
@@ -105,43 +105,43 @@ export function Home() {
             <p className="text-brand-600 text-lg max-w-2xl mx-auto">رحلة بحث وتوثيق تحفظ امتداد العائلة ورواياتها ضمن سجل معرفي موثق</p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-8">
+                    <div className="flex flex-col md:flex-row items-stretch justify-between gap-4 md:gap-2 lg:gap-4 hidden md:flex" dir="rtl">
             {[
-              {
-                icon: FolderPlus,
-                title: "ابدأ سجل عائلتك",
-                desc: "أنشئ حسابك وابدأ رحلة توثيق الروايات والامتداد العائلي ضمن منصتنا."
-              },
-              {
-                icon: Database,
-                title: "حدثنا عن عائلتك",
-                desc: "شارك المعلومات الأساسية المرتبطة بعائلتك لنبدأ دراسة الامتداد العائلي وعمود النسب."
-              },
-              {
-                icon: SearchCheck,
-                title: "نقوم بالبحث والتوثيق",
-                desc: "يعمل فريقنا على البحث والتوثيق وإعداد السجل وفق منهجية معرفية متخصصة."
-              },
-              {
-                icon: Gift,
-                title: "استلم السجل",
-                desc: "تتسلم سجل تراث عائلتك بنسخته المطبوعة والرقمية ضمن إخراج أنيق قابل للحفظ والتحديث."
-              }
-            ].map((feature, idx) => (
-               <motion.div 
-                 key={idx}
-                 initial={{ opacity: 0, y: 20 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: idx * 0.1 }}
-                 className="bg-brand-50 rounded-3xl p-8 hover:shadow-xl transition-shadow text-center"
-               >
-                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-brand-500 mx-auto mb-6 shadow-sm border border-brand-100">
-                   <feature.icon className="w-8 h-8" />
-                 </div>
-                 <h3 className="font-serif text-xl font-bold text-brand-900 mb-4">{feature.title}</h3>
-                 <p className="text-brand-800/80 leading-relaxed text-sm">{feature.desc}</p>
-               </motion.div>
+              { title: "ابدأ سجل عائلتك", desc: "قم بإنشاء حسابك وإعداد النطاق الأولي للسجل" },
+              { title: "حدثنا عن عائلتك", desc: "أدخل البيانات والمعلومات الأولية المتوفرة لديك" },
+              { title: "نقوم بالبحث والتوثيق", desc: "فريقنا يبدأ جمع ومراجعة وتوثيق الروايات والوثائق" },
+              { title: "استلم السجل", desc: "احصل على سجل عائلتك مطبوعاً ورقمياً بتصميم فاخر" }
+            ].map((step, idx) => (
+              <div key={idx} className="relative flex-1 flex items-stretch group">
+                <div 
+                  className="bg-[#f8e6e5] z-10 text-brand-900 border border-[#f5d7d5] shadow-sm py-6 px-8 flex-1 text-center h-full flex flex-col justify-center transition-colors hover:bg-[#f3d7d5]"
+                  style={{
+                    clipPath: idx === 0 
+                      ? 'polygon(100% 0%, 15% 0%, 0% 50%, 15% 100%, 100% 100%)' 
+                      : idx === 3 
+                        ? 'polygon(100% 0%, 0% 0%, 0% 100%, 100% 100%, 85% 50%)' 
+                        : 'polygon(100% 0%, 15% 0%, 0% 50%, 15% 100%, 100% 100%, 85% 50%)',
+                    borderRadius: idx === 0 ? '0 1.5rem 1.5rem 0' : idx === 3 ? '1.5rem 0 0 1.5rem' : '0'
+                  }}
+                >
+                  <h3 className="font-bold text-xl mb-2">{step.title}</h3>
+                  <p className="text-sm opacity-80 leading-relaxed font-medium">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 md:hidden">
+            {[
+              { title: "ابدأ سجل عائلتك", desc: "قم بإنشاء حسابك وإعداد النطاق الأولي للسجل" },
+              { title: "حدثنا عن عائلتك", desc: "أدخل البيانات والمعلومات الأولية المتوفرة لديك" },
+              { title: "نقوم بالبحث والتوثيق", desc: "فريقنا يبدأ جمع ومراجعة وتوثيق الروايات والوثائق" },
+              { title: "استلم السجل", desc: "احصل على سجل عائلتك مطبوعاً ورقمياً بتصميم فاخر" }
+            ].map((step, idx) => (
+              <div key={idx} className="bg-[#f8e6e5] border-[#f5d7d5] rounded-2xl p-6 text-center shadow-sm border text-brand-900">
+                <h3 className="font-bold text-lg mb-2">{idx + 1}. {step.title}</h3>
+                <p className="text-sm opacity-80">{step.desc}</p>
+              </div>
             ))}
           </div>
 
@@ -152,8 +152,8 @@ export function Home() {
             transition={{ delay: 0.5 }}
             className="mt-16 text-center flex justify-center"
           >
-            <Link to="/auth" className="inline-flex items-center justify-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-xl font-semibold transition shadow-lg text-lg group w-fit">
-              ابدأ سجل عائلتك
+            <Link to="/services" className="inline-flex items-center justify-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-xl font-semibold transition shadow-lg text-lg group w-fit">
+              أعرف المزيد عن السجل
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </Link>
           </motion.div>

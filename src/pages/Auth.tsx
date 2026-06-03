@@ -7,7 +7,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfi
 import { doc, setDoc } from "firebase/firestore";
 
 export function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -156,6 +156,40 @@ export function Auth() {
         </Link>
       </div>
 
+            <div className="sm:mx-auto sm:w-full sm:max-w-3xl transform scale-75 origin-top mb-1 mt-10">
+        <div className="flex flex-col md:flex-row items-stretch justify-between gap-4 md:gap-2 lg:gap-4 hidden md:flex" dir="rtl">
+          {[
+            { title: "ابدأ سجل عائلتك", desc: "قم بإنشاء حسابك وإعداد النطاق الأولي للسجل" },
+            { title: "حدثنا عن عائلتك", desc: "أدخل البيانات والمعلومات الأولية المتوفرة لديك" },
+            { title: "نقوم بالبحث والتوثيق", desc: "فريقنا يبدأ جمع ومراجعة وتوثيق الروايات والوثائق" },
+            { title: "استلم السجل", desc: "احصل على سجل عائلتك مطبوعاً ورقمياً بتصميم فاخر" }
+          ].map((step, idx) => (
+            <div key={idx} className="relative flex-1 flex items-stretch group">
+              <div 
+                className="bg-[#f8e6e5] z-10 text-brand-900 border border-[#f5d7d5] shadow-sm py-4 px-4 flex-1 text-center h-full flex flex-col justify-center transition-colors"
+                style={{
+                  clipPath: idx === 0 
+                    ? 'polygon(100% 0%, 15% 0%, 0% 50%, 15% 100%, 100% 100%)' 
+                    : idx === 3 
+                      ? 'polygon(100% 0%, 0% 0%, 0% 100%, 100% 100%, 85% 50%)' 
+                      : 'polygon(100% 0%, 15% 0%, 0% 50%, 15% 100%, 100% 100%, 85% 50%)',
+                  borderRadius: idx === 0 ? '0 1rem 1rem 0' : idx === 3 ? '1rem 0 0 1rem' : '0'
+                }}
+              >
+                <h3 className="font-bold text-sm mb-1">{step.title}</h3>
+                <p className="text-[10px] opacity-80 leading-snug">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-4 flex justify-center pb-2">
+          <Link to="/services" className="inline-flex items-center gap-2 text-brand-600 font-bold hover:text-brand-800 transition text-sm">
+            أعرف المزيد عن السجل <Eye className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-serif font-bold text-brand-900">
           {isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}
@@ -269,7 +303,28 @@ export function Auth() {
           </form>
         </div>
 
-        {isLogin ? (
+                {!isLogin ? (
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-brand-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-brand-50 text-brand-500">لديك حساب بالفعل؟</span>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-center relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-brand-500 rounded-[2rem] blur opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+              <button 
+                onClick={() => setIsLogin(true)} 
+                className="relative flex items-center justify-center gap-2 w-full py-4 bg-white border border-brand-200 rounded-[2rem] text-brand-700 font-bold hover:text-brand-900 transition shadow-sm hover:shadow-md"
+              >
+                <Home className="w-5 h-5 text-brand-600" />
+                تسجيل الدخول
+              </button>
+            </div>
+          </div>
+        ) : (
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -280,7 +335,6 @@ export function Auth() {
               </div>
             </div>
             <div className="mt-6 flex justify-center relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-brand-500 rounded-[2rem] blur opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
               <button 
                 onClick={() => setIsLogin(false)} 
                 className="relative flex items-center justify-center gap-2 w-full py-4 bg-white border border-brand-200 rounded-[2rem] text-brand-700 font-bold hover:text-brand-900 transition shadow-sm hover:shadow-md"
@@ -289,10 +343,6 @@ export function Auth() {
                 إنشاء حساب جديد الآن
               </button>
             </div>
-          </div>
-        ) : (
-          <div className="mt-8 text-center text-sm text-brand-700">
-            لديك حساب بالفعل؟ <button onClick={() => setIsLogin(true)} className="font-medium text-brand-600 hover:text-brand-500 transition border-b border-brand-600">تسجيل الدخول</button>
           </div>
         )}
       </div>

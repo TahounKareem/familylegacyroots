@@ -107,9 +107,9 @@ export function Chatbot() {
       ]);
     } catch (error: any) {
       console.error("Chat error:", error);
-      const errorMessage = error.message.includes('API key') 
-        ? 'عذراً، مفتاح API الخاص بـ Gemini غير مهيأ. يرجى إضافته في إعدادات التطبيق.' 
-        : 'عذراً، حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.';
+      const errorMessage = error.message?.includes('API key') 
+        ? 'عذراً، مفتاح API غير مهيأ. يرجى المراجعة.' 
+        : 'يبدو أن استفسارك يحتاج إلى تفصيل دقيق من قبل زملائي. يسعدنا استقبال رسالتك عبر مركز التواصل والدعم ليتم الرد عليك بشكل شافٍ ووافٍ.';
         
       setMessages(prev => [
         ...prev,

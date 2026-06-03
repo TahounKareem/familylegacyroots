@@ -11,9 +11,9 @@ export function Navbar() {
   const navLinks = [
     { text: "الرئيسية", path: "/" },
     { text: "سجل تراث العائلة", path: "/services" },
-    { text: "من نحن وماذا نقدم", path: "/about" },
+    { text: "من نحن", path: "/about" },
     { text: "المركز المعرفي", path: "/knowledge" },
-    { text: "اتصل بنا", path: "/contact" },
+    { text: "مركز التواصل والدعم", path: "/contact" },
   ];
 
   return (
