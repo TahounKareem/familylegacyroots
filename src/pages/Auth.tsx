@@ -269,7 +269,7 @@ export function Auth() {
                 </div>
                 <div className="ml-3 mr-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-brand-800">
-                    أوافق على <Link to="/legal/terms" target="_blank" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</Link>، <Link to="/legal/privacy" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</Link>، و <Link to="/legal/cookies" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الكوكيز</Link>.
+                    أوافق على <Link to="/legal/terms" target="_blank" className="text-brand-600 hover:text-brand-500 underline">شروط الاستخدام</Link> و <Link to="/legal/privacy" target="_blank" className="text-brand-600 hover:text-brand-500 underline">سياسة الخصوصية</Link> وأقر بصحة البيانات المدخلة.
                   </label>
                 </div>
               </div>

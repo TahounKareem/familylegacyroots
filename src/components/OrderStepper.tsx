@@ -7,9 +7,9 @@ interface OrderStepperProps {
 
 export function OrderStepper({ currentStep }: OrderStepperProps) {
   const stepsList = [
-    { title: "تقديم البيانات", subtitle: "البيانات الأساسية ومعلومات الشحن" },
-    { title: "تحديد النطاق", subtitle: "نقطة العرض الأساسية وقالب التصميم" },
-    { title: "تأكيد الإصدار", subtitle: "مراجعة بيانات الطلب والتوقيع الإلكتروني" },
+    { title: "تقديم البيانات", subtitle: "بيانات أمين السجل" },
+    { title: "إعداد هوية السجل", subtitle: "تحديد أمين السجل واختيار قالب التصميم" },
+    { title: "مراجعة الطلب والتوقيع", subtitle: "مراجعة بيانات الطلب والتوقيع الإلكتروني" },
     { title: "بدء التنفيذ", subtitle: "إتمام الدفع" }
   ];
 

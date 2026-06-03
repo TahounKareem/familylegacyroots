@@ -130,6 +130,9 @@ export interface FamilyData {
   historicalNotes: string;
   managerWord?: string;
   mobileNumber?: string;
+  email?: string;
+  currentResidenceCountry?: string;
+  currentResidenceState?: string;
   shippingAddress?: {
     name: string;
     phone: string;

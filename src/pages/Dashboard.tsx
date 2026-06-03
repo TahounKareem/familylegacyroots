@@ -337,11 +337,11 @@ export function Dashboard() {
                 <div className="space-y-2 mb-6">
                   <button onClick={() => setActiveTab("حالة الإصدار")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
                     <Compass className="w-4 h-4" />
-                    العودة للوحة التحكم
+                    عودة
                   </button>
                   <Link to="/" className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
                     <Home className="w-4 h-4" />
-                    <span className="truncate">العودة لصفحة المنصة الرئيسية</span>
+                    <span className="truncate">العودة للرئيسية</span>
                   </Link>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router";
-import { Check, ArrowRight, ArrowLeft, UserPlus, X, GitMerge } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, UserPlus, X, GitMerge, Sparkles, Coins, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { useAppStore, FamilyData } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { getPhoneCode } from "../data/countries";
@@ -23,11 +24,11 @@ export function OrderFlow() {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("payment") === "true") {
-      setStep(5);
+      setStep(4);
     } else if (searchParams.get("step") === "2") {
       setStep(2);
-    } else if (searchParams.get("step") === "5") {
-      setStep(5);
+    } else if (searchParams.get("step") === "4") {
+      setStep(4);
     }
   }, [location.search]);
 
@@ -53,6 +54,20 @@ export function OrderFlow() {
       street: "",
       zip: "",
       notes: ""
+    },
+    mobileNumber: "",
+    email: "",
+    currentResidenceCountry: "",
+    currentResidenceState: "",
+    hasDeliveryAddress: false,
+    deliveryAddress: {
+      name: "",
+      phone: "",
+      country: "",
+      state: "",
+      street: "",
+      zip: "",
+      notes: ""
     }
   });
 
@@ -70,6 +85,7 @@ export function OrderFlow() {
   const [inviteError, setInviteError] = useState("");
 
   const handleNext = () => {
+    window.scrollTo(0, 0);
     if (step === 1) setStep(2);
     else if (step === 2) {
       if (!formData.designTemplate) {
@@ -82,7 +98,7 @@ export function OrderFlow() {
 
   const handlePrev = () => {
     if (step === 2) setStep(1);
-    else if (step === 5) navigate("/e-signature");
+    else if (step === 4) navigate("/service-agreement");
   };
 
   const handleInviteSubmit = async () => {
@@ -115,7 +131,7 @@ export function OrderFlow() {
       });
 
       // Navigate to success page mimicking Stripe
-      window.location.href = `/dashboard?success=true&order_id=${orderId}&invite=true`;
+      navigate(`/dashboard?success=true&order_id=${orderId}&invite=true`);
     } catch (e) {
       console.error(e);
       alert("حدث خطأ");
@@ -189,10 +205,20 @@ export function OrderFlow() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         
         {/* Navigation Back */}
-        <div className="mb-6">
-          <Link to={currentUser ? "/dashboard" : "/"} className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-800 font-medium transition">
-            <ArrowRight className="w-4 h-4" /> العودة {currentUser ? "للوحة التحكم" : "للرئيسية"}
-          </Link>
+        <div className="mb-6 flex justify-end items-center">
+          
+          {currentUser && (
+            <div className="flex items-center gap-3 text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-full border border-brand-100 shadow-sm">
+              <UserPlus className="w-4 h-4 text-brand-500" />
+              <span>{currentUser.name}</span>
+              <button 
+                onClick={() => { useAppStore.getState().logout(); navigate("/auth"); }} 
+                className="text-red-500 hover:text-red-700 mr-2 text-xs font-bold border-r border-brand-100 pr-3"
+              >
+                تسجيل الخروج
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Progress Bar */}
@@ -207,95 +233,95 @@ export function OrderFlow() {
           {step === 1 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تقديم البيانات</h2>
-                <p className="text-brand-600">أدخل بيانات العميل / أمين السجل</p>
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">بيانات أمين السجل</h2>
+                <p className="text-brand-600 font-bold text-lg">تبدأ رحلة التوثيق من الشخص الذي يحمل مسؤولية حفظ الرواية</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 border-b border-brand-100 pb-12">
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (العميل / أمين السجل) *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>{
-                    setFormData(prev => ({
-                      ...prev, 
-                      firstName: e.target.value
-                    }));
-                  }} placeholder="الاسم الأول" />
+              {/* Section 1 */}
+              <div className="bg-white border rounded-2xl p-6 border-brand-200 shadow-sm p-4 md:p-8">
+                <div className="border-b border-brand-100 pb-4 mb-6">
+                  <h3 className="text-xl font-bold text-brand-900 mb-1">بيانات أمين السجل</h3>
+                  <p className="text-sm text-brand-600">أدخل البيانات الأساسية التي سيُبنى عليها سجل تراث عائلتك</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">اسم الأب *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} placeholder="اسم الأب" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">اسم الجد *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">إسم العائلة *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">القبيلة (اختياري)</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} placeholder="القبيلة إن وجدت" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
-                  <select 
-                    className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
-                    value={formData.country} 
-                    onChange={(e)=>{
-                       setFormData(prev => ({
-                         ...prev, 
-                         country: e.target.value,
-                         shippingAddress: {
-                           ...prev.shippingAddress,
-                           country: prev.shippingAddress?.country || e.target.value,
-                           phone: getPhoneCode(e.target.value)
-                         }
-                       }));
-                    }}
-                  >
-                    <option value="" disabled>اختر الدولة...</option>
-                    <CountrySelectOptions />
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
-                  <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (أمين السجل) *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">اسم الأب *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} placeholder="اسم الأب" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">اسم الجد *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200 mt-8">
-                <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">العنوان البريدي</h3>
+              {/* Section 2 */}
+              <div className="bg-white border rounded-2xl p-6 border-brand-200 shadow-sm p-4 md:p-8">
+                <div className="border-b border-brand-100 pb-4 mb-6">
+                  <h3 className="text-xl font-bold text-brand-900 mb-1">بيانات الإنتماء العائلي</h3>
+                  <p className="text-sm text-brand-600">أدخل البيانات الأساسية التي سيُبنى عليها سجل تراث عائلتك</p>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                      value={formData.shippingAddress?.name || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">إسم العائلة *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-brand-800 mb-2">رقم الهاتف *</label>
-                    <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
-                      value={formData.shippingAddress?.phone || ""} onChange={(e)=>{
+                    <label className="block text-sm font-medium text-brand-800 mb-2">القبيلة (اختياري)</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} placeholder="" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">الدولة (حيث الموطن الأصلي) *</label>
+                    <select 
+                      className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
+                      value={formData.country} 
+                      onChange={(e)=>setFormData({...formData, country: e.target.value})}
+                    >
+                      <option value="" disabled>اختر الدولة...</option>
+                      <CountrySelectOptions />
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3 */}
+              <div className="bg-brand-50 border rounded-2xl p-6 border-brand-200 shadow-sm p-4 md:p-8 relative">
+                <div className="border-b border-brand-200 pb-4 mb-6">
+                  <h3 className="text-xl font-bold text-brand-900 mb-1">بيانات التواصل والإقامة</h3>
+                  <p className="text-sm text-brand-600">تُستخدم هذه البيانات للتواصل مع أمين السجل وإدارة الطلب وتسليم النسخ المطبوعة</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">البريد الإلكتروني *</label>
+                    <input type="email" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.email || ""} onChange={(e)=>setFormData({...formData, email: e.target.value})} placeholder="البريد الإلكتروني" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">رقم الجوال *</label>
+                    <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" value={formData.mobileNumber || ""} onChange={(e)=>{
                          const val = e.target.value;
-                         if (/^[\d+]*$/.test(val)) {
-                            setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: val}});
-                         }
+                         if (/^[\d+]*$/.test(val)) setFormData({...formData, mobileNumber: val});
                       }} placeholder="+0000000000" dir="ltr" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-brand-800 mb-2">الدولة *</label>
+                    <label className="block text-sm font-medium text-brand-800 mb-2">دولة الإقامة الحالية *</label>
                     <select 
                       className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
-                      value={formData.shippingAddress?.country || ""} 
+                      value={formData.currentResidenceCountry || ""} 
                       onChange={(e)=>{
                          setFormData(prev => ({
                            ...prev, 
-                           shippingAddress: {
-                             ...prev.shippingAddress, 
-                             country: e.target.value,
-                             phone: getPhoneCode(e.target.value)
-                           }
+                           currentResidenceCountry: e.target.value
                          }));
                       }}
                     >
@@ -305,41 +331,47 @@ export function OrderFlow() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                      value={formData.shippingAddress?.state || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                      value={formData.shippingAddress?.zip || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                      value={formData.shippingAddress?.street || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
+                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.currentResidenceState || ""} onChange={(e)=>setFormData({...formData, currentResidenceState: e.target.value})} placeholder="المدينة / المحافظة" />
                   </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-brand-200">
+                <div className="pt-6 border-t border-brand-200">
                   <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input 
                       type="checkbox" 
                       className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
                       checked={formData.hasDeliveryAddress || false}
-                      onChange={(e)=>setFormData({...formData, hasDeliveryAddress: e.target.checked})}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        if (checked && (!formData.deliveryAddress?.name && !formData.deliveryAddress?.phone)) {
+                          const fullName = [formData.firstName, formData.fatherName, formData.grandfatherName, formData.familyName].filter(Boolean).join(" ");
+                          setFormData({
+                            ...formData, 
+                            hasDeliveryAddress: checked,
+                            deliveryAddress: {
+                              ...formData.deliveryAddress,
+                              name: fullName,
+                              phone: formData.mobileNumber || formData.deliveryAddress?.phone || ""
+                            } as any
+                          });
+                        } else {
+                          setFormData({...formData, hasDeliveryAddress: checked});
+                        }
+                      }}
                     />
-                    <span className="font-medium text-brand-900">لدي عنوان أخر للتوصيل</span>
+                    <span className="font-bold text-lg text-brand-900 border-b border-brand-300 pb-1">أرغب باستلام النسخ المطبوعة من السجل</span>
                   </label>
 
                   {formData.hasDeliveryAddress && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 p-6 bg-white rounded-xl border border-brand-200 animate-in fade-in slide-in-from-top-4 duration-300">
+                      <h4 className="col-span-1 md:col-span-2 font-bold text-brand-900 mb-2">عنوان التوصيل</h4>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم للتوصيل *</label>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.deliveryAddress?.name || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-brand-800 mb-2">رقم الهاتف للتوصيل *</label>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">رقم هاتف المستلم *</label>
                         <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
                           value={formData.deliveryAddress?.phone || ""} onChange={(e)=>{
                              const val = e.target.value;
@@ -349,7 +381,7 @@ export function OrderFlow() {
                           }} placeholder="+0000000000" dir="ltr" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-brand-800 mb-2">الدولة للتوصيل *</label>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">دولة التوصيل *</label>
                         <select 
                           className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
                           value={formData.deliveryAddress?.country || ""} 
@@ -359,7 +391,7 @@ export function OrderFlow() {
                                deliveryAddress: {
                                  ...prev.deliveryAddress, 
                                  country: e.target.value,
-                                 phone: getPhoneCode(e.target.value)
+                                 phone: prev.deliveryAddress?.phone || getPhoneCode(e.target.value)
                                }
                              }));
                           }}
@@ -369,7 +401,7 @@ export function OrderFlow() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة للتوصيل *</label>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.deliveryAddress?.state || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
                       </div>
@@ -379,7 +411,7 @@ export function OrderFlow() {
                           value={formData.deliveryAddress?.zip || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي للتوصيل *</label>
+                        <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.deliveryAddress?.street || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
                       </div>
@@ -387,120 +419,128 @@ export function OrderFlow() {
                   )}
                 </div>
               </div>
+
+              <div className="text-center mt-6 p-4">
+                <p className="text-sm font-medium text-brand-600 bg-brand-50 border border-brand-100 rounded-full inline-block px-6 py-2 shadow-sm">
+                  تُعامل جميع البيانات بخصوصية تامة، ولا تُستخدم إلا ضمن نطاق تنفيذ السجل وخدمات المنصة.
+                </p>
+              </div>
+
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تحديد النطاق</h2>
-                <p className="text-brand-600">تحديد نقطة العرض الأساسية وقالب التصميم</p>
+                <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">إعداد هوية السجل</h2>
+                <p className="text-brand-600">في هذه الخطوة يتم تحديد أمين السجل واختيار قالب التصميم الخاص بالإصدار</p>
               </div>
 
               <div>
                 <label className="flex items-center gap-2 text-xl font-medium text-brand-900 mb-2">
                   <UserPlus className="w-6 h-6 text-brand-600" />
-                  نقطة العرض الأساسية *
+                  أمين السجل
                 </label>
                 <div className="text-sm font-light text-brand-700 mb-6 bg-brand-50 p-6 rounded-xl border border-brand-100 leading-relaxed">
-                  يقوم السجل على عنصر أساسي وهو توثيق عمود نسب أمين السجل / العميل ، ومربع أمين السجل هو نقطة الانطلاق في توثيق هذه الشجرة.
+                  يُبنى سجل تراث العائلة حول “أمين السجل”، بوصفه نقطة الانطلاق في توثيق عمود النسب، ومن خلاله يتم تنظيم الامتداد العائلي وربط الأجيال ضمن سجل واحد. <span className="font-bold">*سيظهر اسم أمين السجل على غلاف الإصدار الأساسي للسجل.</span>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-brand-900 to-brand-800 rounded-3xl p-8 text-white mb-12 shadow-xl border border-brand-700 relative overflow-hidden mt-8">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] mix-blend-overlay pointer-events-none" />
+              <div className="bg-brand-900/5 rounded-3xl p-8 mb-12 shadow-sm border border-[#802b30]/20 relative overflow-hidden mt-8 text-brand-900">
+                <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] mix-blend-overlay pointer-events-none" />
                 
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-brand-50/10 p-3 rounded-full backdrop-blur-sm mb-4">
-                    <GitMerge className="w-8 h-8 text-brand-100" />
+                  <div className="bg-[#802b30]/10 p-3 rounded-full backdrop-blur-sm mb-4">
+                    <GitMerge className="w-8 h-8 text-[#802b30]" />
                   </div>
-                  <h3 className="text-2xl font-serif font-bold text-center mb-4">أمين السجل.. جذع المبنى ومركز التوثيق</h3>
-                  <p className="text-brand-100 text-center max-w-2xl leading-relaxed mb-10 text-sm md:text-base">
-                   بصفتك أمين السجل، أنت تمثل الحلقة الجوهرية التي تربط الماضي بالمستقبل. اسمك هو نقطة الانطلاق في توثيق هذه الشجرة، ومن خلالك تتفرع الأغصان لتمتد إلى الأبناء والأحفاد المحتمل إضافتهم لاحقاً، مرسخةً إرث العائلة للأجيال القادمة.
+                  <h3 className="text-2xl font-serif font-bold text-center mb-4 text-[#802b30]">مع عمود النسب تبدأ الرواية</h3>
+                  <p className="text-brand-800 text-center max-w-2xl leading-relaxed mb-10 text-sm md:text-base font-medium">
+                    بصفتك أمين السجل، فأنت نقطة الانطلاق في هذا التوثيق، والحلقة التي تصل إرث الأجداد بامتداد الأسرة في الحاضر والمستقبل.ومن خلالك يُبنى عمود النسب، وتُستكمل الرواية التي حملتها الأجيال عبر الزمن، لتبقى محفوظة في سجل يوثق الذاكرة والامتداد.ويعمل فريق البحث على تتبع هذه الرواية بمنهجية علمية، اعتمادًا على المصادر والروايات والوثائق ذات الصلة.
                   </p>
 
                   {/* Visual Tree */}
                   <div className="flex flex-col items-center select-none pt-2">
                      
                      {/* Beyond Family - Box 2 */}
-                     <div className="bg-brand-900/40 text-brand-200 border border-brand-500/50 rounded-full py-1 px-4 text-center text-xs z-10 border-dashed mb-0">
-                        الجد الأعلى
+                     <div className="bg-brand-100/50 text-[#802b30] border border-[#802b30]/30 rounded-full py-1 px-4 text-center text-xs z-10 border-dashed mb-0 font-bold">
+                        جدود أعلى
                      </div>
-                     <div className="h-4 w-0.5 border-l-2 border-brand-200/40 border-dashed mb-1" />
+                     <div className="h-4 w-0.5 border-l-2 border-[#802b30]/40 border-dashed mb-1" />
 
                      {/* Beyond Family - Box 1 */}
-                     <div className="bg-brand-900/60 text-brand-100 border border-brand-500/70 rounded-full py-1.5 px-5 text-center text-xs z-10 border-dashed mb-0">
-                        القبيلة / الفخذ
+                     <div className="bg-brand-200/50 text-[#802b30] border border-[#802b30]/50 rounded-full py-1.5 px-5 text-center text-xs z-10 border-dashed mb-0 font-bold">
+                        جد
                      </div>
-                     <div className="h-4 w-0.5 border-l-2 border-brand-200/40 border-dashed" />
+                     <div className="h-4 w-0.5 border-l-2 border-[#802b30]/40 border-dashed" />
 
                      {/* Family Name */}
-                     <div className="text-brand-300 text-xs tracking-wide opacity-80 uppercase mb-1">العائلة</div>
-                     <div className="bg-brand-900 text-brand-100 border border-brand-500 rounded-full py-1.5 px-6 text-center text-sm z-10 font-bold mb-0">
-                        {formData.familyName || "العائلة"}
+                     <div className="bg-[#802b30] text-white border border-[#802b30] rounded-full py-2 px-8 text-center z-10 font-bold mb-0 shadow-sm flex flex-col items-center min-w-[100px]">
+                        <span className="text-[10px] text-brand-100/90 mb-0.5 font-sans font-medium">العائلة</span>
+                        <span className="text-base leading-tight">{formData.familyName || "العائلة"}</span>
                      </div>
-                     <div className="h-4 w-0.5 bg-brand-200/50" />
+                     <div className="h-4 w-0.5 bg-[#802b30]/30" />
 
                      {/* Grandfather 1 */}
-                     <div className="bg-brand-800/80 border border-brand-400 rounded-full py-1.5 px-6 text-center text-brand-50 text-sm z-10 font-bold">
+                     <div className="bg-brand-100/80 text-[#802b30] border border-[#802b30]/30 rounded-full py-1.5 px-6 text-center text-sm z-10 font-bold shadow-sm">
                         {formData.grandfatherName || "الجد الأول"}
                      </div>
-                     <div className="h-4 w-0.5 bg-brand-200/50" />
+                     <div className="h-4 w-0.5 bg-[#802b30]/30" />
 
                      {/* Father */}
-                     <div className="bg-brand-800/80 border border-brand-400 rounded-full py-2 px-8 text-center text-brand-50 z-10 font-bold">
+                     <div className="bg-brand-100/80 text-[#802b30] border border-[#802b30]/30 rounded-full py-2 px-8 text-center z-10 font-bold shadow-sm">
                         {formData.fatherName || "الأب"}
                      </div>
                      
                      {/* Vertical Line from Father */}
-                     <div className="h-6 w-0.5 bg-brand-200/50" />
+                     <div className="h-6 w-0.5 bg-[#802b30]/30" />
                      
                      {/* Horizontal Line Connecting Branches */}
-                     <div className="w-64 md:w-[24rem] h-0.5 bg-brand-200/50 flex justify-between relative">
-                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
-                        <div className="h-6 w-0.5 bg-brand-200/50 absolute left-1/2 -translate-x-1/2 top-0" />
-                        <div className="h-6 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
+                     <div className="w-64 md:w-[24rem] h-0.5 bg-[#802b30]/30 flex justify-between relative">
+                        <div className="h-6 w-0.5 bg-[#802b30]/30 absolute left-0 top-0" />
+                        <div className="h-6 w-0.5 bg-[#802b30]/30 absolute left-1/2 -translate-x-1/2 top-0" />
+                        <div className="h-6 w-0.5 bg-[#802b30]/30 absolute right-0 top-0" />
                      </div>
 
                      {/* Children Nodes (Siblings + You) */}
                      <div className="flex justify-between w-[17rem] md:w-[25rem] mt-6 relative items-start">
-                        <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                        <div className="bg-white/80 border border-[#802b30]/20 shadow-sm rounded-xl py-2 w-20 md:w-24 text-center text-brand-800 font-bold text-xs backdrop-blur-sm border-dashed">
                            أخ / أخت
                         </div>
                         {/* Record Keeper Box with Children */}
                         <div className="flex flex-col items-center">
-                          <div className="bg-white text-brand-900 border-2 border-brand-200 shadow-[0_0_25px_rgba(255,255,255,0.15)] rounded-full py-2 px-6 md:px-8 min-w-[80px] text-center relative z-10 font-bold font-serif -mt-2">
-                             {formData.firstName || "أنت"}
+                          <div className="bg-[#802b30] text-white border-2 border-[#802b30] shadow-md rounded-full py-2 px-8 md:px-10 min-w-[120px] text-center relative z-10 font-bold font-serif -mt-2 flex flex-col items-center">
+                             <span className="text-[10px] text-brand-100/90 mb-0.5 font-sans font-medium">أمين السجل</span>
+                             <span className="text-lg leading-tight">{formData.firstName || "أنت"}</span>
                           </div>
                           
                           {/* Vertical Line from You */}
-                          <div className="h-5 w-0.5 bg-brand-200/50" />
+                          <div className="h-5 w-0.5 bg-[#802b30]/30" />
                           
                           {/* Horizontal Line for Your Children (4 children) */}
-                          <div className="w-32 md:w-40 h-0.5 bg-brand-200/50 flex justify-between relative">
-                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-0 top-0" />
-                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-[33%] top-0" />
-                            <div className="h-4 w-0.5 bg-brand-200/50 absolute left-[66%] top-0" />
-                            <div className="h-4 w-0.5 bg-brand-200/50 absolute right-0 top-0" />
+                          <div className="w-32 md:w-40 h-0.5 bg-[#802b30]/30 flex justify-between relative">
+                            <div className="h-4 w-0.5 bg-[#802b30]/30 absolute left-0 top-0" />
+                            <div className="h-4 w-0.5 bg-[#802b30]/30 absolute left-[33%] top-0" />
+                            <div className="h-4 w-0.5 bg-[#802b30]/30 absolute left-[66%] top-0" />
+                            <div className="h-4 w-0.5 bg-[#802b30]/30 absolute right-0 top-0" />
                           </div>
                           
                           {/* Your Children Nodes */}
                           <div className="flex justify-between w-[9.5rem] md:w-[11.5rem] mt-4 relative items-start gap-1">
-                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
-                               إبن
+                             <div className="bg-white/60 border border-[#802b30]/30 shadow-sm border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-800 font-bold text-[8px] md:text-[9px]">
+                               إبن / إبنة
                              </div>
-                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
-                               إبنة
+                             <div className="bg-white/60 border border-[#802b30]/30 shadow-sm border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-800 font-bold text-[8px] md:text-[9px]">
+                               إبن / إبنة
                              </div>
-                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
-                               إبن
+                             <div className="bg-white/60 border border-[#802b30]/30 shadow-sm border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-800 font-bold text-[8px] md:text-[9px]">
+                               إبن / إبنة
                              </div>
-                             <div className="bg-brand-800/60 border border-brand-400 border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-200 text-[9px] md:text-[10px]">
-                               إبنة
+                             <div className="bg-white/60 border border-[#802b30]/30 shadow-sm border-dashed rounded-lg py-1 w-8 md:w-10 text-center text-brand-800 font-bold text-[8px] md:text-[9px]">
+                               إبن / إبنة
                              </div>
                           </div>
                         </div>
-                        <div className="bg-brand-800/60 border border-brand-300/30 rounded-xl py-2 w-20 md:w-24 text-center text-brand-200 text-xs backdrop-blur-sm border-dashed">
+                        <div className="bg-white/80 border border-[#802b30]/20 shadow-sm rounded-xl py-2 w-20 md:w-24 text-center text-brand-800 font-bold text-xs backdrop-blur-sm border-dashed">
                            أخ / أخت
                         </div>
                      </div>
@@ -519,7 +559,10 @@ export function OrderFlow() {
                     <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
                        <img src="https://i.postimg.cc/KzTskNLd/Modern.png" alt="مسار مودرن" className="w-full h-full object-contain" />
                     </div>
-                    <span className="font-bold text-brand-900 text-lg">نموذج حديث "مودرن"</span>
+                    <div>
+                      <span className="font-bold text-brand-900 text-lg block mb-1">النموذج الحديث</span>
+                      <span className="text-sm text-brand-600 font-medium">تصميم معاصر بإخراج بصري أنيق ولمسات تحريرية حديثة</span>
+                    </div>
                   </label>
                   
                   <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
@@ -527,16 +570,17 @@ export function OrderFlow() {
                     <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
                        <img src="https://i.postimg.cc/cH35gmYj/Classic.png" alt="مسار كلاسيكي" className="w-full h-full object-contain" />
                     </div>
-                    <span className="font-bold text-brand-900 text-lg">نموذج كلاسيكي</span>
+                    <div>
+                      <span className="font-bold text-brand-900 text-lg block mb-1">النموذج الكلاسيكي</span>
+                      <span className="text-sm text-brand-600 font-medium">طابع تراثي هادئ مستلهم من السجلات العائلية التقليدية.</span>
+                    </div>
                   </label>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Removed Step 4 (Confirm Edition) from here */}
-
-          {step === 5 && (
+          {step === 4 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-8 relative">
               {showInviteModal ? (
                 <div className="bg-brand-50 p-8 rounded-3xl border border-brand-200 max-w-md mx-auto relative z-10 shadow-lg">
@@ -577,35 +621,81 @@ export function OrderFlow() {
                     سيتم تحويلك الآن لإتمام عملية الدفع (بشكل آمن عبر بوابة Stripe). بعد نجاح الدفع، سيتم تفعيل حسابك كأمين سجل لتبدأ بإدراج بياناتك الاختيارية والتواصل مع فريق البحث لمعرفة المستجدات.
                   </p>
                   
-                  <div className="flex flex-col items-stretch mx-auto max-w-xl mb-8 gap-3">
-                    <div 
-                      onClick={() => setPaymentType("full")}
-                      className={`w-full border-2 p-6 rounded-2xl cursor-pointer transition shadow-sm ${paymentType === "full" ? "border-brand-600 bg-brand-50" : "border-brand-100 bg-white hover:border-brand-300"}`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-brand-900">الدفع الكامل</h3>
+                  <div className="flex flex-col items-stretch mx-auto max-w-xl mb-12 mt-4 space-y-4">
+                    
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-serif font-bold mb-4 text-brand-900 border-b border-brand-100 pb-4">الاستثمار في حفظ إرث العائلة</h3>
+                      <div className="inline-block bg-white px-6 py-4 rounded-3xl border border-brand-200 shadow-sm max-w-full block">
+                        <div className="text-4xl font-bold text-brand-600 font-mono mb-2" dir="rtl">١،٩٨٠ دولار</div>
+                        <p className="text-brand-700 text-sm font-medium px-2">يشمل الإصدار الأساسي من "سجل تراث العائلة"</p>
                       </div>
-                      <div className="text-4xl font-mono text-brand-900 font-bold mt-4 mb-2">
-                        $1,780<span className="text-xl text-brand-500 font-light">.00</span>
+                    </div>
+                    
+                    <h4 className="font-bold text-lg mb-2 font-serif text-brand-900 text-center">خيارات تنفيذ المشروع</h4>
+                    
+                    {/* Full Payment Option */}
+                    <div className={`p-4 lg:p-5 rounded-2xl border transition-colors cursor-pointer overflow-hidden ${paymentType === 'full' ? 'bg-[#fef1f2] border-brand-600 shadow-md ring-1 ring-brand-300' : 'bg-white border-brand-200 hover:bg-brand-50'}`} onClick={() => setPaymentType('full')}>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                           <div className={`p-2 lg:p-3 rounded-full shrink-0 shadow-sm border ${paymentType === 'full' ? 'bg-brand-100 border-brand-300' : 'bg-white border-brand-100'}`}>
+                             <Sparkles className="text-brand-500 w-5 h-5 lg:w-6 lg:h-6"/>
+                           </div>
+                           <span className="font-bold text-base lg:text-lg text-brand-900 leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
+                        </div>
+                        <ChevronDown className={`w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto transition-transform ${paymentType === 'full' ? 'rotate-180' : ''}`} />
                       </div>
+                      <AnimatePresence>
+                        {paymentType === "full" && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                            <div className="mt-6 pt-2 space-y-4 text-center">
+                              <div className="text-base lg:text-lg text-center mb-4 bg-white rounded-xl py-3 border border-brand-200 shadow-sm mx-auto max-w-xs">
+                                 قيمة السداد المبكر: <br/><span className="font-bold text-brand-600 font-mono text-2xl block mt-1" dir="ltr">١،٧٨٠ دولار</span>
+                              </div>
+                              <p className="text-sm text-brand-800 bg-white p-4 rounded-xl leading-relaxed text-right border-r-4 border-r-brand-400 w-full shadow-sm">
+                                تتضمن الامتيازات اولوية الجدولة لمراحل البحث والتوثيق والتسليم باللإضافة الي التوصيل السريع.
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
-                    <div className="w-full">
-                      <div 
-                        onClick={() => setPaymentType(paymentType === "installment" ? "full" : "installment")}
-                        className="bg-white border border-brand-100 rounded-xl p-3 text-center cursor-pointer hover:bg-brand-50 transition w-full"
-                      >
-                         <h3 className="text-sm font-bold text-brand-700">خيارات نظام الدفعات (الإجمالي 1980$)</h3>
-                      </div>
-                      {paymentType === "installment" && (
-                        <div className="mt-3 border-2 border-brand-600 bg-brand-50 p-6 rounded-2xl transition shadow-sm animate-in slide-in-from-top-2 duration-300">
-                          <div className="text-3xl font-mono text-brand-900 font-bold mt-2 mb-2">
-                            $693<span className="text-xl text-brand-500 font-light">.00</span>
-                          </div>
-                          <p className="text-sm text-brand-600 font-medium leading-relaxed">الدفعة الأولى 35%<br/><span className="text-xs opacity-80">(دفعة ثانية عند التوثيق ونهائية عند التسليم)</span></p>
+                    {/* Flexible Payment Option */}
+                    <div className={`p-4 lg:p-5 rounded-2xl border transition-colors cursor-pointer overflow-hidden ${paymentType === 'installment' ? 'bg-[#fef1f2] border-brand-600 shadow-md ring-1 ring-brand-300' : 'bg-white border-brand-200 hover:bg-brand-50'}`} onClick={() => setPaymentType('installment')}>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                           <div className={`p-2 lg:p-3 rounded-full shrink-0 shadow-sm border ${paymentType === 'installment' ? 'bg-brand-100 border-brand-300' : 'bg-white border-brand-100'}`}>
+                             <Coins className="text-brand-500 w-5 h-5 lg:w-6 lg:h-6"/>
+                           </div>
+                           <span className="font-bold text-base lg:text-lg text-brand-900">خيار الدفع المرن</span>
                         </div>
-                      )}
+                        <ChevronDown className={`w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto transition-transform ${paymentType === 'installment' ? 'rotate-180' : ''}`} />
+                      </div>
+                      <AnimatePresence>
+                        {paymentType === "installment" && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                            <div className="mt-6 text-sm text-brand-800 bg-white p-5 rounded-xl space-y-4 shadow-sm text-right border-r-4 border-r-brand-400">
+                              <p className="font-bold text-brand-900 border-b border-brand-100 pb-2 mb-4">يمكن توزيع قيمة المشروع على ٣ مراحل ميسرة:</p>
+                              <ul className="space-y-4 font-medium">
+                                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة أولى: 35% عند تفعيل الطلب – مرحلة البحث</li>
+                                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثانية: 35% عند انتهاء مرحلة التوثيق</li>
+                                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثالثة: 30% عند انتهاء العمل وتسليم السجل</li>
+                              </ul>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
+
+                    <div className="text-xs text-brand-600 mt-6 pt-5 border-t border-brand-100 font-light leading-relaxed text-center opacity-80">
+                      * نقبل عددًا محدودًا من مشاريع التوثيق شهريًا حفاظًا على جودة البحث والتوثيق.<br/>
+                      * تنطبق الشروط والأحكام على جميع الخدمات.
+                    </div>
+                  </div>
+                  
+                  <div className="text-center mt-12 mb-8 bg-brand-50 rounded-full py-4 px-6 inline-block mx-auto">
+                    <p className="text-sm font-bold text-brand-600 opacity-90">بعض الروايات تضيع… لأنها لم تُوثق.</p>
+                    <p className="text-xs text-brand-800 mt-1">ابدأ اليوم إنشاء سجل عائلي يوثق عمود نسبكم ويحفظ الذاكرة العائلية للأجيال القادمة.</p>
                   </div>
                   
                   <button 
@@ -632,16 +722,16 @@ export function OrderFlow() {
            <ArrowRight className="w-5 h-5" /> عودة
           </button>
           
-          {step < 5 ? (
+          {step < 4 ? (
             <button 
               onClick={handleNext} 
               disabled={
-                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.shippingAddress?.name || !formData.shippingAddress?.phone || !formData.shippingAddress?.country || !formData.shippingAddress?.state || !formData.shippingAddress?.street)) ||
+                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.email || !formData.mobileNumber || !formData.currentResidenceCountry || !formData.currentResidenceState || (formData.hasDeliveryAddress && (!formData.deliveryAddress?.name || !formData.deliveryAddress?.phone || !formData.deliveryAddress?.country || !formData.deliveryAddress?.state || !formData.deliveryAddress?.street)))) ||
                 (step === 2 && !formData.designTemplate)
               }
               className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {step === 2 ? "تحويل للمراجعة والعقد" : "التالي"} <ArrowLeft className="w-5 h-5" />
+              حفظ ومتابعة <ArrowLeft className="w-5 h-5" />
             </button>
           ) : (
             <button 

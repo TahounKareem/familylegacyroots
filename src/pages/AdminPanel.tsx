@@ -267,11 +267,23 @@ export function AdminPanel() {
               onClick={() => setActiveTab("lobby")}
               className="flex items-center gap-2 bg-[#C3262A] text-white border border-[#C3262A] px-4 py-2 rounded-md hover:bg-[#a61c20] transition shadow-sm font-medium"
             >
-              العودة إلى صالة الإدارة
+              <ChevronLeft className="w-5 h-5 -ml-1" />
+              عودة
             </button>
             <Link to="/" className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium">
               <Home className="w-5 h-5" /> الرئيسية
             </Link>
+            
+            <div className="flex items-center gap-3 text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-full border border-brand-100 shadow-sm">
+              <User className="w-4 h-4 text-brand-500" />
+              <span>{currentUser?.name}</span>
+              <button 
+                onClick={() => { logout(); window.location.href = '/auth'; }} 
+                className="text-red-500 hover:text-red-700 mr-2 text-xs font-bold border-r border-brand-100 pr-3"
+              >
+                تسجيل الخروج
+              </button>
+            </div>
           </div>
         </div>
       )}

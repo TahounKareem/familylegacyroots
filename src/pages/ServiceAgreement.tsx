@@ -129,10 +129,39 @@ export function ServiceAgreement() {
        }
     );
 
-    // 4. Final step: mark ready (signature bypassed by request)
-    await logLegalEvent("contract_bypassed_signature_agreed", { version: "v1.0" }, contractId.current, orderId.current);
+    // 4. Final step: trigger SignNow auto-sign logic
+    try {
+      let clientIp = "unknown";
+      try {
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const ipData = await ipRes.json();
+        clientIp = ipData.ip;
+      } catch (e) {
+        console.warn("Could not fetch IP", e);
+      }
+
+      await fetch("/api/signnow/auto-sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+           orderId: orderId.current,
+           customerName: pendingOrderData.firstName + " " + pendingOrderData.familyName,
+           email: currentUser.email,
+           auditTrail: {
+             ip: clientIp,
+             userAgent: navigator.userAgent,
+             timestamp: new Date().toISOString()
+           }
+        })
+      });
+      console.log("SignNow background auto-sign completed");
+    } catch (e) {
+      console.error("SignNow background error:", e);
+    }
+
+    await logLegalEvent("contract_electronically_signed", { version: "v1.0", provider: "signnow" }, contractId.current, orderId.current);
     
-    // Jump straight to payment step
+    // Jump straight to execution start / payment step
     navigate("/order?step=4");
   };
 
@@ -151,13 +180,31 @@ export function ServiceAgreement() {
     <div className="bg-brand-50 min-h-screen pb-12 pt-8 relative border-t-4 border-brand-600">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Progress Bar (Step 5 - Service Agreement) */}
-        <OrderStepper currentStep={3} />
+        {/* Navigation Back & Profile */}
+        <div className="mb-6 flex justify-end items-center">
+          {currentUser && (
+            <div className="flex items-center gap-3 text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-full border border-brand-100 shadow-sm">
+              <User className="w-4 h-4 text-brand-500" />
+              <span>{currentUser.name}</span>
+              <button 
+                onClick={() => { useAppStore.getState().logout(); navigate("/auth"); }} 
+                className="text-red-500 hover:text-red-700 mr-2 text-xs font-bold border-r border-brand-100 pr-3"
+              >
+                تسجيل الخروج
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="sticky top-0 z-50 bg-brand-50 pt-2 pb-4 mb-4">
+          <OrderStepper currentStep={3} />
+        </div>
 
         {/* Order Summary (Confirm Edition) */}
         <div className="bg-brand-50 p-6 md:p-10 rounded-[2rem] border border-brand-200 shadow-sm mb-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">تأكيد الإصدار</h2>
+            <h2 className="text-3xl font-serif font-bold text-brand-900 mb-2">مراجعة الطلب والتوقيع</h2>
             <p className="text-brand-600">مراجعة بيانات الطلب والتوقيع الإلكتروني</p>
           </div>
           
@@ -171,7 +218,7 @@ export function ServiceAgreement() {
               </button>
               <h3 className="font-bold text-brand-900 border-b border-brand-100 pb-3 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-brand-600" />
-                ملخص بيانات أمين السجل والتسليم
+                بيانات الإصدار المعتمدة
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-right">
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الاسم الأول:</span> <strong className="text-brand-900">{pendingOrderData.firstName}</strong></div>
@@ -182,27 +229,28 @@ export function ServiceAgreement() {
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الدولة:</span> <strong className="text-brand-900">{pendingOrderData.country}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">الموطن الأصلي:</span> <strong className="text-brand-900">{pendingOrderData.homeland}</strong></div>
                 <div className="flex flex-col gap-1"><span className="text-brand-600">قالب التصميم:</span> <strong className="text-brand-900">{pendingOrderData.designTemplate}</strong></div>
-                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">نقطة العرض الأساسية:</span> <strong className="text-brand-900">أمين السجل ({pendingOrderData.firstName} {pendingOrderData.fatherName} {pendingOrderData.familyName})</strong></div>
+                <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">أمين السجل:</span> <strong className="text-brand-900">{pendingOrderData.firstName} {pendingOrderData.fatherName} {pendingOrderData.familyName}</strong></div>
                 <div className="flex flex-col gap-1 md:col-span-2"><span className="text-brand-600">العنوان البريدي:</span> <strong className="text-brand-900">{pendingOrderData.shippingAddress?.name} - {pendingOrderData.shippingAddress?.phone} - {pendingOrderData.shippingAddress?.street}, {pendingOrderData.shippingAddress?.state}, {pendingOrderData.shippingAddress?.country} {pendingOrderData.shippingAddress?.zip}</strong></div>
               </div>
             </div>
             
-            <div className="bg-[#F2E3DE] text-brand-900 p-6 rounded-2xl shadow-sm border border-brand-200 flex flex-col text-right h-full">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-brand-100 flex flex-col text-right h-full">
                <div className="mb-2">
-                  <span className="text-[#C3262A] block mb-3 font-bold text-base border-b border-brand-200/50 pb-2">الباقة المختارة</span>
-                  <ul className="list-disc text-[#541214] mt-2 text-xs sm:text-sm space-y-2 pr-4 pl-2 leading-relaxed">
-                    <li>عمل البحث العلمي والتاريخي المتخصص.</li>
-                    <li>توثيق خط نسب أمين السجل / العميل "عمود النسب".</li>
-                    <li>توثيق المصادر والمراجع للعُقَد النسبية.</li>
-                    <li>توثيق المصادر والمراجع لتراجم الأعلام "السير الذاتية".</li>
-                    <li>تنسيق وموائمة مواد قسم الإدراج الإختياري الخاص بأمين السجل / العميل، مع بقية الأقسام.</li>
-                    <li>أعمال التصميم والإخراج الفني المحترف.</li>
-                    <li className="font-semibold text-brand-900">تسليم العمل "سجل تراث العائلة" على شكل المخرجات التالية:</li>
-                    <ul className="list-circle pr-6 text-xs opacity-90 space-y-1">
-                      <li>نسخة رقمية "الكترونية".</li>
-                      <li>عدد 10 نسخ ورقية مطبوعة بشكل أنيق.</li>
-                      <li>بوستر مشجر عمود النسب الشامل.</li>
-                    </ul>
+                  <span className="text-brand-900 block mb-3 font-bold text-base border-b border-brand-100 pb-2">نطاق العمل المعتمد</span>
+                  <p className="text-brand-800 mb-2 text-sm font-medium">يشمل هذا الإصدار الخدمات والمخرجات التالية ضمن نطاق العمل المتفق عليه:</p>
+                  <ul className="list-disc text-brand-700 mt-2 text-sm space-y-2 pr-4 pl-2 leading-relaxed mb-4">
+                    <li>إجراء البحث العلمي والتاريخي المرتبط بسجل العائلة.</li>
+                    <li>توثيق عمود النسب وربط نقطة العرض الأساسية بالامتداد العائلي الموثق.</li>
+                    <li>توثيق المصادر والمراجع والروايات ذات الصلة بالامتداد النسبي.</li>
+                    <li>إعداد وتوثيق التراجم والسير المرتبطة بأعلام العائلة — عند توفر المادة العلمية.</li>
+                    <li>تنسيق المواد الإضافية والوثائق والصور ضمن الهوية البصرية للسجل.</li>
+                    <li>تصميم وإخراج السجل بصيغة فنية احترافية تليق بإرث العائلة.</li>
+                  </ul>
+                  <p className="text-brand-800 mb-2 text-sm font-medium">يتم تسليم الإصدار النهائي عبر المخرجات التالية:</p>
+                  <ul className="list-disc text-brand-700 mt-2 text-sm space-y-2 pr-4 pl-2 leading-relaxed">
+                    <li>نسخة رقمية عالية الجودة من سجل تراث العائلة.</li>
+                    <li>نسخ مطبوعة فاخرة وفق الباقة المعتمدة.</li>
+                    <li>بوستر مشجر عمود النسب الكامل.</li>
                   </ul>
                </div>
             </div>
@@ -213,10 +261,10 @@ export function ServiceAgreement() {
         <div className="bg-white rounded-2xl shadow-sm border border-brand-100 p-4 mb-8 max-w-lg mx-auto text-center flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-brand-700 font-bold mb-1">
             <ShieldCheck className="w-5 h-5" />
-            <span>حماية مشددة لخصوصية عائلتك</span>
+            <span>حماية موثوقة لخصوصية العائلة</span>
           </div>
-          <p className="text-brand-600 text-xs sm:text-sm leading-relaxed max-w-xs">
-            بياناتك مشفرة ومحفوظة في خوادم آمنة. الخصوصية خط أحمر لا يمكن المساس به.
+          <p className="text-brand-600 text-sm leading-relaxed max-w-md">
+            تُحفظ البيانات والوثائق ضمن بيئة رقمية آمنة، مع التزام كامل بسرية المعلومات وعدم مشاركة محتوى السجل أو الوثائق إلا ضمن نطاق العمل المعتمد.
           </p>
         </div>
 
@@ -232,19 +280,46 @@ export function ServiceAgreement() {
         
         {/* Requirements Checkboxes */}
         <div className="bg-white rounded-3xl p-8 border border-brand-300 shadow-md transition-all duration-500 mb-8">
-          <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الإقرار والموافقة القانونية <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgement & Agreement</span></h3>
+          <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الاعتماد القانوني والتوقيع الإلكتروني <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgment & Electronic Signature</span></h3>
           
           <div className="space-y-4">
-            <CheckboxLabel 
-              checked={req2} onChange={(v) => { setReq2(v); if(v) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="تُعد صفحة بيانات الطلب هذه جزءًا لا يتجزأ من هذا العقد ومكملة لأحكامه، وتُقدَّم على أي وصف تجاري أو مراسلات سابقة فيما يخص تحديد المنتج والقيمة وبيانات العميل. وفي حال التعارض، تُقدَّم بيانات الطلب فيما يتعلق بالبيانات التعريفية للصفقة، وتبقى شروط العقد وأحكامه نافذة." 
-              textEn="This Order Details page forms an integral part of, and supplements, this Agreement and prevails over any prior commercial description or communications regarding identification of the product/service, price, and customer information. In the event of any conflict, the Order Details shall control with respect to the identifying information of the transaction, and the remaining terms and conditions of this Agreement shall remain in full force and effect."
-            />
-            <CheckboxLabel 
-              checked={req1} onChange={(v) => { setReq1(v); if(v) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
-              textAr="أوافق على استخدام التوقيع الإلكتروني والسجلات الإلكترونية وسجل التدقيق (Audit Trail) وشهادة الإكمال (Certificate of Completion) كوسائل إثبات قانونية ملزمة، وأقر بحجيتها الكاملة وعدم اشتراط وجود أصل ورقي." 
-              textEn="I agree to use electronic signatures, electronic records, the Audit Trail (Audit Trail), and the Certificate of Completion (Certificate of Completion) as legally binding means of evidence, and I acknowledge their full legal effect and that no paper original is required."
-            />
+            <label className="flex flex-col p-6 border border-brand-200 rounded-2xl cursor-pointer hover:bg-brand-50 transition shadow-sm bg-white">
+              <div className="flex items-center gap-2 mb-3 border-b border-brand-100 pb-2">
+                <Check className="w-5 h-5 text-brand-600" />
+                <h4 className="font-bold text-brand-900">اعتماد بيانات الطلب</h4>
+              </div>
+              <p className="text-sm text-brand-800 leading-relaxed mb-4 font-medium">
+                أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل والمعلومات التعريفية الخاصة بالإصدار.
+              </p>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+                  checked={req1}
+                  onChange={(e) => { setReq1(e.target.checked); if(e.target.checked) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+                />
+                <span className="font-bold text-sm text-brand-900">أوافق على اعتماد بيانات الطلب الحالية.</span>
+              </div>
+            </label>
+
+            <label className="flex flex-col p-6 border border-brand-200 rounded-2xl cursor-pointer hover:bg-brand-50 transition shadow-sm bg-white">
+              <div className="flex items-center gap-2 mb-3 border-b border-brand-100 pb-2">
+                <Check className="w-5 h-5 text-brand-600" />
+                <h4 className="font-bold text-brand-900">اعتماد التوقيع والسجلات الإلكترونية</h4>
+              </div>
+              <p className="text-sm text-brand-800 leading-relaxed mb-4 font-medium">
+                أوافق على استخدام التوقيع الإلكتروني والسجلات الرقمية وسجل التتبع الإلكتروني كوسائل قانونية معتمدة لإثبات إجراءات هذا الطلب واعتماداته.
+              </p>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+                  checked={req2}
+                  onChange={(e) => { setReq2(e.target.checked); if(e.target.checked) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+                />
+                <span className="font-bold text-sm text-brand-900">أوافق على الاعتماد الإلكتروني.</span>
+              </div>
+            </label>
           </div>
 
         </div>
@@ -256,16 +331,19 @@ export function ServiceAgreement() {
             onClick={() => navigate("/order?step=2")} 
             className="px-6 py-3 rounded-2xl font-medium text-brand-600 hover:bg-brand-50 transition flex items-center gap-2"
           >
-           <ArrowRight className="w-5 h-5" /> عودة لتحديد النطاق
+           <ArrowRight className="w-5 h-5" /> عودة
           </button>
           
-          <button 
-            onClick={handleProceed} 
-            disabled={!canProceed}
-            className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            المتابعة لإتمام الدفع وبدء التنفيذ <ArrowLeft className="w-5 h-5" />
-          </button>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <button 
+              onClick={handleProceed} 
+              disabled={!canProceed}
+              className={`px-10 py-3 rounded-2xl font-bold transition shadow-lg flex items-center gap-2 bg-brand-600 text-white hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              حفظ ومتابعة <ArrowLeft className="w-5 h-5" />
+            </button>
+            <p className="text-xs font-bold text-brand-600">بالمتابعة، يبدأ تجهيز ملف العمل وإدراج الطلب ضمن قائمة التنفيذ البحثي.</p>
+          </div>
         </div>
 
       </div>

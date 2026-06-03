@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import fs from 'fs';
+
+let content = `import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, ChevronDown, ChevronUp } from 'lucide-react';
@@ -186,3 +188,5 @@ export function CookieBanner() {
     </AnimatePresence>
   );
 }
+`;
+fs.writeFileSync('src/components/ui/CookieBanner.tsx', content);

@@ -17,6 +17,7 @@ import { Legal } from "./pages/Legal";
 import { useAppStore } from "./lib/store";
 import { CookieBanner } from "./components/ui/CookieBanner";
 import { Chatbot } from "./components/ui/Chatbot";
+import { SessionManager } from "./components/ui/SessionManager";
 
 import { ShippingDetails } from "./pages/ShippingDetails";
 import { ServiceAgreement } from "./pages/ServiceAgreement";
@@ -67,6 +68,7 @@ export default function App() {
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
       <CookieBanner />
+      <SessionManager />
       <Chatbot />
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUp, BookOpen, Clock, ShieldCheck, CheckCircle2, Bookmark, Info, Users, FileText, Lock, Coins, Sparkles, LayoutList } from 'lucide-react';
+import { ArrowUp, BookOpen, Clock, ShieldCheck, CheckCircle2, Bookmark, Info, ChevronDown, Users, FileText, Lock, Coins, Sparkles, LayoutList } from 'lucide-react';
 
 export function Services() {
   const [activeSection, setActiveSection] = useState('');
@@ -165,23 +165,23 @@ export function Services() {
                 <p>تستند منهجية إعداد السجل إلى مبادئ البحث التوثيقي المعتمدة في الدراسات التاريخية والنسبية.<br/><strong className="text-brand-900 text-xl block mt-4 mb-2">مراحل العمل</strong></p>
                 <div className="space-y-4">
                   <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
-                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">1</div> تحديد نقطة البداية</h3>
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">١</div> تحديد نقطة البداية</h3>
                     <p className="pr-8 text-brand-700">اعتماد نقطة العرض الأساسية التي يُبنى عليها عمود النسب.</p>
                   </div>
                   <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
-                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">2</div> جمع الروايات والبيانات</h3>
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">٢</div> جمع الروايات والبيانات</h3>
                     <p className="pr-8 text-brand-700">جمع الروايات والمعطيات من أمين السجل بوصفه المرجع الأساسي للمشروع.</p>
                   </div>
                   <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
-                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">3</div> البحث والتحليل</h3>
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">٣</div> البحث والتحليل</h3>
                     <p className="pr-8 text-brand-700">مراجعة المصادر والمراجع وتحليل الروابط النسبية وفق المعطيات المتاحة.</p>
                   </div>
                   <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
-                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">4</div> بناء عمود النسب</h3>
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">٤</div> بناء عمود النسب</h3>
                     <p className="pr-8 text-brand-700">ربط طبقات الامتداد العائلي ضمن إطار بحثي واضح.</p>
                   </div>
                   <div className="bg-brand-50 p-6 rounded-xl border border-brand-100 group hover:shadow-md transition">
-                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">5</div> إعداد السجل النهائي</h3>
+                    <h3 className="font-bold text-brand-900 mb-1 text-xl flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-brand-200 text-brand-700 flex items-center justify-center text-sm">٥</div> إعداد السجل النهائي</h3>
                     <p className="pr-8 text-brand-700">إخراج السجل ضمن وثيقة عائلية تجمع البحث التاريخي والتصميم الأنيق.</p>
                   </div>
                 </div>
@@ -279,36 +279,36 @@ export function Services() {
               </h2>
               <div className="text-brand-800 leading-relaxed font-light text-lg space-y-8">
                 
-                <div className="bg-green-50 p-6 md:p-8 rounded-3xl border border-green-200 shadow-sm">
-                   <h3 className="font-bold text-green-900 text-2xl mb-4 border-b border-green-200 pb-3 font-serif">يشمل الإصدار الأساسي من «سجل تراث العائلة»:</h3>
-                   <ul className="space-y-3 pr-4 text-green-900 font-medium">
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> البحث العلمي والتاريخي المتخصص.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق عمود النسب.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق المصادر والمراجع.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> توثيق تراجم الشخصيات الواردة في عمود النسب.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> مواءمة مواد الإدراج الاختياري ضمن السجل.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> التصميم والإخراج الفني الاحترافي.</li>
+                <div className="bg-brand-50 p-6 md:p-8 rounded-3xl border border-brand-100 shadow-sm">
+                   <h3 className="font-bold text-brand-900 text-2xl mb-4 border-b border-brand-100 pb-3 font-serif">يشمل الإصدار الأساسي من «سجل تراث العائلة»:</h3>
+                   <ul className="space-y-3 pr-4 text-brand-800 font-medium">
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> البحث العلمي والتاريخي المتخصص.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> توثيق عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> توثيق المصادر والمراجع.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> توثيق تراجم الشخصيات الواردة في عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> مواءمة مواد الإدراج الاختياري ضمن السجل.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> التصميم والإخراج الفني الاحترافي.</li>
                    </ul>
-                   <h3 className="font-bold text-green-900 mt-8 mb-4 border-b border-green-200 pb-3 text-xl font-serif">ويتم تسليم العمل عبر:</h3>
-                   <ul className="space-y-3 pr-4 text-green-900 font-medium">
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> نسخة رقمية إلكترونية.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> 10 نسخ مطبوعة بإخراج أنيق.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> بوستر لمخطط عمود النسب.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> حافظة أنيقة للبوستر.</li>
-                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> شحن الباقة.</li>
+                   <h3 className="font-bold text-brand-900 mt-8 mb-4 border-b border-brand-100 pb-3 text-xl font-serif">ويتم تسليم العمل عبر:</h3>
+                   <ul className="space-y-3 pr-4 text-brand-800 font-medium">
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> نسخة رقمية إلكترونية.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> 10 نسخ مطبوعة بإخراج أنيق.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> بوستر لمخطط عمود النسب.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> حافظة أنيقة للبوستر.</li>
+                      <li className="flex gap-3 items-start"><CheckCircle2 className="w-6 h-6 text-brand-600 shrink-0" /> شحن الباقة.</li>
                    </ul>
                 </div>
 
-                <div className="bg-red-50 p-6 md:p-8 rounded-3xl border border-red-200 mt-8 shadow-sm">
-                   <h3 className="font-bold text-red-900 text-2xl mb-4 border-b border-red-200 pb-3 font-serif">ما الذي لا يشمله السجل؟</h3>
-                   <p className="mb-4 text-red-900 font-medium">يركز الإصدار الأساسي على توثيق عمود النسب ضمن النطاق المتفق عليه. ولذلك، لا يشمل:</p>
-                   <ul className="space-y-3 pr-4 text-red-900">
+                <div className="bg-white p-6 md:p-8 rounded-3xl border border-brand-100 mt-8 shadow-sm">
+                   <h3 className="font-bold text-brand-900 text-2xl mb-4 border-b border-brand-100 pb-3 font-serif">ما الذي لا يشمله السجل؟</h3>
+                   <p className="mb-4 text-brand-800 font-medium">يركز الإصدار الأساسي على توثيق عمود النسب ضمن النطاق المتفق عليه. ولذلك، لا يشمل:</p>
+                   <ul className="space-y-3 pr-4 text-brand-800">
                       <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> تشجير العائلة الموسع.</li>
                       <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> التوسع خارج نطاق عمود النسب المتعاقد عليه.</li>
                       <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> أعمال الحمض النووي أو تفسيرها ضمن الإصدار الأساسي.</li>
                       <li className="flex gap-3 items-start"><div className="w-2 h-2 mt-2.5 rounded-full bg-red-400 shrink-0"></div> الأبحاث المتقدمة في الأرشيفات الحكومية والتاريخية.</li>
                    </ul>
-                   <p className="mt-6 text-red-900 font-medium p-4 bg-white rounded-xl border border-red-100 shadow-sm border-r-4 border-r-red-400">وفي حال الحاجة إلى أي أعمال بحثية إضافية، فقد يقترح فريق البحث مسارات متقدمة مستقلة بعد صدور الإصدار الأساسي.</p>
+                   <p className="mt-6 text-brand-900 font-medium p-4 bg-brand-50 rounded-xl border border-brand-100 shadow-sm border-r-4 border-r-brand-400">وفي حال الحاجة إلى أي أعمال بحثية إضافية، فقد يقترح فريق البحث مسارات متقدمة مستقلة بعد صدور الإصدار الأساسي.</p>
                 </div>
 
                 <div className="mt-8 rounded-[2rem] overflow-hidden shadow-lg border border-brand-100 bg-white p-2">
@@ -341,7 +341,7 @@ export function Services() {
                 <p>تختلف مدة إعداد السجل بحسب: طبيعة البحث، توفر المصادر والروايات، نطاق المعالجة، ومستوى استكمال البيانات المطلوبة.</p>
                 <div className="bg-brand-50 p-8 flex flex-col items-center justify-center rounded-3xl border border-brand-100 shadow-inner mt-6 max-w-sm mx-auto">
                   <span className="text-xl font-bold text-brand-900 mb-3 text-center">وعادةً ما تتراوح مدة إعداد السجل بين:</span>
-                  <span className="text-4xl text-brand-600 mb-4 font-mono font-bold" dir="ltr">90 - 180 <span className="text-2xl font-sans">يوماً</span></span>
+                  <span className="text-4xl text-brand-600 mb-4 font-mono font-bold" dir="rtl">٩٠ - ١٨٠ <span className="text-2xl font-sans">يوماً</span></span>
                   <span className="text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-lg shadow-sm">بحسب طبيعة المشروع</span>
                 </div>
               </div>
@@ -364,7 +364,7 @@ export function Services() {
                   <div className="text-center mb-10">
                     <h3 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-brand-900 text-center">الاستثمار في حفظ إرث العائلة</h3>
                     <div className="inline-block bg-white px-8 py-5 rounded-3xl border border-[#fbd3d5] shadow-sm max-w-full">
-                      <div className="text-5xl lg:text-6xl font-bold text-brand-600 font-mono mb-2" dir="ltr">$1,980</div>
+                      <div className="text-5xl lg:text-6xl font-bold text-brand-600 font-mono mb-2" dir="rtl">١،٩٨٠ دولار</div>
                       <p className="text-brand-700 text-base lg:text-lg font-medium px-2">يشمل الإصدار الأساسي من "سجل تراث العائلة"</p>
                     </div>
                   </div>
@@ -381,14 +381,14 @@ export function Services() {
                              </div>
                              <span className="font-bold text-base lg:text-lg text-brand-900 leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
                           </div>
-                          <Info className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
+                          <ChevronDown className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
                         </div>
                         <AnimatePresence>
                           {showFullPaymentInfo && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                               <div className="mt-6 pt-2 space-y-4 text-center">
                                 <div className="text-lg lg:text-xl text-center mb-4 bg-white rounded-xl py-4 border border-[#fbd3d5] shadow-sm mx-auto max-w-xs">
-                                   قيمة السداد المبكر: <br/><span className="font-bold text-brand-600 font-mono text-3xl block mt-2" dir="ltr">$1,780</span>
+                                   قيمة السداد المبكر: <br/><span className="font-bold text-brand-600 font-mono text-3xl block mt-2" dir="ltr">١،٧٨٠ دولار</span>
                                 </div>
                                 <p className="text-sm lg:text-base text-brand-800 bg-white p-5 rounded-xl leading-relaxed text-right border-r-4 border-r-brand-400 w-full shadow-sm">
                                   تتضمن الامتيازات اولوية الجدولة لمراحل البحث والتوثيق والتسليم باللإضافة الي التوصيل السريع.
@@ -407,13 +407,13 @@ export function Services() {
                              </div>
                              <span className="font-bold text-base lg:text-lg text-brand-900">خيار الدفع المرن</span>
                           </div>
-                          <Info className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
+                          <ChevronDown className="w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto" />
                         </div>
                         <AnimatePresence>
                           {showFlexiblePaymentInfo && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                               <div className="mt-6 text-sm lg:text-base text-brand-800 bg-white p-6 rounded-xl space-y-4 shadow-sm text-right border-r-4 border-r-brand-400">
-                                <p className="font-bold text-brand-900 border-b border-brand-100 pb-2 mb-4">يمكن توزيع قيمة المشروع على 3 مراحل ميسرة:</p>
+                                <p className="font-bold text-brand-900 border-b border-brand-100 pb-2 mb-4">يمكن توزيع قيمة المشروع على ٣ مراحل ميسرة:</p>
                                 <ul className="space-y-4 font-medium">
                                   <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة أولى: 35% عند تفعيل الطلب – مرحلة البحث</li>
                                   <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثانية: 35% عند انتهاء مرحلة التوثيق</li>
