@@ -955,8 +955,20 @@ export function AdminPanel() {
                                 <option value="مرحلة التوثيق">
                                   مرحلة التوثيق
                                 </option>
+                                <option value="تمت المسودة">
+                                  تمت المسودة
+                                </option>
+                                <option value="تم التصميم الإلكتروني">
+                                  تم التصميم الإلكتروني
+                                </option>
                                 <option value="مرحلة التصويب">
                                   مرحلة التصويب
+                                </option>
+                                <option value="تم التصويب">
+                                  تم التصويب
+                                </option>
+                                <option value="تم تجهيز السجل للطباعة">
+                                  تم تجهيز السجل للطباعة
                                 </option>
                                 <option value="جاهز للتسليم">
                                   جاهز للتسليم
@@ -1203,8 +1215,20 @@ export function AdminPanel() {
                                 <option value="مرحلة التوثيق">
                                   مرحلة التوثيق
                                 </option>
+                                <option value="تمت المسودة">
+                                  تمت المسودة
+                                </option>
+                                <option value="تم التصميم الإلكتروني">
+                                  تم التصميم الإلكتروني
+                                </option>
                                 <option value="مرحلة التصويب">
                                   مرحلة التصويب
+                                </option>
+                                <option value="تم التصويب">
+                                  تم التصويب
+                                </option>
+                                <option value="تم تجهيز السجل للطباعة">
+                                  تم تجهيز السجل للطباعة
                                 </option>
                                 <option value="جاهز للتسليم">
                                   جاهز للتسليم

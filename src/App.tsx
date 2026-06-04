@@ -24,6 +24,7 @@ import { ServiceAgreement } from "./pages/ServiceAgreement";
 import { ESignature } from "./pages/ESignature";
 import { ESignatureSuccess } from "./pages/ESignatureSuccess";
 import { MockSignature } from "./pages/MockSignature";
+import { ScrollToTop } from "./components/ui/ScrollToTop";
 
 export default function App() {
   const initializeFirebase = useAppStore(state => state.initializeFirebase);
@@ -43,6 +44,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

@@ -495,10 +495,16 @@ export function Dashboard() {
                 </h3>
                 <div className="space-y-1">
                   <SidebarItem
-                    title="نبذة وكلمة عن العائلة"
-                    isActive={activeTab === "نبذة وكلمة عن العائلة"}
+                    title="نبذة عن العائلة"
+                    isActive={activeTab === "نبذة عن العائلة"}
                     isLocked={!isPaid}
-                    info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة ، (سيتم إدراجها في القسمالمسمى &#34;بين يدي السجل&#34; وهو القسم الخاص الذي يقع تحت اشرافكم)"
+                    info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة"
+                  />
+                  <SidebarItem
+                    title="بين يدي السجل"
+                    isActive={activeTab === "بين يدي السجل"}
+                    isLocked={!isPaid}
+                    info="هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) عند رغبته ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم (بين يدي السجل) من أجل جعل السجل أكثر خصوصية للعائلة"
                   />
                   <SidebarItem
                     title="نافذة الإدراج العائلي"
@@ -822,7 +828,7 @@ export function Dashboard() {
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <button
                                   onClick={() =>
-                                    setActiveTab("نبذة وكلمة عن العائلة")
+                                    setActiveTab("نبذة عن العائلة")
                                   }
                                   className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
                                 >
@@ -857,7 +863,7 @@ export function Dashboard() {
                                 </button>
 
                                 <button
-                                  onClick={() => setActiveTab("إدراج الصور")}
+                                  onClick={() => setActiveTab("إدراج صور")}
                                   className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
                                 >
                                   <ImageIcon className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
@@ -875,7 +881,7 @@ export function Dashboard() {
 
                                 <button
                                   onClick={() =>
-                                    setActiveTab("الإدراج العائلي")
+                                    setActiveTab("نافذة الإدراج العائلي")
                                   }
                                   className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
                                 >
@@ -1209,7 +1215,7 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "نبذة وكلمة عن العائلة" && (
+                  {activeTab === "نبذة عن العائلة" && (
                     <div className="space-y-6">
                       <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
                         <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
@@ -1245,6 +1251,14 @@ export function Dashboard() {
                         />
                       </div>
 
+                      <p className="text-xs text-brand-400 mt-2 text-center">
+                        يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
+                      </p>
+                    </div>
+                  )}
+
+                  {activeTab === "بين يدي السجل" && (
+                    <div className="space-y-6">
                       <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
                         <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
                           <MessageSquare className="w-5 h-5 text-brand-600" />
