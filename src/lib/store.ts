@@ -53,13 +53,21 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 export type OrderPriority = "عادي" | "عاجل";
 export type RecordType = "سجل أساسي" | "الأبواب المغلقة";
 export type PaymentStatus = "مدفوع بالكامل" | "مدفوع أول دفعة" | "مدفوع ثاني دفعة" | "مدفوع ثالث دفعة" | "كود دعوة" | "غير مدفوع" | "دفع جزئي";
-export type IssueStatus = "طلب غير مكتمل" | "بإنتظار إتمام الدفع" | "جاري التنفيذ" | "تم الإصدار" | "جاري التصويب" | "تم الإغلاق" | "يوجد تصويبات" | "قبول توصيات";
-export type ActionPhase = "مرحلة البحث" | "مرحلة التوثيق" | "طلب إيضاح" | "مرحلة التصويب" | "جاهز للتسليم";
+export type IssueStatus = "طلب غير مكتمل" | "بإنتظار إتمام الدفع" | "جاري التنفيذ" | "تم الإصدار" | "مرحلة التصويب" | "تم الإغلاق" | "يوجد تصويبات" | "قبول توصيات" | "إلغاء";
+export type ActionPhase = "مرحلة البحث" | "مرحلة التوثيق" | "تمت المسودة" | "تم التصميم الإلكتروني" | "طلب إيضاح" | "مرحلة التصويب" | "تم التصويب" | "تم تجهيز السجل للطباعة" | "جاهز للتسليم";
 
 export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل" | "طلب مكتمل" | "تم تسليم الإصدار الأول";
 
-
 export type AppRole = "user" | "admin" | "maestro" | "research" | "marketing" | "accounting" | "compliance" | "shipping" | "customer_service" | "editor";
+
+export interface TimelineEvent {
+  id: string;
+  timestamp: string;
+  message: string;
+  userId?: string;
+  userName?: string;
+  role?: string;
+}
 
 export interface UserInfo {
   id: string;
@@ -174,6 +182,7 @@ export interface Order {
   data: FamilyData;
   createdAt: string;
   messages?: Message[];
+  timeline?: TimelineEvent[];
   deliveryLink?: string;
   digitalCopyLink?: string;
   posterLink?: string;
@@ -190,6 +199,7 @@ interface AppState {
   logout: () => Promise<void>;
   placeOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
+  logTimelineEvent: (orderId: string, _message: string) => Promise<void>;
   fulfillOrder: (id: string, links: { deliveryLink?: string, digitalCopyLink?: string, posterLink?: string, researchRecommendations?: string }) => Promise<void>;
   addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
   markMessagesAsRead: (orderId: string, forRole: "user" | "admin") => Promise<void>;
@@ -238,6 +248,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       await updateDoc(doc(db, "orders", id), { status });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
+    }
+  },
+
+  logTimelineEvent: async (orderId, message) => {
+    try {
+      const state = get();
+      const user = state.currentUser;
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+      
+      const newEvent: TimelineEvent = {
+        id: Math.random().toString(36).substring(2, 10),
+        timestamp: new Date().toISOString(),
+        message,
+        userId: user?.id,
+        userName: user?.name,
+        role: user?.role
+      };
+      
+      const updatedTimeline = [...(order.timeline || []), newEvent];
+      
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === orderId ? { ...o, timeline: updatedTimeline } : o)),
+      }));
+      
+      const updateData: any = { timeline: updatedTimeline };
+      await updateDoc(doc(db, "orders", orderId), updateData);
+    } catch(e) {
+      console.error(e);
     }
   },
 
@@ -343,7 +382,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
           // Listen to orders
           const ordersRef = collection(db, "orders");
-          const q = userInfo.role === "admin" 
+          const isStaff = ["admin", "maestro", "research", "marketing", "accounting", "compliance", "shipping", "customer_service", "editor"].includes(userInfo.role);
+          const q = isStaff
             ? query(ordersRef) 
             : query(ordersRef, where("userId", "==", user.uid));
             

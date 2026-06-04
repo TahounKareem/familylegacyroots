@@ -109,7 +109,11 @@ export function OrderFlow() {
     setInviteError("");
     setIsSubmitting(true);
     try {
-      if (!currentUser) return;
+      if (!currentUser) {
+        setPendingOrderData(formData);
+        navigate("/auth?redirect=/order?step=4&invite=" + inviteCode);
+        return;
+      }
       
       const orderId = currentUser.id;
       const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();

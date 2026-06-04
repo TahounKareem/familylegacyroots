@@ -229,7 +229,7 @@ export function AdminPanel() {
     { id: "articles", label: "إدارة تحرير المركز المعرفي", desc: "نشر وإدارة المقالات المعرفية والمواد المرئية", roles: ["maestro", "editor", "admin"], icon: Book, color: "bg-purple-50 border-purple-200 hover:shadow-purple-100", iconBg: "bg-purple-100 text-purple-600", textColor: "text-purple-900" },
     { id: "marketing", label: "إدارة التسويق", desc: "إدارة الحملات الترويجية ومتابعة المبيعات المتروكة", roles: ["maestro", "marketing", "admin"], icon: Send, color: "bg-pink-50 border-pink-200 hover:shadow-pink-100", iconBg: "bg-pink-100 text-pink-600", textColor: "text-pink-900" },
     { id: "customer_service", label: "إدارة خدمة العملاء", desc: "متابعة استفسارات العملاء والطلبات الخاصة بهم", roles: ["maestro", "customer_service", "admin"], icon: HeartHandshake, color: "bg-orange-50 border-orange-200 hover:shadow-orange-100", iconBg: "bg-orange-100 text-orange-600", textColor: "text-orange-900" },
-    { id: "shipping", label: "إدارة الطباعة والتوصيل", desc: "متابعة عمليات التوصيل للإصدارات المطبوعة", roles: ["maestro", "shipping", "admin"], icon: Package, color: "bg-cyan-50 border-cyan-200 hover:shadow-cyan-100", iconBg: "bg-cyan-100 text-cyan-600", textColor: "text-cyan-900" },
+    { id: "shipping", label: "إدارة التصميم والطباعة والتوصيل", desc: "متابعة عمليات التصميم الإلكتروني والطباعة والتوصيل", roles: ["maestro", "shipping", "admin"], icon: Package, color: "bg-cyan-50 border-cyan-200 hover:shadow-cyan-100", iconBg: "bg-cyan-100 text-cyan-600", textColor: "text-cyan-900" },
     { id: "accounting", label: "إدارة المحاسبة", desc: "مراجعة المدفوعات والتقارير المالية والتحصيلات", roles: ["maestro", "accounting", "admin"], icon: Calculator, color: "bg-emerald-50 border-emerald-200 hover:shadow-emerald-100", iconBg: "bg-emerald-100 text-emerald-600", textColor: "text-emerald-900" },
     { id: "compliance", label: "إدارة الإمتثال", desc: "الرقابة وتدقيق سياسات الجودة والشكاوى", roles: ["maestro", "compliance", "admin"], icon: Shield, color: "bg-indigo-50 border-indigo-200 hover:shadow-indigo-100", iconBg: "bg-indigo-100 text-indigo-600", textColor: "text-indigo-900" },
     { id: "users", label: "إدارة المستخدمين", desc: "مراجعة فريق العمل وتعديل الصلاحيات", roles: ["maestro", "admin"], icon: Users, color: "bg-rose-50 border-rose-200 hover:shadow-rose-100", iconBg: "bg-rose-100 text-rose-600", textColor: "text-rose-900" },
@@ -496,8 +496,10 @@ export function AdminPanel() {
                       onChange={async (e) => {
                          const { updateDoc, doc } = await import("firebase/firestore");
                          const { db } = await import("@/lib/firebase");
-                         await updateDoc(doc(db, "orders", order.id), { paymentStatus: e.target.value });
-                         useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, paymentStatus: e.target.value as any } : o) }));
+                         const newPaymentStatus = e.target.value as PaymentStatus;
+                         await updateDoc(doc(db, "orders", order.id), { paymentStatus: newPaymentStatus });
+                         useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, paymentStatus: newPaymentStatus } : o) }));
+                         useAppStore.getState().logTimelineEvent(order.id, `تم تغيير حالة الدفع إلى: ${newPaymentStatus}`);
                       }}
                       className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] text-brand-800 outline-none cursor-pointer max-w-[90px]"
                     >
@@ -516,8 +518,10 @@ export function AdminPanel() {
                          onChange={async (e) => {
                             const { updateDoc, doc } = await import("firebase/firestore");
                             const { db } = await import("@/lib/firebase");
-                            await updateDoc(doc(db, "orders", order.id), { issueStatus: e.target.value });
-                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, issueStatus: e.target.value as any } : o) }));
+                            const newStatus = e.target.value as IssueStatus;
+                            await updateDoc(doc(db, "orders", order.id), { issueStatus: newStatus });
+                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, issueStatus: newStatus } : o) }));
+                            useAppStore.getState().logTimelineEvent(order.id, `تم تغيير حالة الطلب العامة إلى: ${newStatus}`);
                          }}
                          className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] font-bold text-brand-800 outline-none cursor-pointer max-w-[90px]"
                        >
@@ -539,8 +543,17 @@ export function AdminPanel() {
                          onChange={async (e) => {
                             const { updateDoc, doc } = await import("firebase/firestore");
                             const { db } = await import("@/lib/firebase");
-                            await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
-                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
+                            const newPhase = e.target.value as ActionPhase;
+                            const updateData: any = { actionPhase: newPhase };
+                            
+                            // Specific logic for workflow changes
+                            if (newPhase === "مرحلة التوثيق" && order.totalAmount === 1980 && (!order.paymentStatus || order.paymentStatus === "مدفوع أول دفعة" || order.paymentStatus === "كود دعوة")) {
+                              updateData.paymentStatus = "مستحق الدفعة الثانية";
+                            }
+                            
+                            await updateDoc(doc(db, "orders", order.id), updateData);
+                            useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, ...updateData } : o) }));
+                            useAppStore.getState().logTimelineEvent(order.id, `تم تغيير الإجراء (التنفيذ) إلى: ${newPhase}`);
                          }}
                          className="border border-brand-200 rounded px-1 py-1 bg-brand-100/50 text-[10px] sm:text-[11px] text-brand-700 font-bold outline-none cursor-pointer max-w-[90px]"
                        >
@@ -566,8 +579,17 @@ export function AdminPanel() {
                              onChange={async (e) => {
                                 const { updateDoc, doc } = await import("firebase/firestore");
                                 const { db } = await import("@/lib/firebase");
-                                await updateDoc(doc(db, "orders", order.id), { assignedResearcher: e.target.value });
-                                useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, assignedResearcher: e.target.value } : o) }));
+                                const newResearcherId = e.target.value;
+                                const researcherName = usersList.find(u => u.id === newResearcherId)?.name || 'باحث';
+                                
+                                const updateData = { 
+                                  assignedResearcher: newResearcherId,
+                                  issueStatus: "جاري التنفيذ" as const,
+                                  actionPhase: "مرحلة البحث" as const
+                                };
+                                await updateDoc(doc(db, "orders", order.id), updateData);
+                                useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, ...updateData } : o) }));
+                                useAppStore.getState().logTimelineEvent(order.id, `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`);
                              }}
                            >
                               <option value="">-- لم يتم التعيين --</option>
@@ -662,8 +684,17 @@ export function AdminPanel() {
                             onChange={async (e) => {
                                const { updateDoc, doc } = await import("firebase/firestore");
                                const { db } = await import("@/lib/firebase");
-                               await updateDoc(doc(db, "orders", order.id), { actionPhase: e.target.value });
-                               useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: e.target.value as any } : o) }));
+                               const newPhase = e.target.value as ActionPhase;
+                               const updateData: any = { actionPhase: newPhase };
+                               
+                               if (newPhase === "مرحلة التوثيق" && order.totalAmount === 1980 && (!order.paymentStatus || order.paymentStatus === "مدفوع أول دفعة" || order.paymentStatus === "كود دعوة")) {
+                                 updateData.paymentStatus = "مستحق الدفعة الثانية";
+                                 useAppStore.getState().logTimelineEvent(order.id, `استحقاق الدفعة الثانية للعميل لتنقله لمرحلة التوثيق.`);
+                               }
+                               
+                               await updateDoc(doc(db, "orders", order.id), updateData);
+                               useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, ...updateData } : o) }));
+                               useAppStore.getState().logTimelineEvent(order.id, `تم تغيير الإجراء إلى: ${newPhase}`);
                             }}
                             className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
                           >
@@ -677,10 +708,10 @@ export function AdminPanel() {
                         <td className="px-4 py-4">
                           <div className="flex gap-2">
                             <button 
-                              onClick={() => setExpandedRows(prev => prev.includes(order.id) ? prev.filter(id => id !== order.id) : [...prev, order.id])}
+                              onClick={() => setSelectedOrder(order)}
                               className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
                             >
-                              <Eye className="w-4 h-4" /> عرض الطلب
+                              <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
                             </button>
                             <button 
                               onClick={() => setMessagingOrder(order)}
@@ -691,26 +722,6 @@ export function AdminPanel() {
                           </div>
                         </td>
                       </tr>
-                      {expandedRows.includes(order.id) && (
-                        <tr className="bg-brand-50">
-                          <td colSpan={7} className="px-6 py-6 border-b border-brand-100">
-                             <div className="bg-white p-6 rounded-xl shadow-inner mb-6">
-                               <h3 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2">تفاصيل الطلب (للبحث والتوثيق)</h3>
-                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
-                                <div><span className="text-brand-500 font-medium ml-2">نقطة العرض الأساسية:</span> <span className="text-brand-800 font-bold">{order.data.startingPointName || order.data.startingPointType || order.data.startingPoint || 'العميل نفسه'}</span></div>
-                                <div><span className="text-brand-500 font-medium ml-2">الدولة والموطن الأصلي:</span> <span className="text-brand-800 font-bold">{order.data.country} / {order.data.homeland}</span></div>
-                                <div><span className="text-brand-500 font-medium ml-2">القالب:</span> <span className="text-brand-800 font-bold">{order.data.designTemplate || "لم يحدد"}</span></div>
-                               </div>
-                               <div className="mt-6">
-                                <h4 className="font-bold text-brand-900 mb-4">بيانات السجل والشجرة</h4>
-                                <div className="h-[400px] border border-brand-100 rounded-lg overflow-hidden bg-white">
-                                  <TreeBuilder initialNodes={order.data.treeData?.nodes} initialEdges={order.data.treeData?.edges} readOnly={true} />
-                                </div>
-                               </div>
-                             </div>
-                          </td>
-                        </tr>
-                      )}
                     </React.Fragment>
                   ))}
                   {orders.filter(o => !o.isDeleted).length === 0 && (
@@ -793,7 +804,7 @@ export function AdminPanel() {
         </div>
       )}
 
-      {["marketing", "shipping", "accounting", "compliance"].includes(currentTab) && (() => {
+      {["accounting", "compliance"].includes(currentTab) && (() => {
         const tabInfo = allowedTabs.find(t => t.id === currentTab);
         const Icon = tabInfo?.icon || Package;
         return (
@@ -811,6 +822,117 @@ export function AdminPanel() {
             </div>
           </div>
         );
+      })()}
+
+      {currentTab === "marketing" && (() => {
+        const inactiveOrders = orders.filter(o => !o.isDeleted && o.issueStatus === "طلب غير مكتمل");
+        const unpaidOrders = orders.filter(o => !o.isDeleted && (o.issueStatus === "بإنتظار إتمام الدفع" || o.paymentStatus === "غير مدفوع" || o.paymentStatus === "دفع جزئي"));
+        return (
+          <div className="space-y-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+                <div className="flex items-center gap-3 mb-4">
+                   <div className="bg-red-50 p-3 rounded-xl text-red-600"><AlertCircle className="w-6 h-6" /></div>
+                   <h3 className="font-bold text-lg text-brand-900">طلبات غير مكتملة البيانات</h3>
+                </div>
+                <p className="text-2xl font-bold font-mono text-brand-900 mb-2">{inactiveOrders.length}</p>
+                <p className="text-sm text-brand-500">عملاء غادروا الصفحة قبل إكمال البيانات والدفع.</p>
+                <div className="mt-4 pt-4 border-t border-brand-50">
+                   <button className="text-brand-600 font-bold text-sm hover:text-brand-800 transition">تحميل القائمة (CSV)</button>
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+                <div className="flex items-center gap-3 mb-4">
+                   <div className="bg-orange-50 p-3 rounded-xl text-orange-600"><AlertCircle className="w-6 h-6" /></div>
+                   <h3 className="font-bold text-lg text-brand-900">طلبات غير مدفوعة (مبيعات متروكة)</h3>
+                </div>
+                <p className="text-2xl font-bold font-mono text-brand-900 mb-2">{unpaidOrders.length}</p>
+                <p className="text-sm text-brand-500">عملاء أكملوا البيانات ولم يتموا الدفع.</p>
+                <div className="mt-4 pt-4 border-t border-brand-50">
+                   <button className="text-brand-600 font-bold text-sm hover:text-brand-800 transition">تفعيل حملة استهداف (مبيعات متروكة)</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+               <h3 className="font-bold text-lg text-brand-900 mb-6">الحملات والنشرات الترويجية القادمة</h3>
+               <div className="p-12 text-center bg-brand-50 rounded-xl border border-dashed border-brand-200">
+                 <Send className="w-12 h-12 text-brand-300 mx-auto mb-4" />
+                 <h4 className="font-bold text-brand-700 mb-2">جدولة النشرات والنشر على منصات التواصل</h4>
+                 <p className="text-sm text-brand-500">جاري ربط نظام إدارة التسويق الآلي. سيتم توفير محرر النشرات وتخطيط المحتوى قريباً.</p>
+               </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {currentTab === "shipping" && (() => {
+        const designOrders = orders.filter(o => !o.isDeleted && (o.actionPhase === "تمت المسودة" || o.actionPhase === "تم التصميم الإلكتروني" || o.actionPhase === "تم التصويب" || o.actionPhase === "تم تجهيز السجل للطباعة" || o.actionPhase === "جاهز للتسليم"));
+        return (
+          <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden mb-12">
+            <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+              <h2 className="font-bold text-lg text-brand-900">إدارة التصميم والطباعة والتوصيل</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead className="bg-white text-brand-500 border-b border-brand-100">
+                  <tr>
+                    <th className="px-4 py-4 font-medium">رقم الطلب</th>
+                    <th className="px-4 py-4 font-medium">اسم العميل</th>
+                    <th className="px-4 py-4 font-medium">مرحلة التنفيذ (الإجراء)</th>
+                    <th className="px-4 py-4 font-medium">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-50">
+                  {designOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center py-8 text-brand-500 font-bold bg-brand-50/20">لا يوجد بيانات لعرضها في هذه المرحلة</td>
+                    </tr>
+                  ) : (
+                    designOrders.map((order) => (
+                      <tr key={`sh-${order.id}`} className="hover:bg-brand-50/30 transition">
+                        <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
+                          #{order.orderNumber || order.id.toUpperCase().substring(0,6)}
+                        </td>
+                         <td className="px-4 py-4">
+                          <p className="font-bold text-brand-900 leading-tight">{order.data.firstName} بن {order.data.fatherName}</p>
+                          <p className="text-xs text-brand-600 mt-0.5">({order.data.familyName})</p>
+                        </td>
+                        <td className="px-4 py-4">
+                           <select 
+                             value={order.actionPhase || "تمت المسودة"} 
+                             onChange={async (e) => {
+                                const { updateDoc, doc } = await import("firebase/firestore");
+                                const { db } = await import("@/lib/firebase");
+                                const newPhase = e.target.value as ActionPhase;
+                                await updateDoc(doc(db, "orders", order.id), { actionPhase: newPhase });
+                                useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, actionPhase: newPhase } : o) }));
+                                useAppStore.getState().logTimelineEvent(order.id, `إدارة التصميم: تم تغيير الإجراء إلى: ${newPhase}`);
+                             }}
+                             className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold max-w-[200px] text-brand-800"
+                           >
+                              <option value="تمت المسودة">تمت المسودة (مستلم من البحث)</option>
+                              <option value="تم التصميم الإلكتروني">تم التصميم الإلكتروني</option>
+                              <option value="تم تجهيز السجل للطباعة">تم تجهيز السجل للطباعة</option>
+                              <option value="جاهز للتسليم">جاهز للتسليم</option>
+                           </select>
+                        </td>
+                        <td className="px-4 py-4">
+                           <button 
+                             onClick={() => setSelectedOrder(order)}
+                             className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs"
+                           >
+                             <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
+                           </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
       })()}
 
       {currentTab === "customer_service" && (() => {
@@ -881,9 +1003,18 @@ export function AdminPanel() {
                     </td>
                     <td className="px-4 py-4">
                       {latestOrder ? (
-                        <span className="px-2 py-1 rounded bg-brand-50 text-brand-700 text-xs font-bold border border-brand-100">
-                          {latestOrder.issueStatus || "طلب غير مكتمل"}
-                        </span>
+                        <div className="flex flex-col gap-2">
+                          <span className="px-2 py-1 rounded bg-brand-50 text-brand-700 text-xs font-bold border border-brand-100 text-center w-fit">
+                            {latestOrder.issueStatus || "طلب غير مكتمل"}
+                          </span>
+                          <button 
+                             onClick={() => { setMessagingOrder(latestOrder); markMessagesAsRead(latestOrder.id, "admin"); }} 
+                             className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit"
+                           >
+                             <MessageSquare className="w-3 h-3" /> طلبات إيضاح ورسائل
+                             {latestOrder.messages && latestOrder.messages.filter(m => m.senderRole === "user" && !m.isRead).length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full animate-ping"></span>}
+                           </button>
+                        </div>
                       ) : (
                         <span className="text-gray-400 text-xs">لا يوجد بيانات</span>
                       )}
@@ -1142,6 +1273,38 @@ export function AdminPanel() {
                   onChange={()=>{}}
                 />
               </div>
+
+              {selectedOrder.timeline && selectedOrder.timeline.length > 0 && (
+                 <>
+                   <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8 flex items-center gap-2">
+                     <CheckCircle className="w-5 h-5 text-brand-600" /> الجدول الزمني للطلب (Audit Trail)
+                   </h4>
+                   <div className="bg-white rounded-xl border border-brand-200 p-6 mb-6">
+                     <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-brand-200 before:to-transparent">
+                       {selectedOrder.timeline.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((event, idx) => (
+                         <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                           <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-100 text-brand-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                             {idx + 1}
+                           </div>
+                           <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-brand-100 bg-brand-50 shadow-sm text-right">
+                             <div className="flex items-center justify-between mb-2">
+                               <p className="font-bold text-brand-900">{event.message}</p>
+                               <span className="text-[10px] text-brand-500 font-mono bg-white px-2 py-1 rounded-md border border-brand-100" dir="ltr">
+                                 {new Date(event.timestamp).toLocaleString('ar-SA')}
+                               </span>
+                             </div>
+                             {event.userName && (
+                               <p className="text-xs text-brand-600 flex items-center gap-1">
+                                 <Users className="w-3 h-3" /> بواسطة: {event.userName} ({roleNames[event.role || ""] || event.role})
+                               </p>
+                             )}
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 </>
+              )}
 
                {selectedOrder.data.documents && selectedOrder.data.documents.length > 0 && (
                 <>
