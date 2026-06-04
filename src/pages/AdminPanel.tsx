@@ -329,6 +329,13 @@ export function AdminPanel() {
         ...phaseUpdates,
       });
 
+      await useAppStore.getState().logTimelineEvent(
+        deliveryOrder.id,
+        deliveryTab === "draft"
+          ? "يتم الآن تسليم المسودة للعميل للمراجعة والإعتماد"
+          : "تم التسليم النهائي للسجل وتم إغلاق الطلب"
+      );
+
       const userDoc = await getDoc(doc(db, "users", deliveryOrder.userId));
       if (userDoc.exists()) {
         const userData = userDoc.data() as UserInfo;
@@ -988,7 +995,7 @@ export function AdminPanel() {
                                       onClick={() => setSelectedAuditOrder(order)}
                                       className="flex items-center gap-1.5 whitespace-nowrap text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
                                     >
-                                      <Search className="w-3 h-3" /> مراجعة الـ Audit Trail
+                                      <Search className="w-3 h-3" /> مراجعة سجل حركات الطلب
                                     </button>
                                     <button
                                       onClick={() => setDeliveryOrder(order)}
@@ -1155,10 +1162,10 @@ export function AdminPanel() {
                               >
                                 {(() => {
                                   const currentPhase = order.actionPhase || "مرحلة البحث";
-                                  if (currentPhase === "مرحلة التصويب" || currentPhase === "تم التصويب") {
+                                  if (currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
                                     return (
                                       <>
-                                        <option value="مرحلة التصويب" disabled={currentPhase === "تم التصويب"}>مرحلة التصويب</option>
+                                        <option value="جاري التصويب" disabled={currentPhase === "تم التصويب"}>جاري التصويب</option>
                                         <option value="تم التصويب">تم التصويب</option>
                                       </>
                                     );
@@ -1419,7 +1426,7 @@ export function AdminPanel() {
                 <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center gap-2">
                   <Shield className="w-6 h-6 text-brand-600" />
                   <h2 className="font-bold text-lg text-brand-900">
-                    سجل الإمتثال والعقود القانونية (Audit Trail)
+                    سجل الإمتثال والعقود القانونية (سجل حركات الطلب)
                   </h2>
                 </div>
                 <div className="overflow-x-auto">
@@ -2126,7 +2133,7 @@ export function AdminPanel() {
             <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
               <h3 className="font-bold text-brand-900 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-brand-600" />
-                سجل الحركات (Audit Trail) - طلب #
+                سجل حركات الطلب - طلب #
                 {selectedAuditOrder.orderNumber ||
                   selectedAuditOrder.id.toUpperCase().substring(0, 6)}
               </h3>
@@ -2167,9 +2174,14 @@ export function AdminPanel() {
                                 {event.event}
                               </div>
                               <time className="font-mono text-xs text-brand-500">
-                                {new Date(event.timestamp).toLocaleString(
-                                  "ar-SA",
-                                )}
+                                {new Intl.DateTimeFormat("ar-SA", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }).format(new Date(event.timestamp))}
                               </time>
                             </div>
                             <div className="text-sm text-brand-700">
@@ -2399,7 +2411,7 @@ export function AdminPanel() {
                 <>
                   <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-brand-600" /> الجدول
-                    الزمني للطلب (Audit Trail)
+                    الزمني للطلب (سجل حركات الطلب)
                   </h4>
                   <div className="bg-white rounded-xl border border-brand-200 p-6 mb-6">
                     <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-brand-200 before:to-transparent">
@@ -2426,9 +2438,14 @@ export function AdminPanel() {
                                   className="text-[10px] text-brand-500 font-mono bg-white px-2 py-1 rounded-md border border-brand-100"
                                   dir="ltr"
                                 >
-                                  {new Date(event.timestamp).toLocaleString(
-                                    "ar-SA",
-                                  )}
+                                  {new Intl.DateTimeFormat("ar-SA", {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }).format(new Date(event.timestamp))}
                                 </span>
                               </div>
                               {event.userName && (
@@ -2633,7 +2650,14 @@ export function AdminPanel() {
                     </div>
                     <span className="text-xs text-gray-400 mt-1">
                       {msg.senderRole === "admin" ? "الباحث" : "العميل"} •{" "}
-                      {new Date(msg.createdAt).toLocaleString("ar-SA")}
+                      {new Intl.DateTimeFormat("ar-SA", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).format(new Date(msg.createdAt))}
                     </span>
                   </div>
                 ))

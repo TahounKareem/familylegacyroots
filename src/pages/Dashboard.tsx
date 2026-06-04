@@ -252,7 +252,7 @@ export function Dashboard() {
     );
   };
 
-  const handleSendCorrection = () => {
+  const handleSendCorrection = async () => {
     if (
       !order ||
       !correctionText.trim() ||
@@ -269,7 +269,29 @@ export function Dashboard() {
       text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
       createdAt: new Date().toISOString(),
     };
-    addMessageToOrder(order.id, newMessage);
+    await addMessageToOrder(order.id, newMessage);
+    
+    // Status update & Timeline
+    try {
+      await updateDoc(doc(db, "orders", order.id), {
+        issueStatus: "جاري التصويب",
+        actionPhase: "جاري التصويب",
+      });
+      useAppStore.setState((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === order.id
+            ? { ...o, issueStatus: "جاري التصويب", actionPhase: "جاري التصويب" }
+            : o,
+        ),
+      }));
+      await useAppStore.getState().logTimelineEvent(
+        order.id,
+        "العميل أرسل طلب تصويب - تم تغيير الحالة إلى جاري التصويب"
+      );
+    } catch (e) {
+      console.error(e);
+    }
+
     setCorrectionText("");
     setCorrectionError("");
     setCorrectionPage("");
@@ -614,7 +636,7 @@ export function Dashboard() {
                       const isState6 =
                         order?.issueStatus === "جاري التصويب" ||
                         order?.issueStatus === "يوجد تصويبات" ||
-                        order?.actionPhase === "مرحلة التصويب";
+                        order?.actionPhase === "جاري التصويب";
                       const isState7 = order?.issueStatus === "تم الإغلاق";
 
                       let title = "";
@@ -1402,6 +1424,7 @@ export function Dashboard() {
                         >
                           <input
                             type="file"
+                            accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
                             className="hidden"
                             ref={fileInputRef}
                             onChange={(e) => {
@@ -1595,6 +1618,7 @@ export function Dashboard() {
                         >
                           <input
                             type="file"
+                            accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
                             className="hidden"
                             ref={photosInputRef}
                             onChange={(e) => {
@@ -1704,9 +1728,14 @@ export function Dashboard() {
                                     </div>
                                   )}
                                 <div className={`text-xs mt-2 opacity-75`}>
-                                  {new Date(msg.createdAt).toLocaleString(
-                                    "ar-SA",
-                                  )}
+                                  {new Intl.DateTimeFormat("ar-SA", {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }).format(new Date(msg.createdAt))}
                                 </div>
                               </div>
                             </div>
@@ -1962,9 +1991,14 @@ export function Dashboard() {
                                             className="text-xs text-brand-500 font-mono"
                                             dir="ltr"
                                           >
-                                            {new Date(
-                                              msg.createdAt,
-                                            ).toLocaleString("ar-SA")}
+                                            {new Intl.DateTimeFormat("ar-SA", {
+                                              weekday: "long",
+                                              year: "numeric",
+                                              month: "long",
+                                              day: "numeric",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            }).format(new Date(msg.createdAt))}
                                           </span>
                                         </div>
                                         <p className="text-brand-800 whitespace-pre-line text-sm mt-3">
@@ -2583,9 +2617,14 @@ export function Dashboard() {
                               className="text-sm text-green-700 font-mono mt-1"
                               dir="ltr"
                             >
-                              {new Date(order.createdAt).toLocaleString(
-                                "ar-SA",
-                              )}
+                              {new Intl.DateTimeFormat("ar-SA", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }).format(new Date(order.createdAt))}
                             </p>
                           </div>
                         </div>
