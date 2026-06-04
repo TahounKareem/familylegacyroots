@@ -997,13 +997,18 @@ export function AdminPanel() {
                                     >
                                       <Search className="w-3 h-3" /> مراجعة سجل حركات الطلب
                                     </button>
-                                    <button
-                                      onClick={() => setDeliveryOrder(order)}
-                                      className="flex items-center gap-1.5 whitespace-nowrap text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
-                                    >
-                                      <FileText className="w-3 h-3" /> التسليم
-                                      للعميل
-                                    </button>
+                                    { (order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم تجهيز السجل للطباعة") && (
+                                      <button
+                                        onClick={() => {
+                                          setDeliveryTab(order.actionPhase === "تم التصميم الإلكتروني" ? "draft" : "final");
+                                          setDeliveryOrder(order);
+                                        }}
+                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
+                                      >
+                                        <FileText className="w-3 h-3" /> التسليم
+                                        للعميل
+                                      </button>
+                                    )}
                                     <button
                                       onClick={() =>
                                         orderTab === "archive"
@@ -2171,7 +2176,7 @@ export function AdminPanel() {
                           <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-brand-100 bg-white shadow-sm transition hover:shadow-md hover:border-brand-300">
                             <div className="flex items-center justify-between space-x-2 space-x-reverse mb-1">
                               <div className="font-bold text-brand-900">
-                                {event.event}
+                                {event.message || event.event || "حدث"}
                               </div>
                               <time className="font-mono text-xs text-brand-500">
                                 {new Intl.DateTimeFormat("ar-SA", {
@@ -2714,27 +2719,10 @@ export function AdminPanel() {
               للعميل مباشرة.
             </p>
 
-            <div className="flex bg-brand-100 rounded-lg p-1 mb-6">
-              <button
-                className={`flex-1 py-2 text-sm font-bold rounded-md transition ${
-                  deliveryTab === "draft"
-                    ? "bg-white text-brand-900 shadow-sm"
-                    : "text-brand-600 hover:text-brand-800"
-                }`}
-                onClick={() => setDeliveryTab("draft")}
-              >
-                تسليم مسودة للإعتماد
-              </button>
-              <button
-                className={`flex-1 py-2 text-sm font-bold rounded-md transition ${
-                  deliveryTab === "final"
-                    ? "bg-white text-brand-900 shadow-sm"
-                    : "text-brand-600 hover:text-brand-800"
-                }`}
-                onClick={() => setDeliveryTab("final")}
-              >
-                التسليم النهائي للسجل
-              </button>
+            <div className="flex bg-brand-100 rounded-lg p-1 mb-6 text-center">
+              <div className="flex-1 py-2 text-sm font-bold rounded-md transition bg-white text-brand-900 shadow-sm">
+                {deliveryTab === "draft" ? "تسليم مسودة للإعتماد" : "التسليم النهائي للسجل"}
+              </div>
             </div>
 
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">

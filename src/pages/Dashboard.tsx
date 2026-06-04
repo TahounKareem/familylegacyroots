@@ -269,21 +269,14 @@ export function Dashboard() {
       text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
       createdAt: new Date().toISOString(),
     };
-    await addMessageToOrder(order.id, newMessage);
     
     // Status update & Timeline
     try {
-      await updateDoc(doc(db, "orders", order.id), {
+      await addMessageToOrder(order.id, newMessage, undefined, {
         issueStatus: "جاري التصويب",
         actionPhase: "جاري التصويب",
       });
-      useAppStore.setState((s) => ({
-        orders: s.orders.map((o) =>
-          o.id === order.id
-            ? { ...o, issueStatus: "جاري التصويب", actionPhase: "جاري التصويب" }
-            : o,
-        ),
-      }));
+
       await useAppStore.getState().logTimelineEvent(
         order.id,
         "العميل أرسل طلب تصويب - تم تغيير الحالة إلى جاري التصويب"

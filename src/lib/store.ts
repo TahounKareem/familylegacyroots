@@ -272,6 +272,7 @@ interface AppState {
     orderId: string,
     message: Message,
     newStatus?: OrderStatus,
+    extraUpdates?: Partial<Order>
   ) => Promise<void>;
   markMessagesAsRead: (
     orderId: string,
@@ -372,15 +373,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  addMessageToOrder: async (orderId, message, newStatus) => {
+  addMessageToOrder: async (orderId, message, newStatus, extraUpdates) => {
     try {
       const order = get().orders.find((o) => o.id === orderId);
       if (!order) return;
 
       const updatedMessages = [...(order.messages || []), message];
 
-      let nextActionPhase = order.actionPhase;
-      let nextPreviousPhase = order.previousActionPhase;
+      let nextActionPhase = extraUpdates?.actionPhase !== undefined ? extraUpdates.actionPhase : order.actionPhase;
+      let nextPreviousPhase = extraUpdates?.previousActionPhase !== undefined ? extraUpdates.previousActionPhase : order.previousActionPhase;
 
       if (newStatus === "طلب إيضاح") {
         nextPreviousPhase = order.actionPhase || "مرحلة البحث";
@@ -395,6 +396,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           o.id === orderId
             ? {
                 ...o,
+                ...extraUpdates,
                 messages: updatedMessages,
                 ...(newStatus ? { status: newStatus } : {}),
                 actionPhase: nextActionPhase,
@@ -405,6 +407,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
 
       const updateData: any = {
+        ...extraUpdates,
         messages: updatedMessages,
         actionPhase: nextActionPhase,
         previousActionPhase: nextPreviousPhase,
