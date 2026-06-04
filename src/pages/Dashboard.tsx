@@ -105,6 +105,10 @@ export function Dashboard() {
     isCover: false,
   });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   // Check for Stripe success redirect
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -355,93 +359,99 @@ export function Dashboard() {
     <div className="bg-brand-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header & Greeting */}
-        <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-[60] sticky top-4">
-          <div className="flex flex-col md:flex-row items-center gap-4 relative">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-brand-100/50 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 relative z-[90] sticky top-4 transition-all">
+          <div className="flex flex-col md:flex-row items-center gap-5 relative w-full md:w-auto">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="relative shrink-0 group"
+              className="relative shrink-0 group focus:outline-none focus:ring-4 focus:ring-brand-100 rounded-full transition-all"
             >
               {currentUser.photoUrl ? (
                 <img
                   src={currentUser.photoUrl}
                   alt="Profile"
-                  className="w-16 h-16 rounded-full border-2 border-brand-200 shadow-sm object-cover group-hover:border-brand-500 transition-colors"
+                  className="w-16 h-16 rounded-full border-[3px] border-white shadow-md object-cover group-hover:border-brand-100 transition-colors"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-brand-100 border-2 border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl group-hover:bg-brand-200 group-hover:border-brand-400 transition uppercase">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 border-[3px] border-white shadow-md flex items-center justify-center text-brand-700 font-bold text-2xl group-hover:from-brand-200 group-hover:to-brand-100 transition-all uppercase">
                   {currentUser.name?.charAt(0) || "U"}
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 bg-white rounded-full p-1 border border-brand-200 shadow-sm">
-                <MoreVertical className="w-4 h-4 text-brand-500" />
+              <div className="absolute bottom-0 left-0 bg-white rounded-full p-1 border border-brand-100 shadow-sm flex items-center justify-center translate-y-1 -translate-x-1">
+                <Settings className="w-3.5 h-3.5 text-brand-500" />
               </div>
             </button>
-            <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
+            <div className="text-center md:text-right flex flex-col items-center md:items-start">
+              <span className="text-xs font-bold text-brand-400 mb-0.5 uppercase tracking-wider">مرحباً بك مجدداً</span>
               <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">
-                أهلاً بك، {currentUser.name}
+                {currentUser.name}
               </h1>
-              <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2">
-                <Mail className="w-4 h-4" /> {currentUser.email}
-              </p>
-              {order && (
-                <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">
-                  رقم الطلب: #{order.orderNumber || order.id.toUpperCase()}
-                </span>
-              )}
             </div>
 
             {showProfileMenu && (
               <>
                 <div
-                  className="fixed inset-0 z-30"
+                  className="fixed inset-0 z-40"
                   onClick={() => setShowProfileMenu(false)}
                 ></div>
-                <div className="absolute top-20 right-0 md:right-0 md:translate-x-0 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
+                <div className="absolute top-[80px] right-1/2 translate-x-1/2 md:translate-x-0 md:right-0 w-64 bg-white rounded-3xl shadow-2xl border border-brand-100 overflow-hidden py-3 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
                   <button
                     onClick={() => {
                       setActiveTab("الملف الشخصي");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <User className="w-4 h-4 text-brand-500" /> الملف الشخصي
+                    <User className="w-5 h-5 text-brand-500" /> الملف الشخصي
                   </button>
                   <button
                     onClick={() => {
                       setActiveTab("إعدادات");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <Settings className="w-4 h-4 text-brand-500" /> إعدادات
+                    <Settings className="w-5 h-5 text-brand-500" /> إعدادات
                   </button>
                   <button
                     onClick={() => {
                       setActiveTab("عقد تسجيل الخدمة");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل
+                    <FileText className="w-5 h-5 text-brand-500" /> عقد تسجيل
                     الخدمة
                   </button>
-                  <div className="border-t border-brand-100 my-1"></div>
+                  <div className="border-t border-brand-50 my-2 mx-4"></div>
                   <button
                     onClick={async () => {
                       await signOut(auth);
                       useAppStore.getState().logout();
                       window.location.href = "/auth";
                     }}
-                    className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <LogOut className="w-4 h-4" /> تسجيل الخروج
+                    <LogOut className="w-5 h-5" /> تسجيل الخروج
                   </button>
                 </div>
               </>
             )}
           </div>
-          <div className="flex gap-4">
-            {/* Removed upper button as requested */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <button
+              onClick={() => setActiveTab("السجل الأساسي")}
+              className="flex-1 sm:flex-none justify-center px-5 py-2.5 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-2xl font-bold flex items-center gap-2 hover:shadow-sm transition-all text-sm border border-brand-200/50"
+            >
+              <Compass className="w-4 h-4" />
+              السجل الأساسي
+            </button>
+            <Link
+              to="/"
+              className="flex-1 sm:flex-none justify-center px-5 py-2.5 bg-brand-600 text-white hover:bg-brand-700 rounded-2xl font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
+            >
+              <Home className="w-4 h-4" />
+              الرئيسية
+            </Link>
           </div>
         </div>
 
@@ -581,24 +591,6 @@ export function Dashboard() {
               </div>
 
               {/* Social Media & Outer Links */}
-              <div className="mt-8 pt-6">
-                <div className="space-y-2 mb-6">
-                  <button
-                    onClick={() => setActiveTab("السجل الأساسي")}
-                    className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4"
-                  >
-                    <Compass className="w-4 h-4" />
-                    عودة
-                  </button>
-                  <Link
-                    to="/"
-                    className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4"
-                  >
-                    <Home className="w-4 h-4" />
-                    <span className="truncate">العودة للرئيسية</span>
-                  </Link>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -2277,8 +2269,8 @@ export function Dashboard() {
                         <User className="w-8 h-8 text-brand-600" /> الملف الشخصي
                       </h3>
 
-                      <div className="mb-8 flex items-center gap-6 p-6 bg-brand-50 rounded-2xl border border-brand-100">
-                        <div className="relative group">
+                      <div className="mb-8 flex flex-col md:flex-row items-center md:items-start gap-6 p-6 bg-brand-50 rounded-2xl border border-brand-100">
+                        <div className="relative group shrink-0">
                           {currentUser.photoUrl ? (
                             <img
                               src={currentUser.photoUrl}
@@ -2307,13 +2299,29 @@ export function Dashboard() {
                             accept="image/*"
                           />
                         </div>
-                        <div>
-                          <h4 className="font-bold text-brand-900 text-lg">
-                            الصورة الشخصية
-                          </h4>
-                          <p className="text-sm text-brand-600 mt-1">
-                            يُفضل رفع صورة شخصية واضحة (اختياري)
-                          </p>
+                        <div className="flex-1 text-center md:text-right flex flex-col justify-center py-2 space-y-3">
+                          <div>
+                            <h4 className="font-bold text-brand-900 text-lg">
+                              الصورة الشخصية
+                            </h4>
+                            <p className="text-sm text-brand-600 mt-1 mb-4">
+                              يُفضل رفع صورة شخصية واضحة (اختياري)
+                            </p>
+                          </div>
+                          
+                          <div className="flex flex-col md:flex-row gap-4 mb-2 border-t border-brand-100/50 pt-4">
+                            <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
+                              <span className="text-xs font-bold text-brand-400">البريد الإلكتروني</span>
+                              <span className="text-sm font-mono text-brand-800 break-all">{currentUser.email}</span>
+                            </div>
+                            
+                            {order && (
+                              <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
+                                <span className="text-xs font-bold text-brand-400">رقم الطلب</span>
+                                <span className="text-sm font-mono text-brand-800 break-all">#{order.orderNumber || order.id.toUpperCase()}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 

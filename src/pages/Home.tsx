@@ -71,7 +71,7 @@ export function Home() {
               {!isVideoPlaying ? (
                 <>
                   <img 
-                    src="https://img.youtube.com/vi/ZeSwzfHvw3I/maxresdefault.jpg" 
+                    src="https://img.youtube.com/vi/QttZpZzFris/hqdefault.jpg" 
                     alt="سجل التراث العائلي فيديو تعريفي" 
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
@@ -85,7 +85,7 @@ export function Home() {
               ) : (
                 <iframe 
                   className="absolute inset-0 w-full h-full"
-                  src="https://www.youtube.com/embed/ZeSwzfHvw3I?autoplay=1&rel=0&showinfo=0" 
+                  src="https://www.youtube.com/embed/QttZpZzFris?autoplay=1&rel=0&showinfo=0" 
                   title="سجل التراث العائلي" 
                   frameBorder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
