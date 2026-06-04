@@ -672,13 +672,19 @@ export function Dashboard() {
                         actionButton = (
                           <div className="flex flex-col sm:flex-row gap-4 mt-6">
                             <button
-                              onClick={() => setActiveTab("النسخة الرقمية")}
+                              onClick={() => {
+                                setActiveTab("النسخة الرقمية للسجل");
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
                               className="flex-1 text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
                             >
                               مشاهدة النسخة الرقمية
                             </button>
                             <button
-                              onClick={() => setActiveTab("تصويبات وتعديلات")}
+                              onClick={() => {
+                                setActiveTab("التصويبات");
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
                               className="flex-1 text-center bg-brand-50 border border-brand-200 text-brand-900 font-bold py-4 rounded-xl transition shadow-sm text-lg hover:bg-brand-100"
                             >
                               طلب تصويب
@@ -699,7 +705,10 @@ export function Dashboard() {
                           'تم إصدار النسخة النهائية من سجل تراث عائلتكم ، ويمكنكم استعراض وتحميل هذه النسخة من نافذة "النسخة الرقمية" كما تم ارسال النسخ الورقية وبوستر مخطط عمود النسب الى عنوانكم البريدي .';
                         actionButton = (
                           <button
-                            onClick={() => setActiveTab("النسخة الرقمية")}
+                            onClick={() => {
+                              setActiveTab("النسخة الرقمية للسجل");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
                             className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
                           >
                             مشاهدة وتحميل النسخة الرقمية
