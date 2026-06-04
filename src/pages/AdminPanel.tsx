@@ -804,21 +804,120 @@ export function AdminPanel() {
         </div>
       )}
 
-      {["accounting", "compliance"].includes(currentTab) && (() => {
-        const tabInfo = allowedTabs.find(t => t.id === currentTab);
-        const Icon = tabInfo?.icon || Package;
+      {currentTab === "accounting" && (() => {
+        const accountingOrders = orders.filter(o => !o.isDeleted);
+        const fullPayment = accountingOrders.filter(o => o.paymentStatus === "مدفوع بالكامل" || o.totalAmount === 1780);
+        const flexPayment = accountingOrders.filter(o => o.totalAmount === 1980);
         return (
-          <div className="bg-white rounded-3xl p-12 text-center shadow-lg border border-brand-100 mb-12">
-            <div className="w-24 h-24 mx-auto bg-brand-50 text-[#C3262A] rounded-full flex items-center justify-center mb-6">
-              <Icon className="w-12 h-12" />
+          <div className="space-y-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+                <h3 className="font-bold text-lg text-brand-900 mb-2">إجمالي الطلبات (الدفع الكامل)</h3>
+                <p className="text-3xl font-bold font-mono text-brand-600">{fullPayment.length}</p>
+              </div>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+                <h3 className="font-bold text-lg text-brand-900 mb-2">إجمالي الطلبات (الدفع المرن)</h3>
+                <p className="text-3xl font-bold font-mono text-brand-600">{flexPayment.length}</p>
+              </div>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-100">
+                <h3 className="font-bold text-lg text-brand-900 mb-2">دفعات مستحقة (لم تسدد)</h3>
+                <p className="text-3xl font-bold font-mono text-red-600">{flexPayment.filter(o => o.paymentStatus === "مستحق الدفعة الثانية" || o.paymentStatus === "مستحق الدفعة الثالثة").length}</p>
+              </div>
             </div>
-            <h2 className="text-3xl font-serif text-brand-900 font-bold mb-4">جاري العمل على تطوير بوابة {tabInfo?.label}</h2>
-            <p className="text-xl text-brand-600 font-serif mb-8 max-w-2xl mx-auto leading-relaxed">
-              نسعى دائماً لتقديم أفضل تجربة إدارة لتنظيم سير العمل وتحقيق الأهداف. سيتم إطلاق هذه البوابة قريباً جداً بميزات استثنائية تناسب تطلعاتكم بطريقة تسويقية جذابة.
-            </p>
-            <div className="inline-flex items-center gap-2 bg-yellow-50 text-yellow-700 px-6 py-3 rounded-xl font-bold font-serif border border-yellow-200 shadow-sm">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              جاري التنفيذ والتطوير...
+
+            <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+               <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+                 <h2 className="font-bold text-lg text-brand-900">سجل المدفوعات والفواتير المبدئية</h2>
+               </div>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-right text-sm">
+                   <thead className="bg-white text-brand-500 border-b border-brand-100">
+                     <tr>
+                       <th className="px-4 py-4 font-medium">رقم الطلب</th>
+                       <th className="px-4 py-4 font-medium">نوع الدفع</th>
+                       <th className="px-4 py-4 font-medium">حالة الدفع</th>
+                       <th className="px-4 py-4 font-medium">الإجراءات المحاسبية</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-brand-50">
+                     {accountingOrders.map((order) => (
+                       <tr key={`acc-${order.id}`} className="hover:bg-brand-50/30 transition">
+                         <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">#{order.orderNumber || order.id.toUpperCase().substring(0,6)}</td>
+                         <td className="px-4 py-4 font-bold">{order.totalAmount === 1980 ? "دفع مرن (دفعات)" : "دفع كامل"}</td>
+                         <td className="px-4 py-4">
+                           <span className={`px-2 py-1 rounded text-xs font-bold border ${order.paymentStatus?.includes('مستحق') ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-600 border-green-200'}`}>
+                             {order.paymentStatus || "غير محدد"}
+                           </span>
+                         </td>
+                         <td className="px-4 py-4 flex gap-2">
+                            <button className="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg transition border border-brand-200 text-xs shadow-sm">إصدار فاتورة</button>
+                            {order.paymentStatus?.includes('مستحق') && (
+                              <button className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition text-xs shadow-sm">تأكيد تحصيل الدفعة</button>
+                            )}
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {currentTab === "compliance" && (() => {
+        const complianceOrders = orders.filter(o => !o.isDeleted);
+        return (
+          <div className="space-y-8 mb-12">
+            <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+               <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center gap-2">
+                 <Shield className="w-6 h-6 text-brand-600" />
+                 <h2 className="font-bold text-lg text-brand-900">سجل الإمتثال والعقود القانونية (Audit Trail)</h2>
+               </div>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-right text-sm">
+                   <thead className="bg-white text-brand-500 border-b border-brand-100">
+                     <tr>
+                       <th className="px-4 py-4 font-medium">رقم الطلب / العميل</th>
+                       <th className="px-4 py-4 font-medium">حالة التوقيع الإلكتروني</th>
+                       <th className="px-4 py-4 font-medium">التوافق مع سياسات الخصوصية</th>
+                       <th className="px-4 py-4 font-medium">السجل الزمني الآمن</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-brand-50">
+                     {complianceOrders.map((order) => {
+                       const hasSignature = order.data.documents?.some(d => d.type === "توقيع إلكتروني");
+                       return (
+                       <tr key={`comp-${order.id}`} className="hover:bg-brand-50/30 transition">
+                         <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
+                           <div className="mb-1">#{order.orderNumber || order.id.toUpperCase().substring(0,6)}</div>
+                           <div className="text-xs text-brand-800 font-sans">{order.data.firstName} {order.data.familyName}</div>
+                         </td>
+                         <td className="px-4 py-4">
+                           {hasSignature ? (
+                             <span className="flex items-center gap-1 text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md text-xs border border-green-200 w-fit">
+                               <CheckCircle className="w-3 h-3" /> تم التوثيق الآلي
+                             </span>
+                           ) : (
+                             <span className="flex items-center gap-1 text-red-600 font-bold bg-red-50 px-2 py-1 rounded-md text-xs border border-red-200 w-fit">
+                               <AlertCircle className="w-3 h-3" /> بإنتظار التوقيع
+                             </span>
+                           )}
+                         </td>
+                         <td className="px-4 py-4 font-bold text-green-600 font-mono text-xs">متوافق (GDPR / PDPL)</td>
+                         <td className="px-4 py-4">
+                            <button 
+                              onClick={() => setSelectedOrder(order)}
+                              className="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg transition text-xs shadow-sm flex items-center gap-2"
+                            >
+                              <Search className="w-3 h-3" /> مراجعة الـ Audit Trail 
+                            </button>
+                         </td>
+                       </tr>
+                     )})}
+                   </tbody>
+                 </table>
+               </div>
             </div>
           </div>
         );
@@ -1281,7 +1380,7 @@ export function AdminPanel() {
                    </h4>
                    <div className="bg-white rounded-xl border border-brand-200 p-6 mb-6">
                      <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-brand-200 before:to-transparent">
-                       {selectedOrder.timeline.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((event, idx) => (
+                       {[...(selectedOrder.timeline || [])].sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((event, idx) => (
                          <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                            <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-100 text-brand-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                              {idx + 1}
