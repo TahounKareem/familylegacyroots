@@ -1424,7 +1424,6 @@ export function Dashboard() {
                         >
                           <input
                             type="file"
-                            accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
                             className="hidden"
                             ref={fileInputRef}
                             onChange={(e) => {
@@ -1436,7 +1435,7 @@ export function Dashboard() {
                                 e.target.value = "";
                               }
                             }}
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf,.doc,.docx,image/png,image/jpeg,image/jpg,image/webp"
                             disabled={isUploading}
                           />
                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
@@ -1618,7 +1617,6 @@ export function Dashboard() {
                         >
                           <input
                             type="file"
-                            accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
                             className="hidden"
                             ref={photosInputRef}
                             onChange={(e) => {
@@ -1630,7 +1628,7 @@ export function Dashboard() {
                                 e.target.value = "";
                               }
                             }}
-                            accept="image/jpeg,image/png,image/jpg"
+                            accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
                             disabled={isUploading}
                           />
                           <ImageIcon className="w-12 h-12 text-brand-400 mx-auto mb-4" />
