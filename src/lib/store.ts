@@ -97,7 +97,9 @@ export type ActionPhase =
   | "مرحلة التصويب"
   | "تم التصويب"
   | "تم تجهيز السجل للطباعة"
-  | "جاهز للتسليم";
+  | "جاهز للتسليم"
+  | "تم تسليم المسودة"
+  | "تم التسليم";
 
 export type OrderStatus =
   | "بإنتظار إتمام الدفع"
@@ -265,12 +267,7 @@ interface AppState {
   logTimelineEvent: (orderId: string, _message: string) => Promise<void>;
   fulfillOrder: (
     id: string,
-    links: {
-      deliveryLink?: string;
-      digitalCopyLink?: string;
-      posterLink?: string;
-      researchRecommendations?: string;
-    },
+    data: Partial<Order>,
   ) => Promise<void>;
   addMessageToOrder: (
     orderId: string,
@@ -363,14 +360,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  fulfillOrder: async (id, links) => {
+  fulfillOrder: async (id, data) => {
     try {
       set((state) => ({
         orders: state.orders.map((o) =>
-          o.id === id ? { ...o, status: "مكتمل", ...links } : o,
+          o.id === id ? { ...o, status: "مكتمل", ...data } : o,
         ),
       }));
-      await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...links });
+      await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...data });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
     }

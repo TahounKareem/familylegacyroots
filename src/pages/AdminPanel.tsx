@@ -83,6 +83,7 @@ export function AdminPanel() {
   );
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
+  const [deliveryTab, setDeliveryTab] = useState<"draft" | "final">("draft");
   const [replyText, setReplyText] = useState("");
   const [deliveryLink, setDeliveryLink] = useState("");
   const [digitalCopyLink, setDigitalCopyLink] = useState("");
@@ -311,11 +312,21 @@ export function AdminPanel() {
     if (!deliveryLink.trim() || !deliveryOrder) return;
     setIsFulfilling(true);
     try {
+      let phaseUpdates: any = {};
+      if (deliveryTab === "draft") {
+        phaseUpdates.actionPhase = "تم تسليم المسودة";
+        phaseUpdates.issueStatus = "تم الإصدار";
+      } else if (deliveryTab === "final") {
+        phaseUpdates.actionPhase = "تم التسليم";
+        phaseUpdates.issueStatus = "تم الإغلاق";
+      }
+
       await fulfillOrder(deliveryOrder.id, {
         deliveryLink,
         digitalCopyLink,
         posterLink,
         researchRecommendations,
+        ...phaseUpdates,
       });
 
       const userDoc = await getDoc(doc(db, "users", deliveryOrder.userId));
@@ -907,72 +918,9 @@ export function AdminPanel() {
                               </select>
                             </td>
                             <td className="px-2 py-3 bg-brand-50/20">
-                              <select
-                                value={order.actionPhase || "مرحلة البحث"}
-                                onChange={async (e) => {
-                                  const newPhase = e.target.value as ActionPhase;
-                                  const updateData: any = {
-                                    actionPhase: newPhase,
-                                  };
-
-                                  if (
-                                    newPhase === "مرحلة التوثيق" &&
-                                    order.totalAmount === 1980 &&
-                                    (!order.paymentStatus ||
-                                      order.paymentStatus === "مدفوع أول دفعة" ||
-                                      order.paymentStatus === "كود دعوة")
-                                  ) {
-                                    updateData.paymentStatus = "مستحق الدفعة الثانية";
-                                  }
-
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id ? { ...o, ...updateData } : o
-                                    ),
-                                  }));
-
-                                  try {
-                                    const { updateDoc, doc } = await import("firebase/firestore");
-                                    const { db } = await import("@/lib/firebase");
-                                    await updateDoc(doc(db, "orders", order.id), updateData);
-                                    useAppStore.getState().logTimelineEvent(
-                                      order.id,
-                                      `تم تغيير الإجراء (التنفيذ) إلى: ${newPhase}`
-                                    );
-                                  } catch (error) {
-                                    console.error("Failed to update status", error);
-                                  }
-                                }}
-                                className="border border-brand-200 rounded px-1 py-1 bg-brand-100/50 text-[10px] sm:text-[11px] text-brand-700 font-bold outline-none cursor-pointer w-full max-w-[100px]"
-                              >
-                                <option value="مرحلة البحث">مرحلة البحث</option>
-                                <option value="مرحلة التوثيق">
-                                  مرحلة التوثيق
-                                </option>
-                                <option value="تمت المسودة">
-                                  تمت المسودة
-                                </option>
-                                <option value="تم التصميم الإلكتروني">
-                                  تم التصميم الإلكتروني
-                                </option>
-                                <option value="مرحلة التصويب">
-                                  مرحلة التصويب
-                                </option>
-                                <option value="تم التصويب">
-                                  تم التصويب
-                                </option>
-                                <option value="تم تجهيز السجل للطباعة">
-                                  تم تجهيز السجل للطباعة
-                                </option>
-                                <option value="جاهز للتسليم">
-                                  جاهز للتسليم
-                                </option>
-                                {order.actionPhase === "طلب إيضاح" && (
-                                  <option value="طلب إيضاح" disabled>
-                                    طلب إيضاح (بانتظار العميل)
-                                  </option>
-                                )}
-                              </select>
+                              <span className="inline-block px-2 py-1 bg-brand-100 text-brand-700 text-[10px] sm:text-[11px] font-bold rounded">
+                                {order.actionPhase || "مرحلة البحث"}
+                              </span>
                             </td>
                           </tr>
 
@@ -1036,6 +984,12 @@ export function AdminPanel() {
                                   </div>
 
                                   <div className="flex items-center gap-2 overflow-x-auto">
+                                    <button
+                                      onClick={() => setSelectedAuditOrder(order)}
+                                      className="flex items-center gap-1.5 whitespace-nowrap text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
+                                    >
+                                      <Search className="w-3 h-3" /> مراجعة الـ Audit Trail
+                                    </button>
                                     <button
                                       onClick={() => setDeliveryOrder(order)}
                                       className="flex items-center gap-1.5 whitespace-nowrap text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
@@ -1727,8 +1681,7 @@ export function AdminPanel() {
                                 }
                                 return (
                                   <>
-                                    <option value={currentPhase}>{currentPhase}</option>
-                                    <option value="جاهز للتسليم">جاهز للتسليم</option>
+                                    <option value={currentPhase} disabled>{currentPhase}</option>
                                   </>
                                 );
                               })()}
@@ -2442,7 +2395,7 @@ export function AdminPanel() {
                 />
               </div>
 
-              {selectedOrder.timeline && selectedOrder.timeline.length > 0 && (
+              {activeTab === "orders" && selectedOrder.timeline && selectedOrder.timeline.length > 0 && (
                 <>
                   <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-brand-600" /> الجدول
@@ -2736,6 +2689,29 @@ export function AdminPanel() {
               رابط Dropbox، أو رابط مباشر للملف). سيتم تغيير حالة الطلب وتسليمه
               للعميل مباشرة.
             </p>
+
+            <div className="flex bg-brand-100 rounded-lg p-1 mb-6">
+              <button
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition ${
+                  deliveryTab === "draft"
+                    ? "bg-white text-brand-900 shadow-sm"
+                    : "text-brand-600 hover:text-brand-800"
+                }`}
+                onClick={() => setDeliveryTab("draft")}
+              >
+                تسليم مسودة للإعتماد
+              </button>
+              <button
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition ${
+                  deliveryTab === "final"
+                    ? "bg-white text-brand-900 shadow-sm"
+                    : "text-brand-600 hover:text-brand-800"
+                }`}
+                onClick={() => setDeliveryTab("final")}
+              >
+                التسليم النهائي للسجل
+              </button>
+            </div>
 
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
@@ -3407,6 +3383,22 @@ export function AdminPanel() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="mt-20 border-t border-brand-200 bg-brand-50 pt-12 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-brand-700">
+          <p className="font-serif text-xl sm:text-2xl text-brand-900 mb-6 font-bold">
+            ما لا يُوثق اليوم… قد يصبح مجرد رواية غامضة غدًا.
+          </p>
+          <div className="space-y-2 text-sm sm:text-base">
+            <p className="font-bold text-brand-900">GeneaLab LLC</p>
+            <p>تعمل المنصة من خلال شركة جينيا لاب - الولايات المتحدة الأمريكية.</p>
+          </div>
+          <div className="mt-8 pt-8 border-t border-brand-200 text-sm opacity-75">
+            <p>© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

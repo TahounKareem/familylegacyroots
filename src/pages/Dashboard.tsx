@@ -2593,6 +2593,22 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="mt-20 border-t border-brand-200 bg-brand-50 pt-12 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-brand-700">
+          <p className="font-serif text-xl sm:text-2xl text-brand-900 mb-6 font-bold">
+            ما لا يُوثق اليوم… قد يصبح مجرد رواية غامضة غدًا.
+          </p>
+          <div className="space-y-2 text-sm sm:text-base">
+            <p className="font-bold text-brand-900">GeneaLab LLC</p>
+            <p>تعمل المنصة من خلال شركة جينيا لاب - الولايات المتحدة الأمريكية.</p>
+          </div>
+          <div className="mt-8 pt-8 border-t border-brand-200 text-sm opacity-75">
+            <p>© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
