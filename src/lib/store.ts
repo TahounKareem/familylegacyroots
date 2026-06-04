@@ -1,15 +1,25 @@
 import { create } from "zustand";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
-import { collection, doc, onSnapshot, setDoc, updateDoc, getDoc, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
+  CREATE = "create",
+  UPDATE = "update",
+  DELETE = "delete",
+  LIST = "list",
+  GET = "get",
+  WRITE = "write",
 }
 
 interface FirestoreErrorInfo {
@@ -26,10 +36,14 @@ interface FirestoreErrorInfo {
       providerId?: string | null;
       email?: string | null;
     }[];
-  }
+  };
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+function handleFirestoreError(
+  error: unknown,
+  operationType: OperationType,
+  path: string | null,
+) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -38,27 +52,75 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       emailVerified: auth.currentUser?.emailVerified,
       isAnonymous: auth.currentUser?.isAnonymous,
       tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
+      providerInfo:
+        auth.currentUser?.providerData?.map((provider) => ({
+          providerId: provider.providerId,
+          email: provider.email,
+        })) || [],
     },
     operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
+    path,
+  };
+  console.error("Firestore Error: ", JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
 
 export type OrderPriority = "عادي" | "عاجل";
 export type RecordType = "سجل أساسي" | "الأبواب المغلقة";
-export type PaymentStatus = "مدفوع بالكامل" | "مدفوع أول دفعة" | "مستحق الدفعة الثانية" | "مدفوع ثاني دفعة" | "مستحق الدفعة الثالثة" | "مدفوع ثالث دفعة" | "كود دعوة" | "غير مدفوع" | "دفع جزئي";
-export type IssueStatus = "طلب غير مكتمل" | "بإنتظار إتمام الدفع" | "جاري التنفيذ" | "تم الإصدار" | "مرحلة التصويب" | "تم الإغلاق" | "يوجد تصويبات" | "قبول توصيات" | "إلغاء";
-export type ActionPhase = "مرحلة البحث" | "مرحلة التوثيق" | "تمت المسودة" | "تم التصميم الإلكتروني" | "طلب إيضاح" | "مرحلة التصويب" | "تم التصويب" | "تم تجهيز السجل للطباعة" | "جاهز للتسليم";
+export type PaymentStatus =
+  | "مدفوع بالكامل"
+  | "مدفوع أول دفعة"
+  | "مستحق الدفعة الثانية"
+  | "مدفوع ثاني دفعة"
+  | "مستحق الدفعة الثالثة"
+  | "مدفوع ثالث دفعة"
+  | "كود دعوة"
+  | "غير مدفوع"
+  | "دفع جزئي";
+export type IssueStatus =
+  | "طلب غير مكتمل"
+  | "بإنتظار إتمام الدفع"
+  | "جاري التنفيذ"
+  | "تم الإصدار"
+  | "مرحلة التصويب"
+  | "جاري التصويب"
+  | "تم الإغلاق"
+  | "يوجد تصويبات"
+  | "قبول توصيات"
+  | "إلغاء";
+export type ActionPhase =
+  | "مرحلة البحث"
+  | "مرحلة التوثيق"
+  | "تمت المسودة"
+  | "تم التصميم الإلكتروني"
+  | "طلب إيضاح"
+  | "مرحلة التصويب"
+  | "تم التصويب"
+  | "تم تجهيز السجل للطباعة"
+  | "جاهز للتسليم";
 
-export type OrderStatus = "بإنتظار إتمام الدفع" | "بانتظار الدفع" | "راحل" | "قيد البحث" | "طلب إيضاح" | "تم الرد" | "مكتمل" | "طلب مكتمل" | "تم تسليم الإصدار الأول";
+export type OrderStatus =
+  | "بإنتظار إتمام الدفع"
+  | "بانتظار الدفع"
+  | "راحل"
+  | "قيد البحث"
+  | "طلب إيضاح"
+  | "تم الرد"
+  | "مكتمل"
+  | "طلب مكتمل"
+  | "تم تسليم الإصدار الأول";
 
-export type AppRole = "user" | "admin" | "maestro" | "research" | "marketing" | "accounting" | "compliance" | "shipping" | "customer_service" | "editor";
+export type AppRole =
+  | "user"
+  | "admin"
+  | "maestro"
+  | "research"
+  | "marketing"
+  | "accounting"
+  | "compliance"
+  | "shipping"
+  | "customer_service"
+  | "editor";
 
 export interface TimelineEvent {
   id: string;
@@ -172,6 +234,7 @@ export interface Order {
   paymentStatus?: PaymentStatus;
   issueStatus?: IssueStatus;
   actionPhase?: ActionPhase;
+  previousActionPhase?: ActionPhase;
   assignedResearcher?: string;
   isDeleted?: boolean;
 
@@ -200,9 +263,24 @@ interface AppState {
   placeOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, newStatus: OrderStatus) => Promise<void>;
   logTimelineEvent: (orderId: string, _message: string) => Promise<void>;
-  fulfillOrder: (id: string, links: { deliveryLink?: string, digitalCopyLink?: string, posterLink?: string, researchRecommendations?: string }) => Promise<void>;
-  addMessageToOrder: (orderId: string, message: Message, newStatus?: OrderStatus) => Promise<void>;
-  markMessagesAsRead: (orderId: string, forRole: "user" | "admin") => Promise<void>;
+  fulfillOrder: (
+    id: string,
+    links: {
+      deliveryLink?: string;
+      digitalCopyLink?: string;
+      posterLink?: string;
+      researchRecommendations?: string;
+    },
+  ) => Promise<void>;
+  addMessageToOrder: (
+    orderId: string,
+    message: Message,
+    newStatus?: OrderStatus,
+  ) => Promise<void>;
+  markMessagesAsRead: (
+    orderId: string,
+    forRole: "user" | "admin",
+  ) => Promise<void>;
   initializeFirebase: () => void;
 }
 
@@ -210,16 +288,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   orders: [],
   isAuthReady: false,
-  pendingOrderData: (typeof window !== "undefined" && localStorage.getItem('pendingOrderData')) ? JSON.parse(localStorage.getItem('pendingOrderData')!) : null,
-  
+  pendingOrderData:
+    typeof window !== "undefined" && localStorage.getItem("pendingOrderData")
+      ? JSON.parse(localStorage.getItem("pendingOrderData")!)
+      : null,
+
   setPendingOrderData: (data) => {
-    if (data) localStorage.setItem('pendingOrderData', JSON.stringify(data));
-    else localStorage.removeItem('pendingOrderData');
+    if (data) localStorage.setItem("pendingOrderData", JSON.stringify(data));
+    else localStorage.removeItem("pendingOrderData");
     set({ pendingOrderData: data });
   },
-  
+
   login: (user) => set({ currentUser: user }),
-  
+
   logout: async () => {
     try {
       await firebaseSignOut(auth);
@@ -255,27 +336,29 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       const state = get();
       const user = state.currentUser;
-      const order = state.orders.find(o => o.id === orderId);
+      const order = state.orders.find((o) => o.id === orderId);
       if (!order) return;
-      
+
       const newEvent: TimelineEvent = {
         id: Math.random().toString(36).substring(2, 10),
         timestamp: new Date().toISOString(),
         message,
         userId: user?.id,
         userName: user?.name,
-        role: user?.role
+        role: user?.role,
       };
-      
+
       const updatedTimeline = [...(order.timeline || []), newEvent];
-      
+
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === orderId ? { ...o, timeline: updatedTimeline } : o)),
+        orders: state.orders.map((o) =>
+          o.id === orderId ? { ...o, timeline: updatedTimeline } : o,
+        ),
       }));
-      
+
       const updateData: any = { timeline: updatedTimeline };
       await updateDoc(doc(db, "orders", orderId), updateData);
-    } catch(e) {
+    } catch (e) {
       console.error(e);
     }
   },
@@ -283,7 +366,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   fulfillOrder: async (id, links) => {
     try {
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === id ? { ...o, status: "مكتمل", ...links } : o)),
+        orders: state.orders.map((o) =>
+          o.id === id ? { ...o, status: "مكتمل", ...links } : o,
+        ),
       }));
       await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...links });
     } catch (error) {
@@ -293,21 +378,41 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   addMessageToOrder: async (orderId, message, newStatus) => {
     try {
-      const order = get().orders.find(o => o.id === orderId);
+      const order = get().orders.find((o) => o.id === orderId);
       if (!order) return;
-      
+
       const updatedMessages = [...(order.messages || []), message];
-      
+
+      let nextActionPhase = order.actionPhase;
+      let nextPreviousPhase = order.previousActionPhase;
+
+      if (newStatus === "طلب إيضاح") {
+        nextPreviousPhase = order.actionPhase || "مرحلة البحث";
+        nextActionPhase = "طلب إيضاح";
+      } else if (newStatus === "تم الرد" && order.actionPhase === "طلب إيضاح") {
+        nextActionPhase = order.previousActionPhase || "مرحلة البحث";
+      }
+
       // Optimistic update
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === orderId ? { 
-          ...o, 
-          messages: updatedMessages,
-          ...(newStatus ? { status: newStatus } : {})
-        } : o)),
+        orders: state.orders.map((o) =>
+          o.id === orderId
+            ? {
+                ...o,
+                messages: updatedMessages,
+                ...(newStatus ? { status: newStatus } : {}),
+                actionPhase: nextActionPhase,
+                previousActionPhase: nextPreviousPhase,
+              }
+            : o,
+        ),
       }));
 
-      const updateData: any = { messages: updatedMessages };
+      const updateData: any = {
+        messages: updatedMessages,
+        actionPhase: nextActionPhase,
+        previousActionPhase: nextPreviousPhase,
+      };
       if (newStatus) updateData.status = newStatus;
 
       await updateDoc(doc(db, "orders", orderId), updateData);
@@ -318,11 +423,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   markMessagesAsRead: async (orderId, forRole) => {
     try {
-      const order = get().orders.find(o => o.id === orderId);
+      const order = get().orders.find((o) => o.id === orderId);
       if (!order || !order.messages) return;
-      
+
       let hasChanges = false;
-      const updatedMessages = order.messages.map(msg => {
+      const updatedMessages = order.messages.map((msg) => {
         // if user opens it, we mark admin's messages as read.
         // if admin opens it, we mark user's messages as read.
         if (msg.senderRole !== forRole && !msg.isRead) {
@@ -334,13 +439,17 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       if (!hasChanges) return;
 
-      // Optimistic 
+      // Optimistic
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === orderId ? { ...o, messages: updatedMessages } : o))
+        orders: state.orders.map((o) =>
+          o.id === orderId ? { ...o, messages: updatedMessages } : o,
+        ),
       }));
 
-      await updateDoc(doc(db, "orders", orderId), { messages: updatedMessages });
-    } catch(e) {
+      await updateDoc(doc(db, "orders", orderId), {
+        messages: updatedMessages,
+      });
+    } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `orders/${orderId}`);
     }
   },
@@ -358,12 +467,16 @@ export const useAppStore = create<AppState>((set, get) => ({
           // Get user document
           const userDoc = await getDoc(doc(db, "users", user.uid));
           let userInfo: UserInfo;
-          
+
           if (userDoc.exists()) {
             userInfo = userDoc.data() as UserInfo;
             // Update lastLoginAt
             try {
-              await setDoc(doc(db, "users", user.uid), { lastLoginAt: new Date().toISOString() }, { merge: true });
+              await setDoc(
+                doc(db, "users", user.uid),
+                { lastLoginAt: new Date().toISOString() },
+                { merge: true },
+              );
             } catch (e) {}
           } else {
             // First time login fallback (if created externally)
@@ -371,32 +484,52 @@ export const useAppStore = create<AppState>((set, get) => ({
               id: user.uid,
               name: user.displayName || "مستخدم",
               email: user.email || "",
-              role: user.email?.toLowerCase() === "kareem.tahoun@adamresearchcenter.net" ? "maestro" : (user.email?.toLowerCase() === "hassan.alamri@adamresearchcenter.net" ? "admin" : "user"),
+              role:
+                user.email?.toLowerCase() ===
+                "kareem.tahoun@adamresearchcenter.net"
+                  ? "maestro"
+                  : user.email?.toLowerCase() ===
+                      "hassan.alamri@adamresearchcenter.net"
+                    ? "admin"
+                    : "user",
               createdAt: new Date().toISOString(),
-              lastLoginAt: new Date().toISOString()
+              lastLoginAt: new Date().toISOString(),
             };
             await setDoc(doc(db, "users", user.uid), userInfo);
           }
-          
+
           set({ currentUser: userInfo, isAuthReady: true });
 
           // Listen to orders
           const ordersRef = collection(db, "orders");
-          const isStaff = ["admin", "maestro", "research", "marketing", "accounting", "compliance", "shipping", "customer_service", "editor"].includes(userInfo.role);
+          const isStaff = [
+            "admin",
+            "maestro",
+            "research",
+            "marketing",
+            "accounting",
+            "compliance",
+            "shipping",
+            "customer_service",
+            "editor",
+          ].includes(userInfo.role);
           const q = isStaff
-            ? query(ordersRef) 
+            ? query(ordersRef)
             : query(ordersRef, where("userId", "==", user.uid));
-            
-          onSnapshot(q, (snapshot) => {
-            const ordersList: Order[] = [];
-            snapshot.forEach((doc) => {
-              ordersList.push(doc.data() as Order);
-            });
-            set({ orders: ordersList });
-          }, (error) => {
-             handleFirestoreError(error, OperationType.LIST, `orders`);
-          });
-          
+
+          onSnapshot(
+            q,
+            (snapshot) => {
+              const ordersList: Order[] = [];
+              snapshot.forEach((doc) => {
+                ordersList.push(doc.data() as Order);
+              });
+              set({ orders: ordersList });
+            },
+            (error) => {
+              handleFirestoreError(error, OperationType.LIST, `orders`);
+            },
+          );
         } catch (error) {
           console.error("Error during auth state change:", error);
           set({ isAuthReady: true });
@@ -405,5 +538,5 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ currentUser: null, orders: [], isAuthReady: true });
       }
     });
-  }
+  },
 }));

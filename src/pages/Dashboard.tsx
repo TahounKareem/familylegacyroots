@@ -5,12 +5,49 @@ import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Printer, Download, Settings, User, LogOut, Clock, AlertCircle, CheckCircle, FileText, UploadCloud, MessageSquare, ChevronRight, Lock, BookOpen, Paperclip, Check, MapPin, Mail, Phone, CalendarCheck, UserPlus, Compass, Telescope, Star, Play, Sparkles, Package, Image as ImageIcon, Home, Send, MoreVertical, Camera } from "lucide-react";
+import {
+  Printer,
+  Download,
+  Settings,
+  User,
+  LogOut,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  UploadCloud,
+  MessageSquare,
+  ChevronRight,
+  Lock,
+  BookOpen,
+  Paperclip,
+  Check,
+  MapPin,
+  Mail,
+  Phone,
+  CalendarCheck,
+  UserPlus,
+  Compass,
+  Telescope,
+  Star,
+  Play,
+  Sparkles,
+  Package,
+  Image as ImageIcon,
+  Home,
+  Send,
+  MoreVertical,
+  Camera,
+  Quote,
+  Users,
+  Book,
+} from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
 export function Dashboard() {
-  const { currentUser, orders, updateOrderStatus, addMessageToOrder } = useAppStore();
-  const [activeTab, setActiveTab] = useState("خريطة الطريق");
+  const { currentUser, orders, updateOrderStatus, addMessageToOrder } =
+    useAppStore();
+  const [activeTab, setActiveTab] = useState("السجل الأساسي");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -29,20 +66,28 @@ export function Dashboard() {
   const [replyAttachments, setReplyAttachments] = useState<string[]>([]);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
 
-  const [pendingUpload, setPendingUpload] = useState<{file: File, arrayName: "documents"|"photos"} | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<{
+    file: File;
+    arrayName: "documents" | "photos";
+  } | null>(null);
 
-  const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file || !currentUser) return;
-    
+
     setIsUploading(true);
     try {
-      const storageRef = ref(storage, `users/${currentUser.id}/profile_${Date.now()}`);
+      const storageRef = ref(
+        storage,
+        `users/${currentUser.id}/profile_${Date.now()}`,
+      );
       const uploadTask = await uploadBytesResumable(storageRef, file);
       const url = await getDownloadURL(uploadTask.ref);
-      
+
       await updateDoc(doc(db, "users", currentUser.id), {
-        photoUrl: url
+        photoUrl: url,
       });
       useAppStore.setState({ currentUser: { ...currentUser, photoUrl: url } });
     } catch (err) {
@@ -52,7 +97,13 @@ export function Dashboard() {
       setIsUploading(false);
     }
   };
-  const [mediaMeta, setMediaMeta] = useState({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
+  const [mediaMeta, setMediaMeta] = useState({
+    title: "",
+    kind: "",
+    description: "",
+    purpose: "إضافة لسجل تراث العائلة",
+    isCover: false,
+  });
 
   // Check for Stripe success redirect
   useEffect(() => {
@@ -62,17 +113,28 @@ export function Dashboard() {
     const isInvite = params.get("invite") === "true";
 
     if (success === "true" && orderId) {
-      const order = orders.find(o => o.id === orderId);
-      if (order && (order.status === "بانتظار الدفع" || order.status === "بإنتظار إتمام الدفع")) {
+      const order = orders.find((o) => o.id === orderId);
+      if (
+        order &&
+        (order.status === "بانتظار الدفع" ||
+          order.status === "بإنتظار إتمام الدفع")
+      ) {
         updateOrderStatus(orderId, "قيد البحث");
         // Trigger email
         if (currentUser) {
-          getDoc(doc(db, "users", currentUser.id)).then(userDoc => {
+          getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              import("@/lib/emailService").then(({ sendOrderConfirmationEmail }) => {
-                sendOrderConfirmationEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || orderId, isInvite);
-              });
+              import("@/lib/emailService").then(
+                ({ sendOrderConfirmationEmail }) => {
+                  sendOrderConfirmationEmail(
+                    userData.email,
+                    userData.name || "العميل الكريم",
+                    order.orderNumber || orderId,
+                    isInvite,
+                  );
+                },
+              );
             }
           });
         }
@@ -81,24 +143,35 @@ export function Dashboard() {
     }
   }, [location.search, orders, updateOrderStatus, navigate, currentUser]);
 
-  const totalAdminMessagesUnread = orders.find(o => o.userId === currentUser?.id)?.messages?.filter(m => m.senderRole === "admin" && !m.isRead).length || 0;
+  const totalAdminMessagesUnread =
+    orders
+      .find((o) => o.userId === currentUser?.id)
+      ?.messages?.filter((m) => m.senderRole === "admin" && !m.isRead).length ||
+    0;
 
   useEffect(() => {
-    const order = orders.find(o => o.userId === currentUser?.id);
-    if (activeTab === "استيضاحات فريق البحث" && totalAdminMessagesUnread > 0 && order) {
+    const order = orders.find((o) => o.userId === currentUser?.id);
+    if (
+      activeTab === "استيضاحات فريق البحث" &&
+      totalAdminMessagesUnread > 0 &&
+      order
+    ) {
       useAppStore.getState().markMessagesAsRead(order.id, "user");
     }
   }, [activeTab, totalAdminMessagesUnread, orders, currentUser]);
 
   if (!currentUser) return <Navigate to="/auth" />;
 
-  const userOrders = orders.filter(o => o.userId === currentUser.id);
+  const userOrders = orders.filter((o) => o.userId === currentUser.id);
   const order = userOrders[0]; // ONLY 1 order allowed
-  
+
   // If user just registered and has no order setup, redirect them to complete their data
   if (!order) return <Navigate to="/order" replace />;
-  
-  const isPaid = order && order.status !== "بانتظار الدفع" && order.status !== "بإنتظار إتمام الدفع";
+
+  const isPaid =
+    order &&
+    order.status !== "بانتظار الدفع" &&
+    order.status !== "بإنتظار إتمام الدفع";
 
   const handleResumePayment = async () => {
     if (!order) return;
@@ -124,47 +197,73 @@ export function Dashboard() {
   const updateSpecificData = async (updates: Partial<FamilyData>) => {
     if (!order) return;
     const newData = { ...order.data, ...updates };
-    useAppStore.setState(s => ({
-      orders: s.orders.map(o => o.id === order.id ? { ...o, data: newData } : o)
+    useAppStore.setState((s) => ({
+      orders: s.orders.map((o) =>
+        o.id === order.id ? { ...o, data: newData } : o,
+      ),
     }));
     await updateDoc(doc(db, "orders", order.id), { data: newData });
   };
 
   const uploadFileAndUpdate = (file: File, type: "documents" | "photos") => {
     setPendingUpload({ file, arrayName: type });
-    setMediaMeta({ title: "", kind: "", description: "", purpose: "إضافة لسجل تراث العائلة", isCover: false });
+    setMediaMeta({
+      title: "",
+      kind: "",
+      description: "",
+      purpose: "إضافة لسجل تراث العائلة",
+      isCover: false,
+    });
   };
 
   const confirmUpload = () => {
     if (!pendingUpload || !order) return;
     setIsUploading(true);
-    const storageRef = ref(storage, `${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`);
+    const storageRef = ref(
+      storage,
+      `${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`,
+    );
     const uploadTask = uploadBytesResumable(storageRef, pendingUpload.file);
 
-    uploadTask.on('state_changed', null, 
+    uploadTask.on(
+      "state_changed",
+      null,
       (error) => {
         console.error("Upload error:", error);
         setIsUploading(false);
         alert("فشل رفع الملف.");
-      }, 
+      },
       async () => {
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         const currentArr = order.data[pendingUpload.arrayName] || [];
-        await updateSpecificData({ [pendingUpload.arrayName]: [...currentArr, { url: downloadURL, ...mediaMeta }] });
+        await updateSpecificData({
+          [pendingUpload.arrayName]: [
+            ...currentArr,
+            { url: downloadURL, ...mediaMeta },
+          ],
+        });
         setIsUploading(false);
         setPendingUpload(null);
-      }
+      },
     );
   };
 
   const handleSendCorrection = () => {
-    if (!order || !correctionText.trim() || !correctionError.trim() || !correctionSection || !correctionPage || !agreeToCorrectionTerms) return;
+    if (
+      !order ||
+      !correctionText.trim() ||
+      !correctionError.trim() ||
+      !correctionSection ||
+      !correctionPage ||
+      !agreeToCorrectionTerms
+    )
+      return;
     const newMessage: Message = {
       id: Math.random().toString(36).substr(2, 9),
       senderId: currentUser.id,
       senderRole: "user",
       text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     addMessageToOrder(order.id, newMessage);
     setCorrectionText("");
@@ -184,7 +283,7 @@ export function Dashboard() {
       senderRole: "user",
       text: replyText,
       attachments: replyAttachments,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     addMessageToOrder(order.id, newMessage, "تم الرد");
     setReplyText("");
@@ -199,79 +298,150 @@ export function Dashboard() {
 
   const InfoTooltip = ({ text }: { text: string }) => (
     <div className="relative group inline-flex items-center justify-center mr-2 z-50 align-middle">
-      <div className="w-5 h-5 rounded-full bg-brand-200 text-brand-700 font-bold text-xs flex items-center justify-center cursor-help">i</div>
+      <div className="w-5 h-5 rounded-full bg-brand-200 text-brand-700 font-bold text-xs flex items-center justify-center cursor-help">
+        i
+      </div>
       <div className="absolute bottom-full right-1/2 translate-x-1/2 mb-2 w-64 bg-brand-50 border border-brand-200 text-brand-800 text-xs rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
         {text}
       </div>
     </div>
   );
 
-  const SidebarItem = ({ title, isActive, isLocked, info, badge }: { title: string, isActive: boolean, isLocked?: boolean, info?: string, badge?: number }) => (
-    <button 
-      disabled={isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق"}
+  const SidebarItem = ({
+    title,
+    isActive,
+    isLocked,
+    info,
+    badge,
+  }: {
+    title: string;
+    isActive: boolean;
+    isLocked?: boolean;
+    info?: string;
+    badge?: number;
+  }) => (
+    <button
+      disabled={isLocked && title !== "السجل الأساسي"}
       onClick={() => setActiveTab(title)}
       className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative font-sans text-sm border
-        ${isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق" ? "opacity-50 cursor-not-allowed" : ""}
+        ${isLocked && title !== "السجل الأساسي" ? "opacity-50 cursor-not-allowed" : ""}
         ${isActive ? "bg-brand-50 border-brand-200 text-black font-bold" : "text-black border-transparent hover:bg-brand-50 hover:border-brand-200"}`}
     >
       <div className="flex items-center">
         <span>{title}</span>
         {badge !== undefined && badge > 0 && (
-          <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">{badge}</span>
+          <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">
+            {badge}
+          </span>
         )}
         {info && (
           <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
-            <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-200">i</div>
+            <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-200">
+              i
+            </div>
             <div className="absolute bottom-full mb-2 right-0 w-60 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
               {info}
             </div>
           </div>
         )}
       </div>
-      {isLocked && title !== "حالة الإصدار" && title !== "خريطة الطريق" && <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />}
+      {isLocked && title !== "السجل الأساسي" && (
+        <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />
+      )}
     </button>
   );
 
   return (
     <div className="bg-brand-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header & Greeting */}
         <div className="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm border border-brand-100 mb-8 flex justify-between items-center relative z-[60] sticky top-4">
           <div className="flex flex-col md:flex-row items-center gap-4 relative">
-             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="relative shrink-0 group">
-               {currentUser.photoUrl ? (
-                 <img src={currentUser.photoUrl} alt="Profile" className="w-16 h-16 rounded-full border-2 border-brand-200 shadow-sm object-cover group-hover:border-brand-500 transition-colors" />
-               ) : (
-                 <div className="w-16 h-16 rounded-full bg-brand-100 border-2 border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl group-hover:bg-brand-200 group-hover:border-brand-400 transition uppercase">
-                   {currentUser.name?.charAt(0) || "U"}
-                 </div>
-               )}
-               <div className="absolute bottom-0 left-0 bg-white rounded-full p-1 border border-brand-200 shadow-sm">
-                 <MoreVertical className="w-4 h-4 text-brand-500" />
-               </div>
-             </button>
-             <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
-                <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">أهلاً بك، {currentUser.name}</h1>
-                <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2"><Mail className="w-4 h-4" /> {currentUser.email}</p>
-                {order && <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">رقم الطلب: #{order.orderNumber || order.id.toUpperCase()}</span>}
-             </div>
-             
-             {showProfileMenu && (
-               <>
-                 <div className="fixed inset-0 z-30" onClick={() => setShowProfileMenu(false)}></div>
-                 <div className="absolute top-20 right-0 md:right-0 md:translate-x-0 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
-                   <button onClick={() => { setActiveTab("الملف الشخصي"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><User className="w-4 h-4 text-brand-500" /> الملف الشخصي</button>
-                   <button onClick={() => { setActiveTab("إعدادات"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><Settings className="w-4 h-4 text-brand-500" /> إعدادات</button>
-                   <button onClick={() => { setActiveTab("عقد تسجيل الخدمة"); setShowProfileMenu(false); }} className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"><FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل الخدمة</button>
-                   <div className="border-t border-brand-100 my-1"></div>
-                   <button onClick={async () => { await signOut(auth); useAppStore.getState().logout(); window.location.href = '/auth'; }} className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"><LogOut className="w-4 h-4" /> تسجيل الخروج</button>
-                 </div>
-               </>
-             )}
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="relative shrink-0 group"
+            >
+              {currentUser.photoUrl ? (
+                <img
+                  src={currentUser.photoUrl}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full border-2 border-brand-200 shadow-sm object-cover group-hover:border-brand-500 transition-colors"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-brand-100 border-2 border-brand-200 shadow-sm flex items-center justify-center text-brand-600 font-bold text-2xl group-hover:bg-brand-200 group-hover:border-brand-400 transition uppercase">
+                  {currentUser.name?.charAt(0) || "U"}
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 bg-white rounded-full p-1 border border-brand-200 shadow-sm">
+                <MoreVertical className="w-4 h-4 text-brand-500" />
+              </div>
+            </button>
+            <div className="text-center md:text-right flex flex-col items-center md:items-start gap-1">
+              <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">
+                أهلاً بك، {currentUser.name}
+              </h1>
+              <p className="text-sm text-brand-600 font-mono inline-flex items-center gap-2">
+                <Mail className="w-4 h-4" /> {currentUser.email}
+              </p>
+              {order && (
+                <span className="mt-1 px-3 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-mono border border-brand-200 shadow-sm shrink-0">
+                  رقم الطلب: #{order.orderNumber || order.id.toUpperCase()}
+                </span>
+              )}
+            </div>
+
+            {showProfileMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setShowProfileMenu(false)}
+                ></div>
+                <div className="absolute top-20 right-0 md:right-0 md:translate-x-0 w-64 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden py-2 z-40 animate-in fade-in slide-in-from-top-2">
+                  <button
+                    onClick={() => {
+                      setActiveTab("الملف الشخصي");
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                  >
+                    <User className="w-4 h-4 text-brand-500" /> الملف الشخصي
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("إعدادات");
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                  >
+                    <Settings className="w-4 h-4 text-brand-500" /> إعدادات
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("عقد تسجيل الخدمة");
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full text-right px-4 py-3 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3"
+                  >
+                    <FileText className="w-4 h-4 text-brand-500" /> عقد تسجيل
+                    الخدمة
+                  </button>
+                  <div className="border-t border-brand-100 my-1"></div>
+                  <button
+                    onClick={async () => {
+                      await signOut(auth);
+                      useAppStore.getState().logout();
+                      window.location.href = "/auth";
+                    }}
+                    className="w-full text-right px-4 py-3 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"
+                  >
+                    <LogOut className="w-4 h-4" /> تسجيل الخروج
+                  </button>
+                </div>
+              </>
+            )}
           </div>
           <div className="flex gap-4">
-             {/* Removed upper button as requested */}
+            {/* Removed upper button as requested */}
           </div>
         </div>
 
@@ -279,15 +449,30 @@ export function Dashboard() {
           {/* Sidebar Navigation */}
           <div className="lg:w-1/4">
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-brand-100 sticky top-8 z-50">
-              
               <div className="mb-6">
-                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">البوابة الرئيسية</h3>
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">
+                  البوابة الرئيسية
+                </h3>
                 <div className="space-y-1">
-                  <SidebarItem title="خريطة الطريق" isActive={activeTab === "خريطة الطريق"} />
-                  <SidebarItem title="حالة الإصدار" isActive={activeTab === "حالة الإصدار"} />
-                  <SidebarItem title="بيانات العميل / أمين السجل" isActive={activeTab === "بيانات العميل / أمين السجل"} isLocked={!isPaid} />
-                  <SidebarItem title="نقطة العرض الأساسية" isActive={activeTab === "نقطة العرض الأساسية"} isLocked={!isPaid} />
-                  <SidebarItem title="قالب التصميم المختار" isActive={activeTab === "قالب التصميم المختار"} isLocked={!isPaid} />
+                  <SidebarItem
+                    title="السجل الأساسي"
+                    isActive={activeTab === "السجل الأساسي"}
+                  />
+                  <SidebarItem
+                    title="بيانات العميل / أمين السجل"
+                    isActive={activeTab === "بيانات العميل / أمين السجل"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="نقطة العرض الأساسية"
+                    isActive={activeTab === "نقطة العرض الأساسية"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="قالب التصميم المختار"
+                    isActive={activeTab === "قالب التصميم المختار"}
+                    isLocked={!isPaid}
+                  />
                 </div>
               </div>
 
@@ -295,274 +480,696 @@ export function Dashboard() {
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4 flex items-center">
                   بيانات "الإدراج الإختياري"
                   <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
-                    <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help">i</div>
+                    <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help">
+                      i
+                    </div>
                     <div className="absolute bottom-full mb-2 right-0 w-64 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none normal-case z-50">
-                      هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) – عند رغبته – ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم (بين يدي السجل ) من أجل جعل السجل أكثر خصوصية للعائلة والذي قد يشمل على سبيل المثال مايلي: ( كلمة لأمين السجل / العميل - نبذة تاريخية عن العائلة - مشجر الأحياء من العائلة والأسلاف ضمن عمود النسب ).
+                      هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) –
+                      عند رغبته – ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم
+                      (بين يدي السجل ) من أجل جعل السجل أكثر خصوصية للعائلة
+                      والذي قد يشمل على سبيل المثال مايلي: ( كلمة لأمين السجل /
+                      العميل - نبذة تاريخية عن العائلة - مشجر الأحياء من العائلة
+                      والأسلاف ضمن عمود النسب ).
                     </div>
                   </div>
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem title="نبذة وكلمة عن العائلة" isActive={activeTab === "نبذة وكلمة عن العائلة"} isLocked={!isPaid} info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة ، (سيتم إدراجها في القسمالمسمى &#34;بين يدي السجل&#34; وهو القسم الخاص الذي يقع تحت اشرافكم)" />
-                  <SidebarItem title="نافذة الإدراج العائلي" isActive={activeTab === "نافذة الإدراج العائلي"} isLocked={!isPaid} info="مشجر للأحياء من العائلة والأسلاف ضمن عمود النسب : ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام ." />
-                  <SidebarItem title="إدراج وثائق" isActive={activeTab === "إدراج وثائق"} isLocked={!isPaid} info="الوثائق : يمكن ادراج اي وثائق يرغب أمين السجل / العميل في ادراجها، مثل مشجرات تقليدية – شهادات – وثائق اثبات شخصية قديمة –وثائق وزاج – ولادة - وثائق صادرة من المحاكم الشرعية فيها معلومات عن العائلة او الأسلاف ..الخ ، ملحوظة : يتعين أن تكون الوثائق المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ." />
-                  <SidebarItem title="إدراج صور" isActive={activeTab === "إدراج صور"} isLocked={!isPaid} info="الصور : يمكن لأمين السجل /العميل إدراج صور لأفراد العائلة مثل ( صور الأشخاص المدرجين ضمن مشجر الأحياء ، او صور بقية الأشخاص في عمود النسب الصاعد فقط . ملحوظة : يتعين أن تكون الصور المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ." />
+                  <SidebarItem
+                    title="نبذة وكلمة عن العائلة"
+                    isActive={activeTab === "نبذة وكلمة عن العائلة"}
+                    isLocked={!isPaid}
+                    info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة ، (سيتم إدراجها في القسمالمسمى &#34;بين يدي السجل&#34; وهو القسم الخاص الذي يقع تحت اشرافكم)"
+                  />
+                  <SidebarItem
+                    title="نافذة الإدراج العائلي"
+                    isActive={activeTab === "نافذة الإدراج العائلي"}
+                    isLocked={!isPaid}
+                    info="مشجر للأحياء من العائلة والأسلاف ضمن عمود النسب : ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام ."
+                  />
+                  <SidebarItem
+                    title="إدراج وثائق"
+                    isActive={activeTab === "إدراج وثائق"}
+                    isLocked={!isPaid}
+                    info="الوثائق : يمكن ادراج اي وثائق يرغب أمين السجل / العميل في ادراجها، مثل مشجرات تقليدية – شهادات – وثائق اثبات شخصية قديمة –وثائق وزاج – ولادة - وثائق صادرة من المحاكم الشرعية فيها معلومات عن العائلة او الأسلاف ..الخ ، ملحوظة : يتعين أن تكون الوثائق المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ."
+                  />
+                  <SidebarItem
+                    title="إدراج صور"
+                    isActive={activeTab === "إدراج صور"}
+                    isLocked={!isPaid}
+                    info="الصور : يمكن لأمين السجل /العميل إدراج صور لأفراد العائلة مثل ( صور الأشخاص المدرجين ضمن مشجر الأحياء ، او صور بقية الأشخاص في عمود النسب الصاعد فقط . ملحوظة : يتعين أن تكون الصور المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ."
+                  />
                 </div>
               </div>
 
               <div className="mb-6">
-                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">التواصل والتحديثات</h3>
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">
+                  التواصل والتحديثات
+                </h3>
                 <div className="space-y-1">
-                  <SidebarItem title="استيضاحات فريق البحث" isActive={activeTab === "استيضاحات فريق البحث"} isLocked={!isPaid} info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ." badge={totalAdminMessagesUnread} />
+                  <SidebarItem
+                    title="استيضاحات فريق البحث"
+                    isActive={activeTab === "استيضاحات فريق البحث"}
+                    isLocked={!isPaid}
+                    info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ."
+                    badge={totalAdminMessagesUnread}
+                  />
                 </div>
               </div>
 
               <div className="mb-6">
-                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">ابق سجلك حياً</h3>
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">
+                  ابق سجلك حياً
+                </h3>
                 <div className="space-y-1">
-                  <SidebarItem title="النسخة الرقمية للسجل" isActive={activeTab === "النسخة الرقمية للسجل"} isLocked={!isPaid} />
-                  <SidebarItem title="بوستر عمود النسب" isActive={activeTab === "بوستر عمود النسب"} isLocked={!isPaid} />
-                  <SidebarItem title="التصويبات" isActive={activeTab === "التصويبات"} isLocked={!isPaid} info="هذه الخاصية ستظهر عند استلامكم السجل الخاص بكم حيث سيتم تفعيل هذه الخاصية لتتمكنوا من ارسال التصويبات ان وجدت ." />
+                  <SidebarItem
+                    title="النسخة الرقمية للسجل"
+                    isActive={activeTab === "النسخة الرقمية للسجل"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="بوستر عمود النسب"
+                    isActive={activeTab === "بوستر عمود النسب"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="التصويبات"
+                    isActive={activeTab === "التصويبات"}
+                    isLocked={!isPaid}
+                    info="هذه الخاصية ستظهر عند استلامكم السجل الخاص بكم حيث سيتم تفعيل هذه الخاصية لتتمكنوا من ارسال التصويبات ان وجدت ."
+                  />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">فتح الأبواب المغلقة</h3>
+                <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4">
+                  فتح الأبواب المغلقة
+                </h3>
                 <div className="space-y-1">
-                   <SidebarItem title="فتح الأبواب المغلقة" isActive={activeTab === "فتح الأبواب المغلقة"} isLocked={!isPaid} info="بحث متقدم. هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ." />
+                  <SidebarItem
+                    title="فتح الأبواب المغلقة"
+                    isActive={activeTab === "فتح الأبواب المغلقة"}
+                    isLocked={!isPaid}
+                    info="بحث متقدم. هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ."
+                  />
                 </div>
               </div>
 
               {/* Social Media & Outer Links */}
               <div className="mt-8 pt-6">
                 <div className="space-y-2 mb-6">
-                  <button onClick={() => setActiveTab("حالة الإصدار")} className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
+                  <button
+                    onClick={() => setActiveTab("السجل الأساسي")}
+                    className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4"
+                  >
                     <Compass className="w-4 h-4" />
                     عودة
                   </button>
-                  <Link to="/" className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4">
+                  <Link
+                    to="/"
+                    className="w-full text-brand-600 py-2.5 rounded-xl transition flex items-center gap-3 hover:bg-brand-50 font-semibold text-sm px-4"
+                  >
                     <Home className="w-4 h-4" />
                     <span className="truncate">العودة للرئيسية</span>
                   </Link>
                 </div>
               </div>
-
             </div>
           </div>
 
           {/* Main Content Area */}
           <div className="lg:w-3/4">
             <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-brand-100 min-h-[600px]">
-              
               {!order ? (
                 <div className="text-center py-20">
                   <BookOpen className="w-16 h-16 text-brand-200 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">طلب غير مكتمل</h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">يمكنك متابعة استكمال البيانات في أي وقت.</p>
-                  <Link to="/order" className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block drop-shadow-md">إنشاء السجل الأساسي</Link>
+                  <h2 className="text-2xl font-serif text-brand-900 mb-4">
+                    طلب غير مكتمل
+                  </h2>
+                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">
+                    يمكنك متابعة استكمال البيانات في أي وقت.
+                  </p>
+                  <Link
+                    to="/order"
+                    className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block drop-shadow-md"
+                  >
+                    إنشاء السجل الأساسي
+                  </Link>
                 </div>
               ) : !isPaid ? (
-                 <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
+                <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
                   <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">بانتظار إتمام الدفع</h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">أكمل عملية الدفع لإنهاء طلب السجل وتفعيل الاشتراك.</p>
-                  <button onClick={handleResumePayment} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg">إتمام الدفع واعتماد الطلب (1999$)</button>
+                  <h2 className="text-2xl font-serif text-brand-900 mb-4">
+                    بانتظار إتمام الدفع
+                  </h2>
+                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">
+                    أكمل عملية الدفع لإنهاء طلب السجل وتفعيل الاشتراك.
+                  </p>
+                  <button
+                    onClick={handleResumePayment}
+                    className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg"
+                  >
+                    إتمام الدفع واعتماد الطلب (1999$)
+                  </button>
                 </div>
               ) : (
                 /* PAID CONTENT */
                 <div className="space-y-8 animate-in fade-in duration-300">
-                  <h2 className="text-3xl font-serif font-bold text-brand-900 mb-8 pb-4 border-b border-brand-100">{activeTab}</h2>
+                  <h2 className="text-3xl font-serif font-bold text-brand-900 mb-8 pb-4 border-b border-brand-100">
+                    {activeTab}
+                  </h2>
 
-                  {activeTab === "خريطة الطريق" && (
-                    <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
-                      <div className="flex items-center gap-4 mb-6">
-                         <Compass className="w-12 h-12 text-brand-600" />
-                         <div>
-                           <h2 className="text-2xl font-bold font-serif text-brand-900 mb-2">خريطة الطريق لتوثيق سجل تراث عائلتك</h2>
-                           <p className="text-brand-700">دليلك الإرشادي خطوة بخطوة للوصول إلى سجل عائلي متكامل.</p>
-                         </div>
-                      </div>
+                  {activeTab === "السجل الأساسي" &&
+                    (() => {
+                      const isState1 = order.issueStatus === "طلب غير مكتمل";
+                      const isState2 =
+                        order.issueStatus === "بإنتظار إتمام الدفع" ||
+                        (!isPaid && order.issueStatus !== "طلب غير مكتمل");
+                      const isState3 =
+                        order.issueStatus === "جاري التنفيذ" &&
+                        order.actionPhase === "مرحلة البحث";
+                      const isState4 =
+                        order.issueStatus === "جاري التنفيذ" &&
+                        order.actionPhase === "مرحلة التوثيق";
+                      const isState5 = order.issueStatus === "تم الإصدار";
+                      const isState6 =
+                        order.issueStatus === "جاري التصويب" ||
+                        order.issueStatus === "يوجد تصويبات" ||
+                        order.actionPhase === "مرحلة التصويب";
+                      const isState7 = order.issueStatus === "تم الإغلاق";
 
-                      <div className="bg-white p-6 rounded-xl border border-brand-100 shadow-sm mb-6 flex items-center justify-between">
-                         <div className="flex items-center gap-3">
-                           <div className={`w-3 h-3 rounded-full uppercase ${(order.status === 'مكتمل' || order.status === 'طلب مكتمل') ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
-                           <span className="font-bold text-brand-900">حالة السجل الحالية:</span>
-                           <span className="text-brand-600 text-sm font-medium border border-brand-200 bg-brand-50 px-3 py-1 rounded-full">{order.status}</span>
-                         </div>
-                         {totalAdminMessagesUnread > 0 && (
-                           <button onClick={() => setActiveTab("استيضاحات فريق البحث")} className="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1 rounded-full font-bold flex items-center gap-1 hover:bg-red-100 transition">
-                             <AlertCircle className="w-4 h-4" /> يوجد استيضاحات جديدة ({totalAdminMessagesUnread})
-                           </button>
-                         )}
-                      </div>
+                      let title = "";
+                      let statusText = order.issueStatus;
+                      let actionText = "";
+                      let subText = "";
+                      let actionButton = null;
 
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <button onClick={() => setActiveTab("بيانات العميل / أمين السجل")} className="p-5 bg-white border border-brand-200 rounded-xl hover:border-brand-400 hover:shadow-md transition text-right group">
-                          <CheckCircle className="w-8 h-8 text-green-500 mb-3" />
-                          <h4 className="font-bold text-brand-900 mb-1">البيانات الأساسية</h4>
-                          <p className="text-xs text-brand-600">اكتمل إدخال بيانات أمين السجل التي تم إنشاء الطلب بها.</p>
-                        </button>
-                        
-                        <button onClick={() => isPaid ? setActiveTab("إدراج وثائق") : null} className={`p-5 bg-white border border-brand-200 rounded-xl transition text-right group ${isPaid ? 'hover:border-brand-400 hover:shadow-md' : 'opacity-70 cursor-not-allowed'}`}>
-                          <UploadCloud className={`w-8 h-8 mb-3 ${isPaid ? 'text-brand-500' : 'text-gray-400'}`} />
-                          <h4 className="font-bold text-brand-900 mb-1 flex justify-between items-center">
-                            إدراج الوثائق {!isPaid && <Lock className="w-3 h-3 text-brand-400" />}
-                          </h4>
-                          <p className="text-xs text-brand-600 leading-relaxed">أضف وثائق أو شهادات تثري السجل وتدعم المحتوى العائلي (اختياري).</p>
-                        </button>
-                        
-                        <button onClick={() => isPaid ? setActiveTab("نبذة وكلمة عن العائلة") : null} className={`p-5 bg-white border border-brand-200 rounded-xl transition text-right group ${isPaid ? 'hover:border-brand-400 hover:shadow-md' : 'opacity-70 cursor-not-allowed'}`}>
-                          <FileText className={`w-8 h-8 mb-3 ${isPaid ? 'text-brand-500' : 'text-gray-400'}`} />
-                          <h4 className="font-bold text-brand-900 mb-1 flex justify-between items-center">
-                            بين يدي السجل {!isPaid && <Lock className="w-3 h-3 text-brand-400" />}
-                          </h4>
-                          <p className="text-xs text-brand-600 leading-relaxed">دوّن كلمة باسم العائلة، هجرتها التاريخية، أو نبذة عن أبطالها.</p>
-                        </button>
-                      </div>
+                      if (isState1) {
+                        title =
+                          "كل جيل يحمل جزءًا من الرواية… حتى يأتي من يجمعها في سجل واحد";
+                        actionText = "يمكنك متابعة رحلة التوثيق في اي وقت";
+                        actionButton = (
+                          <button
+                            onClick={() =>
+                              setActiveTab("بيانات العميل / أمين السجل")
+                            }
+                            className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
+                          >
+                            أكمل رحلة التوثيق
+                          </button>
+                        );
+                      } else if (isState2) {
+                        title =
+                          "ما لا يُوثق اليوم… قد يصبح مجرد رواية غامضة غدًا.";
+                        actionText =
+                          "اكمل عملية الدفع ليتمكن الفريق من بدء التنفيذ";
+                        actionButton = (
+                          <button
+                            onClick={() => setActiveTab("فاتورة الطلب")}
+                            className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
+                          >
+                            إتمام الدفع وبدء التنفيذ
+                          </button>
+                        );
+                      } else if (isState3) {
+                        title =
+                          "“كل إضافة اليوم… تصبح جزءًا محفوظًا من ذاكرة العائلة للأجيال القادمة.”";
+                        actionText = "حالياً نقوم بالأعمال البحثية";
+                        subText =
+                          "نقوم بالأعمال البحثية وبناء عمود النسب لسجل عائلتكم وفق المواد والمعلومات المعتمدة. يمكنكم من هذه البوابة متابعة حالة الإصدار، وإضافة المحتوى الإثرائي الذي ترونه مناسبًا لإدراجه ضمن السجل.";
+                      } else if (isState4) {
+                        title =
+                          "“كل إضافة اليوم… تصبح جزءًا محفوظًا من ذاكرة العائلة للأجيال القادمة.”";
+                        actionText = "حالياً نقوم بأعمال التوثيق";
+                        subText =
+                          "نعمل حاليًا على توثيق مخرجات سجل تراث عائلتكم. مازال يمكنكم إضافة المحتوى الإثرائي الذي ترونه مناسبًا لإدراجه ضمن السجل، نقترح عليكم المبادرة باضافة الإثراء الذي ترغبون به قبل صدور النسخة الأولية .";
+                      } else if (isState5) {
+                        title =
+                          "الآن اصبح تراث عائلتك كتاباً .. سجل تراث عائلتك بين يديك";
+                        actionText = "تم إصدار النسخة الأولية";
+                        subText =
+                          'يسرنا اخبارك بصدور النسخة الأولية من سجل عائلتك ، يمكنك تصفح النسخة الرقمية من نافذة "النسخة الرقمية " ، كما يمكنك في حالة وجود تصويبات على هذه النسخة الأولية تعبئة جدول التصويبات عبر نافذة "تصويبات" في القائمة اليمنى.';
+                        actionButton = (
+                          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                            <button
+                              onClick={() => setActiveTab("النسخة الرقمية")}
+                              className="flex-1 text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
+                            >
+                              مشاهدة النسخة الرقمية
+                            </button>
+                            <button
+                              onClick={() => setActiveTab("تصويبات وتعديلات")}
+                              className="flex-1 text-center bg-brand-50 border border-brand-200 text-brand-900 font-bold py-4 rounded-xl transition shadow-sm text-lg hover:bg-brand-100"
+                            >
+                              طلب تصويب
+                            </button>
+                          </div>
+                        );
+                      } else if (isState6) {
+                        title =
+                          "الآن اصبح تراث عائلتك كتاباً .. سجل تراث عائلتك بين يديك";
+                        actionText = "سجل تراث عائلتكم قيد التصويب";
+                        subText =
+                          "نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .";
+                      } else if (isState7) {
+                        title =
+                          "الآن اصبح تراث عائلتك كتاباً .. سجل تراث عائلتك بين يديك";
+                        actionText = "تم إصدار النسخة النهائية .";
+                        subText =
+                          'تم إصدار النسخة النهائية من سجل تراث عائلتكم ، ويمكنكم استعراض وتحميل هذه النسخة من نافذة "النسخة الرقمية" كما تم ارسال النسخ الورقية وبوستر مخطط عمود النسب الى عنوانكم البريدي .';
+                        actionButton = (
+                          <button
+                            onClick={() => setActiveTab("النسخة الرقمية")}
+                            className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
+                          >
+                            مشاهدة وتحميل النسخة الرقمية
+                          </button>
+                        );
+                      } else {
+                        title = "كل جيل يحمل جزءًا من الرواية…";
+                        actionText = "تابع السجل";
+                      }
 
-                    </div>
-                  )}
+                      return (
+                        <div className="space-y-8 max-w-4xl mx-auto">
+                          <div className="text-center py-8">
+                            <h2 className="text-3xl md:text-4xl font-serif text-[#C3262A] font-bold leading-tight px-4">
+                              {title}
+                            </h2>
+                          </div>
 
-                  {activeTab === "حالة الإصدار" && (
-                     <div className="bg-brand-50 p-8 rounded-2xl border border-brand-200">
-                       <div className="flex items-center gap-4 mb-6 pb-6 border-b border-brand-200">
-                         {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? <CheckCircle className="w-12 h-12 text-green-500" /> : <Clock className="w-12 h-12 text-orange-500" />}
-                         <div>
-                           <h3 className="text-xl font-bold text-brand-900 mb-2">حالة الإصدار الحالية: <span className="text-brand-600">{order.status}</span></h3>
-                           <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-brand-600 text-sm mt-1">
-                             <span className="flex items-center gap-1"><CalendarCheck className="w-4 h-4" /> تاريخ الطلب: <strong className="font-bold">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</strong></span>
-                             {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? (
-                               <span className="flex items-center gap-1 text-green-600 font-bold text-base"><CheckCircle className="w-5 h-5" /> تم التسليم بنجاح!</span>
-                             ) : (
-                               <span className="flex items-center gap-1 text-orange-600"><Clock className="w-4 h-4" /> التسليم المتوقع: <strong className="font-bold border-b border-orange-200 pb-0.5">{calculateDeliveryDate(order.createdAt)}</strong></span>
-                             )}
-                           </div>
-                         </div>
-                       </div>
-                       
-                       {(order.status === "مكتمل" || order.status === "طلب مكتمل") ? (
-                         <div className="space-y-4">
-                           <h3 className="text-2xl font-bold text-brand-900 mb-4 tracking-tight">يسعدنا إتمام العمل!</h3>
-                           <p className="text-brand-700 leading-relaxed text-lg">
-                             لقد تم إصدار سجل تراث عائلتكم وهو الآن بين أيديكم. نأمل أن يكون هذا العمل على قدر تطلعاتكم وتوقعاتكم، وأن يكون مرجعاً يفخر به الأبناء والأحفاد.
-                           </p>
-                           <p className="text-brand-700 leading-relaxed text-lg">
-                             بإمكانكم الآن الاطلاع على سجلكم الرقمي، كما ندعوكم لقراءة <strong className="text-brand-900">توصيات واقتراحات فريق البحث</strong> بعناية للاستفادة القصوى من العمل، ويمكنكم تقديم طلبات التصويب وفقاً للشروط والأحكام خلال الفترة المحددة.
-                           </p>
-                           <p className="text-brand-700 leading-relaxed text-lg">
-                             وللتعمق أكثر في تاريخ عائلتكم، ندعوكم لاستكشاف خدمة <strong className="text-brand-900 text-xl border-b-2 border-brand-300 ml-1">فتح الأبواب المغلقة (بحث متقدم)</strong> للحصول على إصدارنا الثاني الحصري.
-                           </p>
-                         </div>
-                       ) : (
-                         <>
-                           <p className="text-brand-900 font-bold mb-4">عزيزي أمين السجل / العميل</p>
-                           
-                           <ul className="space-y-4 text-brand-700 leading-relaxed text-lg">
-                             <li className="flex items-start gap-3">
-                               <BookOpen className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                               <span>يعمل فريق بحث سجل تراث العائلة على توثيق سجلك ، البحوث الجادة تأخذ وقتاً من اجل اعداد سجل نسبي موثوق .</span>
-                             </li>
-                             <li className="flex items-start gap-3">
-                               <MessageSquare className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                               <span>في حالة وجود استفسار لدى فريق البحث فسيتم التواصل معك من خلال المنصة وسوف يتم اشعاركم بالبريد الالكتروني حول ذلك .</span>
-                             </li>
-                             <li className="flex items-start gap-3">
-                               <CheckCircle className="w-6 h-6 text-brand-400 shrink-0 mt-1" />
-                               <span>فريقنا في غاية الحماس كي يصدر سجل تراث عائلتكم في افضل جودة علمية واجمل اخراج وتصميم فني .</span>
-                             </li>
-                           </ul>
-                         </>
-                       )}
+                          <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative">
+                            <div className="bg-brand-50 p-6 border-b border-brand-100 text-center">
+                              <h3 className="font-bold text-2xl text-brand-900 mb-1">
+                                السجل الأساسي
+                              </h3>
+                              <p className="text-brand-600">
+                                مركز إدارة ومتابعة إصدار سجل تراث عائلتكم
+                              </p>
+                            </div>
 
-                       <div className="mt-8 border-t border-brand-200 pt-6">
-                         <h4 className="font-bold text-brand-900 mb-2">رقم الطلب:</h4>
-                         <p className="font-mono text-xl text-brand-600 bg-white inline-block px-4 py-2 border border-brand-200 rounded-lg">#{order.orderNumber || order.id.toUpperCase()}</p>
-                       </div>
-                     </div>
-                  )}
+                            <div className="p-8 space-y-6">
+                              <div className="flex flex-col md:flex-row gap-6">
+                                <div className="flex-1 bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <CheckCircle className="w-6 h-6 text-brand-400" />
+                                    <h4 className="font-bold text-brand-900 text-lg">
+                                      حالة السجل :
+                                    </h4>
+                                  </div>
+                                  <p className="text-xl font-bold text-brand-600 mt-2">
+                                    {statusText || "جاري التنفيذ"}
+                                  </p>
+                                </div>
+
+                                <div className="flex-[2] bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <Compass className="w-6 h-6 text-brand-400" />
+                                    <h4 className="font-bold text-brand-900 text-lg">
+                                      الإجراء :{" "}
+                                      <span className="font-normal text-brand-700">
+                                        {actionText}
+                                      </span>
+                                    </h4>
+                                  </div>
+                                  {subText && (
+                                    <p className="text-sm text-black leading-relaxed mt-3 pt-3 border-t border-brand-100/50 font-medium">
+                                      {subText}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              {actionButton}
+                            </div>
+                          </div>
+
+                          {(isState3 || isState4) && (
+                            <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
+                              <div className="text-center mb-8">
+                                <h3 className="text-2xl font-bold text-brand-900 mb-2">
+                                  المحتوى الإثرائي للسجل :{" "}
+                                  <span className="text-brand-500 font-normal">
+                                    "إدراج إختياري"
+                                  </span>
+                                </h3>
+                                <p className="text-black font-medium leading-relaxed max-w-2xl mx-auto">
+                                  يمكنكم إثراء سجل العائلة بإضافة الصور والوثائق
+                                  والروايات والنصوص التعريفية التي تساعد فريق
+                                  البحث والإخراج على بناء سجل أكثر عمقًا وتميزًا
+                                </p>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <button
+                                  onClick={() =>
+                                    setActiveTab("نبذة وكلمة عن العائلة")
+                                  }
+                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
+                                >
+                                  <Quote className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
+                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                    نبذة عن العائلة
+                                  </h4>
+                                  <p className="text-brand-600 font-bold mb-2">
+                                    اكتب قصة عائلتكم
+                                  </p>
+                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                    أضف نبذة تعريفية أو كلمة افتتاحية تُمهّد
+                                    لسجل العائلة وتعكس هويتها وامتدادها التاريخي
+                                  </p>
+                                </button>
+
+                                <button
+                                  onClick={() => setActiveTab("إدراج وثائق")}
+                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
+                                >
+                                  <FileText className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
+                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                    إدراج الوثائق
+                                  </h4>
+                                  <p className="text-brand-600 font-bold mb-2">
+                                    دعم الرواية بالمصادر
+                                  </p>
+                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                    أرفق الوثائق أو المشجرات أو الصور التاريخية
+                                    التي تساعد في توثيق السجل.
+                                  </p>
+                                </button>
+
+                                <button
+                                  onClick={() => setActiveTab("إدراج الصور")}
+                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
+                                >
+                                  <ImageIcon className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
+                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                    إدراج الصور
+                                  </h4>
+                                  <p className="text-brand-600 font-bold mb-2">
+                                    أرشيف الذاكرة البصرية
+                                  </p>
+                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                    أضف الصور التاريخية أو العائلية التي ترون
+                                    أهمية تضمينها داخل السجل.
+                                  </p>
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    setActiveTab("الإدراج العائلي")
+                                  }
+                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
+                                >
+                                  <Users className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
+                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                    نافذة الإدراج العائلي
+                                  </h4>
+                                  <p className="text-brand-600 font-bold mb-2">
+                                    مخطط شجرة العائلة
+                                  </p>
+                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                    أدرج افراد عائلتك ليظهر ارتباطهم بعمود النسب
+                                    في سجل تراث عائلتك.
+                                  </p>
+                                </button>
+
+                                <button
+                                  onClick={() => setActiveTab("بين يدي السجل")}
+                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group lg:col-start-2 lg:col-span-1"
+                                >
+                                  <Book className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
+                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                    بين يدي السجل
+                                  </h4>
+                                  <p className="text-brand-600 font-bold mb-2">
+                                    قدم سجلك
+                                  </p>
+                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                    نافذة تتيح لك كتابة تقديم لسجلك ، ضع بصمتك
+                                    الشخصية في مقدمة السجل .
+                                  </p>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                   {activeTab === "بيانات العميل / أمين السجل" && (
                     <div className="space-y-8">
                       <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-brand-900 text-lg p-6 bg-white border border-brand-100 rounded-2xl shadow-sm">
-                        <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-brand-400" /> البيانات الأساسية</div>
-                        <div><span className="block text-sm text-brand-500 mb-1">الاسم الأول:</span> <strong>{order.data.firstName}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">اسم الأب:</span> <strong>{order.data.fatherName}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">اسم الجد:</span> <strong>{order.data.grandfatherName}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">اللقب / العائلة:</span> <strong>{order.data.familyName}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">القبيلة / العائلة:</span> <strong>{order.data.tribeName || 'غير متوفر'}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">الدولة:</span> <strong>{order.data.country}</strong></div>
-                        <div><span className="block text-sm text-brand-500 mb-1">الموطن الأصلي:</span> <strong>{order.data.homeland}</strong></div>
+                        <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2">
+                          <Lock className="w-4 h-4 text-brand-400" /> البيانات
+                          الأساسية
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            الاسم الأول:
+                          </span>{" "}
+                          <strong>{order.data.firstName}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            اسم الأب:
+                          </span>{" "}
+                          <strong>{order.data.fatherName}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            اسم الجد:
+                          </span>{" "}
+                          <strong>{order.data.grandfatherName}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            اللقب / العائلة:
+                          </span>{" "}
+                          <strong>{order.data.familyName}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            القبيلة / العائلة:
+                          </span>{" "}
+                          <strong>{order.data.tribeName || "غير متوفر"}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            الدولة:
+                          </span>{" "}
+                          <strong>{order.data.country}</strong>
+                        </div>
+                        <div>
+                          <span className="block text-sm text-brand-500 mb-1">
+                            الموطن الأصلي:
+                          </span>{" "}
+                          <strong>{order.data.homeland}</strong>
+                        </div>
                       </div>
 
                       <div className="p-6 bg-brand-50 border border-brand-200 rounded-2xl shadow-sm">
-                        <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-4 mb-4 flex items-center gap-2 text-lg"><MapPin className="w-5 h-5 text-brand-600" /> بيانات التواصل والعنوان البريدي</h3>
-                        
+                        <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-4 mb-4 flex items-center gap-2 text-lg">
+                          <MapPin className="w-5 h-5 text-brand-600" /> بيانات
+                          التواصل والعنوان البريدي
+                        </h3>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-brand-700 mb-2">الهاتف النقال</label>
-                            <input 
-                              type="text" 
+                            <label className="block text-sm font-medium text-brand-700 mb-2">
+                              الهاتف النقال
+                            </label>
+                            <input
+                              type="text"
                               className="w-full p-3 rounded-xl border border-brand-200 focus:ring-brand-500 focus:border-brand-500"
                               placeholder="رقم الهاتف متضمناً رمز الدولة"
                               value={order.data.mobileNumber || ""}
-                              onChange={e => {
+                              onChange={(e) => {
                                 const val = e.target.value;
-                                useAppStore.setState(s => ({
-                                  orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, mobileNumber: val } } : o)
+                                useAppStore.setState((s) => ({
+                                  orders: s.orders.map((o) =>
+                                    o.id === order.id
+                                      ? {
+                                          ...o,
+                                          data: {
+                                            ...o.data,
+                                            mobileNumber: val,
+                                          },
+                                        }
+                                      : o,
+                                  ),
                                 }));
                               }}
-                              onBlur={e => updateSpecificData({ mobileNumber: e.target.value })}
+                              onBlur={(e) =>
+                                updateSpecificData({
+                                  mobileNumber: e.target.value,
+                                })
+                              }
                             />
                           </div>
-                          
+
                           <div className="col-span-2 mt-4">
-                            <label className="flex items-center text-brand-900 font-bold mb-4">العنوان البريدي (الذي ترغب شحن الباقة اليه): <InfoTooltip text="العنوان البريدي من اجل توصيل الباقة اليكم ." /></label>
+                            <label className="flex items-center text-brand-900 font-bold mb-4">
+                              العنوان البريدي (الذي ترغب شحن الباقة اليه):{" "}
+                              <InfoTooltip text="العنوان البريدي من اجل توصيل الباقة اليكم ." />
+                            </label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm text-brand-600 mb-1">الدولة</label>
-                                <input type="text" className="w-full p-3 rounded-xl border border-brand-200" 
-                                  value={order.data.shippingAddress?.country || ""} 
-                                  onChange={e => {
+                                <label className="block text-sm text-brand-600 mb-1">
+                                  الدولة
+                                </label>
+                                <input
+                                  type="text"
+                                  className="w-full p-3 rounded-xl border border-brand-200"
+                                  value={
+                                    order.data.shippingAddress?.country || ""
+                                  }
+                                  onChange={(e) => {
                                     const val = e.target.value;
-                                    useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, shippingAddress: { ...o.data.shippingAddress, country: val } as any } } : o) }));
+                                    useAppStore.setState((s) => ({
+                                      orders: s.orders.map((o) =>
+                                        o.id === order.id
+                                          ? {
+                                              ...o,
+                                              data: {
+                                                ...o.data,
+                                                shippingAddress: {
+                                                  ...o.data.shippingAddress,
+                                                  country: val,
+                                                } as any,
+                                              },
+                                            }
+                                          : o,
+                                      ),
+                                    }));
                                   }}
-                                  onBlur={e => updateSpecificData({ shippingAddress: { ...(order.data.shippingAddress as any), country: e.target.value } })}
+                                  onBlur={(e) =>
+                                    updateSpecificData({
+                                      shippingAddress: {
+                                        ...(order.data.shippingAddress as any),
+                                        country: e.target.value,
+                                      },
+                                    })
+                                  }
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm text-brand-600 mb-1">المقاطعة / المحافظة</label>
-                                <input type="text" className="w-full p-3 rounded-xl border border-brand-200" 
-                                  value={order.data.shippingAddress?.state || ""} 
-                                  onChange={e => {
+                                <label className="block text-sm text-brand-600 mb-1">
+                                  المقاطعة / المحافظة
+                                </label>
+                                <input
+                                  type="text"
+                                  className="w-full p-3 rounded-xl border border-brand-200"
+                                  value={
+                                    order.data.shippingAddress?.state || ""
+                                  }
+                                  onChange={(e) => {
                                     const val = e.target.value;
-                                    useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, shippingAddress: { ...o.data.shippingAddress, state: val } as any } } : o) }));
+                                    useAppStore.setState((s) => ({
+                                      orders: s.orders.map((o) =>
+                                        o.id === order.id
+                                          ? {
+                                              ...o,
+                                              data: {
+                                                ...o.data,
+                                                shippingAddress: {
+                                                  ...o.data.shippingAddress,
+                                                  state: val,
+                                                } as any,
+                                              },
+                                            }
+                                          : o,
+                                      ),
+                                    }));
                                   }}
-                                  onBlur={e => updateSpecificData({ shippingAddress: { ...(order.data.shippingAddress as any), state: e.target.value } })}
+                                  onBlur={(e) =>
+                                    updateSpecificData({
+                                      shippingAddress: {
+                                        ...(order.data.shippingAddress as any),
+                                        state: e.target.value,
+                                      },
+                                    })
+                                  }
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm text-brand-600 mb-1">العنوان بالتفصيل</label>
-                                <input type="text" className="w-full p-3 rounded-xl border border-brand-200" 
-                                  value={order.data.shippingAddress?.street || ""} 
-                                  onChange={e => {
+                                <label className="block text-sm text-brand-600 mb-1">
+                                  العنوان بالتفصيل
+                                </label>
+                                <input
+                                  type="text"
+                                  className="w-full p-3 rounded-xl border border-brand-200"
+                                  value={
+                                    order.data.shippingAddress?.street || ""
+                                  }
+                                  onChange={(e) => {
                                     const val = e.target.value;
-                                    useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, shippingAddress: { ...o.data.shippingAddress, street: val } as any } } : o) }));
+                                    useAppStore.setState((s) => ({
+                                      orders: s.orders.map((o) =>
+                                        o.id === order.id
+                                          ? {
+                                              ...o,
+                                              data: {
+                                                ...o.data,
+                                                shippingAddress: {
+                                                  ...o.data.shippingAddress,
+                                                  street: val,
+                                                } as any,
+                                              },
+                                            }
+                                          : o,
+                                      ),
+                                    }));
                                   }}
-                                  onBlur={e => updateSpecificData({ shippingAddress: { ...(order.data.shippingAddress as any), street: e.target.value } })}
+                                  onBlur={(e) =>
+                                    updateSpecificData({
+                                      shippingAddress: {
+                                        ...(order.data.shippingAddress as any),
+                                        street: e.target.value,
+                                      },
+                                    })
+                                  }
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm text-brand-600 mb-1">الرقم البريدي</label>
-                                <input type="text" className="w-full p-3 rounded-xl border border-brand-200" 
-                                  value={order.data.shippingAddress?.zip || ""} 
-                                  onChange={e => {
+                                <label className="block text-sm text-brand-600 mb-1">
+                                  الرقم البريدي
+                                </label>
+                                <input
+                                  type="text"
+                                  className="w-full p-3 rounded-xl border border-brand-200"
+                                  value={order.data.shippingAddress?.zip || ""}
+                                  onChange={(e) => {
                                     const val = e.target.value;
-                                    useAppStore.setState(s => ({ orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, shippingAddress: { ...o.data.shippingAddress, zip: val } as any } } : o) }));
+                                    useAppStore.setState((s) => ({
+                                      orders: s.orders.map((o) =>
+                                        o.id === order.id
+                                          ? {
+                                              ...o,
+                                              data: {
+                                                ...o.data,
+                                                shippingAddress: {
+                                                  ...o.data.shippingAddress,
+                                                  zip: val,
+                                                } as any,
+                                              },
+                                            }
+                                          : o,
+                                      ),
+                                    }));
                                   }}
-                                  onBlur={e => updateSpecificData({ shippingAddress: { ...(order.data.shippingAddress as any), zip: e.target.value } })}
+                                  onBlur={(e) =>
+                                    updateSpecificData({
+                                      shippingAddress: {
+                                        ...(order.data.shippingAddress as any),
+                                        zip: e.target.value,
+                                      },
+                                    })
+                                  }
                                 />
                               </div>
                             </div>
-                            <p className="text-xs text-brand-400 mt-3">يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.</p>
+                            <p className="text-xs text-brand-400 mt-3">
+                              يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -571,14 +1178,20 @@ export function Dashboard() {
 
                   {activeTab === "نقطة العرض الأساسية" && (
                     <div className="p-8 bg-brand-50 rounded-2xl border border-brand-200 text-center">
-                      <p className="text-brand-600 mb-4 font-light">بناءً على طلبكم، نقطة الانطلاق المعتمدة لبدء التوثيق لعمود النسب هي:</p>
+                      <p className="text-brand-600 mb-4 font-light">
+                        بناءً على طلبكم، نقطة الانطلاق المعتمدة لبدء التوثيق
+                        لعمود النسب هي:
+                      </p>
                       <div className="flex justify-center items-center gap-4 text-3xl font-serif text-brand-900 font-bold border-y-2 border-brand-200 py-6 max-w-lg mx-auto">
                         <UserPlus className="w-10 h-10 text-brand-600" />
                         <span>
-                          {order.data.startingPointType === "أنا أمين السجل" ? `أمين السجل: ${order.data.firstName || ''} ${order.data.familyName || ''}`.trim() :
-                           order.data.startingPointType === "اسم العائلة" ? `عائلة: ${order.data.familyName}` :
-                           order.data.startingPointType === "احد الأسلاف" ? `الجد: ${order.data.startingPointName}` :
-                           `أمين السجل: ${order.data.firstName || ''} ${order.data.familyName || ''}`.trim()}
+                          {order.data.startingPointType === "أنا أمين السجل"
+                            ? `أمين السجل: ${order.data.firstName || ""} ${order.data.familyName || ""}`.trim()
+                            : order.data.startingPointType === "اسم العائلة"
+                              ? `عائلة: ${order.data.familyName}`
+                              : order.data.startingPointType === "احد الأسلاف"
+                                ? `الجد: ${order.data.startingPointName}`
+                                : `أمين السجل: ${order.data.firstName || ""} ${order.data.familyName || ""}`.trim()}
                         </span>
                       </div>
                     </div>
@@ -586,59 +1199,103 @@ export function Dashboard() {
 
                   {activeTab === "قالب التصميم المختار" && (
                     <div className="p-8 bg-white border-2 border-brand-100 rounded-2xl text-center">
-                      <div className="text-4xl font-serif text-brand-900 mb-4">{order.data.designTemplate}</div>
-                      <p className="text-brand-600">سيتم تصميم نسخة أنيقة من سجلك بناءً على النموذج {order.data.designTemplate}.</p>
+                      <div className="text-4xl font-serif text-brand-900 mb-4">
+                        {order.data.designTemplate}
+                      </div>
+                      <p className="text-brand-600">
+                        سيتم تصميم نسخة أنيقة من سجلك بناءً على النموذج{" "}
+                        {order.data.designTemplate}.
+                      </p>
                     </div>
                   )}
 
                   {activeTab === "نبذة وكلمة عن العائلة" && (
                     <div className="space-y-6">
                       <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
-                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2"><BookOpen className="w-5 h-5 text-brand-600" />نبذة تاريخية عن العائلة</p>
-                        <p className="text-brand-600 mb-4 text-sm">اكتب كل ما تود إرفاقه فيما يتعلق بالنبذة التاريخية (يُدرج بسجلكم بخصوصية).</p>
-                        <textarea 
-                          className="w-full h-48 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900" 
+                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
+                          <BookOpen className="w-5 h-5 text-brand-600" />
+                          نبذة تاريخية عن العائلة
+                        </p>
+                        <p className="text-brand-600 mb-4 text-sm">
+                          اكتب كل ما تود إرفاقه فيما يتعلق بالنبذة التاريخية
+                          (يُدرج بسجلكم بخصوصية).
+                        </p>
+                        <textarea
+                          className="w-full h-48 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900"
                           value={order.data.historicalNotes || ""}
                           onChange={(e) => {
                             const val = e.target.value;
-                            useAppStore.setState(s => ({
-                              orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, historicalNotes: val } } : o)
+                            useAppStore.setState((s) => ({
+                              orders: s.orders.map((o) =>
+                                o.id === order.id
+                                  ? {
+                                      ...o,
+                                      data: { ...o.data, historicalNotes: val },
+                                    }
+                                  : o,
+                              ),
                             }));
                           }}
-                          onBlur={(e) => updateSpecificData({ historicalNotes: e.target.value })}
+                          onBlur={(e) =>
+                            updateSpecificData({
+                              historicalNotes: e.target.value,
+                            })
+                          }
                           placeholder="ابدا الكتابة هنا..."
                         />
                       </div>
 
                       <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
-                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2"><MessageSquare className="w-5 h-5 text-brand-600" />كلمة أمين السجل</p>
-                        <p className="text-brand-600 mb-4 text-sm">مساحة مخصصة لكتابة كلمتك كأمين سجل والتي سيتم اعتمادها وإدراجها.</p>
-                        <textarea 
-                          className="w-full h-32 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900" 
+                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
+                          <MessageSquare className="w-5 h-5 text-brand-600" />
+                          كلمة أمين السجل
+                        </p>
+                        <p className="text-brand-600 mb-4 text-sm">
+                          مساحة مخصصة لكتابة كلمتك كأمين سجل والتي سيتم اعتمادها
+                          وإدراجها.
+                        </p>
+                        <textarea
+                          className="w-full h-32 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900"
                           value={order.data.managerWord || ""}
                           onChange={(e) => {
                             const val = e.target.value;
-                            useAppStore.setState(s => ({
-                              orders: s.orders.map(o => o.id === order.id ? { ...o, data: { ...o.data, managerWord: val } } : o)
+                            useAppStore.setState((s) => ({
+                              orders: s.orders.map((o) =>
+                                o.id === order.id
+                                  ? {
+                                      ...o,
+                                      data: { ...o.data, managerWord: val },
+                                    }
+                                  : o,
+                              ),
                             }));
                           }}
-                          onBlur={(e) => updateSpecificData({ managerWord: e.target.value })}
+                          onBlur={(e) =>
+                            updateSpecificData({ managerWord: e.target.value })
+                          }
                           placeholder="ابدا الكتابة هنا..."
                         />
                       </div>
-                      
-                      <p className="text-xs text-brand-400 mt-2 text-center">يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.</p>
+
+                      <p className="text-xs text-brand-400 mt-2 text-center">
+                        يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
+                      </p>
                     </div>
                   )}
 
                   {activeTab === "نافذة الإدراج العائلي" && (
                     <div className="space-y-4">
-                      <p className="text-brand-600 mb-4">أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك المباشر في هذا المخطط).</p>
+                      <p className="text-brand-600 mb-4">
+                        أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك
+                        المباشر في هذا المخطط).
+                      </p>
                       <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
-                        <TreeBuilder 
-                          initialNodes={order.data.treeData?.nodes || []} 
-                          initialEdges={order.data.treeData?.edges || []} 
-                          onChange={(nodes, edges) => updateSpecificData({ treeData: { nodes, edges } })}
+                        <TreeBuilder
+                          initialNodes={order.data.treeData?.nodes || []}
+                          initialEdges={order.data.treeData?.edges || []}
+                          onChange={(nodes, edges) =>
+                            updateSpecificData({ treeData: { nodes, edges } })
+                          }
                           familyName={order.data.familyName}
                         />
                       </div>
@@ -648,63 +1305,191 @@ export function Dashboard() {
                   {activeTab === "إدراج وثائق" && (
                     <div className="space-y-6">
                       {pendingUpload?.arrayName === "documents" ? (
-                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
-                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2"><FileText className="w-5 h-5 text-brand-500"/> تفاصيل الوثيقة: <span className="text-brand-600 font-normal">{pendingUpload.file.name}</span></h4>
-                           <div className="space-y-4">
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">عنوان الوثيقة (إختياري)</label>
-                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.title} onChange={e => setMediaMeta({...mediaMeta, title: e.target.value})} placeholder="مثال: وثيقة زواج جدي" />
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">النوع (إختياري)</label>
-                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.kind} onChange={e => setMediaMeta({...mediaMeta, kind: e.target.value})} placeholder="صك محكمة، شهادة ميلاد..." />
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">الوصف (إختياري)</label>
-                               <textarea className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" rows={3} value={mediaMeta.description} onChange={e => setMediaMeta({...mediaMeta, description: e.target.value})} placeholder="أي تفاصيل تود توضيحها حول هذه الوثيقة..."></textarea>
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">الغرض من الإدراج</label>
-                               <select className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white" value={mediaMeta.purpose} onChange={e => setMediaMeta({...mediaMeta, purpose: e.target.value})}>
-                                 <option value="إضافة لسجل تراث العائلة">إضافة لسجل تراث العائلة الرئيسي</option>
-                                 <option value="مشاركة للغرض البحثي فقط">مشاركة مع فريق البحث للغرض البحثي فقط</option>
-                                 <option value="غلاف للسجل">استخدام كغلاف لسجل تراث العائلة</option>
-                               </select>
-                             </div>
-                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
-                               <button disabled={isUploading} onClick={confirmUpload} className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2">
-                                 {isUploading ? <><UploadCloud className="w-5 h-5 animate-pulse" /> جاري الرفع...</> : 'حفظ ورفع الوثيقة'}
-                               </button>
-                               <button disabled={isUploading} onClick={() => setPendingUpload(null)} className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition">إلغاء</button>
-                             </div>
-                           </div>
-                         </div>
+                        <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
+                          <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-brand-500" />{" "}
+                            تفاصيل الوثيقة:{" "}
+                            <span className="text-brand-600 font-normal">
+                              {pendingUpload.file.name}
+                            </span>
+                          </h4>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                عنوان الوثيقة (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.title}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    title: e.target.value,
+                                  })
+                                }
+                                placeholder="مثال: وثيقة زواج جدي"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                النوع (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.kind}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    kind: e.target.value,
+                                  })
+                                }
+                                placeholder="صك محكمة، شهادة ميلاد..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                الوصف (إختياري)
+                              </label>
+                              <textarea
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                rows={3}
+                                value={mediaMeta.description}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    description: e.target.value,
+                                  })
+                                }
+                                placeholder="أي تفاصيل تود توضيحها حول هذه الوثيقة..."
+                              ></textarea>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                الغرض من الإدراج
+                              </label>
+                              <select
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white"
+                                value={mediaMeta.purpose}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    purpose: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="إضافة لسجل تراث العائلة">
+                                  إضافة لسجل تراث العائلة الرئيسي
+                                </option>
+                                <option value="مشاركة للغرض البحثي فقط">
+                                  مشاركة مع فريق البحث للغرض البحثي فقط
+                                </option>
+                                <option value="غلاف للسجل">
+                                  استخدام كغلاف لسجل تراث العائلة
+                                </option>
+                              </select>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
+                              <button
+                                disabled={isUploading}
+                                onClick={confirmUpload}
+                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <UploadCloud className="w-5 h-5 animate-pulse" />{" "}
+                                    جاري الرفع...
+                                  </>
+                                ) : (
+                                  "حفظ ورفع الوثيقة"
+                                )}
+                              </button>
+                              <button
+                                disabled={isUploading}
+                                onClick={() => setPendingUpload(null)}
+                                className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition"
+                              >
+                                إلغاء
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       ) : (
-                        <div onClick={() => !isUploading && fileInputRef.current?.click()} className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-50 cursor-pointer'}`}>
-                           <input type="file" className="hidden" ref={fileInputRef} onChange={(e) => { if(e.target.files && e.target.files[0]) { uploadFileAndUpdate(e.target.files[0], "documents"); e.target.value = ''; } }} accept=".pdf,.doc,.docx" disabled={isUploading} />
-                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
-                           <p className="text-brand-800 font-bold mb-2">انقر هنا لرفع وثيقة تاريخية جديدة</p>
-                           <p className="text-sm text-brand-600">(الرفع لمرفق واحد في كل مرة)</p>
+                        <div
+                          onClick={() =>
+                            !isUploading && fileInputRef.current?.click()
+                          }
+                          className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-50 cursor-pointer"}`}
+                        >
+                          <input
+                            type="file"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                uploadFileAndUpdate(
+                                  e.target.files[0],
+                                  "documents",
+                                );
+                                e.target.value = "";
+                              }
+                            }}
+                            accept=".pdf,.doc,.docx"
+                            disabled={isUploading}
+                          />
+                          <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
+                          <p className="text-brand-800 font-bold mb-2">
+                            انقر هنا لرفع وثيقة تاريخية جديدة
+                          </p>
+                          <p className="text-sm text-brand-600">
+                            (الرفع لمرفق واحد في كل مرة)
+                          </p>
                         </div>
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {order.data.documents?.map((docItem, i) => {
-                           const isStr = typeof docItem === 'string';
-                           const url = isStr ? docItem : docItem.url;
-                           const title = isStr ? url.split('%2F').pop()?.split('?')[0] || 'وثيقة' : (docItem.title || url.split('%2F').pop()?.split('?')[0] || 'وثيقة');
-                           return (
-                             <a key={i} href={url} target="_blank" rel="noreferrer" className="flex flex-col gap-2 p-4 bg-white rounded-xl border border-brand-200 hover:border-brand-400 hover:shadow-md transition group relative overflow-hidden">
-                               <div className="absolute top-0 right-0 w-1 h-full bg-brand-400 group-hover:bg-brand-500 transition-colors"></div>
-                               <div className="flex items-start gap-3">
-                                 <FileText className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
-                                 <div>
-                                   <h4 className="font-bold text-brand-900 line-clamp-1" dir="auto">{title}</h4>
-                                   {!isStr && <p className="text-xs text-brand-600 mt-1 font-mono">{docItem.purpose} {docItem.kind ? ` • ${docItem.kind}` : ''}</p>}
-                                 </div>
-                               </div>
-                               {!isStr && docItem.description && <p className="text-xs text-brand-500 mt-2 line-clamp-2 pr-8">{docItem.description}</p>}
-                             </a>
-                           );
+                          if (!docItem) return null;
+                          const isStr = typeof docItem === "string";
+                          const url = isStr ? docItem : docItem.url;
+                          const title = isStr
+                            ? url.split("%2F").pop()?.split("?")[0] || "وثيقة"
+                            : docItem.title ||
+                              url.split("%2F").pop()?.split("?")[0] ||
+                              "وثيقة";
+                          return (
+                            <a
+                              key={i}
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex flex-col gap-2 p-4 bg-white rounded-xl border border-brand-200 hover:border-brand-400 hover:shadow-md transition group relative overflow-hidden"
+                            >
+                              <div className="absolute top-0 right-0 w-1 h-full bg-brand-400 group-hover:bg-brand-500 transition-colors"></div>
+                              <div className="flex items-start gap-3">
+                                <FileText className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
+                                <div>
+                                  <h4
+                                    className="font-bold text-brand-900 line-clamp-1"
+                                    dir="auto"
+                                  >
+                                    {title}
+                                  </h4>
+                                  {!isStr && (
+                                    <p className="text-xs text-brand-600 mt-1 font-mono">
+                                      {docItem.purpose}{" "}
+                                      {docItem.kind ? ` • ${docItem.kind}` : ""}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              {!isStr && docItem.description && (
+                                <p className="text-xs text-brand-500 mt-2 line-clamp-2 pr-8">
+                                  {docItem.description}
+                                </p>
+                              )}
+                            </a>
+                          );
                         })}
                       </div>
                     </div>
@@ -713,62 +1498,187 @@ export function Dashboard() {
                   {activeTab === "إدراج صور" && (
                     <div className="space-y-6">
                       {pendingUpload?.arrayName === "photos" ? (
-                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
-                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-brand-500"/> تفاصيل الصورة: <span className="text-brand-600 font-normal">{pendingUpload.file.name}</span></h4>
-                           <div className="space-y-4">
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">عنوان الصورة (إختياري)</label>
-                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.title} onChange={e => setMediaMeta({...mediaMeta, title: e.target.value})} placeholder="مثال: صورة للعائلة في قرية..." />
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">النوع (إختياري)</label>
-                               <input type="text" className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" value={mediaMeta.kind} onChange={e => setMediaMeta({...mediaMeta, kind: e.target.value})} placeholder="صورة شخصية، صورة جماعية، معلم أثري..." />
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">الوصف (إختياري)</label>
-                               <textarea className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none" rows={3} value={mediaMeta.description} onChange={e => setMediaMeta({...mediaMeta, description: e.target.value})} placeholder="أي تفاصيل تود توضيحها حول هذه الصورة..."></textarea>
-                             </div>
-                             <div>
-                               <label className="block text-sm font-semibold text-brand-700 mb-1">الغرض من الإدراج</label>
-                               <select className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white" value={mediaMeta.purpose} onChange={e => setMediaMeta({...mediaMeta, purpose: e.target.value})}>
-                                 <option value="إضافة لسجل تراث العائلة">إضافة لسجل تراث العائلة الرئيسي</option>
-                                 <option value="مشاركة للغرض البحثي فقط">مشاركة مع فريق البحث للغرض البحثي فقط</option>
-                                 <option value="غلاف للسجل">استخدام الصورة كغلاف لسجل تراث العائلة</option>
-                               </select>
-                             </div>
-                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
-                               <button disabled={isUploading} onClick={confirmUpload} className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2">
-                                 {isUploading ? <><UploadCloud className="w-5 h-5 animate-pulse" /> جاري الرفع...</> : 'حفظ ورفع الصورة'}
-                               </button>
-                               <button disabled={isUploading} onClick={() => setPendingUpload(null)} className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition">إلغاء</button>
-                             </div>
-                           </div>
-                         </div>
+                        <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
+                          <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2">
+                            <ImageIcon className="w-5 h-5 text-brand-500" />{" "}
+                            تفاصيل الصورة:{" "}
+                            <span className="text-brand-600 font-normal">
+                              {pendingUpload.file.name}
+                            </span>
+                          </h4>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                عنوان الصورة (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.title}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    title: e.target.value,
+                                  })
+                                }
+                                placeholder="مثال: صورة للعائلة في قرية..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                النوع (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.kind}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    kind: e.target.value,
+                                  })
+                                }
+                                placeholder="صورة شخصية، صورة جماعية، معلم أثري..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                الوصف (إختياري)
+                              </label>
+                              <textarea
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                rows={3}
+                                value={mediaMeta.description}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    description: e.target.value,
+                                  })
+                                }
+                                placeholder="أي تفاصيل تود توضيحها حول هذه الصورة..."
+                              ></textarea>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                الغرض من الإدراج
+                              </label>
+                              <select
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white"
+                                value={mediaMeta.purpose}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    purpose: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="إضافة لسجل تراث العائلة">
+                                  إضافة لسجل تراث العائلة الرئيسي
+                                </option>
+                                <option value="مشاركة للغرض البحثي فقط">
+                                  مشاركة مع فريق البحث للغرض البحثي فقط
+                                </option>
+                                <option value="غلاف للسجل">
+                                  استخدام الصورة كغلاف لسجل تراث العائلة
+                                </option>
+                              </select>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
+                              <button
+                                disabled={isUploading}
+                                onClick={confirmUpload}
+                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <UploadCloud className="w-5 h-5 animate-pulse" />{" "}
+                                    جاري الرفع...
+                                  </>
+                                ) : (
+                                  "حفظ ورفع الصورة"
+                                )}
+                              </button>
+                              <button
+                                disabled={isUploading}
+                                onClick={() => setPendingUpload(null)}
+                                className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition"
+                              >
+                                إلغاء
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       ) : (
-                        <div onClick={() => !isUploading && photosInputRef.current?.click()} className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-50 cursor-pointer'}`}>
-                           <input type="file" className="hidden" ref={photosInputRef} onChange={(e) => { if(e.target.files && e.target.files[0]) { uploadFileAndUpdate(e.target.files[0], "photos"); e.target.value = ''; } }} accept="image/jpeg,image/png,image/jpg" disabled={isUploading} />
-                           <ImageIcon className="w-12 h-12 text-brand-400 mx-auto mb-4" />
-                           <p className="text-brand-800 font-bold mb-2">انقر هنا لرفع صورة عائلية موثقة</p>
-                           <p className="text-sm text-brand-600">(الرفع لمرفق واحد في كل مرة)</p>
+                        <div
+                          onClick={() =>
+                            !isUploading && photosInputRef.current?.click()
+                          }
+                          className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-50 cursor-pointer"}`}
+                        >
+                          <input
+                            type="file"
+                            className="hidden"
+                            ref={photosInputRef}
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                uploadFileAndUpdate(
+                                  e.target.files[0],
+                                  "photos",
+                                );
+                                e.target.value = "";
+                              }
+                            }}
+                            accept="image/jpeg,image/png,image/jpg"
+                            disabled={isUploading}
+                          />
+                          <ImageIcon className="w-12 h-12 text-brand-400 mx-auto mb-4" />
+                          <p className="text-brand-800 font-bold mb-2">
+                            انقر هنا لرفع صورة عائلية موثقة
+                          </p>
+                          <p className="text-sm text-brand-600">
+                            (الرفع لمرفق واحد في كل مرة)
+                          </p>
                         </div>
                       )}
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {order.data.photos?.map((photoItem, i) => {
-                           const isStr = typeof photoItem === 'string';
-                           const url = isStr ? photoItem : photoItem.url;
-                           const title = !isStr && photoItem.title ? photoItem.title : '';
-                           return (
-                             <a key={i} href={url} target="_blank" rel="noreferrer" className="aspect-[4/5] bg-white rounded-xl overflow-hidden border border-brand-200 hover:border-brand-400 hover:shadow-md transition block relative group">
-                               <img src={url} alt={`Photo ${i}`} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<div class="flex items-center justify-center h-full text-xs text-brand-400 p-2 text-center">لا يمكن عرض الصورة هنا، انقر للعرض</div>'; }} />
-                               {!isStr && (photoItem.title || photoItem.purpose) && (
-                                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform">
-                                   <p className="text-xs font-bold line-clamp-1">{photoItem.title || "صورة عائلية"}</p>
-                                   <p className="text-[10px] opacity-80 mt-0.5 line-clamp-1">{photoItem.purpose}</p>
-                                 </div>
-                               )}
-                             </a>
-                           );
+                          if (!photoItem) return null;
+                          const isStr = typeof photoItem === "string";
+                          const url = isStr ? photoItem : photoItem.url;
+                          const title =
+                            !isStr && photoItem.title ? photoItem.title : "";
+                          return (
+                            <a
+                              key={i}
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="aspect-[4/5] bg-white rounded-xl overflow-hidden border border-brand-200 hover:border-brand-400 hover:shadow-md transition block relative group"
+                            >
+                              <img
+                                src={url}
+                                alt={`Photo ${i}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  e.currentTarget.parentElement!.innerHTML =
+                                    '<div class="flex items-center justify-center h-full text-xs text-brand-400 p-2 text-center">لا يمكن عرض الصورة هنا، انقر للعرض</div>';
+                                }}
+                              />
+                              {!isStr &&
+                                (photoItem.title || photoItem.purpose) && (
+                                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform">
+                                    <p className="text-xs font-bold line-clamp-1">
+                                      {photoItem.title || "صورة عائلية"}
+                                    </p>
+                                    <p className="text-[10px] opacity-80 mt-0.5 line-clamp-1">
+                                      {photoItem.purpose}
+                                    </p>
+                                  </div>
+                                )}
+                            </a>
+                          );
                         })}
                       </div>
                     </div>
@@ -777,61 +1687,141 @@ export function Dashboard() {
                   {activeTab === "استيضاحات فريق البحث" && (
                     <div className="bg-white border rounded-2xl flex flex-col h-[600px] border-brand-200 overflow-hidden relative">
                       <div className="bg-brand-50 border-b border-brand-200 p-4">
-                        <h4 className="font-bold text-brand-900">تواصل آمن ومباشر</h4>
+                        <h4 className="font-bold text-brand-900">
+                          تواصل آمن ومباشر
+                        </h4>
                       </div>
                       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
-                        {(!order.messages || order.messages.length === 0) ? (
-                          <div className="text-center py-20 text-brand-400"><MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />لا توجد رسائل بعد.</div>
+                        {!order.messages || order.messages.length === 0 ? (
+                          <div className="text-center py-20 text-brand-400">
+                            <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            لا توجد رسائل بعد.
+                          </div>
                         ) : (
-                          order.messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.senderRole === "user" ? "justify-end" : "justify-start"}`}>
-                               <div className={`max-w-[75%] rounded-2xl p-4 ${msg.senderRole === "user" ? "bg-brand-600 text-white rounded-tl-sm" : "bg-brand-100 text-brand-900 rounded-tr-sm"}`}>
-                                 <p className="whitespace-pre-wrap">{msg.text}</p>
-                                 {msg.attachments && msg.attachments.length > 0 && (
+                          order.messages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className={`flex ${msg.senderRole === "user" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[75%] rounded-2xl p-4 ${msg.senderRole === "user" ? "bg-brand-600 text-white rounded-tl-sm" : "bg-brand-100 text-brand-900 rounded-tr-sm"}`}
+                              >
+                                <p className="whitespace-pre-wrap">
+                                  {msg.text}
+                                </p>
+                                {msg.attachments &&
+                                  msg.attachments.length > 0 && (
                                     <div className="mt-3 flex flex-wrap gap-2">
                                       {msg.attachments.map((att, i) => (
-                                        <a key={i} href={att} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] bg-white text-brand-900 px-2 py-1 rounded">مرفق <Paperclip className="w-3 h-3" /></a>
+                                        <a
+                                          key={i}
+                                          href={att}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1 text-[10px] bg-white text-brand-900 px-2 py-1 rounded"
+                                        >
+                                          مرفق <Paperclip className="w-3 h-3" />
+                                        </a>
                                       ))}
                                     </div>
-                                 )}
-                                 <div className={`text-xs mt-2 opacity-75`}>{new Date(msg.createdAt).toLocaleString("ar-SA")}</div>
-                               </div>
+                                  )}
+                                <div className={`text-xs mt-2 opacity-75`}>
+                                  {new Date(msg.createdAt).toLocaleString(
+                                    "ar-SA",
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           ))
                         )}
                       </div>
-                      
+
                       {replyAttachments.length > 0 && (
                         <div className="absolute bottom-[72px] left-4 right-4 bg-gray-100 p-2 rounded-lg flex gap-2 overflow-x-auto border border-gray-200">
-                           {replyAttachments.map((url, i) => (
-                             <div key={i} className="bg-white px-2 py-1 text-xs rounded border flex items-center gap-2">
-                               مرفق أدخلته
-                               <button onClick={() => setReplyAttachments(replyAttachments.filter(a => a !== url))} className="text-red-500 font-bold hover:text-red-700">X</button>
-                             </div>
-                           ))}
+                          {replyAttachments.map((url, i) => (
+                            <div
+                              key={i}
+                              className="bg-white px-2 py-1 text-xs rounded border flex items-center gap-2"
+                            >
+                              مرفق أدخلته
+                              <button
+                                onClick={() =>
+                                  setReplyAttachments(
+                                    replyAttachments.filter((a) => a !== url),
+                                  )
+                                }
+                                className="text-red-500 font-bold hover:text-red-700"
+                              >
+                                X
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
-                      
-                      {(order.status === "طلب إيضاح" || order.actionPhase === "طلب إيضاح") ? (
+
+                      {order.status === "طلب إيضاح" ||
+                      order.actionPhase === "طلب إيضاح" ? (
                         <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0">
-                          <input type="file" className="hidden" ref={chatFileInputRef} onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              const file = e.target.files[0];
-                              const storageRef = ref(storage, `chat/${Date.now()}_${file.name}`);
-                              const uploadTask = uploadBytesResumable(storageRef, file);
-                              uploadTask.on('state_changed', null, null, async () => {
-                                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                                setReplyAttachments([...replyAttachments, downloadURL]);
-                              });
+                          <input
+                            type="file"
+                            className="hidden"
+                            ref={chatFileInputRef}
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+                                const storageRef = ref(
+                                  storage,
+                                  `chat/${Date.now()}_${file.name}`,
+                                );
+                                const uploadTask = uploadBytesResumable(
+                                  storageRef,
+                                  file,
+                                );
+                                uploadTask.on(
+                                  "state_changed",
+                                  null,
+                                  null,
+                                  async () => {
+                                    const downloadURL = await getDownloadURL(
+                                      uploadTask.snapshot.ref,
+                                    );
+                                    setReplyAttachments([
+                                      ...replyAttachments,
+                                      downloadURL,
+                                    ]);
+                                  },
+                                );
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => chatFileInputRef.current?.click()}
+                            className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200"
+                            title="إرفاق ملف"
+                          >
+                            <Paperclip className="w-5 h-5" />
+                          </button>
+                          <input
+                            type="text"
+                            className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4"
+                            placeholder="إكتب ردك على طلب الإيضاح هنا..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleSendReply()
                             }
-                          }} />
-                          <button onClick={() => chatFileInputRef.current?.click()} className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200" title="إرفاق ملف"><Paperclip className="w-5 h-5"/></button>
-                          <input type="text" className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4" placeholder="إكتب ردك على طلب الإيضاح هنا..." value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSendReply()} />
-                          <button onClick={handleSendReply} className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold">إرسال الرد</button>
+                          />
+                          <button
+                            onClick={handleSendReply}
+                            className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold"
+                          >
+                            إرسال الرد
+                          </button>
                         </div>
                       ) : (
                         <div className="p-4 bg-brand-50 border-t border-brand-200 text-center text-sm font-bold text-brand-600 absolute bottom-0 left-0 right-0 h-[72px] flex items-center justify-center">
-                          لا يمكنك إرسال رسائل حالياً. المراسلة متاحة فقط للرد على استفسارات فريق البحث.
+                          لا يمكنك إرسال رسائل حالياً. المراسلة متاحة فقط للرد
+                          على استفسارات فريق البحث.
                         </div>
                       )}
                     </div>
@@ -843,53 +1833,104 @@ export function Dashboard() {
                       {!order.digitalCopyLink ? (
                         <>
                           <Sparkles className="w-16 h-16 text-brand-400 mx-auto mb-6 animate-pulse" />
-                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">قريباً سيكون سجل تراث عائلتك بين يديك!</h3>
-                          <p className="text-brand-700 max-w-md mx-auto text-lg">سيظهر لك هنا رابط تحميل <strong className="text-brand-900">سجل تراث عائلتك الرقمي</strong> فور اعتماده وإصداره.</p>
+                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">
+                            قريباً سيكون سجل تراث عائلتك بين يديك!
+                          </h3>
+                          <p className="text-brand-700 max-w-md mx-auto text-lg">
+                            سيظهر لك هنا رابط تحميل{" "}
+                            <strong className="text-brand-900">
+                              سجل تراث عائلتك الرقمي
+                            </strong>{" "}
+                            فور اعتماده وإصداره.
+                          </p>
                         </>
                       ) : (
                         <div className="animate-in fade-in zoom-in duration-500">
                           <BookOpen className="w-20 h-20 text-brand-600 mx-auto mb-6" />
-                          <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">سجل تراث عائلتك جاهز للتصفح</h3>
-                          <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">لقد انتهينا من إعداد نسختك الرقمية بأعلى معايير الجودة والإخراج.</p>
+                          <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">
+                            سجل تراث عائلتك جاهز للتصفح
+                          </h3>
+                          <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">
+                            لقد انتهينا من إعداد نسختك الرقمية بأعلى معايير
+                            الجودة والإخراج.
+                          </p>
                           <div className="flex flex-col items-center justify-center gap-6">
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                              <a href={order.digitalCopyLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
-                                <Download className="w-6 h-6" /> تحميل النسخة الرقمية
+                              <a
+                                href={order.digitalCopyLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+                              >
+                                <Download className="w-6 h-6" /> تحميل النسخة
+                                الرقمية
                               </a>
                             </div>
                             <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
                               <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.</p>
+                              <p className="leading-relaxed">
+                                يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
+                                إليك! <br />
+                                <span className="font-bold underline decoration-green-300 decoration-2">
+                                  تتضمن الشحنة:
+                                </span>{" "}
+                                10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
+                              </p>
                             </div>
                           </div>
                         </div>
                       )}
                     </div>
                   )}
-                  
+
                   {activeTab === "بوستر عمود النسب" && (
                     <div className="text-center py-24 bg-gradient-to-br from-brand-50 to-white rounded-3xl border border-brand-200 shadow-sm relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-300 via-brand-500 to-brand-300"></div>
                       {!order.posterLink ? (
                         <>
                           <Star className="w-16 h-16 text-brand-400 mx-auto mb-6 animate-pulse" />
-                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">لوحة فنية توثق جذور عائلتك!</h3>
-                          <p className="text-brand-700 max-w-md mx-auto text-lg">سيظهر لك هنا رابط تحميل <strong className="text-brand-900">بوستر مشجر عمود نسبكم</strong> بصيغة رقمية أصلية عند الإصدار.</p>
+                          <h3 className="text-2xl font-bold text-brand-900 mb-3 tracking-tight">
+                            لوحة فنية توثق جذور عائلتك!
+                          </h3>
+                          <p className="text-brand-700 max-w-md mx-auto text-lg">
+                            سيظهر لك هنا رابط تحميل{" "}
+                            <strong className="text-brand-900">
+                              بوستر مشجر عمود نسبكم
+                            </strong>{" "}
+                            بصيغة رقمية أصلية عند الإصدار.
+                          </p>
                         </>
                       ) : (
                         <div className="animate-in fade-in zoom-in duration-500">
                           <Compass className="w-20 h-20 text-brand-600 mx-auto mb-6" />
-                          <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">بوستر مشجرة العائلة جاهز!</h3>
-                          <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">تحفة فنية فريدة صُممت لتوثيق عمود نسبكم عبر الأجيال.</p>
+                          <h3 className="text-3xl font-bold text-brand-900 mb-4 tracking-tight">
+                            بوستر مشجرة العائلة جاهز!
+                          </h3>
+                          <p className="text-brand-700 max-w-md mx-auto text-lg mb-10">
+                            تحفة فنية فريدة صُممت لتوثيق عمود نسبكم عبر الأجيال.
+                          </p>
                           <div className="flex flex-col items-center justify-center gap-6">
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                              <a href={order.posterLink} target="_blank" rel="noopener noreferrer" className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto">
-                                <Download className="w-6 h-6" /> تحميل البوستر عالي الدقة
+                              <a
+                                href={order.posterLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+                              >
+                                <Download className="w-6 h-6" /> تحميل البوستر
+                                عالي الدقة
                               </a>
                             </div>
                             <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
                               <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها إليك! <br/><span className="font-bold underline decoration-green-300 decoration-2">تتضمن الشحنة:</span> 10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.</p>
+                              <p className="leading-relaxed">
+                                يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
+                                إليك! <br />
+                                <span className="font-bold underline decoration-green-300 decoration-2">
+                                  تتضمن الشحنة:
+                                </span>{" "}
+                                10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -899,15 +1940,25 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {(order?.status !== "مكتمل" && order?.status !== "طلب مكتمل") ? (
+                      {order?.status !== "مكتمل" &&
+                      order?.status !== "طلب مكتمل" ? (
                         <div className="text-center py-10 px-4">
-                           <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
-                           <h3 className="text-xl font-bold text-brand-900 mb-2">سيظهر لك هنا نموذج التصويبات</h3>
-                           <p className="text-brand-600 font-light max-w-sm mx-auto">لتتمكن من التبليغ عن الأخطاء ليتم بناءاً عليها من إصلاح وتحديث الاخطاء عند وجودها، وذلك بعد إصدار السجل.</p>
+                          <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
+                          <h3 className="text-xl font-bold text-brand-900 mb-2">
+                            سيظهر لك هنا نموذج التصويبات
+                          </h3>
+                          <p className="text-brand-600 font-light max-w-sm mx-auto">
+                            لتتمكن من التبليغ عن الأخطاء ليتم بناءاً عليها من
+                            إصلاح وتحديث الاخطاء عند وجودها، وذلك بعد إصدار
+                            السجل.
+                          </p>
                         </div>
                       ) : (
                         <div className="px-6 md:px-12 py-8">
-                          {order?.messages && order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).length > 0 ? (
+                          {order?.messages &&
+                          order.messages.filter((m) =>
+                            m.text.includes("طلب تصويب - القسم"),
+                          ).length > 0 ? (
                             <div className="space-y-8">
                               {/* Previous Corrections List */}
                               <div className="bg-white rounded-2xl p-6 md:p-8 border border-brand-200 shadow-sm">
@@ -916,41 +1967,71 @@ export function Dashboard() {
                                   طلبات التصويب السابقة
                                 </h3>
                                 <div className="space-y-4">
-                                  {order.messages.filter(m => m.text.includes('طلب تصويب - القسم')).map(msg => (
-                                    <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
-                                      <div className="flex justify-between items-start mb-2">
-                                        <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
-                                          تم الإرسال
-                                        </span>
-                                        <span className="text-xs text-brand-500 font-mono" dir="ltr">{new Date(msg.createdAt).toLocaleString('ar-SA')}</span>
+                                  {order.messages
+                                    .filter((m) =>
+                                      m.text.includes("طلب تصويب - القسم"),
+                                    )
+                                    .map((msg) => (
+                                      <div
+                                        key={msg.id}
+                                        className="bg-brand-50 p-5 rounded-xl border border-brand-100"
+                                      >
+                                        <div className="flex justify-between items-start mb-2">
+                                          <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
+                                            تم الإرسال
+                                          </span>
+                                          <span
+                                            className="text-xs text-brand-500 font-mono"
+                                            dir="ltr"
+                                          >
+                                            {new Date(
+                                              msg.createdAt,
+                                            ).toLocaleString("ar-SA")}
+                                          </span>
+                                        </div>
+                                        <p className="text-brand-800 whitespace-pre-line text-sm mt-3">
+                                          {msg.text}
+                                        </p>
                                       </div>
-                                      <p className="text-brand-800 whitespace-pre-line text-sm mt-3">{msg.text}</p>
-                                    </div>
-                                  ))}
+                                    ))}
                                 </div>
                               </div>
-                              
+
                               {/* Marketing Message */}
                               <div className="bg-brand-50 p-8 rounded-2xl border flex flex-col items-center justify-center text-center border-brand-200 shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                                 <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
 
                                 <Sparkles className="w-16 h-16 text-brand-500 mb-6" />
-                                <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">جاري دراسة طلبكم بكل اهتمام</h3>
+                                <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">
+                                  جاري دراسة طلبكم بكل اهتمام
+                                </h3>
                                 <p className="text-brand-700 text-lg mb-8 max-w-2xl leading-relaxed">
-                                  يقوم فريق البحث حالياً بدراسة طلب التصويب بدقة. سيتم تحديث السجل الخاص بكم فور التأكد من مدى صحة ومطابقة التصويب مع المصادر المعتمدة.
+                                  يقوم فريق البحث حالياً بدراسة طلب التصويب
+                                  بدقة. سيتم تحديث السجل الخاص بكم فور التأكد من
+                                  مدى صحة ومطابقة التصويب مع المصادر المعتمدة.
                                 </p>
-                                
+
                                 <div className="bg-white p-8 rounded-2xl border border-brand-100 shadow-sm w-full relative z-10">
                                   <h4 className="text-xl font-bold text-brand-900 mb-3 font-serif flex items-center justify-center gap-2 text-center">
                                     <Star className="w-6 h-6 text-brand-500 fill-brand-500" />
                                     ارتقِ بتجربتك مع الإصدار الثاني!
                                   </h4>
                                   <p className="text-brand-600 mb-6 leading-relaxed">
-                                    يمكنك طلب الإصدار الثاني بمزايا حصرية وتفاصيل أعمق عن تاريخ عائلتك. قم بدعوة أصدقائك للحصول على "سجل تراث العائلة" واستمتع بتخفيض خاص عند طلبك للإصدار الثاني أو عند استكشافك لخدمة البحث المتقدم "فتح الأبواب المغلقة".
+                                    يمكنك طلب الإصدار الثاني بمزايا حصرية
+                                    وتفاصيل أعمق عن تاريخ عائلتك. قم بدعوة
+                                    أصدقائك للحصول على "سجل تراث العائلة"
+                                    واستمتع بتخفيض خاص عند طلبك للإصدار الثاني
+                                    أو عند استكشافك لخدمة البحث المتقدم "فتح
+                                    الأبواب المغلقة".
                                   </p>
                                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <button onClick={() => setActiveTab("فتح الأبواب المغلقة")} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition">
+                                    <button
+                                      onClick={() =>
+                                        setActiveTab("فتح الأبواب المغلقة")
+                                      }
+                                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition"
+                                    >
                                       خدمة فتح الأبواب المغلقة
                                       <ChevronRight className="w-4 h-4" />
                                     </button>
@@ -961,16 +2042,33 @@ export function Dashboard() {
                           ) : (
                             <>
                               <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
-                                <FileText className="w-8 h-8 text-brand-600" /> نموذج طلب تصويب
+                                <FileText className="w-8 h-8 text-brand-600" />{" "}
+                                نموذج طلب تصويب
                               </h3>
                               <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100 mb-8">
-                                <p className="text-brand-800 font-medium mb-4">نأمل منكم في حالة وجود أي ملاحظات أو أخطاء مطبعية أو علمية تعبئة النموذج أدناه بدقة ليتسنى لفريق البحث إدراجها وتحديث السجل.</p>
-                                
+                                <p className="text-brand-800 font-medium mb-4">
+                                  نأمل منكم في حالة وجود أي ملاحظات أو أخطاء
+                                  مطبعية أو علمية تعبئة النموذج أدناه بدقة
+                                  ليتسنى لفريق البحث إدراجها وتحديث السجل.
+                                </p>
+
                                 <div className="space-y-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                      <label className="block text-sm font-bold text-brand-700 mb-1">أي قسم في سجل تراث العائلة يحتاج لهذا التصويب؟</label>
-                                      <input type="text" list="sections" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="اختر أو اكتب يدوياً..." value={correctionSection} onChange={(e) => setCorrectionSection(e.target.value)} />
+                                      <label className="block text-sm font-bold text-brand-700 mb-1">
+                                        أي قسم في سجل تراث العائلة يحتاج لهذا
+                                        التصويب؟
+                                      </label>
+                                      <input
+                                        type="text"
+                                        list="sections"
+                                        className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
+                                        placeholder="اختر أو اكتب يدوياً..."
+                                        value={correctionSection}
+                                        onChange={(e) =>
+                                          setCorrectionSection(e.target.value)
+                                        }
+                                      />
                                       <datalist id="sections">
                                         <option value="الباب الأول: التسلسل النسبي" />
                                         <option value="الباب الثاني: الوثائق" />
@@ -979,28 +2077,94 @@ export function Dashboard() {
                                       </datalist>
                                     </div>
                                     <div>
-                                      <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة في سجل تراث العائلة التي تحتاج لهذا التصويب</label>
-                                      <input type="text" className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3" placeholder="مثال: 45" value={correctionPage} onChange={(e) => setCorrectionPage(e.target.value)} />
+                                      <label className="block text-sm font-bold text-brand-700 mb-1">
+                                        رقم الصفحة في سجل تراث العائلة التي
+                                        تحتاج لهذا التصويب
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
+                                        placeholder="مثال: 45"
+                                        value={correctionPage}
+                                        onChange={(e) =>
+                                          setCorrectionPage(e.target.value)
+                                        }
+                                      />
                                     </div>
                                   </div>
                                   <div>
-                                    <label className="block text-sm font-bold text-brand-700 mb-1">التصويب المطلوب</label>
-                                    <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3" placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..." value={correctionError} onChange={(e) => setCorrectionError(e.target.value)}></textarea>
+                                    <label className="block text-sm font-bold text-brand-700 mb-1">
+                                      التصويب المطلوب
+                                    </label>
+                                    <textarea
+                                      className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3"
+                                      placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..."
+                                      value={correctionError}
+                                      onChange={(e) =>
+                                        setCorrectionError(e.target.value)
+                                      }
+                                    ></textarea>
                                   </div>
                                   <div>
-                                    <label className="block text-sm font-bold text-brand-700 mb-1">مرجعية او مصدر هذا التصويب</label>
-                                    <textarea className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3" placeholder="اكتب التصويب الصحيح ومصادرك..." value={correctionText} onChange={(e) => setCorrectionText(e.target.value)}></textarea>
+                                    <label className="block text-sm font-bold text-brand-700 mb-1">
+                                      مرجعية او مصدر هذا التصويب
+                                    </label>
+                                    <textarea
+                                      className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3"
+                                      placeholder="اكتب التصويب الصحيح ومصادرك..."
+                                      value={correctionText}
+                                      onChange={(e) =>
+                                        setCorrectionText(e.target.value)
+                                      }
+                                    ></textarea>
                                   </div>
-                                  
+
                                   <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">
-                                    <input type="checkbox" id="terms" className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500" checked={agreeToCorrectionTerms} onChange={(e) => setAgreeToCorrectionTerms(e.target.checked)} />
-                                    <label htmlFor="terms" className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none">
-                                      تخضع كافة التصويبات للمراجعة والتدقيق العلمي والإعتماد من قبل فريق البحث للتحقق من صحتها وتطابقها مع المصادر. وأقر بالموافقة على <button className="text-brand-600 font-bold underline" onClick={(e) => { e.preventDefault(); setShowCorrectionTerms(true); }}>تطبيق الشروط والأحكام</button> الخاصة بالتعديلات.
+                                    <input
+                                      type="checkbox"
+                                      id="terms"
+                                      className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500"
+                                      checked={agreeToCorrectionTerms}
+                                      onChange={(e) =>
+                                        setAgreeToCorrectionTerms(
+                                          e.target.checked,
+                                        )
+                                      }
+                                    />
+                                    <label
+                                      htmlFor="terms"
+                                      className="text-sm text-brand-700 leading-relaxed cursor-pointer select-none"
+                                    >
+                                      تخضع كافة التصويبات للمراجعة والتدقيق
+                                      العلمي والإعتماد من قبل فريق البحث للتحقق
+                                      من صحتها وتطابقها مع المصادر. وأقر
+                                      بالموافقة على{" "}
+                                      <button
+                                        className="text-brand-600 font-bold underline"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          setShowCorrectionTerms(true);
+                                        }}
+                                      >
+                                        تطبيق الشروط والأحكام
+                                      </button>{" "}
+                                      الخاصة بالتعديلات.
                                     </label>
                                   </div>
 
-                                  <button onClick={handleSendCorrection} disabled={!correctionSection || !correctionPage || !correctionText || !correctionError || !agreeToCorrectionTerms} className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm">
-                                    <Send className="w-5 h-5" /> إرسال طلب التصويب
+                                  <button
+                                    onClick={handleSendCorrection}
+                                    disabled={
+                                      !correctionSection ||
+                                      !correctionPage ||
+                                      !correctionText ||
+                                      !correctionError ||
+                                      !agreeToCorrectionTerms
+                                    }
+                                    className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm"
+                                  >
+                                    <Send className="w-5 h-5" /> إرسال طلب
+                                    التصويب
                                   </button>
                                 </div>
                               </div>
@@ -1010,14 +2174,33 @@ export function Dashboard() {
                           {showCorrectionTerms && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                               <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden text-right p-6">
-                                <h3 className="text-xl font-bold text-brand-900 mb-4">شروط وأحكام التصويبات</h3>
+                                <h3 className="text-xl font-bold text-brand-900 mb-4">
+                                  شروط وأحكام التصويبات
+                                </h3>
                                 <ul className="list-disc list-inside space-y-2 text-brand-700 text-sm mb-6 pb-4 border-b border-gray-100">
-                                  <li>يحق للعميل تقديم طلب تصويب واحد مجاني خلال 30 يوماً من استلام السجل.</li>
-                                  <li>يجب الإشارة إلى المصدر المعتمد للتصويب إذا كان تعديلاً جوهرياً في النسب.</li>
-                                  <li>عمليات التصحيح الإملائي والتنسيقي تتم مراجعتها وتعديلها مباشرة.</li>
-                                  <li>التحديثات الجذرية التي تتطلب إعادة بحث قد يترتب عليها رسوم إضافية.</li>
+                                  <li>
+                                    يحق للعميل تقديم طلب تصويب واحد مجاني خلال
+                                    30 يوماً من استلام السجل.
+                                  </li>
+                                  <li>
+                                    يجب الإشارة إلى المصدر المعتمد للتصويب إذا
+                                    كان تعديلاً جوهرياً في النسب.
+                                  </li>
+                                  <li>
+                                    عمليات التصحيح الإملائي والتنسيقي تتم
+                                    مراجعتها وتعديلها مباشرة.
+                                  </li>
+                                  <li>
+                                    التحديثات الجذرية التي تتطلب إعادة بحث قد
+                                    يترتب عليها رسوم إضافية.
+                                  </li>
                                 </ul>
-                                <button onClick={() => setShowCorrectionTerms(false)} className="w-full py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700">إغلاق ومتابعة</button>
+                                <button
+                                  onClick={() => setShowCorrectionTerms(false)}
+                                  className="w-full py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700"
+                                >
+                                  إغلاق ومتابعة
+                                </button>
                               </div>
                             </div>
                           )}
@@ -1031,35 +2214,75 @@ export function Dashboard() {
                       <div className="text-center mb-10">
                         <Telescope className="w-20 h-20 text-brand-600 mx-auto mb-6 opacity-90" />
                         {!order.researchRecommendations ? (
-                          <h3 className="text-2xl md:text-3xl font-bold text-brand-900 mb-4 leading-tight">هنا ستظهر توصيات واقتراحات فريق البحث<br/>بعد صدور "سجل تراث العائلة"</h3>
+                          <h3 className="text-2xl md:text-3xl font-bold text-brand-900 mb-4 leading-tight">
+                            هنا ستظهر توصيات واقتراحات فريق البحث
+                            <br />
+                            بعد صدور "سجل تراث العائلة"
+                          </h3>
                         ) : (
                           <div className="bg-brand-50 border-2 border-brand-200 rounded-2xl p-8 mb-8 shadow-sm">
                             <h3 className="text-2xl md:text-3xl font-bold text-brand-900 mb-4 leading-tight flex justify-center items-center gap-3">
-                              <Star className="w-8 h-8 text-brand-500 fill-brand-500" /> توصيات واقتراحات فريق البحث
+                              <Star className="w-8 h-8 text-brand-500 fill-brand-500" />{" "}
+                              توصيات واقتراحات فريق البحث
                             </h3>
                             <div className="text-brand-800 text-lg leading-relaxed text-right whitespace-pre-line bg-white p-6 rounded-xl border border-brand-100 shadow-inner">
                               {order.researchRecommendations}
                             </div>
                           </div>
                         )}
-                        <p className="text-brand-500 font-bold bg-brand-50 inline-block px-4 py-2 rounded-full border border-brand-100">تعتبر خدمة فتح الأبواب المغلقة خدمة مستقلة - تنطبق الشروط والأحكام</p>
+                        <p className="text-brand-500 font-bold bg-brand-50 inline-block px-4 py-2 rounded-full border border-brand-100">
+                          تعتبر خدمة فتح الأبواب المغلقة خدمة مستقلة - تنطبق
+                          الشروط والأحكام
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-8 text-brand-800 leading-relaxed bg-brand-50 p-6 sm:p-10 rounded-2xl border border-brand-100 text-lg">
-                        <p className="font-medium">يعتبر "سجل تراث العائلة" - السجل الأساسي - عند صدوره هو العمل الجوهري الذي تكون من خلالة رحلة توثيق عمود النسب ، وعند صدوره قد يقترح فريق البحث بعض التوصيات في بعض الحالات التي لاتتوفر فيها مصادر كافية أو يحتاج البحث الى بحث متقدم من نوع آخر ، وهنا تأتي خدمة "فتح الأبواب المغلقة" لتفتح ابواباً آخرى من البحث عند رغبة (أمين السجل/العميل) في ذلك .</p>
-                        
+                        <p className="font-medium">
+                          يعتبر "سجل تراث العائلة" - السجل الأساسي - عند صدوره
+                          هو العمل الجوهري الذي تكون من خلالة رحلة توثيق عمود
+                          النسب ، وعند صدوره قد يقترح فريق البحث بعض التوصيات في
+                          بعض الحالات التي لاتتوفر فيها مصادر كافية أو يحتاج
+                          البحث الى بحث متقدم من نوع آخر ، وهنا تأتي خدمة "فتح
+                          الأبواب المغلقة" لتفتح ابواباً آخرى من البحث عند رغبة
+                          (أمين السجل/العميل) في ذلك .
+                        </p>
+
                         <div className="bg-white p-6 rounded-xl border border-brand-100 shadow-sm">
-                          <h4 className="font-bold text-brand-900 text-xl mb-3 flex items-center gap-3"><Compass className="w-7 h-7 text-brand-600" /> خدمة فتح الأبواب المغلقة :</h4>
-                          <p>خدمة اختيارية تُقدَّم بعد تثبيت الأصل، وتهدف إلى تعميق التوثيق عبر أدوات بحث متقدمة، تُفعّل جزئيًا أو كليًا حسب مقتضيات البحث العلمي .</p>
+                          <h4 className="font-bold text-brand-900 text-xl mb-3 flex items-center gap-3">
+                            <Compass className="w-7 h-7 text-brand-600" /> خدمة
+                            فتح الأبواب المغلقة :
+                          </h4>
+                          <p>
+                            خدمة اختيارية تُقدَّم بعد تثبيت الأصل، وتهدف إلى
+                            تعميق التوثيق عبر أدوات بحث متقدمة، تُفعّل جزئيًا أو
+                            كليًا حسب مقتضيات البحث العلمي .
+                          </p>
                         </div>
-                        
+
                         <div className="bg-white p-6 rounded-xl border border-brand-100 shadow-sm">
-                          <h4 className="font-bold text-brand-900 text-xl mb-3 flex items-center gap-3"><MapPin className="w-7 h-7 text-brand-600" /> كيف تعمل خدمة فتح الأبواب المغلقة</h4>
-                          <p className="mb-4">تشمل خدمة "فتح الأبواب المغلقة" على انواع من البحوث المتخصصة والمعمقة ، من أجل فتح بعض الأبواب المغلقة والتي ابرزها الأصدار الأساسي للسجل ، وقد تكون على سبيل المثال أحد هذه الأنواع من الأعمال البحثية:</p>
+                          <h4 className="font-bold text-brand-900 text-xl mb-3 flex items-center gap-3">
+                            <MapPin className="w-7 h-7 text-brand-600" /> كيف
+                            تعمل خدمة فتح الأبواب المغلقة
+                          </h4>
+                          <p className="mb-4">
+                            تشمل خدمة "فتح الأبواب المغلقة" على انواع من البحوث
+                            المتخصصة والمعمقة ، من أجل فتح بعض الأبواب المغلقة
+                            والتي ابرزها الأصدار الأساسي للسجل ، وقد تكون على
+                            سبيل المثال أحد هذه الأنواع من الأعمال البحثية:
+                          </p>
                           <ul className="space-y-3 mt-4 text-brand-900">
-                            <li className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-brand-500"></div>البحث في الوثائق والسجلات الرسمية.</li>
-                            <li className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-brand-500"></div>البحث في الأراشيف الحكومية التاريخية.</li>
-                            <li className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-brand-500"></div>تفسير نتائج الحمض النووي وربطها بالسياق النسبي</li>
+                            <li className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-brand-500"></div>
+                              البحث في الوثائق والسجلات الرسمية.
+                            </li>
+                            <li className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-brand-500"></div>
+                              البحث في الأراشيف الحكومية التاريخية.
+                            </li>
+                            <li className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-brand-500"></div>
+                              تفسير نتائج الحمض النووي وربطها بالسياق النسبي
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -1068,167 +2291,318 @@ export function Dashboard() {
 
                   {activeTab === "الملف الشخصي" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
-                       <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><User className="w-8 h-8 text-brand-600" /> الملف الشخصي</h3>
-                       
-                       <div className="mb-8 flex items-center gap-6 p-6 bg-brand-50 rounded-2xl border border-brand-100">
-                         <div className="relative group">
-                           {currentUser.photoUrl ? (
-                             <img src={currentUser.photoUrl} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover" />
-                           ) : (
-                             <div className="w-24 h-24 rounded-full bg-white border-4 border-brand-100 shadow-md flex items-center justify-center text-brand-600 font-bold text-4xl uppercase">
-                               {currentUser.name?.charAt(0) || "U"}
-                             </div>
-                           )}
-                           <button 
-                             type="button"
-                             onClick={() => profilePhotoInputRef.current?.click()}
-                             className="absolute bottom-0 left-0 bg-brand-600 text-white p-2 rounded-full shadow-lg hover:bg-brand-500 transition-colors"
-                           >
-                             <Camera className="w-4 h-4" />
-                           </button>
-                           <input type="file" className="hidden" ref={profilePhotoInputRef} onChange={handleProfilePhotoUpload} accept="image/*" />
-                         </div>
-                         <div>
-                           <h4 className="font-bold text-brand-900 text-lg">الصورة الشخصية</h4>
-                           <p className="text-sm text-brand-600 mt-1">يُفضل رفع صورة شخصية واضحة (اختياري)</p>
-                         </div>
-                       </div>
+                      <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                        <User className="w-8 h-8 text-brand-600" /> الملف الشخصي
+                      </h3>
 
-                       <form onSubmit={async (e) => {
-                         e.preventDefault();
-                         const formData = new FormData(e.currentTarget);
-                         const newName = formData.get('name') as string;
-                         const newPhone = formData.get('phone') as string;
-                         const newCountry = formData.get('country') as string;
-                         const newState = formData.get('state') as string;
-                         const newStreet = formData.get('street') as string;
-                         const newZip = formData.get('zip') as string;
-                         
-                         try {
-                           // Update user doc
-                           await updateDoc(doc(db, "users", currentUser.id), {
-                             name: newName,
-                             phone: newPhone,
-                             shippingAddress: { country: newCountry, state: newState, street: newStreet, zip: newZip }
-                           });
-                           useAppStore.setState({ currentUser: { ...currentUser, name: newName } });
-                           alert('تم حفظ البيانات بنجاح.');
-                         } catch (err) {
-                           console.error(err);
-                           alert('حدث خطأ أثناء الحفظ.');
-                         }
-                       }}>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                      <div className="mb-8 flex items-center gap-6 p-6 bg-brand-50 rounded-2xl border border-brand-100">
+                        <div className="relative group">
+                          {currentUser.photoUrl ? (
+                            <img
+                              src={currentUser.photoUrl}
+                              alt="Profile"
+                              className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
+                            />
+                          ) : (
+                            <div className="w-24 h-24 rounded-full bg-white border-4 border-brand-100 shadow-md flex items-center justify-center text-brand-600 font-bold text-4xl uppercase">
+                              {currentUser.name?.charAt(0) || "U"}
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              profilePhotoInputRef.current?.click()
+                            }
+                            className="absolute bottom-0 left-0 bg-brand-600 text-white p-2 rounded-full shadow-lg hover:bg-brand-500 transition-colors"
+                          >
+                            <Camera className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="file"
+                            className="hidden"
+                            ref={profilePhotoInputRef}
+                            onChange={handleProfilePhotoUpload}
+                            accept="image/*"
+                          />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-brand-900 text-lg">
+                            الصورة الشخصية
+                          </h4>
+                          <p className="text-sm text-brand-600 mt-1">
+                            يُفضل رفع صورة شخصية واضحة (اختياري)
+                          </p>
+                        </div>
+                      </div>
+
+                      <form
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.currentTarget);
+                          const newName = formData.get("name") as string;
+                          const newPhone = formData.get("phone") as string;
+                          const newCountry = formData.get("country") as string;
+                          const newState = formData.get("state") as string;
+                          const newStreet = formData.get("street") as string;
+                          const newZip = formData.get("zip") as string;
+
+                          try {
+                            // Update user doc
+                            await updateDoc(doc(db, "users", currentUser.id), {
+                              name: newName,
+                              phone: newPhone,
+                              shippingAddress: {
+                                country: newCountry,
+                                state: newState,
+                                street: newStreet,
+                                zip: newZip,
+                              },
+                            });
+                            useAppStore.setState({
+                              currentUser: { ...currentUser, name: newName },
+                            });
+                            alert("تم حفظ البيانات بنجاح.");
+                          } catch (err) {
+                            console.error(err);
+                            alert("حدث خطأ أثناء الحفظ.");
+                          }
+                        }}
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                          <div>
+                            <label className="block text-sm font-bold text-brand-700 mb-2">
+                              الاسم
+                            </label>
+                            <input
+                              required
+                              name="name"
+                              type="text"
+                              className="w-full border-brand-200 rounded-xl bg-white"
+                              defaultValue={currentUser.name || ""}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-brand-700 mb-2">
+                              البريد الإلكتروني (لا يمكن تعديله)
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full border-brand-200 object-not-allowed bg-gray-100 text-gray-500 rounded-xl"
+                              value={currentUser.email || ""}
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-brand-700 mb-2">
+                              رقم الهاتف
+                            </label>
+                            <input
+                              name="phone"
+                              type="text"
+                              className="w-full border-brand-200 rounded-xl bg-white"
+                              defaultValue={order?.data.mobileNumber || ""}
+                              placeholder="رقم الهاتف"
+                            />
+                          </div>
+                          <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                            <h4 className="col-span-2 text-sm font-bold text-brand-700 mt-2">
+                              عنوان الشحن الدائم
+                            </h4>
                             <div>
-                              <label className="block text-sm font-bold text-brand-700 mb-2">الاسم</label>
-                              <input required name="name" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={currentUser.name || ""} />
+                              <label className="block text-xs text-brand-600 mb-1">
+                                الدولة
+                              </label>
+                              <input
+                                name="country"
+                                type="text"
+                                className="w-full border-brand-200 rounded-xl bg-white"
+                                defaultValue={
+                                  order?.data.shippingAddress?.country || ""
+                                }
+                                placeholder="الدولة"
+                              />
                             </div>
                             <div>
-                              <label className="block text-sm font-bold text-brand-700 mb-2">البريد الإلكتروني (لا يمكن تعديله)</label>
-                              <input type="text" className="w-full border-brand-200 object-not-allowed bg-gray-100 text-gray-500 rounded-xl" value={currentUser.email || ""} disabled />
+                              <label className="block text-xs text-brand-600 mb-1">
+                                المنطقة/المدينة
+                              </label>
+                              <input
+                                name="state"
+                                type="text"
+                                className="w-full border-brand-200 rounded-xl bg-white"
+                                defaultValue={
+                                  order?.data.shippingAddress?.state || ""
+                                }
+                                placeholder="المدينة"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="block text-xs text-brand-600 mb-1">
+                                الشارع والوصف
+                              </label>
+                              <input
+                                name="street"
+                                type="text"
+                                className="w-full border-brand-200 rounded-xl bg-white"
+                                defaultValue={
+                                  order?.data.shippingAddress?.street || ""
+                                }
+                                placeholder="اسم الشارع أو وصف دقيق"
+                              />
                             </div>
                             <div>
-                              <label className="block text-sm font-bold text-brand-700 mb-2">رقم الهاتف</label>
-                              <input name="phone" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={order?.data.mobileNumber || ""} placeholder="رقم الهاتف" />
+                              <label className="block text-xs text-brand-600 mb-1">
+                                الرمز البريدي
+                              </label>
+                              <input
+                                name="zip"
+                                type="text"
+                                className="w-full border-brand-200 rounded-xl bg-white"
+                                defaultValue={
+                                  order?.data.shippingAddress?.zip || ""
+                                }
+                                placeholder="الرمز البريدي"
+                              />
                             </div>
-                            <div className="md:col-span-2 grid grid-cols-2 gap-4">
-                              <h4 className="col-span-2 text-sm font-bold text-brand-700 mt-2">عنوان الشحن الدائم</h4>
-                              <div>
-                                <label className="block text-xs text-brand-600 mb-1">الدولة</label>
-                                <input name="country" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={order?.data.shippingAddress?.country || ""} placeholder="الدولة" />
-                              </div>
-                              <div>
-                                <label className="block text-xs text-brand-600 mb-1">المنطقة/المدينة</label>
-                                <input name="state" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={order?.data.shippingAddress?.state || ""} placeholder="المدينة" />
-                              </div>
-                              <div className="col-span-2">
-                                <label className="block text-xs text-brand-600 mb-1">الشارع والوصف</label>
-                                <input name="street" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={order?.data.shippingAddress?.street || ""} placeholder="اسم الشارع أو وصف دقيق" />
-                              </div>
-                              <div>
-                                <label className="block text-xs text-brand-600 mb-1">الرمز البريدي</label>
-                                <input name="zip" type="text" className="w-full border-brand-200 rounded-xl bg-white" defaultValue={order?.data.shippingAddress?.zip || ""} placeholder="الرمز البريدي" />
-                              </div>
-                            </div>
-                         </div>
-                         <div className="mt-6 flex justify-end">
-                           <button type="submit" className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 shadow-sm transition">حفظ التغييرات</button>
-                         </div>
-                       </form>
+                          </div>
+                        </div>
+                        <div className="mt-6 flex justify-end">
+                          <button
+                            type="submit"
+                            className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 shadow-sm transition"
+                          >
+                            حفظ التغييرات
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   )}
 
                   {activeTab === "إعدادات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
-                       <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><Settings className="w-8 h-8 text-brand-600" /> الإعدادات</h3>
-                       
-                       <div className="space-y-8">
-                         {/* Security Setting */}
-                         <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
-                            <h4 className="font-bold text-brand-800 mb-4 flex items-center gap-2"><Lock className="w-5 h-5 text-brand-600" /> الأمان وتسجيل الدخول</h4>
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                      <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                        <Settings className="w-8 h-8 text-brand-600" />{" "}
+                        الإعدادات
+                      </h3>
+
+                      <div className="space-y-8">
+                        {/* Security Setting */}
+                        <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                          <h4 className="font-bold text-brand-800 mb-4 flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-brand-600" /> الأمان
+                            وتسجيل الدخول
+                          </h4>
+                          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-brand-700">
+                                تغيير كلمة المرور
+                              </p>
+                              <p className="text-xs text-brand-500 mt-1">
+                                يُنصح بتحديث كلمة المرور بشكل دوري للحفاظ على
+                                أمان حسابك.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() =>
+                                alert(
+                                  "سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.",
+                                )
+                              }
+                              className="px-6 py-2 border border-brand-300 text-brand-700 rounded-xl hover:bg-brand-100 transition text-sm font-medium whitespace-nowrap"
+                            >
+                              تغيير كلمة المرور
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Notifications Setting */}
+                        <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                          <h4 className="font-bold text-brand-800 mb-4 flex items-center gap-2">
+                            <Mail className="w-5 h-5 text-brand-600" />{" "}
+                            الإشعارات والتنبيهות
+                          </h4>
+                          <div className="space-y-4">
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                defaultChecked
+                                className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
+                              />
                               <div>
-                                <p className="text-sm font-semibold text-brand-700">تغيير كلمة المرور</p>
-                                <p className="text-xs text-brand-500 mt-1">يُنصح بتحديث كلمة المرور بشكل دوري للحفاظ على أمان حسابك.</p>
+                                <p className="text-sm font-semibold text-brand-700">
+                                  تنبيهات حالة الطلب
+                                </p>
+                                <p className="text-xs text-brand-500">
+                                  إرسال بريد إلكتروني عند تغير حالة طلبك (مثل:
+                                  قيد البحث، مكتمل).
+                                </p>
                               </div>
-                              <button onClick={() => alert("سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.")} className="px-6 py-2 border border-brand-300 text-brand-700 rounded-xl hover:bg-brand-100 transition text-sm font-medium whitespace-nowrap">تغيير كلمة المرور</button>
-                            </div>
-                         </div>
-                         
-                         {/* Notifications Setting */}
-                         <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
-                            <h4 className="font-bold text-brand-800 mb-4 flex items-center gap-2"><Mail className="w-5 h-5 text-brand-600" /> الإشعارات والتنبيهות</h4>
-                            <div className="space-y-4">
-                              <label className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" defaultChecked className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500" />
-                                <div>
-                                  <p className="text-sm font-semibold text-brand-700">تنبيهات حالة الطلب</p>
-                                  <p className="text-xs text-brand-500">إرسال بريد إلكتروني عند تغير حالة طلبك (مثل: قيد البحث، مكتمل).</p>
-                                </div>
-                              </label>
-                              <label className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" defaultChecked className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500" />
-                                <div>
-                                  <p className="text-sm font-semibold text-brand-700">رسائل فريق العمل</p>
-                                  <p className="text-xs text-brand-500">إشعار بالبريد الإلكتروني عند ورود استفسارات من فريق البحث.</p>
-                                </div>
-                              </label>
-                            </div>
-                         </div>
-                       </div>
+                            </label>
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                defaultChecked
+                                className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
+                              />
+                              <div>
+                                <p className="text-sm font-semibold text-brand-700">
+                                  رسائل فريق العمل
+                                </p>
+                                <p className="text-xs text-brand-500">
+                                  إشعار بالبريد الإلكتروني عند ورود استفسارات من
+                                  فريق البحث.
+                                </p>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {activeTab === "عقد تسجيل الخدمة" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 p-8">
-                       <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3"><FileText className="w-8 h-8 text-brand-600" /> عقد تسجيل الخدمة</h3>
-                       {!order ? (
-                         <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 flex items-center gap-4">
-                            <AlertCircle className="w-10 h-10 text-orange-500" />
-                            <div>
-                              <h4 className="font-bold text-orange-800 text-lg">لم تقم بالتوقيع على العقد بعد</h4>
-                              <p className="text-sm text-orange-700">لم يتم العثور على سجل مرتبط بحسابك.</p>
-                            </div>
-                         </div>
-                       ) : (
-                         <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex items-center gap-4 shadow-sm">
-                            <CheckCircle className="w-10 h-10 text-green-500" />
-                            <div>
-                              <h4 className="font-bold text-green-800 text-lg">تم توقيع العقد بنجاح</h4>
-                              <p className="text-sm text-green-700 font-mono mt-1" dir="ltr">{new Date(order.createdAt).toLocaleString('ar-SA')}</p>
-                            </div>
-                         </div>
-                       )}
+                      <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
+                        <FileText className="w-8 h-8 text-brand-600" /> عقد
+                        تسجيل الخدمة
+                      </h3>
+                      {!order ? (
+                        <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 flex items-center gap-4">
+                          <AlertCircle className="w-10 h-10 text-orange-500" />
+                          <div>
+                            <h4 className="font-bold text-orange-800 text-lg">
+                              لم تقم بالتوقيع على العقد بعد
+                            </h4>
+                            <p className="text-sm text-orange-700">
+                              لم يتم العثور على سجل مرتبط بحسابك.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-green-50 p-6 rounded-2xl border border-green-200 flex items-center gap-4 shadow-sm">
+                          <CheckCircle className="w-10 h-10 text-green-500" />
+                          <div>
+                            <h4 className="font-bold text-green-800 text-lg">
+                              تم توقيع العقد بنجاح
+                            </h4>
+                            <p
+                              className="text-sm text-green-700 font-mono mt-1"
+                              dir="ltr"
+                            >
+                              {new Date(order.createdAt).toLocaleString(
+                                "ar-SA",
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
-
                 </div>
               )}
-
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
