@@ -166,7 +166,7 @@ export function Dashboard() {
   const order = userOrders[0]; // ONLY 1 order allowed
 
   // If user just registered and has no order setup, redirect them to complete their data
-  if (!order) return <Navigate to="/order" replace />;
+  // if (!order) return <Navigate to="/order" replace />;
 
   const isPaid =
     order &&
@@ -605,40 +605,7 @@ export function Dashboard() {
           {/* Main Content Area */}
           <div className="lg:w-3/4">
             <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-brand-100 min-h-[600px]">
-              {!order ? (
-                <div className="text-center py-20">
-                  <BookOpen className="w-16 h-16 text-brand-200 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">
-                    طلب غير مكتمل
-                  </h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">
-                    يمكنك متابعة استكمال البيانات في أي وقت.
-                  </p>
-                  <Link
-                    to="/order"
-                    className="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 inline-block drop-shadow-md"
-                  >
-                    إنشاء السجل الأساسي
-                  </Link>
-                </div>
-              ) : !isPaid ? (
-                <div className="text-center py-20 bg-brand-50 rounded-2xl border border-brand-200">
-                  <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-                  <h2 className="text-2xl font-serif text-brand-900 mb-4">
-                    بانتظار إتمام الدفع
-                  </h2>
-                  <p className="text-brand-600 mb-8 max-w-sm mx-auto">
-                    أكمل عملية الدفع لإنهاء طلب السجل وتفعيل الاشتراك.
-                  </p>
-                  <button
-                    onClick={handleResumePayment}
-                    className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg"
-                  >
-                    إتمام الدفع واعتماد الطلب (1999$)
-                  </button>
-                </div>
-              ) : (
-                /* PAID CONTENT */
+                {/* MAIN CONTENT */}
                 <div className="space-y-8 animate-in fade-in duration-300">
                   <h2 className="text-3xl font-serif font-bold text-brand-900 mb-8 pb-4 border-b border-brand-100">
                     {activeTab}
@@ -646,25 +613,25 @@ export function Dashboard() {
 
                   {activeTab === "السجل الأساسي" &&
                     (() => {
-                      const isState1 = order.issueStatus === "طلب غير مكتمل";
+                      const isState1 = !order || order.issueStatus === "طلب غير مكتمل";
                       const isState2 =
-                        order.issueStatus === "بإنتظار إتمام الدفع" ||
-                        (!isPaid && order.issueStatus !== "طلب غير مكتمل");
+                        order && (order.issueStatus === "بإنتظار إتمام الدفع" ||
+                        (!isPaid && order.issueStatus !== "طلب غير مكتمل"));
                       const isState3 =
-                        order.issueStatus === "جاري التنفيذ" &&
-                        order.actionPhase === "مرحلة البحث";
+                        order?.issueStatus === "جاري التنفيذ" &&
+                        order?.actionPhase === "مرحلة البحث";
                       const isState4 =
-                        order.issueStatus === "جاري التنفيذ" &&
-                        order.actionPhase === "مرحلة التوثيق";
-                      const isState5 = order.issueStatus === "تم الإصدار";
+                        order?.issueStatus === "جاري التنفيذ" &&
+                        order?.actionPhase === "مرحلة التوثيق";
+                      const isState5 = order?.issueStatus === "تم الإصدار";
                       const isState6 =
-                        order.issueStatus === "جاري التصويب" ||
-                        order.issueStatus === "يوجد تصويبات" ||
-                        order.actionPhase === "مرحلة التصويب";
-                      const isState7 = order.issueStatus === "تم الإغلاق";
+                        order?.issueStatus === "جاري التصويب" ||
+                        order?.issueStatus === "يوجد تصويبات" ||
+                        order?.actionPhase === "مرحلة التصويب";
+                      const isState7 = order?.issueStatus === "تم الإغلاق";
 
                       let title = "";
-                      let statusText = order.issueStatus;
+                      let statusText = order?.issueStatus || "طلب غير مكتمل";
                       let actionText = "";
                       let subText = "";
                       let actionButton = null;
@@ -675,9 +642,10 @@ export function Dashboard() {
                         actionText = "يمكنك متابعة رحلة التوثيق في اي وقت";
                         actionButton = (
                           <button
-                            onClick={() =>
-                              setActiveTab("بيانات العميل / أمين السجل")
-                            }
+                            onClick={() => {
+                              if (!order) navigate("/order");
+                              else setActiveTab("بيانات العميل / أمين السجل");
+                            }}
                             className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
                           >
                             أكمل رحلة التوثيق
@@ -690,7 +658,7 @@ export function Dashboard() {
                           "اكمل عملية الدفع ليتمكن الفريق من بدء التنفيذ";
                         actionButton = (
                           <button
-                            onClick={() => setActiveTab("فاتورة الطلب")}
+                            onClick={handleResumePayment}
                             className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
                           >
                             إتمام الدفع وبدء التنفيذ
@@ -2613,7 +2581,6 @@ export function Dashboard() {
                     </div>
                   )}
                 </div>
-              )}
             </div>
           </div>
         </div>
