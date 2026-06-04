@@ -356,10 +356,10 @@ export function Dashboard() {
   );
 
   return (
-    <div className="bg-brand-50 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header & Greeting */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-brand-100/50 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 relative z-[90] sticky top-4 transition-all">
+    <div className="bg-brand-50 min-h-screen pb-10">
+      {/* Header & Greeting */}
+      <div className="bg-white/95 backdrop-blur-xl shadow-sm border-b border-brand-100/50 mb-8 sticky top-0 z-[90] transition-all py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
           <div className="flex flex-col md:flex-row items-center gap-5 relative w-full md:w-auto">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -393,43 +393,43 @@ export function Dashboard() {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowProfileMenu(false)}
                 ></div>
-                <div className="absolute top-[80px] right-1/2 translate-x-1/2 md:translate-x-0 md:right-0 w-64 bg-white rounded-3xl shadow-2xl border border-brand-100 overflow-hidden py-3 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
+                <div className="absolute top-[80px] right-1/2 translate-x-1/2 md:translate-x-0 md:right-0 w-64 bg-brand-50 rounded-3xl shadow-xl border-2 border-brand-200 overflow-hidden py-3 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
                   <button
                     onClick={() => {
                       setActiveTab("الملف الشخصي");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-100 text-brand-800 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <User className="w-5 h-5 text-brand-500" /> الملف الشخصي
+                    <User className="w-5 h-5 text-brand-600" /> الملف الشخصي
                   </button>
                   <button
                     onClick={() => {
                       setActiveTab("إعدادات");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-100 text-brand-800 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <Settings className="w-5 h-5 text-brand-500" /> إعدادات
+                    <Settings className="w-5 h-5 text-brand-600" /> إعدادات
                   </button>
                   <button
                     onClick={() => {
                       setActiveTab("عقد تسجيل الخدمة");
                       setShowProfileMenu(false);
                     }}
-                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-50 text-brand-700 font-semibold flex items-center gap-3 transition-colors"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-brand-100 text-brand-800 font-semibold flex items-center gap-3 transition-colors"
                   >
-                    <FileText className="w-5 h-5 text-brand-500" /> عقد تسجيل
+                    <FileText className="w-5 h-5 text-brand-600" /> عقد تسجيل
                     الخدمة
                   </button>
-                  <div className="border-t border-brand-50 my-2 mx-4"></div>
+                  <div className="border-t border-brand-200 my-2 mx-4"></div>
                   <button
                     onClick={async () => {
                       await signOut(auth);
                       useAppStore.getState().logout();
                       window.location.href = "/auth";
                     }}
-                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3 transition-colors"
+                    className="w-full text-right px-5 py-3.5 text-sm hover:bg-red-100 text-red-600 font-semibold flex items-center gap-3 transition-colors"
                   >
                     <LogOut className="w-5 h-5" /> تسجيل الخروج
                   </button>
@@ -440,21 +440,16 @@ export function Dashboard() {
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={() => setActiveTab("السجل الأساسي")}
-              className="flex-1 sm:flex-none justify-center px-5 py-2.5 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-2xl font-bold flex items-center gap-2 hover:shadow-sm transition-all text-sm border border-brand-200/50"
+              className="flex-1 sm:flex-none justify-center px-6 py-2.5 bg-brand-800 text-white hover:bg-brand-900 rounded-2xl font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all text-sm border border-brand-700"
             >
               <Compass className="w-4 h-4" />
               السجل الأساسي
             </button>
-            <Link
-              to="/"
-              className="flex-1 sm:flex-none justify-center px-5 py-2.5 bg-brand-600 text-white hover:bg-brand-700 rounded-2xl font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
-            >
-              <Home className="w-4 h-4" />
-              الرئيسية
-            </Link>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:w-1/4">
@@ -2604,8 +2599,11 @@ export function Dashboard() {
             <p className="font-bold text-brand-900">GeneaLab LLC</p>
             <p>تعمل المنصة من خلال شركة جينيا لاب - الولايات المتحدة الأمريكية.</p>
           </div>
-          <div className="mt-8 pt-8 border-t border-brand-200 text-sm opacity-75">
-            <p>© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
+          <div className="mt-8 pt-8 border-t border-brand-200 text-sm flex flex-col items-center gap-4">
+            <p className="opacity-75">© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
+            <Link to="/" className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-800 font-bold transition p-2 bg-brand-100 rounded-lg shadow-sm">
+              <Home className="w-4 h-4" /> الذهاب الى الصفحة الرئيسية لمنصة سجل تراث العائلة
+            </Link>
           </div>
         </div>
       </footer>
