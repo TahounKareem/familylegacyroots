@@ -910,11 +910,7 @@ export function AdminPanel() {
                               <select
                                 value={order.actionPhase || "مرحلة البحث"}
                                 onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  const newPhase = e.target
-                                    .value as ActionPhase;
+                                  const newPhase = e.target.value as ActionPhase;
                                   const updateData: any = {
                                     actionPhase: newPhase,
                                   };
@@ -923,31 +919,29 @@ export function AdminPanel() {
                                     newPhase === "مرحلة التوثيق" &&
                                     order.totalAmount === 1980 &&
                                     (!order.paymentStatus ||
-                                      order.paymentStatus ===
-                                        "مدفوع أول دفعة" ||
+                                      order.paymentStatus === "مدفوع أول دفعة" ||
                                       order.paymentStatus === "كود دعوة")
                                   ) {
-                                    updateData.paymentStatus =
-                                      "مستحق الدفعة الثانية";
+                                    updateData.paymentStatus = "مستحق الدفعة الثانية";
                                   }
 
-                                  await updateDoc(
-                                    doc(db, "orders", order.id),
-                                    updateData,
-                                  );
                                   useAppStore.setState((s) => ({
                                     orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? { ...o, ...updateData }
-                                        : o,
+                                      o.id === order.id ? { ...o, ...updateData } : o
                                     ),
                                   }));
-                                  useAppStore
-                                    .getState()
-                                    .logTimelineEvent(
+
+                                  try {
+                                    const { updateDoc, doc } = await import("firebase/firestore");
+                                    const { db } = await import("@/lib/firebase");
+                                    await updateDoc(doc(db, "orders", order.id), updateData);
+                                    useAppStore.getState().logTimelineEvent(
                                       order.id,
-                                      `تم تغيير الإجراء (التنفيذ) إلى: ${newPhase}`,
+                                      `تم تغيير الإجراء (التنفيذ) إلى: ${newPhase}`
                                     );
+                                  } catch (error) {
+                                    console.error("Failed to update status", error);
+                                  }
                                 }}
                                 className="border border-brand-200 rounded px-1 py-1 bg-brand-100/50 text-[10px] sm:text-[11px] text-brand-700 font-bold outline-none cursor-pointer w-full max-w-[100px]"
                               >
@@ -1164,11 +1158,7 @@ export function AdminPanel() {
                               <select
                                 value={order.actionPhase || "مرحلة البحث"}
                                 onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  const newPhase = e.target
-                                    .value as ActionPhase;
+                                  const newPhase = e.target.value as ActionPhase;
                                   const updateData: any = {
                                     actionPhase: newPhase,
                                   };
@@ -1177,37 +1167,35 @@ export function AdminPanel() {
                                     newPhase === "مرحلة التوثيق" &&
                                     order.totalAmount === 1980 &&
                                     (!order.paymentStatus ||
-                                      order.paymentStatus ===
-                                        "مدفوع أول دفعة" ||
+                                      order.paymentStatus === "مدفوع أول دفعة" ||
                                       order.paymentStatus === "كود دعوة")
                                   ) {
-                                    updateData.paymentStatus =
-                                      "مستحق الدفعة الثانية";
-                                    useAppStore
-                                      .getState()
-                                      .logTimelineEvent(
-                                        order.id,
-                                        `استحقاق الدفعة الثانية للعميل لتنقله لمرحلة التوثيق.`,
-                                      );
+                                    updateData.paymentStatus = "مستحق الدفعة الثانية";
                                   }
 
-                                  await updateDoc(
-                                    doc(db, "orders", order.id),
-                                    updateData,
-                                  );
                                   useAppStore.setState((s) => ({
                                     orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? { ...o, ...updateData }
-                                        : o,
+                                      o.id === order.id ? { ...o, ...updateData } : o
                                     ),
                                   }));
-                                  useAppStore
-                                    .getState()
-                                    .logTimelineEvent(
+
+                                  try {
+                                    const { updateDoc, doc } = await import("firebase/firestore");
+                                    const { db } = await import("@/lib/firebase");
+                                    await updateDoc(doc(db, "orders", order.id), updateData);
+                                    if (updateData.paymentStatus) {
+                                      useAppStore.getState().logTimelineEvent(
+                                        order.id,
+                                        `استحقاق الدفعة الثانية للعميل لتنقله لمرحلة التوثيق.`
+                                      );
+                                    }
+                                    useAppStore.getState().logTimelineEvent(
                                       order.id,
-                                      `تم تغيير الإجراء إلى: ${newPhase}`,
+                                      `تم تغيير الإجراء إلى: ${newPhase}`
                                     );
+                                  } catch (error) {
+                                    console.error("Failed to update status", error);
+                                  }
                                 }}
                                 className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
                               >
@@ -1706,26 +1694,25 @@ export function AdminPanel() {
                             <select
                               value={order.actionPhase || "تمت المسودة"}
                               onChange={async (e) => {
-                                const { updateDoc, doc } =
-                                  await import("firebase/firestore");
-                                const { db } = await import("@/lib/firebase");
                                 const newPhase = e.target.value as ActionPhase;
-                                await updateDoc(doc(db, "orders", order.id), {
-                                  actionPhase: newPhase,
-                                });
                                 useAppStore.setState((s) => ({
                                   orders: s.orders.map((o) =>
-                                    o.id === order.id
-                                      ? { ...o, actionPhase: newPhase }
-                                      : o,
+                                    o.id === order.id ? { ...o, actionPhase: newPhase } : o
                                   ),
                                 }));
-                                useAppStore
-                                  .getState()
-                                  .logTimelineEvent(
+                                try {
+                                  const { updateDoc, doc } = await import("firebase/firestore");
+                                  const { db } = await import("@/lib/firebase");
+                                  await updateDoc(doc(db, "orders", order.id), {
+                                    actionPhase: newPhase,
+                                  });
+                                  useAppStore.getState().logTimelineEvent(
                                     order.id,
-                                    `إدارة التصميم: تم تغيير الإجراء إلى: ${newPhase}`,
+                                    `إدارة التصميم: تم تغيير الإجراء إلى: ${newPhase}`
                                   );
+                                } catch (error) {
+                                  console.error("Failed to update phase", error);
+                                }
                               }}
                               className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold max-w-[200px] text-brand-800"
                             >
