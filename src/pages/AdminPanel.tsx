@@ -495,7 +495,7 @@ export function AdminPanel() {
               <button
                 onClick={() => {
                   logout();
-                  window.location.href = "/auth";
+                  window.location.href = "/Team";
                 }}
                 className="text-red-500 hover:text-red-700 mr-2 text-xs font-bold border-r border-brand-100 pr-3"
               >
@@ -518,7 +518,7 @@ export function AdminPanel() {
             <button
               onClick={() => {
                 logout();
-                window.location.href = "/auth";
+                window.location.href = "/Team";
               }}
               className="flex items-center gap-2 bg-white text-red-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-red-50 transition shadow-sm font-medium"
             >
@@ -1199,33 +1199,24 @@ export function AdminPanel() {
                                 }}
                                 className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
                               >
-                                <option value="مرحلة البحث">مرحلة البحث</option>
-                                <option value="مرحلة التوثيق">
-                                  مرحلة التوثيق
-                                </option>
-                                <option value="تمت المسودة">
-                                  تمت المسودة
-                                </option>
-                                <option value="تم التصميم الإلكتروني">
-                                  تم التصميم الإلكتروني
-                                </option>
-                                <option value="مرحلة التصويب">
-                                  مرحلة التصويب
-                                </option>
-                                <option value="تم التصويب">
-                                  تم التصويب
-                                </option>
-                                <option value="تم تجهيز السجل للطباعة">
-                                  تم تجهيز السجل للطباعة
-                                </option>
-                                <option value="جاهز للتسليم">
-                                  جاهز للتسليم
-                                </option>
-                                {order.actionPhase === "طلب إيضاح" && (
-                                  <option value="طلب إيضاح" disabled>
-                                    طلب إيضاح (بانتظار العميل)
-                                  </option>
-                                )}
+                                {(() => {
+                                  const currentPhase = order.actionPhase || "مرحلة البحث";
+                                  if (currentPhase === "مرحلة التصويب" || currentPhase === "تم التصويب") {
+                                    return (
+                                      <>
+                                        <option value="مرحلة التصويب" disabled={currentPhase === "تم التصويب"}>مرحلة التصويب</option>
+                                        <option value="تم التصويب">تم التصويب</option>
+                                      </>
+                                    );
+                                  }
+                                  return (
+                                    <>
+                                      <option value="مرحلة البحث">مرحلة البحث</option>
+                                      <option value="مرحلة التوثيق">مرحلة التوثيق</option>
+                                      <option value="تمت المسودة">تمت المسودة</option>
+                                    </>
+                                  );
+                                })()}
                               </select>
                             </td>
                             <td className="px-4 py-4">
@@ -1716,16 +1707,31 @@ export function AdminPanel() {
                               }}
                               className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold max-w-[200px] text-brand-800"
                             >
-                              <option value="تمت المسودة">
-                                تمت المسودة (مستلم من البحث)
-                              </option>
-                              <option value="تم التصميم الإلكتروني">
-                                تم التصميم الإلكتروني
-                              </option>
-                              <option value="تم تجهيز السجل للطباعة">
-                                تم تجهيز السجل للطباعة
-                              </option>
-                              <option value="جاهز للتسليم">جاهز للتسليم</option>
+                              {(() => {
+                                const currentPhase = order.actionPhase || "تمت المسودة";
+                                if (currentPhase === "تم التصويب" || currentPhase === "تم تجهيز السجل للطباعة") {
+                                  return (
+                                    <>
+                                      <option value="تم التصويب" disabled={currentPhase === "تم تجهيز السجل للطباعة"}>تم التصويب</option>
+                                      <option value="تم تجهيز السجل للطباعة">تم تجهيز السجل للطباعة</option>
+                                    </>
+                                  );
+                                }
+                                if (currentPhase === "تمت المسودة" || currentPhase === "تم التصميم الإلكتروني") {
+                                  return (
+                                    <>
+                                      <option value="تمت المسودة" disabled={currentPhase === "تم التصميم الإلكتروني"}>تمت المسودة</option>
+                                      <option value="تم التصميم الإلكتروني">تم التصميم الإلكتروني</option>
+                                    </>
+                                  );
+                                }
+                                return (
+                                  <>
+                                    <option value={currentPhase}>{currentPhase}</option>
+                                    <option value="جاهز للتسليم">جاهز للتسليم</option>
+                                  </>
+                                );
+                              })()}
                             </select>
                           </td>
                           <td className="px-4 py-4">
