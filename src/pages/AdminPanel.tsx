@@ -2,9 +2,9 @@ import { doc, getDoc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, quer
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import React, { useState, useEffect } from "react";
-import { useAppStore, Order, UserInfo } from "@/lib/store";
+import { useAppStore, Order, UserInfo, PaymentStatus, IssueStatus, ActionPhase } from "@/lib/store";
 import { Navigate, Link } from "react-router";
-import { Users, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2, HeartHandshake, Package, Shield, Calculator, Quote, LogOut, ChevronDown, ChevronLeft } from "lucide-react";
+import { Users, User, FileText, CheckCircle, Search, Edit3, Eye, MessageSquare, X, Home, Link as LinkIcon, Send, AlertCircle, Book, Plus, Trash2, HeartHandshake, Package, Shield, Calculator, Quote, LogOut, ChevronDown, ChevronLeft } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
@@ -886,7 +886,7 @@ export function AdminPanel() {
                    </thead>
                    <tbody className="divide-y divide-brand-50">
                      {complianceOrders.map((order) => {
-                       const hasSignature = order.data.documents?.some(d => d.type === "توقيع إلكتروني");
+                       const hasSignature = order.data.documents?.some(d => typeof d !== 'string' && d.kind === "توقيع إلكتروني");
                        return (
                        <tr key={`comp-${order.id}`} className="hover:bg-brand-50/30 transition">
                          <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
