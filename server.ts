@@ -263,19 +263,33 @@ async function startServer() {
       }
 
       // Step 2: Generate embedded invite for the document
-      const payload = {
-        invites: [
-          {
-            email: email || "user@example.com",
-            role_id: "", // Will use freeform or default if empty
-            order: 1,
-            auth_method: "none"
-          }
-        ]
-      };
-
       try {
-        console.log(`Generating invite for Document ID: ${documentId}`);
+        console.log(`Fetching roles for Document ID: ${documentId}`);
+        const docRes = await fetch(`https://api.signnow.com/document/${documentId}`, {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
+        });
+        const docData = await docRes.json();
+        let roleId = "";
+        let roleName = "Signer 1";
+        if (docData.roles && docData.roles.length > 0) {
+          roleId = docData.roles[0].unique_id;
+          roleName = docData.roles[0].name || roleName;
+        }
+
+        const payload = {
+          invites: [
+            {
+              email: email || "customer@example.com",
+              role_id: roleId,
+              order: 1,
+              auth_method: "none",
+              first_name: customerName || "Customer"
+            }
+          ]
+        };
+
+        console.log(`Generating invite for Document ID: ${documentId} with role: ${roleName}`);
         const inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
           method: "POST",
           headers: {
@@ -291,7 +305,7 @@ async function startServer() {
         
         if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
            console.error("SignNow Invite Error:", inviteData);
-           return res.status(400).json({ error: "فشل استخراج رابط التوقيع من SignNow. تأكد من أن القالب يحتوي على Role متاح." });
+           return res.status(400).json({ error: "فشل استخراج رابط التوقيع من SignNow. تفاصيل: " + JSON.stringify(inviteData.errors || inviteData) });
         }
 
         res.json({ signUrl: inviteData.data[0].link, contractId: documentId });
