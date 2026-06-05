@@ -191,7 +191,9 @@ async function startServer() {
       
       try {
         console.log(`Copying SignNow template: ${SIGNNOW_TEMPLATE_ID}`);
-        let copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
+        let targetTemplateId = SIGNNOW_TEMPLATE_ID;
+        
+        let copyRes = await fetch(`https://api.signnow.com/template/${targetTemplateId}/copy`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
@@ -206,6 +208,39 @@ async function startServer() {
           copyData = JSON.parse(copyText);
         } catch (err) {
           copyData = { error: copyText };
+        }
+
+        // If not found, perhaps it was a Document Group Template?
+        if (copyData.errors && copyData.errors[0]?.code === 65582) {
+           console.log("Template not found directly. Checking if it's a Document Group Template ID...");
+           const grpRes = await fetch(`https://api.signnow.com/documentgroup/template/${SIGNNOW_TEMPLATE_ID}`, {
+             method: "GET",
+             headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
+           });
+           
+           if (grpRes.ok) {
+             const grpData = await grpRes.json();
+             if (grpData.templates && grpData.templates.length > 0) {
+               targetTemplateId = grpData.templates[0].id;
+               console.log(`Extracted underlying template ID ${targetTemplateId} from Document Group Template`);
+               
+               // Retry copy with the real template ID
+               copyRes = await fetch(`https://api.signnow.com/template/${targetTemplateId}/copy`, {
+                  method: "POST",
+                  headers: {
+                    "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
+               });
+               copyText = await copyRes.text();
+               try {
+                 copyData = JSON.parse(copyText);
+               } catch (err) {
+                 copyData = { error: copyText };
+               }
+             }
+           }
         }
 
         console.log("SignNow copy response:", copyText);
