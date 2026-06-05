@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { CheckCircle, ArrowLeft, ArrowRight, Info, PenTool, Loader2 } from "lucide-react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, FamilyData } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 
 export function ESignature() {

@@ -183,9 +183,7 @@ async function startServer() {
         }
       } catch (e: any) {
          console.error("SignNow template copy error:", e);
-         // Return a safe local mock URL so the user is not blocked
-         const origin = req.headers.origin || "http://localhost:3000";
-         return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "تم تحويلك لصفحة التوقيع البديلة (Mock) بسبب تعذر الوصول لـ SignNow" });
+         return res.status(400).json({ error: "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
       }
 
       // Step 2: Generate embedded invite for the document
@@ -217,15 +215,13 @@ async function startServer() {
         
         if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
            console.error("SignNow Invite Error:", inviteData);
-           const origin = req.headers.origin || "http://localhost:3000";
-           return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "API Failed to generate embedded link, using fallback. " + JSON.stringify(inviteData) });
+           return res.status(400).json({ error: "فشل استخراج رابط التوقيع من SignNow. تأكد من أن القالب يحتوي على Role متاح." });
         }
 
         res.json({ signUrl: inviteData.data[0].link, contractId: documentId });
       } catch (e: any) {
         console.error("SignNow invite error:", e);
-        const origin = req.headers.origin || "http://localhost:3000";
-        return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "API Request exception. " + e.message });
+        return res.status(500).json({ error: "API Request exception. " + e.message });
       }
 
     } catch (error: any) {

@@ -41,6 +41,7 @@ import {
   Quote,
   Users,
   Book,
+  X,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
