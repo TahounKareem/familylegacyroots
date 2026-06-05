@@ -82,6 +82,7 @@ async function startServer() {
       const userName = session.customer_details?.name || session.metadata?.userName;
 
       console.log(`Payment successful for order: ${orderId}. Email triggered for ${userEmail}.`);
+      console.log(`[Email Service Mock] Sending the digitally signed contract (Audit Trail & PDF) to: ${userEmail}`);
     }
 
     res.json({ received: true });

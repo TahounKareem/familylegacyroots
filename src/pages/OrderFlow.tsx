@@ -131,6 +131,9 @@ export function OrderFlow() {
         issueStatus: "جاري التنفيذ",
         actionPhase: "مرحلة البحث",
         totalAmount: 0,
+        contractSigned: true,
+        contractSignedAt: new Date().toISOString(),
+        contractUrl: "https://signnow.com/contract/mock",
         data: formData,
       });
 
@@ -172,6 +175,9 @@ export function OrderFlow() {
         issueStatus: "بإنتظار إتمام الدفع", // Will change to جاري التنفيذ after payment hook, but for now we set it as waiting
         actionPhase: "مرحلة البحث",
         totalAmount: totalCost,
+        contractSigned: true,
+        contractSignedAt: new Date().toISOString(),
+        contractUrl: "https://signnow.com/contract/mock",
         data: formData,
       });
 

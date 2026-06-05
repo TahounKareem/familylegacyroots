@@ -251,6 +251,9 @@ export interface Order {
   digitalCopyLink?: string;
   posterLink?: string;
   researchRecommendations?: string;
+  contractSigned?: boolean;
+  contractUrl?: string;
+  contractSignedAt?: string;
 }
 
 interface AppState {

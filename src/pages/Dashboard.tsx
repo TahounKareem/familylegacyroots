@@ -479,8 +479,8 @@ export function Dashboard() {
                     isActive={activeTab === "السجل الأساسي"}
                   />
                   <SidebarItem
-                    title="بيانات العميل / أمين السجل"
-                    isActive={activeTab === "بيانات العميل / أمين السجل"}
+                    title="بيانات أمين السجل"
+                    isActive={activeTab === "بيانات أمين السجل"}
                     isLocked={!isPaid}
                   />
                   <SidebarItem
@@ -646,7 +646,7 @@ export function Dashboard() {
                           <button
                             onClick={() => {
                               if (!order) navigate("/order");
-                              else setActiveTab("بيانات العميل / أمين السجل");
+                              else setActiveTab("بيانات أمين السجل");
                             }}
                             className="mt-6 w-full text-center bg-[#C3262A] hover:bg-[#a61c20] text-white font-bold py-4 rounded-xl transition shadow-lg text-lg"
                           >
@@ -900,7 +900,7 @@ export function Dashboard() {
                       );
                     })()}
 
-                  {activeTab === "بيانات العميل / أمين السجل" && (
+                  {activeTab === "بيانات أمين السجل" && (
                     <div className="space-y-8">
                       <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-brand-900 text-lg p-6 bg-white border border-brand-100 rounded-2xl shadow-sm">
                         <div className="col-span-2 border-b border-brand-100 pb-2 mb-2 font-bold flex items-center gap-2">
@@ -1155,6 +1155,43 @@ export function Dashboard() {
                             <p className="text-xs text-brand-400 mt-3">
                               يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
                             </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Contract Details Section */}
+                      <div className="p-6 bg-white border border-brand-200 rounded-2xl shadow-sm mt-8">
+                        <h3 className="font-bold text-brand-900 border-b border-brand-200 pb-4 mb-4 flex items-center gap-2 text-lg">
+                          <CheckCircle className="w-5 h-5 text-green-600" /> الإعتماد الإلكتروني
+                        </h3>
+                        <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+                          <div className="w-full">
+                            {order.contractSigned ? (
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-4 bg-green-50 p-4 rounded-xl border border-green-100">
+                                  <div className="bg-green-100 p-2 rounded-full text-green-700">
+                                    <CheckCircle className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-green-900">تم توقيع العقد بنجاح</p>
+                                    <p className="text-sm text-green-700 font-mono mt-1">تاريخ التوقيع: {order.contractSignedAt ? new Intl.DateTimeFormat("ar-SA", { dateStyle: "long", timeStyle: "medium" }).format(new Date(order.contractSignedAt)) : "متوفر"}</p>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-brand-600 leading-relaxed">
+                                  يُعد هذا العقد – بما يشمله من المقدمة والتمهيد وصفحة الطلب وجميع المواد والأحكام – اتفاقًا ملزمًا ونهائيًا. تم إثبات توقيعك إلكترونيًا ولها نفس الحجية القانونية المستمدة من السجلات التقنية (Audit Trail).
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex items-center gap-4">
+                                <div className="bg-red-100 p-2 rounded-full text-red-700">
+                                  <X className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-red-900">لم يتم توقيع العقد</p>
+                                  <p className="text-sm text-red-700 mt-1">يرجى التواصل مع الدعم الفني لمراجعة حالة العقد.</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
