@@ -181,7 +181,7 @@ async function startServer() {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
       
       let SIGNNOW_API_KEY = await getSignNowToken();
-      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "2a574ca2a0294a419348dd8dd90194dc373622e0";
+      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "44dfb3653931419984f172e16f3cca445c095957";
 
       if (!SIGNNOW_API_KEY) {
         throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
