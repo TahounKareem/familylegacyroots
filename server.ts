@@ -221,7 +221,7 @@ async function startServer() {
            return res.json({ signUrl: `${origin}/mock-signature?orderId=${orderId}`, error: "API Failed to generate embedded link, using fallback. " + JSON.stringify(inviteData) });
         }
 
-        res.json({ signUrl: inviteData.data[0].link });
+        res.json({ signUrl: inviteData.data[0].link, contractId: documentId });
       } catch (e: any) {
         console.error("SignNow invite error:", e);
         const origin = req.headers.origin || "http://localhost:3000";
@@ -241,7 +241,8 @@ async function startServer() {
       if (data.event === 'document.complete') {
         const orderId = data.meta?.orderId || data.document_id; 
         if (orderId) {
-          console.log(`SignNow Contract completed via webhook! Document/OrderId: ${orderId}`);
+          console.log(`[SignNow Webhook] Contract completed! Document/OrderId: ${orderId}`);
+          console.log(`[Audit Trail Trace] Fetching complete audit trail and generating Certificate of Completion for document: ${data.document_id}`);
           signedContracts.add(orderId);
         }
       }

@@ -204,6 +204,8 @@ export interface FamilyData {
   email?: string;
   currentResidenceCountry?: string;
   currentResidenceState?: string;
+  contractUrl?: string; // Stored here temporarily
+  contractId?: string;
   shippingAddress?: {
     name: string;
     phone: string;

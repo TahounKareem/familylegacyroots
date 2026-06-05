@@ -42,11 +42,15 @@ export function ESignature() {
           throw new Error(data.error || "فشل في إنشاء العقد من الخادم");
         }
         
-        const urlStr = data?.data?.contract?.signers?.[0]?.sign_page_url || data?.contract?.signers?.[0]?.sign_page_url;
+        const urlStr = data?.signUrl;
         
         if (urlStr) {
           // Remove embedded since we want a popup/new window experience
           setSignUrl(urlStr);
+          // Save the URL to pendingOrderData so we can store it in placeOrder 
+          useAppStore.setState(s => ({
+            pendingOrderData: { ...s.pendingOrderData, contractUrl: urlStr, contractId: data.contractId } as FamilyData
+          }));
         } else {
           throw new Error("لم يتم العثور على رابط التوقيع في الرد: " + JSON.stringify(data));
         }

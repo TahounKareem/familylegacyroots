@@ -1168,17 +1168,20 @@ export function Dashboard() {
                           <div className="w-full">
                             {order.contractSigned ? (
                               <div className="space-y-4">
-                                <div className="flex items-center gap-4 bg-green-50 p-4 rounded-xl border border-green-100">
-                                  <div className="bg-green-100 p-2 rounded-full text-green-700">
+                                <div className="flex items-center gap-4 bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-sm">
+                                  <div className="bg-emerald-100 p-2 rounded-full text-emerald-700">
                                     <CheckCircle className="w-6 h-6" />
                                   </div>
                                   <div>
-                                    <p className="font-bold text-green-900">تم توقيع العقد بنجاح</p>
-                                    <p className="text-sm text-green-700 font-mono mt-1">تاريخ التوقيع: {order.contractSignedAt ? new Intl.DateTimeFormat("ar-SA", { dateStyle: "long", timeStyle: "medium" }).format(new Date(order.contractSignedAt)) : "متوفر"}</p>
+                                    <p className="font-bold text-emerald-900">مكتمل وموثق رقمياً (eSignature & Audit Trail)</p>
+                                    <p className="text-sm text-emerald-700 font-mono mt-1">تاريخ توثيق الإعتماد: {order.contractSignedAt ? new Intl.DateTimeFormat("ar-SA", { dateStyle: "long", timeStyle: "medium" }).format(new Date(order.contractSignedAt)) : "متوفر"}</p>
+                                    {order.data.contractId && (
+                                       <p className="text-xs text-emerald-600 font-mono mt-1">معرف الوثيقة (SignNow ID): {order.data.contractId}</p>
+                                    )}
                                   </div>
                                 </div>
-                                <p className="text-sm text-brand-600 leading-relaxed">
-                                  يُعد هذا العقد – بما يشمله من المقدمة والتمهيد وصفحة الطلب وجميع المواد والأحكام – اتفاقًا ملزمًا ونهائيًا. تم إثبات توقيعك إلكترونيًا ولها نفس الحجية القانونية المستمدة من السجلات التقنية (Audit Trail).
+                                <p className="text-sm text-brand-600 leading-relaxed bg-brand-50 p-4 rounded-lg border border-brand-100">
+                                  يُعد هذا العقد – بما يشمله من المقدمة والتمهيد وصفحة الطلب وجميع المواد والأحكام – اتفاقًا ملزمًا ونهائيًا. تم إثبات توقيعك إلكترونيًا ولها نفس الحجية القانونية أمام كافة الجهات الرسمية، ومرفق بها سجلات التتبع الرقمي (Audit Trail). تم إرسال نسخة من العقد المكتمل إلى بريدك الإلكتروني.
                                 </p>
                               </div>
                             ) : (

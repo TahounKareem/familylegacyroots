@@ -133,7 +133,7 @@ export function OrderFlow() {
         totalAmount: 0,
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
-        contractUrl: "https://signnow.com/contract/mock",
+        contractUrl: formData.contractUrl || "",
         data: formData,
       });
 
@@ -177,7 +177,7 @@ export function OrderFlow() {
         totalAmount: totalCost,
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
-        contractUrl: "https://signnow.com/contract/mock",
+        contractUrl: formData.contractUrl || "",
         data: formData,
       });
 
