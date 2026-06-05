@@ -50,6 +50,51 @@ const systemInstruction = `أنت "المرشد الذكي"، مساعد إرش�
 ${knowledgeBase}
 `;
 
+let cachedSignNowToken: string | null = null;
+let tokenExpiry: number = 0;
+
+async function getSignNowToken(): Promise<string> {
+  const basicToken = process.env.SIGNNOW_BASIC_TOKEN;
+  const username = process.env.SIGNNOW_USERNAME;
+  const password = process.env.SIGNNOW_PASSWORD;
+  
+  if (!basicToken || !username || !password) {
+    // Fallback to the static Bearer token if auto-generation is not configured
+    return process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+  }
+
+  // Preemptively refresh if expiring in less than 5 minutes
+  if (cachedSignNowToken && Date.now() < tokenExpiry) {
+    return cachedSignNowToken;
+  }
+
+  console.log("Generating new SignNow Access Token...");
+  try {
+    const res = await fetch("https://api.signnow.com/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${basicToken}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=password`
+    });
+
+    const data = await res.json();
+    if (data.access_token) {
+      cachedSignNowToken = data.access_token;
+      // expire in data.expires_in seconds (usually 30 days, but we subtract 5 mins for safety)
+      tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
+      return cachedSignNowToken;
+    }
+    
+    throw new Error("Failed to generate SignNow Token: " + JSON.stringify(data));
+  } catch (error) {
+    console.error("Token generation error:", error);
+    // Fallback to static if request fails completely
+    return process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
@@ -99,7 +144,7 @@ async function startServer() {
       // Using credentials provided by user:
       // API Key / Bearer: 495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176
       // Basic Auth Token: ZGVkOTI1ZDUxY2U5YjcxNjBmOTEyNDA2Zjk5NjY0ZDI6MGM4YTM4NTFlNmVlMzYzNmFkNWE4MGNmMDVmYTFmNTY=
-      const SIGNNOW_API_KEY = process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+      let SIGNNOW_API_KEY = await getSignNowToken();
       
       // We will perform a generic ping/verify to SignNow API to validate the key
       const pingRes = await fetch("https://api.signnow.com/user", {
@@ -135,7 +180,7 @@ async function startServer() {
     try {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
       
-      const SIGNNOW_API_KEY = process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+      let SIGNNOW_API_KEY = await getSignNowToken();
       const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "2a574ca2a0294a419348dd8dd90194dc373622e0";
 
       if (!SIGNNOW_API_KEY) {
@@ -179,11 +224,11 @@ async function startServer() {
           documentId = copyData.id;
           console.log(`Generated Document ID: ${documentId}`);
         } else {
-           throw new Error("فشل استنساخ قالب العقد من SignNow: " + JSON.stringify(copyData));
+           throw new Error("SignNow API Error: " + JSON.stringify(copyData));
         }
       } catch (e: any) {
          console.error("SignNow template copy error:", e);
-         return res.status(400).json({ error: "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
+         return res.status(400).json({ error: e.message || "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
       }
 
       // Step 2: Generate embedded invite for the document
