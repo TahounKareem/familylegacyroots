@@ -215,9 +215,10 @@ async function startServer() {
           console.log(`Generated Document ID: ${documentId}`);
         } else {
            if (copyData.errors && copyData.errors[0]?.code === 65582) {
-             throw new Error("هذا المعرف (ID) يعود لمستند عادي وليس قالب. يرجى فتح حسابك في SignNow، والضغط على خيار 'Make Template' بجوار المستند، ثم استخدم الـ ID الجديد الخاص بالقالب.");
+             const keyPrefix = SIGNNOW_API_KEY.substring(0, 8) + "...";
+             throw new Error(`(API Key: ${keyPrefix})\nلم يتم العثور على القالب أو لا يملك الحساب صلاحية الوصول إليه. يرجى التأكد من أن الـ Template ID صحيح وموجود في نفس حساب SignNow. تفاصيل: Document not found.`);
            } else if (copyText.includes("404")) {
-             throw new Error("لم يتم العثور على القالب. تأكد من أن الـ Template ID المضاف صحيح (وليس Document ID)، وأنه موجود في حساب SignNow المرتبط بـ API Key.");
+             throw new Error("مسار الـ API غير صحيح. يرجى التأكد من الـ Template ID.");
            }
            throw new Error("SignNow API Error: " + JSON.stringify(copyData));
         }
