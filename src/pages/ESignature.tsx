@@ -140,18 +140,7 @@ export function ESignature() {
                        className="w-full h-full border-2 border-brand-200 rounded-xl shadow-md"
                        allow="camera; microphone; geolocation"
                      ></iframe>
-                     <p className="text-sm text-gray-500 max-w-sm mt-4">
-                       بعد التوقيع، سيتم تحديث هذه الصفحة والمتابعة تلقائياً. المرجو الانتظار لحظات بعد الانتهاء.
-                     </p>
-                     {(currentUser?.role === 'admin' || currentUser?.role === 'maestro') && (
-                       <button
-                         onClick={() => { setIsSigned(true); navigate("/order?payment=true", { replace: true }); }}
-                         className="mt-4 text-xs underline text-red-500"
-                       >
-                         تخطي للإختبار (المدير العام)
-                       </button>
-                     )}
-                   </div>
+                     <p className="text-sm font-bold text-brand-800 max-w-sm mt-4 mb-2 text-center">الرجاء التوقيع على الملف أعلاه، ثم الضغط على الزر أدناه للمتابعة</p><button onClick={() => { setIsSigned(true); navigate("/order?payment=true", { replace: true }); }} className="mb-4 px-6 py-2 bg-brand-600 text-white font-medium rounded-full shadow-md hover:bg-brand-700 transition">لقد قمت بإتمام التوقيع بنجاح</button></div>
                  ) : (
                    <div className="text-red-500 font-medium p-4">
                      {errorMsg || "حدث خطأ أثناء استخراج رابط التوقيع. يرجى מراجعة إعدادات قالب eSignatures.io الخاص بك."}

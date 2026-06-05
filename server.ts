@@ -179,140 +179,18 @@ async function startServer() {
   app.post("/api/contracts", async (req, res) => {
     try {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
-      
       let SIGNNOW_API_KEY = await getSignNowToken();
-      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "c4a19bd6babc4a0fbd1913856a97f07d729848f0";
-
       if (!SIGNNOW_API_KEY) {
         throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
       }
-
-      let documentId = "";
       
-      try {
-        console.log(`Copying SignNow template: ${SIGNNOW_TEMPLATE_ID}`);
-        let targetTemplateId = SIGNNOW_TEMPLATE_ID;
-        
-        let copyRes = await fetch(`https://api.signnow.com/template/${targetTemplateId}/copy`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
-        });
-        
-        let copyText = await copyRes.text();
-        let copyData;
-        try {
-          copyData = JSON.parse(copyText);
-        } catch (err) {
-          copyData = { error: copyText };
-        }
-
-        // If not found, perhaps it was a Document Group Template?
-        if (copyData.errors && copyData.errors[0]?.code === 65582) {
-           console.log("Template not found directly. Checking if it's a Document Group Template ID...");
-           const grpRes = await fetch(`https://api.signnow.com/documentgroup/template/${SIGNNOW_TEMPLATE_ID}`, {
-             method: "GET",
-             headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
-           });
-           
-           if (grpRes.ok) {
-             const grpData = await grpRes.json();
-             if (grpData.templates && grpData.templates.length > 0) {
-               targetTemplateId = grpData.templates[0].id;
-               console.log(`Extracted underlying template ID ${targetTemplateId} from Document Group Template`);
-               
-               // Retry copy with the real template ID
-               copyRes = await fetch(`https://api.signnow.com/template/${targetTemplateId}/copy`, {
-                  method: "POST",
-                  headers: {
-                    "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
-               });
-               copyText = await copyRes.text();
-               try {
-                 copyData = JSON.parse(copyText);
-               } catch (err) {
-                 copyData = { error: copyText };
-               }
-             }
-           }
-        }
-
-        console.log("SignNow copy response:", copyText);
-        
-        if (copyData.id) {
-          documentId = copyData.id;
-          console.log(`Generated Document ID: ${documentId}`);
-        } else {
-           if (copyData.errors && copyData.errors[0]?.code === 65582) {
-             const keyPrefix = SIGNNOW_API_KEY.substring(0, 8) + "...";
-             throw new Error(`(API Key: ${keyPrefix})\nلم يتم العثور على القالب أو لا يملك الحساب صلاحية الوصول إليه. يرجى التأكد من أن الـ Template ID صحيح وموجود في نفس حساب SignNow. تفاصيل: Document not found.`);
-           } else if (copyText.includes("404")) {
-             throw new Error("مسار الـ API غير صحيح. يرجى التأكد من الـ Template ID.");
-           }
-           throw new Error("SignNow API Error: " + JSON.stringify(copyData));
-        }
-      } catch (e: any) {
-         console.error("SignNow template copy error:", e);
-         return res.status(400).json({ error: e.message || "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
-      }
-
-      // Step 2: Generate embedded invite for the document
-      try {
-        console.log(`Fetching roles for Document ID: ${documentId}`);
-        const docRes = await fetch(`https://api.signnow.com/document/${documentId}`, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
-        });
-        const docData = await docRes.json();
-        let roleId = "";
-        let roleName = "Signer 1";
-        if (docData.roles && docData.roles.length > 0) {
-          roleId = docData.roles[0].unique_id;
-          roleName = docData.roles[0].name || roleName;
-        }
-
-        const payload = {
-          invites: [
-            {
-              email: email || "customer@example.com",
-              role_id: roleId,
-              order: 1,
-              auth_method: "none",
-              first_name: customerName || "Customer"
-            }
-          ]
-        };
-
-        console.log(`Generating invite for Document ID: ${documentId} with role: ${roleName}`);
-        const inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const inviteText = await inviteRes.text();
-        console.log("SignNow invite response:", inviteText);
-        const inviteData = JSON.parse(inviteText);
-        
-        if (inviteData.errors || !inviteData.data || !inviteData.data[0]?.link) {
-           console.error("SignNow Invite Error:", inviteData);
-           return res.status(400).json({ error: "فشل استخراج رابط التوقيع من SignNow. تفاصيل: " + JSON.stringify(inviteData.errors || inviteData) });
-        }
-
-        res.json({ signUrl: inviteData.data[0].link, contractId: documentId });
-      } catch (e: any) {
-        console.error("SignNow invite error:", e);
-        return res.status(500).json({ error: "API Request exception. " + e.message });
-      }
+      console.log(`[SignNow API] Skipping API document generation and using generic link per user request.`);
+      
+      // Generic Link provided by user:
+      const genericSignUrl = "https://signnow.com/s/KFgBgium";
+      
+      // Return the generic link directly
+      res.json({ signUrl: genericSignUrl, contractId: orderId || "KFgBgium" });
 
     } catch (error: any) {
       console.error("Error creating contract:", error);
