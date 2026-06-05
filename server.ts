@@ -190,7 +190,7 @@ async function startServer() {
       let documentId = "";
       
       try {
-        console.log(`Copying SignNow document/template: ${SIGNNOW_TEMPLATE_ID}`);
+        console.log(`Copying SignNow template: ${SIGNNOW_TEMPLATE_ID}`);
         let copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
           method: "POST",
           headers: {
@@ -208,38 +208,17 @@ async function startServer() {
           copyData = { error: copyText };
         }
 
-        // If it failed because it's not a template but a document, try /document/:id/copy
-        if (!copyRes.ok || copyData["404"] || copyData.errors) {
-          console.log("Failed as template, trying as document...", copyData);
-          const docCopyRes = await fetch(`https://api.signnow.com/document/${SIGNNOW_TEMPLATE_ID}/copy`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
-          });
-          
-          const docCopyText = await docCopyRes.text();
-          let docCopyData;
-          try {
-            docCopyData = JSON.parse(docCopyText);
-          } catch (err) {
-            docCopyData = { error: docCopyText };
-          }
-          
-          if (docCopyRes.ok && docCopyData.id) {
-             copyData = docCopyData;
-             copyText = docCopyText;
-          }
-        }
-
         console.log("SignNow copy response:", copyText);
         
         if (copyData.id) {
           documentId = copyData.id;
           console.log(`Generated Document ID: ${documentId}`);
         } else {
+           if (copyData.errors && copyData.errors[0]?.code === 65582) {
+             throw new Error("هذا المعرف (ID) يعود لمستند عادي وليس قالب. يرجى فتح حسابك في SignNow، والضغط على خيار 'Make Template' بجوار المستند، ثم استخدم الـ ID الجديد الخاص بالقالب.");
+           } else if (copyText.includes("404")) {
+             throw new Error("لم يتم العثور على القالب. تأكد من أن الـ Template ID المضاف صحيح (وليس Document ID)، وأنه موجود في حساب SignNow المرتبط بـ API Key.");
+           }
            throw new Error("SignNow API Error: " + JSON.stringify(copyData));
         }
       } catch (e: any) {
