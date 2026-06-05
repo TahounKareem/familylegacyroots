@@ -161,8 +161,8 @@ export function ServiceAgreement() {
 
     await logLegalEvent("contract_electronically_signed", { version: "v1.0", provider: "signnow" }, contractId.current, orderId.current);
     
-    // Jump straight to execution start / payment step
-    navigate("/order?step=4");
+    // Jump to the electronic signature page
+    navigate("/e-signature");
   };
 
   if (!currentUser || !pendingOrderData) return null;

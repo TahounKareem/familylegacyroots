@@ -117,6 +117,9 @@ export function OrderFlow() {
       
       const orderId = currentUser.id;
       const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();
+      
+      const finalData = { ...formData, contractUrl: pendingOrderData?.contractUrl || "", contractId: pendingOrderData?.contractId || "" };
+
       await placeOrder({
         id: orderId,
         orderNumber,
@@ -133,8 +136,8 @@ export function OrderFlow() {
         totalAmount: 0,
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
-        contractUrl: formData.contractUrl || "",
-        data: formData,
+        contractUrl: finalData.contractUrl,
+        data: finalData,
       });
 
       // Navigate to success page mimicking Stripe
@@ -160,6 +163,9 @@ export function OrderFlow() {
       const planPrice = paymentType === "full" ? 1780 : 693;
       const totalCost = paymentType === "full" ? 1780 : 1980;
       
+      // Merge any contract data generated in ESignature step
+      const finalData = { ...formData, contractUrl: pendingOrderData?.contractUrl || "", contractId: pendingOrderData?.contractId || "" };
+
       // Save order in Firestore with local pending state 
       await placeOrder({
         id: orderId,
@@ -177,8 +183,8 @@ export function OrderFlow() {
         totalAmount: totalCost,
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
-        contractUrl: formData.contractUrl || "",
-        data: formData,
+        contractUrl: finalData.contractUrl,
+        data: finalData,
       });
 
       // Call Express Backend to create a Stripe Session
