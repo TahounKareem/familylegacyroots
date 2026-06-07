@@ -150,37 +150,23 @@ export function ESignature() {
                      <button onClick={() => { setIsSigned(true); navigate("/order?payment=true", { replace: true }); }} className="mb-4 px-6 py-2 bg-brand-600 text-white font-medium rounded-full shadow-md hover:bg-brand-700 transition">لقد قمت بإتمام التوقيع فعلاً (تخطي)</button>
                    </div>
                  ) : (
-                   <div className="flex flex-col items-center justify-center p-4 text-center w-full">
-                     <AlertTriangle className="w-10 h-10 text-orange-500 mb-2" />
-                     <h3 className="text-lg font-bold text-brand-900 mb-2">توقيع الوثيقة (حل بديل)</h3>
-                     <p className="text-orange-700 text-sm mb-6 max-w-lg w-full">
-                       تعذر الاتصال بمنصة SignNow مؤقتاً بسبب خلل في إعدادات الربط أو انتهاء صلاحية الرمز. كحل بديل لعدم تعطل طلبك، يمكنك الإقرار والموافقة محلياً عبر المربع أدناه.
+                   <div className="flex flex-col items-center justify-center p-6 text-center">
+                     <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+                     <h3 className="text-lg font-bold text-brand-900 mb-2">تعذر الوصول لمنصة التوقيع</h3>
+                     <p className="text-red-600 font-medium whitespace-pre-line mb-4 border border-red-200 bg-red-50 p-4 rounded-xl text-sm w-full max-w-lg text-right">
+                       فشل الاتصال بمنصة SignNow. الخطأ الوارد:
+                       <br />
+                       {errorMsg}
                      </p>
                      
-                     <div className="w-full max-w-lg bg-orange-50 border border-orange-200 rounded-2xl p-6 shadow-sm text-right">
-                        <h4 className="font-bold text-orange-900 mb-4 border-b border-orange-200 pb-2">إقرار بمثابة توقيع إلكتروني</h4>
-                        <div className="flex items-start gap-4">
-                          <input 
-                            type="checkbox" 
-                            id="local-agree" 
-                            onChange={(e) => {
-                               if (e.target.checked) {
-                                 // Local sign
-                                 setIsSigned(true);
-                                 useAppStore.setState(s => ({
-                                   pendingOrderData: { ...s.pendingOrderData, contractSigned: true } as any
-                                 }));
-                                 setTimeout(() => navigate("/order?payment=true", { replace: true }), 1500);
-                               }
-                            }}
-                            className="mt-1 w-6 h-6 text-brand-600 rounded border-gray-300 focus:ring-brand-500 cursor-pointer"
-                          />
-                          <label htmlFor="local-agree" className="text-sm text-gray-800 leading-relaxed cursor-pointer font-medium">
-                            أقر بأنني قد وافقت على تدشين الخدمة، وأُفوض منصة "سجل تراث العائلة" للبدء في الإجراءات، ويُعد اختياري لهذا المربع بمثابة موافقة صريحة وتوقيع بديل (Local Signature Fallback) يحل محل التوقيع الأصلي مؤقتاً لحين إصلاح المعالجة الآلية.
-                          </label>
-                        </div>
+                     <div className="bg-brand-50 text-brand-800 p-4 rounded-xl text-sm w-full max-w-lg text-right border border-brand-100 mt-4">
+                       <h4 className="font-bold mb-2 text-brand-900">تعليمات لحل المشكلة:</h4>
+                       <ul className="list-disc pr-5 space-y-2">
+                         <li>تأكد من إدخال <strong>SIGNNOW_API_KEY</strong> صحيح للمصادقة.</li>
+                         <li>أથ تأكد من أن معلومات الدخول (الإيميل، الباسورد، Basic Token) صحيحة في الإعدادات.</li>
+                         <li>ملاحظة: إذا كان حسابك مفعل عليه المصادقة الثنائية (2FA)، فلن يعمل تسجيل الدخول التلقائي ويجب استخدام رمز مصادقة (Bearer Token) مباشرة في <code>SIGNNOW_API_KEY</code>.</li>
+                       </ul>
                      </div>
-                     <p className="text-xs text-gray-400 mt-8 w-full block text-center" dir="ltr">Developer Note: {errorMsg?.substring(0, 80)}...</p>
                    </div>
                  )}
                </div>
