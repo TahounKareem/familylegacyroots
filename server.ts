@@ -175,7 +175,7 @@ async function startServer() {
     }
   });
 
-  // SignNow APIs (Legacy iframe)
+  // SignNow APIs
   app.post("/api/contracts", async (req, res) => {
     try {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
@@ -184,13 +184,108 @@ async function startServer() {
         throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
       }
       
-      console.log(`[SignNow API] Skipping API document generation and using generic link per user request.`);
+      console.log(`[SignNow API] Initializing embedded document creation for Order: ${orderId}`);
       
-      // Generic Link provided by user:
-      const genericSignUrl = "https://signnow.com/s/KFgBgium";
+      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "0f222d784ad44d979dff2e9f966330ac49bee472";
+
+      let documentId = "";
       
-      // Return the generic link directly
-      res.json({ signUrl: genericSignUrl, contractId: orderId || "KFgBgium" });
+      // Step 1: Copy Template
+      try {
+        let copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ document_name: `سجل تراث العائلة - ${orderId || customerName || "جديد"}` })
+        });
+        
+        let copyData = await copyRes.json().catch(() => ({}));
+
+        if (copyData.id) {
+          documentId = copyData.id;
+          console.log(`Created new Document ID: ${documentId}`);
+        } else {
+           throw new Error("فشل في نسخ القالب (Template Copy Error). تفاصيل: " + JSON.stringify(copyData));
+        }
+      } catch (e: any) {
+         console.error("SignNow template copy error:", e);
+         return res.status(400).json({ error: "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
+      }
+
+      // Step 2: Fetch roles and generate embedded invite for the document
+      try {
+        const docRes = await fetch(`https://api.signnow.com/document/${documentId}`, {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
+        });
+        const docData = await docRes.json();
+        
+        let roleId = "";
+        let roleName = "Signer 1";
+        if (docData.roles && docData.roles.length > 0) {
+          roleId = docData.roles[0].unique_id;
+          roleName = docData.roles[0].name || roleName;
+        }
+
+        const payload = {
+          invites: [
+            {
+              email: email || "customer@example.com",
+              role_id: roleId,
+              order: 1,
+              auth_method: "none",
+              first_name: customerName || "Customer"
+            }
+          ]
+        };
+
+        let inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        let inviteData = await inviteRes.json().catch(() => ({}));
+
+        if (inviteData.errors || !inviteData.data || inviteData.data.length === 0) {
+           console.error("SignNow Invite Error:", inviteData);
+           return res.status(400).json({ error: "فشل استخراج بيانات التوقيع من SignNow (Embedded Invite Error)" });
+        }
+
+        const inviteId = inviteData.data[0].id;
+        console.log(`Created Embedded Invite ID: ${inviteId}`);
+
+        // Step 3: Create the one-time link for the iframe
+        const linkRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites/${inviteId}/link`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            auth_method: "none",
+            link_expiration: 30
+          })
+        });
+
+        const linkData = await linkRes.json().catch(() => ({}));
+
+        if (linkData.errors || !linkData.data || !linkData.data.link) {
+           console.error("SignNow Link Error:", linkData);
+           return res.status(400).json({ error: "فشل إنشاء رابط التوقيع (Embedded Link Error)" });
+        }
+
+        console.log(`Embedded Link Generated Successfully`);
+        res.json({ signUrl: linkData.data.link, contractId: documentId });
+      } catch (e: any) {
+        console.error("SignNow invite logic error:", e);
+        return res.status(500).json({ error: "API Request exception during invite. " + e.message });
+      }
 
     } catch (error: any) {
       console.error("Error creating contract:", error);
