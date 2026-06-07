@@ -1176,8 +1176,13 @@ export function Dashboard() {
                                   <div>
                                     <p className="font-bold text-emerald-900">مكتمل وموثق رقمياً (eSignature & Audit Trail)</p>
                                     <p className="text-sm text-emerald-700 font-mono mt-1">تاريخ توثيق الإعتماد: {order.contractSignedAt ? new Intl.DateTimeFormat("ar-SA", { dateStyle: "long", timeStyle: "medium" }).format(new Date(order.contractSignedAt)) : "متوفر"}</p>
-                                    {order.data.contractId && (
-                                       <p className="text-xs text-emerald-600 font-mono mt-1">معرف الوثيقة (SignNow ID): {order.data.contractId}</p>
+                                    {order.data.contractUrl && order.data.contractUrl.startsWith('data:image') && (
+                                       <div className="mt-3">
+                                          <p className="text-xs text-emerald-800 font-medium mb-2">التوقيع الإلكتروني:</p>
+                                          <div className="bg-white border border-emerald-200 rounded-lg p-2 inline-block">
+                                             <img src={order.data.contractUrl} className="h-16 object-contain mix-blend-multiply" alt="Signature" />
+                                          </div>
+                                       </div>
                                     )}
                                   </div>
                                 </div>

@@ -2398,6 +2398,17 @@ export function AdminPanel() {
                     </p>
                   </div>
                 )}
+                {selectedOrder.contractSigned && selectedOrder.data.contractUrl && selectedOrder.data.contractUrl.startsWith('data:image') && (
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl md:col-span-2">
+                    <strong className="text-blue-800 block mb-2 flex items-center gap-2">
+                      التوقيع الإلكتروني المعتمد:
+                    </strong>
+                    <div className="bg-white p-2 border border-blue-200 rounded-lg inline-block">
+                       <img src={selectedOrder.data.contractUrl} alt="Signature" className="h-24 object-contain mix-blend-multiply" />
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2 font-mono" dir="ltr">Time: {selectedOrder.contractSignedAt ? new Date(selectedOrder.contractSignedAt).toLocaleString() : 'N/A'}</p>
+                  </div>
+                )}
               </div>
 
               <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">
