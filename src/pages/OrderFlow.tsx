@@ -118,7 +118,13 @@ export function OrderFlow() {
       const orderId = currentUser.id;
       const orderNumber = "ORD-" + Math.floor(1000000 + Math.random() * 9000000).toString();
       
-      const finalData = { ...formData, contractUrl: pendingOrderData?.contractUrl || "", contractId: pendingOrderData?.contractId || "" };
+      const finalData = { 
+        ...formData, 
+        contractUrl: pendingOrderData?.contractUrl || "", 
+        contractId: pendingOrderData?.contractId || "",
+        contractSigned: pendingOrderData?.contractSigned || false,
+        signatureName: pendingOrderData?.signatureName || ""
+      };
 
       await placeOrder({
         id: orderId,
@@ -164,7 +170,13 @@ export function OrderFlow() {
       const totalCost = paymentType === "full" ? 1780 : 1980;
       
       // Merge any contract data generated in ESignature step
-      const finalData = { ...formData, contractUrl: pendingOrderData?.contractUrl || "", contractId: pendingOrderData?.contractId || "" };
+      const finalData = { 
+        ...formData, 
+        contractUrl: pendingOrderData?.contractUrl || "", 
+        contractId: pendingOrderData?.contractId || "",
+        contractSigned: pendingOrderData?.contractSigned || false,
+        signatureName: pendingOrderData?.signatureName || ""
+      };
 
       // Save order in Firestore with local pending state 
       await placeOrder({

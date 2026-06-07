@@ -206,6 +206,8 @@ export interface FamilyData {
   currentResidenceState?: string;
   contractUrl?: string; // Stored here temporarily
   contractId?: string;
+  contractSigned?: boolean;  // Built-in Electronic Signature status
+  signatureName?: string;    // Built-in Electronic Signature name
   shippingAddress?: {
     name: string;
     phone: string;
