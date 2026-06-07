@@ -174,7 +174,7 @@ async function startServer() {
       
       console.log(`[SignNow API] Initializing embedded document creation for Order: ${orderId}`);
       
-      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "0f222d784ad44d979dff2e9f966330ac49bee472";
+      const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "c4a19bd6babc4a0fbd1913856a97f07d729848f0";
 
       let documentId = "";
       
