@@ -99,6 +99,30 @@ async function startServer() {
     if (process.env.SIGNNOW_API_KEY) {
       return process.env.SIGNNOW_API_KEY;
     }
+    
+    const basicToken = process.env.SIGNNOW_BASIC_TOKEN;
+    const username = process.env.SIGNNOW_USERNAME;
+    const password = process.env.SIGNNOW_PASSWORD;
+
+    if (basicToken && username && password) {
+      try {
+        const res = await fetch("https://api.signnow.com/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Authorization": `Basic ${basicToken}`,
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: `grant_type=password&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        });
+        const data = await res.json();
+        if (data.access_token) {
+          return data.access_token;
+        }
+      } catch (err) {
+        console.error("Failed to generate SignNow token", err);
+      }
+    }
+
     return "";
   }
 
