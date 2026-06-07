@@ -58,9 +58,12 @@ async function getSignNowToken(): Promise<string> {
   const username = process.env.SIGNNOW_USERNAME;
   const password = process.env.SIGNNOW_PASSWORD;
   
+  // If credentials aren't fully provided, fall back to the manually provided API token
   if (!basicToken || !username || !password) {
-    // Fallback to the static Bearer token if auto-generation is not configured
-    return process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+    console.log("Using static SIGNNOW_API_KEY since auto-generation parameters are missing.");
+    const staticToken = process.env.SIGNNOW_API_KEY;
+    if (!staticToken) throw new Error("لم يتم تكوين إعدادات SignNow في البيئة.");
+    return staticToken;
   }
 
   // Preemptively refresh if expiring in less than 5 minutes
@@ -68,9 +71,10 @@ async function getSignNowToken(): Promise<string> {
     return cachedSignNowToken;
   }
 
-  console.log("Generating new SignNow Access Token...");
+  console.log("Generating new SignNow Access Token via OAuth2...");
+  let res;
   try {
-    const res = await fetch("https://api.signnow.com/oauth2/token", {
+    res = await fetch("https://api.signnow.com/oauth2/token", {
       method: "POST",
       headers: {
         "Authorization": `Basic ${basicToken}`,
@@ -78,21 +82,26 @@ async function getSignNowToken(): Promise<string> {
       },
       body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=password`
     });
-
-    const data = await res.json();
-    if (data.access_token) {
-      cachedSignNowToken = data.access_token;
-      // expire in data.expires_in seconds (usually 30 days, but we subtract 5 mins for safety)
-      tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
-      return cachedSignNowToken;
-    }
-    
-    throw new Error("Failed to generate SignNow Token: " + JSON.stringify(data));
-  } catch (error) {
-    console.error("Token generation error:", error);
-    // Fallback to static if request fails completely
-    return process.env.SIGNNOW_API_KEY || "495ec6d39ffc100718a7b52560730e4c74ba4e02d2c28c8c4a59aedde8362176";
+  } catch (error: any) {
+    throw new Error("خطأ في الاتصال بخوادم SignNow: " + error.message);
   }
+
+  const data = await res.json();
+  if (data.access_token) {
+    cachedSignNowToken = data.access_token;
+    // expire in data.expires_in seconds (usually 30 days, but we subtract 5 mins for safety)
+    tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
+    console.log("Successfully generated new Access Token.");
+    return cachedSignNowToken;
+  }
+  
+  if (data.error === "Invalid credentials.") {
+    throw new Error("بيانات حساب SignNow غير صحيحة (الإيميل أو كلمة المرور). يرجى تحديثها في إعدادات البيئة (SIGNNOW_USERNAME / SIGNNOW_PASSWORD).");
+  } else if (data.error === "invalid_client") {
+    throw new Error("بيانات الـ App في SignNow غير صحيحة (تأكد من SIGNNOW_BASIC_TOKEN وأن التطبيق في وضع الـ Live وليس الـ Sandbox).");
+  }
+
+  throw new Error("فشل في توليد Access Token من SignNow. تفاصيل: " + JSON.stringify(data));
 }
 
 async function startServer() {
