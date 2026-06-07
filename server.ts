@@ -207,11 +207,11 @@ async function startServer() {
           documentId = copyData.id;
           console.log(`Created new Document ID: ${documentId}`);
         } else {
-           throw new Error("فشل في نسخ القالب (Template Copy Error). تفاصيل: " + JSON.stringify(copyData));
+           throw new Error("فشل في نسخ القالب: " + JSON.stringify(copyData));
         }
       } catch (e: any) {
          console.error("SignNow template copy error:", e);
-         return res.status(400).json({ error: "فشل الوصول الى SignNow: تأكد من مفتاح الـ API و Template ID" });
+         return res.status(400).json({ error: "فشل الوصول الى SignNow خطوة 1: " + e.message });
       }
 
       // Step 2: Fetch roles and generate embedded invite for the document
