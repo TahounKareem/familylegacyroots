@@ -50,60 +50,6 @@ const systemInstruction = `أنت "المرشد الذكي"، مساعد إرش�
 ${knowledgeBase}
 `;
 
-let cachedSignNowToken: string | null = null;
-let tokenExpiry: number = 0;
-
-async function getSignNowToken(): Promise<string> {
-  const basicToken = process.env.SIGNNOW_BASIC_TOKEN;
-  const username = process.env.SIGNNOW_USERNAME;
-  const password = process.env.SIGNNOW_PASSWORD;
-  
-  // If credentials aren't fully provided, fall back to the manually provided API token
-  if (!basicToken || !username || !password) {
-    console.log("Using static SIGNNOW_API_KEY since auto-generation parameters are missing.");
-    const staticToken = process.env.SIGNNOW_API_KEY;
-    if (!staticToken) throw new Error("لم يتم تكوين إعدادات SignNow في البيئة.");
-    return staticToken;
-  }
-
-  // Preemptively refresh if expiring in less than 5 minutes
-  if (cachedSignNowToken && Date.now() < tokenExpiry) {
-    return cachedSignNowToken;
-  }
-
-  console.log("Generating new SignNow Access Token via OAuth2...");
-  let res;
-  try {
-    res = await fetch("https://api.signnow.com/oauth2/token", {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${basicToken}`,
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=password`
-    });
-  } catch (error: any) {
-    throw new Error("خطأ في الاتصال بخوادم SignNow: " + error.message);
-  }
-
-  const data = await res.json();
-  if (data.access_token) {
-    cachedSignNowToken = data.access_token;
-    // expire in data.expires_in seconds (usually 30 days, but we subtract 5 mins for safety)
-    tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
-    console.log("Successfully generated new Access Token.");
-    return cachedSignNowToken;
-  }
-  
-  if (data.error === "Invalid credentials.") {
-    throw new Error("بيانات حساب SignNow غير صحيحة (الإيميل أو كلمة المرور). يرجى تحديثها في إعدادات البيئة (SIGNNOW_USERNAME / SIGNNOW_PASSWORD).");
-  } else if (data.error === "invalid_client") {
-    throw new Error("بيانات الـ App في SignNow غير صحيحة (تأكد من SIGNNOW_BASIC_TOKEN وأن التطبيق في وضع الـ Live وليس الـ Sandbox).");
-  }
-
-  throw new Error("فشل في توليد Access Token من SignNow. تفاصيل: " + JSON.stringify(data));
-}
-
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
