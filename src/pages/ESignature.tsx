@@ -160,13 +160,13 @@ export function ESignature() {
                      </p>
                      
                      <div className="bg-brand-50 text-brand-800 p-4 rounded-xl text-sm w-full max-w-lg text-right border border-brand-100 mt-4">
-                       <h4 className="font-bold mb-2 text-brand-900">تعليمات لحل المشكلة:</h4>
-                       <ul className="list-disc pr-5 space-y-2">
-                         <li>تأكد من إدخال <strong>SIGNNOW_API_KEY</strong> صحيح للمصادقة.</li>
-                         <li>أથ تأكد من أن معلومات الدخول (الإيميل، الباسورد، Basic Token) صحيحة في الإعدادات.</li>
-                         <li>ملاحظة: إذا كان حسابك مفعل عليه المصادقة الثنائية (2FA)، فلن يعمل تسجيل الدخول التلقائي ويجب استخدام رمز مصادقة (Bearer Token) مباشرة في <code>SIGNNOW_API_KEY</code>.</li>
-                       </ul>
-                     </div>
+  <h4 className="font-bold mb-2 text-brand-900">تعليمات هامة لحل خطأ (1537 invalid_token):</h4>
+  <ol className="list-decimal pr-5 space-y-3 font-medium text-brand-700">
+    <li>افتح <strong>SignNow Developer Console</strong> وأنشئ <strong>Personal Access Token</strong> جديد.</li>
+    <li>الصقه في إعدادات المنصة (Secrets) تحت متغير <code dir="ltr">SIGNNOW_API_KEY</code>.</li>
+    <li><strong>هام - البيئة التجريبية (Sandbox):</strong> الرموز المجانية التجريبية لا تعمل على الرابط الأساسي وتعطي خطأ 1537. <strong>يجب</strong> أن تُضيف متغيراً باسم <code dir="ltr">SIGNNOW_API_URL</code> وقيمته <code dir="ltr" className="inline-block bg-white border border-gray-200 px-2 py-0.5 mt-1">https://api-eval.signnow.com</code> لكي تنجح عملية الربط.</li>
+  </ol>
+</div>
                    </div>
                  )}
                </div>

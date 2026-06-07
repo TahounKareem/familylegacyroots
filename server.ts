@@ -97,16 +97,17 @@ async function startServer() {
   async function getSignNowToken() {
     // If user provided a Personal Access Token or we generated one, use it
     if (process.env.SIGNNOW_API_KEY) {
-      return process.env.SIGNNOW_API_KEY;
+      return process.env.SIGNNOW_API_KEY.replace(/^Bearer\s+/i, '').trim();
     }
     
     const basicToken = process.env.SIGNNOW_BASIC_TOKEN;
     const username = process.env.SIGNNOW_USERNAME;
     const password = process.env.SIGNNOW_PASSWORD;
 
+    const baseUrl = process.env.SIGNNOW_API_URL || "https://api.signnow.com";
     if (basicToken && username && password) {
       try {
-        const res = await fetch("https://api.signnow.com/oauth2/token", {
+        const res = await fetch(`${baseUrl}/oauth2/token`, {
           method: "POST",
           headers: {
             "Authorization": `Basic ${basicToken}`,
@@ -135,7 +136,8 @@ async function startServer() {
       let SIGNNOW_API_KEY = await getSignNowToken();
       
       // We will perform a generic ping/verify to SignNow API to validate the key
-      const pingRes = await fetch("https://api.signnow.com/user", {
+      const baseUrl = process.env.SIGNNOW_API_URL || "https://api.signnow.com";
+      const pingRes = await fetch(`${baseUrl}/user`, {
         headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
       });
       
@@ -167,12 +169,14 @@ async function startServer() {
   app.post("/api/contracts", async (req, res) => {
     try {
       const { orderId, customerName, email, locale, clientOrigin } = req.body;
-      let SIGNNOW_API_KEY = await getSignNowToken();
-      if (!SIGNNOW_API_KEY) {
-        throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
-      }
-      
-      console.log(`[SignNow API] Initializing embedded document creation for Order: ${orderId}`);
+    let SIGNNOW_API_KEY = await getSignNowToken();
+    if (!SIGNNOW_API_KEY) {
+      throw new Error("لم يتم إعداد SignNow Key. يرجى التواصل مع الدعم.");
+    }
+    
+    const baseUrl = process.env.SIGNNOW_API_URL || "https://api.signnow.com";
+    
+    console.log(`[SignNow API] Using token of length ${SIGNNOW_API_KEY.length}. Initializing embedded document creation for Order: ${orderId} on URL: ${baseUrl}`);
       
       const SIGNNOW_TEMPLATE_ID = process.env.SIGNNOW_TEMPLATE_ID || "c4a19bd6babc4a0fbd1913856a97f07d729848f0";
 
@@ -180,7 +184,7 @@ async function startServer() {
       
       // Step 1: Copy Template
       try {
-        let copyRes = await fetch(`https://api.signnow.com/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
+        let copyRes = await fetch(`${baseUrl}/template/${SIGNNOW_TEMPLATE_ID}/copy`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
@@ -195,7 +199,7 @@ async function startServer() {
           documentId = copyData.id;
           console.log(`Created new Document ID: ${documentId}`);
         } else {
-           throw new Error("فشل في نسخ القالب: " + JSON.stringify(copyData));
+           throw new Error(`فشل في نسخ القالب (الكود: ${copyRes.status}). الاستجابة: ` + JSON.stringify(copyData));
         }
       } catch (e: any) {
          console.error("SignNow template copy error:", e);
@@ -204,7 +208,7 @@ async function startServer() {
 
       // Step 2: Fetch roles and generate embedded invite for the document
       try {
-        const docRes = await fetch(`https://api.signnow.com/document/${documentId}`, {
+        const docRes = await fetch(`${baseUrl}/document/${documentId}`, {
           method: "GET",
           headers: { "Authorization": `Bearer ${SIGNNOW_API_KEY}` }
         });
@@ -229,7 +233,7 @@ async function startServer() {
           ]
         };
 
-        let inviteRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites`, {
+        let inviteRes = await fetch(`${baseUrl}/v2/documents/${documentId}/embedded-invites`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
@@ -249,7 +253,7 @@ async function startServer() {
         console.log(`Created Embedded Invite ID: ${inviteId}`);
 
         // Step 3: Create the one-time link for the iframe
-        const linkRes = await fetch(`https://api.signnow.com/v2/documents/${documentId}/embedded-invites/${inviteId}/link`, {
+        const linkRes = await fetch(`${baseUrl}/v2/documents/${documentId}/embedded-invites/${inviteId}/link`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${SIGNNOW_API_KEY}`,
