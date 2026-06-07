@@ -19,8 +19,11 @@ export function ESignature() {
   }, [currentUser, pendingOrderData, navigate]);
 
   useEffect(() => {
+    let isMounted = true;
     async function initContract() {
       if (!currentUser?.id) return;
+      if (signUrl) return; // Prevent re-fetching
+      
       try {
         setIsLoadingUrl(true);
         setErrorMsg(null);
@@ -37,6 +40,7 @@ export function ESignature() {
           })
         });
         const data = await res.json();
+        if (!isMounted) return;
         
         if (!res.ok || data.error) {
           throw new Error(data.error || "فشل في إنشاء العقد من الخادم");
@@ -45,9 +49,7 @@ export function ESignature() {
         const urlStr = data?.signUrl;
         
         if (urlStr) {
-          // Remove embedded since we want a popup/new window experience
           setSignUrl(urlStr);
-          // Save the URL to pendingOrderData so we can store it in placeOrder 
           useAppStore.setState(s => ({
             pendingOrderData: { ...s.pendingOrderData, contractUrl: urlStr, contractId: data.contractId } as FamilyData
           }));
@@ -55,14 +57,22 @@ export function ESignature() {
           throw new Error("لم يتم العثور على رابط التوقيع في الرد: " + JSON.stringify(data));
         }
       } catch (err: any) {
+        if (!isMounted) return;
         console.error("Failed to generate contract:", err);
         setErrorMsg(err.message || "حدث خطأ غير معروف");
       } finally {
-        setIsLoadingUrl(false);
+        if (isMounted) setIsLoadingUrl(false);
       }
     }
-    initContract();
-  }, [currentUser, pendingOrderData]);
+    
+    if (!signUrl) {
+      initContract();
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser]); // Removed pendingOrderData to prevent infinite loop
 
   useEffect(() => {
     // 1. Listen for messages from SignNow iframe
