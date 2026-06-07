@@ -93,6 +93,15 @@ async function startServer() {
   // In-memory store for signed contracts (mock DB for webhook verification)
   const signedContracts = new Set<string>();
 
+  // Helper to get SignNow API token
+  async function getSignNowToken() {
+    // If user provided a Personal Access Token or we generated one, use it
+    if (process.env.SIGNNOW_API_KEY) {
+      return process.env.SIGNNOW_API_KEY;
+    }
+    return "";
+  }
+
   app.post("/api/signnow/auto-sign", async (req, res) => {
     try {
       const { orderId, customerName, email, auditTrail } = req.body;
