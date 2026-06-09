@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams, Navigate, useLocation } from "react-router";
 import { Shield, Lock, FileCheck, CheckCircle } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import { termsAr, termsEn } from "../data/legal/terms";
 import { cookiesAr, cookiesEn } from "../data/legal/cookies";
 import { refundAr, refundEn } from "../data/legal/refund";
 import { paymentsAr, paymentsEn } from "../data/legal/payments";
 import { privacyAr, privacyEn } from "../data/legal/privacy";
 
-export type DocId = 'terms' | 'privacy' | 'cookies' | 'refund' | 'payments';
+export type DocId = 'terms' | 'privacy' | 'cookies' | 'refund' | 'payments' | 'service_agreement';
 export type Lang = 'ar' | 'en';
 
 export interface LegalSection {
@@ -30,6 +33,23 @@ const placeholderContent = (lang: Lang) => (
   </div>
 );
 
+const serviceAgreementPlaceholder = {
+  ar: {
+    title: 'عقد تقديم الخدمة (العام)',
+    version: '1.0',
+    effectiveDate: '2025-01-01',
+    lastUpdated: '2025-01-01',
+    sections: [{ id: '1', title: 'مقدمة العقد', content: placeholderContent('ar') }]
+  },
+  en: {
+    title: 'Service Agreement',
+    version: '1.0',
+    effectiveDate: '2025-01-01',
+    lastUpdated: '2025-01-01',
+    sections: [{ id: '1', title: 'Introduction', content: placeholderContent('en') }]
+  }
+};
+
 const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
   terms: {
     ar: termsAr,
@@ -50,19 +70,58 @@ const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
   payments: {
     ar: paymentsAr,
     en: paymentsEn,
-  }
+  },
+  service_agreement: serviceAgreementPlaceholder
 };
 
 export function Legal() {
   const { documentId } = useParams<{ documentId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const [remoteDoc, setRemoteDoc] = useState<LegalDocument | null>(null);
 
   const lang = (searchParams.get('lang') as Lang) === 'en' ? 'en' : 'ar';
   
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [documentId, lang]);
+
+  useEffect(() => {
+    async function fetchRemoteDoc() {
+      if (!documentId) return;
+      try {
+        const docRef = doc(db, "legal_documents", documentId);
+        const snapshot = await getDoc(docRef);
+        if (snapshot.exists()) {
+          const data = snapshot.data().latestVersion;
+          if (data) {
+             setRemoteDoc({
+               title: data.title || "وثيقة قانونية",
+               version: data.version || "1.0",
+               effectiveDate: data.effectiveDate || "N/A",
+               lastUpdated: data.lastUpdated || "N/A",
+               sections: [
+                 {
+                   id: 'remote-content',
+                   title: 'المحتويات',
+                   content: (
+                     <div className="prose prose-brand max-w-none font-light leading-relaxed">
+                       <ReactMarkdown>{data.content}</ReactMarkdown>
+                     </div>
+                   )
+                 }
+               ]
+             });
+             return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load remote legal doc:", err);
+      }
+      setRemoteDoc(null);
+    }
+    fetchRemoteDoc();
+  }, [documentId]);
 
   const isValidDocId = (id: string | undefined): id is DocId => {
     return !!id && id in legalContent;
@@ -72,7 +131,9 @@ export function Legal() {
     return <Navigate to="/legal/terms" replace />;
   }
 
-  const doc = legalContent[documentId][lang];
+  // Use remote doc if it exists and language is arabic (since our admin tool only inputs arabic)
+  // Otherwise fallback to static translated files
+  const docData = (remoteDoc && lang === 'ar') ? remoteDoc : legalContent[documentId][lang];
   const isRTL = lang === 'ar';
   const isPrivacyPage = documentId === 'privacy';
 
@@ -115,16 +176,16 @@ export function Legal() {
 
       {/* Header */}
       <header className="mb-12 bg-white rounded-3xl p-8 md:p-12 border border-brand-100 shadow-sm text-center">
-        <h1 className="font-serif text-3xl md:text-5xl font-bold text-brand-900 mb-6">{doc.title}</h1>
+        <h1 className="font-serif text-3xl md:text-5xl font-bold text-brand-900 mb-6">{docData.title}</h1>
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-brand-600 font-medium">
           <span className="flex items-center gap-2">
             <FileCheck className="w-4 h-4" />
-            {isRTL ? 'الإصدار: ' : 'Version: '} {doc.version}
+            {isRTL ? 'الإصدار: ' : 'Version: '} {docData.version}
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-brand-300"></span>
-          <span>{isRTL ? 'تاريخ السريان: ' : 'Effective Date: '} {doc.effectiveDate}</span>
+          <span>{isRTL ? 'تاريخ السريان: ' : 'Effective Date: '} {docData.effectiveDate}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-brand-300"></span>
-          <span>{isRTL ? 'آخر تحديث: ' : 'Last Updated: '} {doc.lastUpdated}</span>
+          <span>{isRTL ? 'آخر تحديث: ' : 'Last Updated: '} {docData.lastUpdated}</span>
         </div>
       </header>
 
@@ -164,7 +225,7 @@ export function Legal() {
               {isRTL ? 'جدول المحتويات' : 'Table of Contents'}
             </h3>
             <nav className="space-y-1">
-              {doc.sections.map((section) => (
+              {docData.sections.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
@@ -179,7 +240,7 @@ export function Legal() {
 
         {/* Main Content Sections */}
         <div className="lg:w-3/4 space-y-12">
-          {doc.sections.map((section) => (
+          {docData.sections.map((section) => (
             <section 
               key={section.id} 
               id={section.id} 

@@ -49,6 +49,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
+import { ComplianceDashboard } from "../components/admin/ComplianceDashboard";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
 
@@ -1422,93 +1423,7 @@ export function AdminPanel() {
           );
         })()}
 
-      {currentTab === "compliance" &&
-        (() => {
-          const complianceOrders = orders.filter((o) => !o.isDeleted);
-          return (
-            <div className="space-y-8 mb-12">
-              <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-brand-600" />
-                  <h2 className="font-bold text-lg text-brand-900">
-                    سجل الإمتثال والعقود القانونية (سجل حركات الطلب)
-                  </h2>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right text-sm">
-                    <thead className="bg-white text-brand-500 border-b border-brand-100">
-                      <tr>
-                        <th className="px-4 py-4 font-medium">
-                          رقم الطلب / العميل
-                        </th>
-                        <th className="px-4 py-4 font-medium">
-                          حالة التوقيع الإلكتروني
-                        </th>
-                        <th className="px-4 py-4 font-medium">
-                          التوافق مع سياسات الخصوصية
-                        </th>
-                        <th className="px-4 py-4 font-medium">
-                          السجل الزمني الآمن
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-brand-50">
-                      {complianceOrders.map((order) => {
-                        const hasSignature = order.data.documents?.some(
-                          (d) =>
-                            typeof d !== "string" &&
-                            d.kind === "توقيع إلكتروني",
-                        );
-                        return (
-                          <tr
-                            key={`comp-${order.id}`}
-                            className="hover:bg-brand-50/30 transition"
-                          >
-                            <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
-                              <div className="mb-1">
-                                #
-                                {order.orderNumber ||
-                                  order.id.toUpperCase().substring(0, 6)}
-                              </div>
-                              <div className="text-xs text-brand-800 font-sans">
-                                {order.data.firstName} {order.data.familyName}
-                              </div>
-                            </td>
-                            <td className="px-4 py-4">
-                              {hasSignature ? (
-                                <span className="flex items-center gap-1 text-green-600 font-bold bg-green-50 px-2 py-1 rounded-md text-xs border border-green-200 w-fit">
-                                  <CheckCircle className="w-3 h-3" /> تم التوثيق
-                                  الآلي
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-1 text-red-600 font-bold bg-red-50 px-2 py-1 rounded-md text-xs border border-red-200 w-fit">
-                                  <AlertCircle className="w-3 h-3" /> بإنتظار
-                                  التوقيع
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-4 py-4 font-bold text-green-600 font-mono text-xs">
-                              متوافق (GDPR / PDPL)
-                            </td>
-                            <td className="px-4 py-4">
-                              <button
-                                onClick={() => setSelectedAuditOrder(order)}
-                                className="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg transition text-xs shadow-sm flex items-center gap-2"
-                              >
-                                <Search className="w-3 h-3" /> مراجعة الـ Audit
-                                Trail
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
+      {currentTab === "compliance" && <ComplianceDashboard />}
 
       {currentTab === "marketing" &&
         (() => {
