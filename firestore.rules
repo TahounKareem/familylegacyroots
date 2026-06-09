@@ -157,6 +157,19 @@ service cloud.firestore {
       allow read, update, delete: if isStaff();
     }
     
+    // ==========================================
+    // Legal Documents Collection
+    // ==========================================
+    match /legal_documents/{docId} {
+      allow read: if true;
+      allow write: if isStaff();
+      
+      match /versions/{versionId} {
+        allow read: if true;
+        allow write: if isStaff();
+      }
+    }
+    
     // Default Deny
     match /{document=**} {
       allow read, write: if false;
