@@ -24,18 +24,47 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Query Restrictions (Mass Reads Protection)
+    // ==========================================
+    function isValidQuery() {
+      // Prevent fetching more than 100 docs at once for normal users
+      return !('limit' in request.query) || request.query.limit <= 100;
+    }
+
+    // ==========================================
     // Users Collection
     // ==========================================
     match /users/{userId} {
-      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
     }
     
     // ==========================================
     // Orders Collection
     // ==========================================
     match /orders/{orderId} {
-      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isStaff();
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid && isValidQuery()) || (isStaff());
       allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isStaff());
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isStaff());
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Messages Collection
+    // ==========================================
+    match /messages/{messageId} {
+      allow read: if isSignedIn() && ((resource.data.userId == request.auth.uid) || isStaff()) && isValidQuery();
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isStaff());
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Notifications Collection
+    // ==========================================
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && ((resource.data.userId == request.auth.uid) || isStaff()) && isValidQuery();
+      allow create: if isStaff();
       allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isStaff());
       allow delete: if isAdmin();
     }

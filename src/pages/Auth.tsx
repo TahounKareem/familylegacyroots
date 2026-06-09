@@ -79,10 +79,12 @@ export function Auth() {
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           
           let country = "غير محدد";
+          let ipAddress = "تم تسجيلها بواسطة سيرفر أمان النظام";
           try {
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
             if (data.country_name) country = data.country_name;
+            if (data.ip) ipAddress = data.ip;
           } catch (e) {
             console.error("Could not fetch country:", e);
           }
@@ -100,9 +102,22 @@ export function Auth() {
               agreedToTermsAt: agreeTerms ? new Date().toISOString() : null,
               cookieConsentLevel: cookieConsent,
               cookieConsentAt: cookieConsent !== 'none' ? new Date().toISOString() : null,
-              ipAddress: "تم تسجيلها بواسطة سيرفر أمان النظام",
+              ipAddress: ipAddress,
             }
           });
+
+          // Add to audit logs
+          try {
+            const { collection, addDoc } = await import('firebase/firestore');
+            await addDoc(collection(db, 'audit_logs'), {
+              action: 'USER_REGISTRATION_AND_CONSENT',
+              userId: user.uid,
+              details: `User created account and accepted terms. IP: ${ipAddress}`,
+              timestamp: new Date().toISOString()
+            });
+          } catch (e) {
+            console.error("Failed to log audit event:", e);
+          }
 
           // Send verification email and sign out to wait for verification
           await sendEmailVerification(user);

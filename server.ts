@@ -73,17 +73,41 @@ async function startServer() {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the checkout.session.completed event
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      
-      const orderId = session.metadata?.orderId;
-      const userEmail = session.customer_details?.email || session.metadata?.userEmail;
-      const userName = session.customer_details?.name || session.metadata?.userName;
-      const invoiceNumber = session.metadata?.invoiceNumber;
+    // Handle Stripe Events
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        
+        const orderId = session.metadata?.orderId;
+        const userEmail = session.customer_details?.email || session.metadata?.userEmail;
+        const userName = session.customer_details?.name || session.metadata?.userName;
+        const invoiceNumber = session.metadata?.invoiceNumber;
 
-      console.log(`Payment successful for order: ${orderId} (Invoice: ${invoiceNumber}). Email triggered for ${userEmail}.`);
-      console.log(`[Email Service Mock] Sending the digitally signed contract (Audit Trail & PDF) to: ${userEmail}`);
+        console.log(`[Stripe Webhook] Payment successful [PAID] for order: ${orderId} (Invoice: ${invoiceNumber}).`);
+        console.log(`[Email Service Placeholder] Sending Receipt & Contract to: ${userEmail}`);
+        // TODO: (Production) Use firebase-admin to update Firestore order status to 'PAID'
+        break;
+      }
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log(`[Stripe Webhook] Payment failed [FAILED] for intent: ${paymentIntent.id}`);
+        // TODO: (Production) Update order status to 'FAILED'
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        console.log(`[Stripe Webhook] Charge refunded [REFUNDED] for charge: ${charge.id}`);
+        // TODO: (Production) Update order status to 'REFUNDED'
+        break;
+      }
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.log(`[Stripe Webhook] Checkout expired [CANCELLED] for order: ${session.metadata?.orderId}`);
+        // TODO: (Production) Update order status to 'CANCELLED'
+        break;
+      }
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
 
     res.json({ received: true });

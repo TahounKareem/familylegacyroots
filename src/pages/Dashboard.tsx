@@ -57,6 +57,7 @@ export function Dashboard() {
   const [correctionText, setCorrectionText] = useState("");
   const [correctionError, setCorrectionError] = useState("");
   const [agreeToCorrectionTerms, setAgreeToCorrectionTerms] = useState(false);
+  const [agreeToUploadTerms, setAgreeToUploadTerms] = useState(false);
   const [showCorrectionTerms, setShowCorrectionTerms] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -212,6 +213,7 @@ export function Dashboard() {
 
   const uploadFileAndUpdate = (file: File, type: "documents" | "photos") => {
     setPendingUpload({ file, arrayName: type });
+    setAgreeToUploadTerms(false);
     setMediaMeta({
       title: "",
       kind: "",
@@ -226,7 +228,7 @@ export function Dashboard() {
     setIsUploading(true);
     const storageRef = ref(
       storage,
-      `${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`,
+      `orders/${order.id}/${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`,
     );
     const uploadTask = uploadBytesResumable(storageRef, pendingUpload.file);
 
@@ -1429,11 +1431,25 @@ export function Dashboard() {
                                 </option>
                               </select>
                             </div>
+                            
+                            <div className="flex items-start gap-3 mt-4 bg-brand-50 p-4 rounded-xl border border-brand-100">
+                                <input
+                                  type="checkbox"
+                                  id="upload-terms-doc"
+                                  className="mt-1 w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
+                                  checked={agreeToUploadTerms}
+                                  onChange={(e) => setAgreeToUploadTerms(e.target.checked)}
+                                />
+                                <label htmlFor="upload-terms-doc" className="text-sm text-brand-800 font-medium leading-relaxed">
+                                  أقر بأنني أمتلك حقوق هذه الوثيقة وأنها صحيحة ولا تنتهك أي حقوق نشر أو خصوصية طرف ثالث، وأتحمل المسؤولية القانونية الكاملة عن رفعها أو مشاركتها في هذا السجل كما هو موضح بشروط الاستخدام.
+                                </label>
+                            </div>
+
                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
                               <button
-                                disabled={isUploading}
+                                disabled={isUploading || !agreeToUploadTerms}
                                 onClick={confirmUpload}
-                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2"
+                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 {isUploading ? (
                                   <>
@@ -1622,11 +1638,25 @@ export function Dashboard() {
                                 </option>
                               </select>
                             </div>
+                            
+                            <div className="flex items-start gap-3 mt-4 bg-brand-50 p-4 rounded-xl border border-brand-100">
+                                <input
+                                  type="checkbox"
+                                  id="upload-terms-photo"
+                                  className="mt-1 w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
+                                  checked={agreeToUploadTerms}
+                                  onChange={(e) => setAgreeToUploadTerms(e.target.checked)}
+                                />
+                                <label htmlFor="upload-terms-photo" className="text-sm text-brand-800 font-medium leading-relaxed">
+                                  أقر بأنني أمتلك حقوق هذه الصورة وأنها صحيحة ولا تنتهك أي حقوق نشر أو خصوصية طرف ثالث، وأتحمل المسؤولية القانونية الكاملة عن رفعها أو مشاركتها في هذا السجل كما هو موضح بشروط الاستخدام.
+                                </label>
+                            </div>
+
                             <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
                               <button
-                                disabled={isUploading}
+                                disabled={isUploading || !agreeToUploadTerms}
                                 onClick={confirmUpload}
-                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2"
+                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 {isUploading ? (
                                   <>
@@ -2619,6 +2649,50 @@ export function Dashboard() {
                                 </p>
                               </div>
                             </label>
+                          </div>
+                        </div>
+
+                        {/* Privacy & Account Deletion */}
+                        <div className="bg-red-50 p-6 rounded-2xl border border-red-100 mt-6">
+                          <h4 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-red-600" /> إدارة البيانات والخصوصية
+                          </h4>
+                          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-red-700">
+                                طلب حذف الحساب وجميع البيانات المرتبطة
+                              </p>
+                              <p className="text-xs text-red-500 mt-1 max-w-xl">
+                                بموجب سياسة الخصوصية وقوانين حماية البيانات، يحق لك طلب مسح جميع بياناتك الواردة لدينا. لن نتمكن من استرجاع البيانات بعد تنفيذ الحذف.
+                              </p>
+                            </div>
+                            <button
+                              onClick={async () => {
+                                const ans = window.prompt("انتبة! سيتم تقديم طلب لحذف حسابك ومحو بياناتك بشكل نهائي من خلال فريقنا. إذا كنت متأكداً يرجى كتابة 'تأكيد' أدناه:");
+                                if (ans === 'تأكيد') {
+                                  alert('تم تسجيل طلبك لحذف الحساب بنجاح. سيقوم فريقنا بمراجعته وتنفيذه خلال 14 يوم عمل كحد أقصى وفق السياسات.');
+                                  try {
+                                    const { collection, addDoc } = await import('firebase/firestore');
+                                    await addDoc(collection(db, 'support_tickets'), {
+                                      userId: currentUser.id,
+                                      userName: currentUser.name,
+                                      email: currentUser.email,
+                                      topic: 'حذف الحساب',
+                                      description: 'طلب رسمي مقدم من المستخدم لحذف بياناته.',
+                                      status: 'new',
+                                      createdAt: new Date().toISOString()
+                                    });
+                                  } catch (e) {
+                                    console.error("Could not send deletion request", e);
+                                  }
+                                } else if(ans !== null) {
+                                  alert('لم يتم تأكيد الطلب.');
+                                }
+                              }}
+                              className="px-6 py-2 border border-red-300 bg-white text-red-600 rounded-xl hover:bg-red-100 transition text-sm font-bold whitespace-nowrap shadow-sm"
+                            >
+                              تقديم طلب حذف الحساب
+                            </button>
                           </div>
                         </div>
                       </div>
