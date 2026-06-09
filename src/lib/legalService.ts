@@ -104,10 +104,22 @@ async function updateUserLegalProfile(updates: LegalProfileUpdate) {
   }
 }
 
+let cachedIp = "";
+
 export async function logLegalEvent(eventType: string, metadata: any = {}, contractId?: string, orderId?: string) {
   const user = auth.currentUser;
   if (!user) return;
   
+  if (!cachedIp && typeof window !== 'undefined') {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      if (data.ip) cachedIp = data.ip;
+    } catch (e) {
+      cachedIp = "غير متوفر";
+    }
+  }
+
   const sequenceKey = contractId || orderId || "general";
   contractSequences[sequenceKey] = (contractSequences[sequenceKey] || 0) + 1;
   const pageUrl = typeof window !== "undefined" ? window.location.pathname : "";
@@ -124,7 +136,7 @@ export async function logLegalEvent(eventType: string, metadata: any = {}, contr
       sessionId: currentSessionId,
       pageUrl,
       eventSequence: contractSequences[sequenceKey],
-      ipAddress: "pending_edge_capture"
+      ipAddress: cachedIp || "غير متوفر"
     };
     
     await addDoc(collection(db, "audit_logs"), eventPayload);
@@ -235,6 +247,16 @@ export async function recordLegalConsent(
   if (!user) return;
 
   try {
+    if (!cachedIp && typeof window !== 'undefined') {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        if (data.ip) cachedIp = data.ip;
+      } catch (e) {
+        cachedIp = "غير متوفر";
+      }
+    }
+
     const consentDocId = contractId ? `${contractId}_${consentType}` : `${user.uid}_${consentType}_${Date.now()}`;
     const consentPayload = sanitizeSnapshot({
       userId: user.uid,
@@ -246,7 +268,7 @@ export async function recordLegalConsent(
       preferences,
       acceptedAt: serverTimestamp(),
       userAgent: navigator.userAgent,
-      ipHash: "hash_placeholder_or_edge_computed",
+      ipAddress: cachedIp || "غير متوفر",
       ...metadata
     });
     await setDoc(doc(db, "legal_consents", consentDocId), consentPayload, { merge: true });

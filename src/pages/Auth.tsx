@@ -79,11 +79,10 @@ export function Auth() {
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           
           let country = "غير محدد";
-          let ipAddress = "تم تسجيلها بواسطة سيرفر أمان النظام";
+          let ipAddress = "غير متوفر";
           try {
-            const res = await fetch('https://ipapi.co/json/');
+            const res = await fetch('https://api.ipify.org?format=json');
             const data = await res.json();
-            if (data.country_name) country = data.country_name;
             if (data.ip) ipAddress = data.ip;
           } catch (e) {
             console.error("Could not fetch country:", e);

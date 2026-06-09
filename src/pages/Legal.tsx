@@ -9,6 +9,7 @@ import { cookiesAr, cookiesEn } from "../data/legal/cookies";
 import { refundAr, refundEn } from "../data/legal/refund";
 import { paymentsAr, paymentsEn } from "../data/legal/payments";
 import { privacyAr, privacyEn } from "../data/legal/privacy";
+import { serviceAgreementAr, serviceAgreementEn } from "../data/legal/service_agreement";
 
 export type DocId = 'terms' | 'privacy' | 'cookies' | 'refund' | 'payments' | 'service_agreement';
 export type Lang = 'ar' | 'en';
@@ -27,29 +28,6 @@ export interface LegalDocument {
   lastUpdated: string;
   sections: LegalSection[];
 }
-
-const placeholderContent = (lang: Lang) => (
-  <div className="prose prose-brand max-w-none font-light leading-relaxed">
-    <p>{lang === 'ar' ? 'سيتم إضافة المحتوى قريباً.' : 'Content will be added soon.'}</p>
-  </div>
-);
-
-const serviceAgreementPlaceholder = {
-  ar: {
-    title: 'عقد تقديم الخدمة (العام)',
-    version: '1.0',
-    effectiveDate: '2025-01-01',
-    lastUpdated: '2025-01-01',
-    sections: [{ id: '1', title: 'مقدمة العقد', content: placeholderContent('ar') }]
-  },
-  en: {
-    title: 'Service Agreement',
-    version: '1.0',
-    effectiveDate: '2025-01-01',
-    lastUpdated: '2025-01-01',
-    sections: [{ id: '1', title: 'Introduction', content: placeholderContent('en') }]
-  }
-};
 
 export const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
   terms: {
@@ -72,7 +50,10 @@ export const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
     ar: paymentsAr,
     en: paymentsEn,
   },
-  service_agreement: serviceAgreementPlaceholder
+  service_agreement: {
+    ar: serviceAgreementAr,
+    en: serviceAgreementEn,
+  }
 };
 
 export function Legal() {

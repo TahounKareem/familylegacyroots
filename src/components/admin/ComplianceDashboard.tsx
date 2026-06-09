@@ -50,8 +50,11 @@ interface DocumentVersion {
   lastUpdated: string;
 }
 
+import { UserComplianceReport } from "./UserComplianceReport";
+
 export function ComplianceDashboard() {
   const [activeTab, setActiveTab] = useState<"users_consents" | "visitors_consents" | "legal_versions">("users_consents");
+  const [selectedUserReport, setSelectedUserReport] = useState<string | null>(null);
   
   // Data State
   const [users, setUsers] = useState<ComplianceUser[]>([]);
@@ -201,6 +204,7 @@ export function ComplianceDashboard() {
                 <th className="px-6 py-4 font-bold">ملفات الارتباط (Cookies)</th>
                 <th className="px-6 py-4 font-bold">عقد تقديم الخدمة (إن وجد)</th>
                 <th className="px-6 py-4 font-bold">IP Address</th>
+                <th className="px-6 py-4 font-bold">الإجراءات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-50">
@@ -245,6 +249,14 @@ export function ComplianceDashboard() {
                     <td className="px-6 py-4 text-xs font-mono text-gray-500" dir="ltr">
                       {u.legalConsent?.ipAddress || u.ipAddress || "N/A"}
                     </td>
+                    <td className="px-6 py-4">
+                      <button 
+                        onClick={() => setSelectedUserReport(u.id)}
+                        className="bg-brand-800 hover:bg-brand-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center whitespace-nowrap"
+                      >
+                        <FileText className="w-3 h-3 ml-1" /> عرض التقرير التفصيلي
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
@@ -256,7 +268,10 @@ export function ComplianceDashboard() {
   };
 
   const renderVisitorsConsents = () => {
-    const displayedLogs = auditLogs.filter(log => log?.action?.includes('CONSENT') || log?.action?.includes('REGISTRATION'));
+    const displayedLogs = auditLogs.filter(log => {
+      const actionValue = log?.action || log?.eventType || "";
+      return actionValue.includes('CONSENT') || actionValue.includes('REGISTRATION') || actionValue.includes('checkbox');
+    });
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
@@ -279,22 +294,30 @@ export function ComplianceDashboard() {
             {displayedLogs.length === 0 ? (
                <p className="text-center text-sm text-gray-500 py-8">لا يوجد سجلات متوفرة.</p>
             ) : (
-              displayedLogs.map(log => (
-                <div key={log.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-brand-50/50 p-4 rounded-xl border border-brand-100">
-                  <div>
-                    <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
-                      {log.action}
-                    </span>
-                    <p className="text-sm font-semibold text-brand-900">{log.details}</p>
-                    {log.ipAddress && <p className="text-xs text-brand-600 mt-1 font-mono" dir="ltr">IP: {log.ipAddress}</p>}
+              displayedLogs.map(log => {
+                const actionValue = log.action || log.eventType || "حدث";
+                let dateString = "غير متاح";
+                if (log.timestamp) {
+                  const ts = typeof log.timestamp.toMillis === 'function' ? log.timestamp.toMillis() : log.timestamp;
+                  dateString = new Date(ts).toLocaleString("en-GB");
+                }
+                return (
+                  <div key={log.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-brand-50/50 p-4 rounded-xl border border-brand-100">
+                    <div>
+                      <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
+                        {actionValue}
+                      </span>
+                      <p className="text-sm font-semibold text-brand-900">{log.details || JSON.stringify(log.preferences || {})}</p>
+                      {log.ipAddress && <p className="text-xs text-brand-600 mt-1 font-mono" dir="ltr">IP: {log.ipAddress}</p>}
+                    </div>
+                    <div className="text-left">
+                       <p className="text-xs font-semibold text-gray-500 whitespace-nowrap" dir="ltr">
+                         {dateString}
+                       </p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                     <p className="text-xs font-semibold text-gray-500 whitespace-nowrap" dir="ltr">
-                       {new Date(log.timestamp).toLocaleString("en-GB")}
-                     </p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -430,6 +453,10 @@ export function ComplianceDashboard() {
         {activeTab === "visitors_consents" && renderVisitorsConsents()}
         {activeTab === "legal_versions" && renderLegalVersions()}
       </div>
+
+      {selectedUserReport && (
+        <UserComplianceReport userId={selectedUserReport} onClose={() => setSelectedUserReport(null)} />
+      )}
     </div>
   );
 }
