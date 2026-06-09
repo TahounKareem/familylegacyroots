@@ -15,6 +15,8 @@ export function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
   
   const currentUser = useAppStore((state) => state.currentUser);
   const navigate = useNavigate();
@@ -23,13 +25,20 @@ export function Auth() {
     e.preventDefault();
     setError(null);
 
+    // Rate Limiting & Account Lockout Check
+    if (lockoutUntil && Date.now() < lockoutUntil) {
+      const minutesLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
+      setError(`تم قفل الحساب مؤقتًا بسبب محاولات الدخول المتكررة الخاطئة. يرجى المحاولة بعد ${minutesLeft} دقيقة.`);
+      return;
+    }
+
     if (!isLogin && !agreeTerms) {
       alert("الرجاء الموافقة على شروط الاستخدام وسياسة الخصوصية لإتمام التسجيل.");
       return;
     }
     
     // Password strictness validation
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_#^\-])[A-Za-z\d@$!%*?&_#^\-]{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_#^-])[A-Za-z\d@$!%*?&_#^-]{8,}$/;
     if (!isLogin && !passwordRegex.test(password)) {
       setError("كلمة المرور يجب أن تتكون من 8 أحرف كحد أدنى وتتضمن حرفاً كبيراً ورقم ورمز.");
       return;
@@ -42,7 +51,7 @@ export function Auth() {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           
           if (!passwordRegex.test(password)) {
-            alert("إشعار أمان: نظراً لسياسات الأمان الجديدة، يرجى تغيير كلمة المرور الخاصة بك لتتوافق مع المتطلبات الحالية (8 أحرف كحد أدنى تتضمن حرفاً كبيراً ورقم ورمز) وذلك من خلال خيار استعادة كلمة المرور.");
+             alert("إشعار أمان: نظراً لسياسات الأمان الجديدة، يرجى تغيير كلمة المرور الخاصة بك لتتوافق مع المتطلبات الحالية (8 أحرف كحد أدنى تتضمن حرفاً كبيراً ورقم ورمز) وذلك من خلال خيار استعادة كلمة المرور.");
           }
 
           if (!userCredential.user.emailVerified) {
@@ -50,6 +59,10 @@ export function Auth() {
             setError("برجاء تفعيل حسابك أولاً من خلال الرابط المرسل إلى بريدك الإلكتروني.");
             return;
           }
+          
+          // Reset attempts on success
+          setFailedAttempts(0);
+          setLockoutUntil(null);
         } else {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
@@ -109,6 +122,16 @@ export function Auth() {
           errorMessage = "البريد الإلكتروني هذا مستخدم مسبقاً.";
         } else if (err.code === "auth/invalid-credential") {
           errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+          if (isLogin) {
+            const newAttempts = failedAttempts + 1;
+            setFailedAttempts(newAttempts);
+            if (newAttempts >= 5) {
+              setLockoutUntil(Date.now() + 15 * 60000); // 15 minutes lockout
+              errorMessage = "تم قفل الحساب مؤقتاً لمدة 15 دقيقة بسبب محاولات دخول خاطئة متكررة (Rate Limiting).";
+            } else {
+              errorMessage += ` (المحاولة ${newAttempts} من 5)`;
+            }
+          }
         } else if (err.code === "auth/network-request-failed") {
           errorMessage = "حدث خطأ في الاتصال بخوادم المصادقة (Network Request Failed). الغالب أن النطاق الحالي غير مضاف في قائمة النطاقات المسموحة (Authorized Domains) في إعدادات Firebase أو تمت إعاقته بسبب إضافة حجب إعلانات.";
         } else if (err.code === "permission-denied") {

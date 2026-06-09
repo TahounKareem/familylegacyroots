@@ -80,8 +80,9 @@ async function startServer() {
       const orderId = session.metadata?.orderId;
       const userEmail = session.customer_details?.email || session.metadata?.userEmail;
       const userName = session.customer_details?.name || session.metadata?.userName;
+      const invoiceNumber = session.metadata?.invoiceNumber;
 
-      console.log(`Payment successful for order: ${orderId}. Email triggered for ${userEmail}.`);
+      console.log(`Payment successful for order: ${orderId} (Invoice: ${invoiceNumber}). Email triggered for ${userEmail}.`);
       console.log(`[Email Service Mock] Sending the digitally signed contract (Audit Trail & PDF) to: ${userEmail}`);
     }
 
@@ -138,7 +139,7 @@ async function startServer() {
   // Stripe Create Checkout Session Integration
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
-      const { orderId, userName, userEmail, packagePrice } = req.body;
+      const { orderId, userName, userEmail, packagePrice, invoiceNumber } = req.body;
 
       if (!stripeKey) {
         throw new Error("Stripe secret key configuration is missing on the server. Please add STRIPE_SECRET_KEY to your .env file.");
@@ -153,7 +154,7 @@ async function startServer() {
               currency: "usd",
               product_data: {
                 name: "توثيق سجل تراث العائلة",
-                description: `طلب رقم #${orderId}`,
+                description: `طلب رقم #${orderId} - فاتورة ${invoiceNumber || ''}`,
               },
               unit_amount: packagePrice * 100, // Amount in cents
             },
@@ -165,6 +166,7 @@ async function startServer() {
           orderId: orderId,
           userName: userName,
           userEmail: userEmail,
+          invoiceNumber: invoiceNumber || ''
         },
         success_url: `${req.protocol}://${req.get("host")}/dashboard?success=true&order_id=${orderId}`,
         cancel_url: `${req.protocol}://${req.get("host")}/order?cancel=true`,

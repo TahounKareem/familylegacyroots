@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-let content = fs.readFileSync('src/pages/OrderFlow.tsx', 'utf8');
+const content = fs.readFileSync('src/pages/OrderFlow.tsx', 'utf8');
 
 const badStart = content.indexOf('{step === 1');
 const badEnd = content.indexOf('{step === 5');

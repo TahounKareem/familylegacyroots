@@ -11,6 +11,8 @@ export function AdminAuth() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
   
   const currentUser = useAppStore((state) => state.currentUser);
   const navigate = useNavigate();
@@ -20,13 +22,29 @@ export function AdminAuth() {
     setError(null);
     if (!email || !password) return;
     
+    // Rate Limiting & Account Lockout
+    if (lockoutUntil && Date.now() < lockoutUntil) {
+      const minutesLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
+      setError(`تم قفل الحساب مؤقتًا. المحاولة القادمة بعد ${minutesLeft} دقيقة.`);
+      return;
+    }
+
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Wait for store to update
+      setFailedAttempts(0);
+      setLockoutUntil(null);
     } catch (err: any) {
       console.error(err);
-      setError("بيانات الدخول غير صحيحة، أو ليس لديك الصلاحية.");
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      if (newAttempts >= 5) {
+        setLockoutUntil(Date.now() + 15 * 60000);
+        setError("تم قفل الحساب مؤقتاً لمدة 15 دقيقة لدواعي أمنية.");
+      } else {
+        setError(`بيانات الدخول غير صحيحة، أو ليس لديك الصلاحية. (المحاولة ${newAttempts} من 5)`);
+      }
     } finally {
       setLoading(false);
     }

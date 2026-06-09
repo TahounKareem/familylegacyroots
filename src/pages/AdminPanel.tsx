@@ -312,7 +312,7 @@ export function AdminPanel() {
     if (!deliveryLink.trim() || !deliveryOrder) return;
     setIsFulfilling(true);
     try {
-      let phaseUpdates: any = {};
+      const phaseUpdates: any = {};
       if (deliveryTab === "draft") {
         phaseUpdates.actionPhase = "تم تسليم المسودة";
         phaseUpdates.issueStatus = "تم الإصدار";

@@ -105,11 +105,32 @@ export function ESignature() {
                  </div>
                  
                </div>
+
+               <div className="mt-8 flex flex-col items-start gap-4 text-sm font-medium text-brand-800 w-full max-w-lg bg-white p-4 rounded-xl border border-brand-200">
+                 <label className="flex items-center gap-3 cursor-pointer">
+                   <input type="checkbox" required className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500" onChange={(e) => {
+                     // Just a visual required state handled by HTML, but we will enforce it in handleSign
+                   }} id="check-order" />
+                   <span>أوافق على نموذج الطلب بكافة تفاصيله المُدخلة.</span>
+                 </label>
+                 <label className="flex items-center gap-3 cursor-pointer">
+                   <input type="checkbox" required className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500" id="check-service" />
+                   <span>أوافق على عقد تقديم الخدمة وأقر بأن هذا توقيع إلكتروني مُعتمد.</span>
+                 </label>
+               </div>
                
                <button 
-                 onClick={handleSign}
+                 onClick={() => {
+                   const c1 = document.getElementById('check-order') as HTMLInputElement;
+                   const c2 = document.getElementById('check-service') as HTMLInputElement;
+                   if (!c1?.checked || !c2?.checked) {
+                     alert("يرجى الموافقة على نموذج الطلب وعقد الخدمة أولاً قبل التوقيع.");
+                     return;
+                   }
+                   handleSign();
+                 }}
                  disabled={isSaving}
-                 className="mt-8 px-8 py-3 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700 transition flex items-center gap-2"
+                 className="mt-6 px-8 py-3 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700 transition flex items-center gap-2"
                >
                  {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                  اعتماد التوقيع والمتابعة

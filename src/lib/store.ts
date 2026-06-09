@@ -127,6 +127,8 @@ export interface TimelineEvent {
   id: string;
   timestamp: string;
   message: string;
+  event?: string;
+  details?: string;
   userId?: string;
   userName?: string;
   role?: string;
@@ -258,6 +260,7 @@ export interface Order {
   contractSigned?: boolean;
   contractUrl?: string;
   contractSignedAt?: string;
+  invoiceNumber?: string;
 }
 
 interface AppState {
@@ -483,7 +486,9 @@ export const useAppStore = create<AppState>((set, get) => ({
                 { lastLoginAt: new Date().toISOString() },
                 { merge: true },
               );
-            } catch (e) {}
+            } catch (e) {
+              console.error("Failed to update lastLoginAt", e);
+            }
           } else {
             // First time login fallback (if created externally)
             userInfo = {

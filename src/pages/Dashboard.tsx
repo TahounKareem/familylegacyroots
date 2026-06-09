@@ -634,7 +634,7 @@ export function Dashboard() {
                       const isState7 = order?.issueStatus === "تم الإغلاق";
 
                       let title = "";
-                      let statusText = order?.issueStatus || "طلب غير مكتمل";
+                      const statusText = order?.issueStatus || "طلب غير مكتمل";
                       let actionText = "";
                       let subText = "";
                       let actionButton = null;

@@ -170,6 +170,7 @@ export function OrderFlow() {
       const totalCost = paymentType === "full" ? 1780 : 1980;
       
       // Merge any contract data generated in ESignature step
+      const invoiceNumber = "INV-" + Math.floor(10000000 + Math.random() * 90000000).toString();
       const finalData = { 
         ...formData, 
         contractUrl: pendingOrderData?.contractUrl || "", 
@@ -196,6 +197,7 @@ export function OrderFlow() {
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
         contractUrl: finalData.contractUrl,
+        invoiceNumber: invoiceNumber,
         data: finalData,
       });
 
@@ -210,6 +212,7 @@ export function OrderFlow() {
           userName: currentUser?.name || "عميل المركز",
           userEmail: currentUser?.email || "pending@example.com",
           packagePrice: planPrice,
+          invoiceNumber: invoiceNumber
         }),
       });
 

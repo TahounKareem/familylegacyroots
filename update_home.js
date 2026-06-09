@@ -53,7 +53,7 @@ const journeyReplacement = `          <div className="flex flex-col md:flex-row 
 
 // Replace the features grid with the arrow steps
 content = content.replace(
-  /<div className="grid md:grid-cols-4 gap-8">[\s\S]*?<\/div>\n\n          <motion.div \n            initial=\{\{ opacity: 0, y: 20 \}\}/,
+  /<div className="grid md:grid-cols-4 gap-8">[\s\S]*?<\/div>\n\n {10}<motion.div \n {12}initial=\{\{ opacity: 0, y: 20 \}\}/,
   journeyReplacement + '\n\n          <motion.div \n            initial={{ opacity: 0, y: 20 }}'
 );
 
