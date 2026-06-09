@@ -223,14 +223,31 @@ export function Dashboard() {
     });
   };
 
-  const confirmUpload = () => {
+  const confirmUpload = async () => {
     if (!pendingUpload || !order) return;
     setIsUploading(true);
+    
+    let fileToUpload = pendingUpload.file;
+    // Check if it's an image and needs compression
+    if (fileToUpload.type.startsWith('image/')) {
+        try {
+            const { default: imageCompression } = await import('browser-image-compression');
+            const options = {
+                maxSizeMB: 1, // Max size in MB
+                maxWidthOrHeight: 1920,
+                useWebWorker: true
+            };
+            fileToUpload = await imageCompression(fileToUpload, options);
+        } catch (error) {
+            console.error("Image compression failed, using original file", error);
+        }
+    }
+
     const storageRef = ref(
       storage,
-      `orders/${order.id}/${pendingUpload.arrayName}/${Date.now()}_${pendingUpload.file.name}`,
+      `orders/${order.id}/${pendingUpload.arrayName}/${Date.now()}_${fileToUpload.name}`,
     );
-    const uploadTask = uploadBytesResumable(storageRef, pendingUpload.file);
+    const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
     uploadTask.on(
       "state_changed",
