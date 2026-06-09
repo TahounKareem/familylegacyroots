@@ -292,8 +292,8 @@ export function Dashboard() {
     
     // Status update & Timeline
     try {
-      await addMessageToOrder(order.id, newMessage, undefined, {
-        issueStatus: "جاري التصويب",
+      await addMessageToOrder(order.id, newMessage, "مرحلة التصويب", {
+        issueStatus: "مرحلة التصويب",
         actionPhase: "جاري التصويب",
       });
 
@@ -1957,17 +1957,19 @@ export function Dashboard() {
                                 الرقمية
                               </a>
                             </div>
-                            <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
-                              <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">
-                                يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
-                                إليك! <br />
-                                <span className="font-bold underline decoration-green-300 decoration-2">
-                                  تتضمن الشحنة:
-                                </span>{" "}
-                                10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
-                              </p>
-                            </div>
+                            {order.status === "تم الإغلاق" && (
+                              <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
+                                <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                                <p className="leading-relaxed">
+                                  يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
+                                  إليك! <br />
+                                  <span className="font-bold underline decoration-green-300 decoration-2">
+                                    تتضمن الشحنة:
+                                  </span>{" "}
+                                  10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -2012,17 +2014,19 @@ export function Dashboard() {
                                 عالي الدقة
                               </a>
                             </div>
-                            <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
-                              <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                              <p className="leading-relaxed">
-                                يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
-                                إليك! <br />
-                                <span className="font-bold underline decoration-green-300 decoration-2">
-                                  تتضمن الشحنة:
-                                </span>{" "}
-                                10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
-                              </p>
-                            </div>
+                            {order.status === "تم الإغلاق" && (
+                              <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
+                                <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                                <p className="leading-relaxed">
+                                  يسعدنا إبلاغك بأنه تم إرسال الشحنة وهي في طريقها
+                                  إليك! <br />
+                                  <span className="font-bold underline decoration-green-300 decoration-2">
+                                    تتضمن الشحنة:
+                                  </span>{" "}
+                                  10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -2032,7 +2036,10 @@ export function Dashboard() {
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
                       {order?.status !== "مكتمل" &&
-                      order?.status !== "طلب مكتمل" ? (
+                      order?.status !== "طلب مكتمل" &&
+                      order?.status !== "تم تسليم الإصدار الأول" &&
+                      order?.status !== "مرحلة التصويب" &&
+                      order?.status !== "تم الإغلاق" ? (
                         <div className="text-center py-10 px-4">
                           <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
                           <h3 className="text-xl font-bold text-brand-900 mb-2">

@@ -909,8 +909,8 @@ export function AdminPanel() {
                                   جاري التنفيذ
                                 </option>
                                 <option value="تم الإصدار">تم الإصدار</option>
-                                <option value="جاري التصويب">
-                                  جاري التصويب
+                                <option value="مرحلة التصويب">
+                                  مرحلة التصويب
                                 </option>
                                 <option value="تم الإغلاق">تم الإغلاق</option>
                                 {order.recordType === "الأبواب المغلقة" && (
@@ -1590,11 +1590,12 @@ export function AdminPanel() {
                             >
                               {(() => {
                                 const currentPhase = order.actionPhase || "تمت المسودة";
-                                if (currentPhase === "تم التصويب" || currentPhase === "تم تجهيز السجل للطباعة") {
+                                if (currentPhase === "تم التصويب" || currentPhase === "جاهز للطباعة" || currentPhase === "تم تجهيز السجل للطباعة") {
                                   return (
                                     <>
-                                      <option value="تم التصويب" disabled={currentPhase === "تم تجهيز السجل للطباعة"}>تم التصويب</option>
-                                      <option value="تم تجهيز السجل للطباعة">تم تجهيز السجل للطباعة</option>
+                                      <option value="تم التصويب" disabled={currentPhase === "جاهز للطباعة" || currentPhase === "تم تجهيز السجل للطباعة"}>تم التصويب</option>
+                                      <option value="جاهز للطباعة">جاهز للطباعة</option>
+                                      <option value="تم تجهيز السجل للطباعة" className="hidden">تم تجهيز السجل للطباعة</option>
                                     </>
                                   );
                                 }
