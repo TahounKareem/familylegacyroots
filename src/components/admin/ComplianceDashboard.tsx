@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { Shield, FileCheck, Users, FileText, CheckCircle, AlertCircle, Save, Plus, ChevronDown, ChevronUp, History } from "lucide-react";
 import { collection, onSnapshot, getDocs, updateDoc, doc, setDoc, addDoc, query, orderBy } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { legalContent, LegalSection } from "../../pages/Legal";
 
 // -- Interfaces --
 
@@ -14,6 +16,13 @@ interface ComplianceUser {
   cookieConsentLevel?: string;
   cookieConsentAt?: string;
   ipAddress?: string;
+  legalConsent?: {
+    agreedToTerms?: boolean;
+    agreedToTermsAt?: string;
+    cookieConsentLevel?: string;
+    cookieConsentAt?: string;
+    ipAddress?: string;
+  };
 }
 
 interface ComplianceOrder {
@@ -55,6 +64,45 @@ export function ComplianceDashboard() {
   const [docTitle, setDocTitle] = useState("");
   const [docVersion, setDocVersion] = useState("");
   const [isSavingDoc, setIsSavingDoc] = useState(false);
+  const [docSections, setDocSections] = useState<LegalSection[]>([]);
+  
+  useEffect(() => {
+    async function loadDoc() {
+      try {
+        const { getDoc } = await import('firebase/firestore');
+        const docRef = doc(db, "legal_documents", selectedDocId);
+        const snapshot = await getDoc(docRef);
+        if (snapshot.exists()) {
+          const data = snapshot.data().latestVersion;
+          if (data && data.sections && data.sections.length > 0) {
+            setDocTitle(data.title || "");
+            setDocVersion(data.version || "");
+            setDocSections(data.sections);
+            return;
+          }
+        }
+      } catch (e) {
+         console.warn("Could not load from firestore, using local template");
+      }
+      
+      const defaultDoc = legalContent[selectedDocId as keyof typeof legalContent]?.['ar'];
+      if (defaultDoc) {
+        setDocTitle(defaultDoc.title);
+        setDocVersion(defaultDoc.version);
+        setDocSections(defaultDoc.sections.map(s => ({ 
+          ...s, 
+          html: s.html || (s.content ? renderToStaticMarkup(s.content as React.ReactElement) : "")
+        })));
+      }
+    }
+    loadDoc();
+  }, [selectedDocId]);
+
+  const handleSectionHtmlChange = (index: number, html: string) => {
+    const newSections = [...docSections];
+    newSections[index].html = html;
+    setDocSections(newSections);
+  };
 
   const availableDocs = [
     { id: "terms", label: "شروط استخدام الموقع والمنصة" },
@@ -96,20 +144,24 @@ export function ComplianceDashboard() {
   }, []);
 
   const handleSaveLegalVersion = async () => {
-    if (!docContent || !docVersion || !docTitle) {
-      alert("الرجاء تعبئة كافة الحقول (العنوان - رقم الإصدار - النص)");
+    if (!docVersion || !docTitle) {
+      alert("الرجاء تعبئة كافة الحقول (العنوان - رقم الإصدار)");
       return;
     }
     
     setIsSavingDoc(true);
     try {
-      // Save it structure: legal_documents/{docId}/versions/{autoId}
-      // Also update legal_documents/{docId} with latest info
       const effectiveDate = new Date().toISOString().split("T")[0];
+      const safeSections = docSections.map(s => ({
+        id: s.id,
+        title: s.title,
+        html: s.html || ""
+      }));
+      
       const newVersion = {
         title: docTitle,
         version: docVersion,
-        content: docContent,
+        sections: safeSections,
         effectiveDate,
         lastUpdated: effectiveDate,
         createdAt: new Date().toISOString()
@@ -120,7 +172,6 @@ export function ComplianceDashboard() {
       await addDoc(collection(docRef, "versions"), newVersion);
       
       alert("تم إصدار وحفظ النسخة الجديدة بنجاح. ستنعكس فوراً في واجهة المستخدم.");
-      setDocContent(""); 
       setDocVersion("");
     } catch (e) {
       console.error(e);
@@ -164,19 +215,19 @@ export function ComplianceDashboard() {
                   <tr key={u.id} className="hover:bg-brand-50/50 transition">
                     <td className="px-6 py-4 text-brand-900 font-semibold">{u.name || "عضو"} <br/><span className="text-xs text-brand-500 font-normal">{u.email}</span></td>
                     <td className="px-6 py-4">
-                      {u.agreedToTermsAt ? (
+                      {u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt ? (
                         <span className="flex items-center gap-1 text-green-700 text-xs bg-green-50 px-2 py-1 rounded-md w-fit">
                           <CheckCircle className="w-3 h-3" />
-                          مقبول - {new Date(u.agreedToTermsAt).toLocaleDateString("ar-SA")}
+                          مقبول - {new Date(u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt || '').toLocaleDateString("ar-SA")}
                         </span>
                       ) : (
                         <span className="text-gray-400 text-xs">غير متوفر</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {u.cookieConsentLevel ? (
+                      {u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel ? (
                         <span className="flex items-center gap-1 text-brand-700 text-xs bg-brand-100 px-2 py-1 rounded-md w-fit inline-block">
-                          {u.cookieConsentLevel === 'all' ? 'الكل' : u.cookieConsentLevel}
+                          {(u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel) === 'all' ? 'الكل' : (u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel)}
                         </span>
                       ) : (
                          <span className="text-gray-400 text-xs">غير متوفر</span>
@@ -192,7 +243,7 @@ export function ComplianceDashboard() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-xs font-mono text-gray-500" dir="ltr">
-                      {u.ipAddress || "N/A"}
+                      {u.legalConsent?.ipAddress || u.ipAddress || "N/A"}
                     </td>
                   </tr>
                 )
@@ -205,7 +256,7 @@ export function ComplianceDashboard() {
   };
 
   const renderVisitorsConsents = () => {
-    const displayedLogs = auditLogs.filter(log => log.action.includes('CONSENT') || log.action.includes('REGISTRATION'));
+    const displayedLogs = auditLogs.filter(log => log?.action?.includes('CONSENT') || log?.action?.includes('REGISTRATION'));
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
@@ -294,14 +345,41 @@ export function ComplianceDashboard() {
           </div>
           
           <div className="mb-6">
-            <label className="block text-sm font-bold text-brand-800 mb-2">النص القانوني (يمكنك استخدام Markdown لتنسيق العناوين العريضة والخطوط)</label>
-            <textarea 
-              rows={12}
-              className="w-full border border-brand-200 rounded-xl p-4 focus:ring-2 focus:ring-brand-500 outline-none text-brand-900 font-sans leading-relaxed"
-              placeholder="اكتب أو انسخ النص القانوني الجديد هنا..."
-              value={docContent}
-              onChange={e => setDocContent(e.target.value)}
-            ></textarea>
+            <label className="block text-sm font-bold text-brand-800 mb-4">هيكلة ومحتوى الوثيقة (اضغط على أي قسم للتعديل مباشرة)</label>
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Table of contents preview */}
+              <div className="lg:w-1/4">
+                <div className="sticky top-6 bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
+                  <h3 className="text-sm font-bold text-brand-900 mb-4 pb-4 border-b border-brand-100">فهرس المحتويات</h3>
+                  <nav className="space-y-1">
+                    {docSections.map((section) => (
+                      <div key={section.id} className="block w-full text-right px-3 py-2 text-xs text-brand-600 truncate border-r-2 border-transparent hover:border-brand-500 hover:text-brand-900 transition-colors">
+                        {section.title}
+                      </div>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+              
+              {/* Sections Edit */}
+              <div className="lg:w-3/4 space-y-6">
+                {docSections.map((section, index) => (
+                  <section key={section.id} className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm focus-within:ring-2 focus-within:ring-brand-500 transition">
+                    <h2 className="font-serif text-xl font-bold text-brand-900 mb-4 pb-3 border-b border-brand-50">
+                      {section.title}
+                    </h2>
+                    <div className="prose prose-brand max-w-none font-light leading-relaxed text-sm">
+                      <div 
+                        contentEditable 
+                        className="outline-none min-h-[100px] p-2 hover:bg-brand-50/50 rounded-lg transition"
+                        dangerouslySetInnerHTML={{ __html: section.html || "" }}
+                        onBlur={(e) => handleSectionHtmlChange(index, e.currentTarget.innerHTML)}
+                      />
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </div>
           </div>
           
           <button 

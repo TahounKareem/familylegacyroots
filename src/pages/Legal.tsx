@@ -16,7 +16,8 @@ export type Lang = 'ar' | 'en';
 export interface LegalSection {
   id: string;
   title: string;
-  content: React.ReactNode;
+  content?: React.ReactNode;
+  html?: string;
 }
 
 export interface LegalDocument {
@@ -50,7 +51,7 @@ const serviceAgreementPlaceholder = {
   }
 };
 
-const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
+export const legalContent: Record<DocId, Record<Lang, LegalDocument>> = {
   terms: {
     ar: termsAr,
     en: termsEn,
@@ -100,13 +101,13 @@ export function Legal() {
                version: data.version || "1.0",
                effectiveDate: data.effectiveDate || "N/A",
                lastUpdated: data.lastUpdated || "N/A",
-               sections: [
+               sections: data.sections || [
                  {
                    id: 'remote-content',
                    title: 'المحتويات',
                    content: (
                      <div className="prose prose-brand max-w-none font-light leading-relaxed">
-                       <ReactMarkdown>{data.content}</ReactMarkdown>
+                       <ReactMarkdown>{data.content || ""}</ReactMarkdown>
                      </div>
                    )
                  }
@@ -250,7 +251,11 @@ export function Legal() {
                 {section.title}
               </h2>
               <div className="text-brand-800">
-                {section.content}
+                {section.html ? (
+                  <div className="prose prose-brand max-w-none font-light leading-relaxed" dangerouslySetInnerHTML={{ __html: section.html }} />
+                ) : (
+                  section.content
+                )}
               </div>
             </section>
           ))}
