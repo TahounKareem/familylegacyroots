@@ -334,7 +334,7 @@ export function Auth() {
                 disabled={loading}
                 className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${loading ? 'bg-brand-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'}`}
               >
-                {loading ? "جاري المعالجة..." : (isLogin ? "الدخول لملف العائلة" : "إنشاء حساب")}
+                {loading ? "جاري المعالجة..." : (isLogin ? "الدخول للحساب" : "إنشاء حساب")}
               </button>
             </div>
           </form>

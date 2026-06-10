@@ -201,29 +201,12 @@ export function OrderFlow() {
         data: finalData,
       });
 
-      // Call Express Backend to create a Stripe Session
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId,
-          userName: currentUser?.name || "عميل المركز",
-          userEmail: currentUser?.email || "pending@example.com",
-          packagePrice: planPrice,
-          invoiceNumber: invoiceNumber
-        }),
-      });
+      // We redirect directly to Stripe Payment Links with client_reference_id
+      const paymentLink = paymentType === "full" 
+        ? `https://buy.stripe.com/9B6aEY0Ax1dv3nY8tv8so04?client_reference_id=${orderId}`
+        : `https://buy.stripe.com/7sY8wQ82Z6xP8Ii4df8so03?client_reference_id=${orderId}`;
 
-      const data = await response.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || "حدث خطأ أثناء الاتصال ببوابة الدفع. برجاء وضع مفتاح Stripe بالخادم.");
-        setIsSubmitting(false);
-      }
+      window.location.href = paymentLink;
     } catch (error) {
       console.error("Order submission error", error);
       alert("حدث خطأ غير متوقع.");
@@ -671,7 +654,7 @@ export function OrderFlow() {
                            <div className={`p-2 lg:p-3 rounded-full shrink-0 shadow-sm border ${paymentType === 'full' ? 'bg-brand-100 border-brand-300' : 'bg-white border-brand-100'}`}>
                              <Sparkles className="text-brand-500 w-5 h-5 lg:w-6 lg:h-6"/>
                            </div>
-                           <span className="font-bold text-base lg:text-lg text-brand-900 leading-tight">امتيازات للمشاريع المسددة قبل المعالجة!</span>
+                            <span className="font-bold text-base lg:text-lg text-brand-900 leading-tight">استفد من خصم السداد المبكر</span>
                         </div>
                         <ChevronDown className={`w-6 h-6 text-brand-500 shrink-0 self-end sm:self-auto transition-transform ${paymentType === 'full' ? 'rotate-180' : ''}`} />
                       </div>
@@ -710,7 +693,7 @@ export function OrderFlow() {
                               <ul className="space-y-4 font-medium">
                                 <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة أولى: 35% عند تفعيل الطلب – مرحلة البحث</li>
                                 <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثانية: 35% عند انتهاء مرحلة التوثيق</li>
-                                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثالثة: 30% عند انتهاء العمل وتسليم السجل</li>
+                                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-2 bg-brand-400 rounded-full shrink-0"></div> دفعة ثالثة: 30% عند انتهاء العمل</li>
                               </ul>
                             </div>
                           </motion.div>

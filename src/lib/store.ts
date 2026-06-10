@@ -314,7 +314,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   logout: async () => {
     try {
       await firebaseSignOut(auth);
-      set({ currentUser: null, orders: [] });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("pendingOrderData");
+      }
+      set({ currentUser: null, orders: [], pendingOrderData: null });
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -375,12 +378,13 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   fulfillOrder: async (id, data) => {
     try {
+      const finalStatus = data.status || "مكتمل";
       set((state) => ({
         orders: state.orders.map((o) =>
-          o.id === id ? { ...o, status: "مكتمل", ...data } : o,
+          o.id === id ? { ...o, ...data, status: finalStatus } : o,
         ),
       }));
-      await updateDoc(doc(db, "orders", id), { status: "مكتمل", ...data });
+      await updateDoc(doc(db, "orders", id), { ...data, status: finalStatus });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
     }

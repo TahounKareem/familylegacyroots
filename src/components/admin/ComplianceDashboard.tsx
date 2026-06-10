@@ -247,7 +247,13 @@ export function ComplianceDashboard() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-xs font-mono text-gray-500" dir="ltr">
-                      {u.legalConsent?.ipAddress || u.ipAddress || "N/A"}
+                      {
+                        // Prioritize audit logs to get the real recorded IP instead of the security server message
+                        auditLogs.find(log => log.userId === u.id && log.ipAddress && log.ipAddress !== "تم تسجيلها بواسطة سيرفر أمان النظام")?.ipAddress 
+                        || u.legalConsent?.ipAddress 
+                        || u.ipAddress 
+                        || "N/A"
+                      }
                     </td>
                     <td className="px-6 py-4">
                       <button 

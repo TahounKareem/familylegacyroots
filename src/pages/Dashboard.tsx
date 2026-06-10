@@ -52,10 +52,7 @@ export function Dashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [replyText, setReplyText] = useState("");
-  const [correctionSection, setCorrectionSection] = useState("");
-  const [correctionPage, setCorrectionPage] = useState("");
-  const [correctionText, setCorrectionText] = useState("");
-  const [correctionError, setCorrectionError] = useState("");
+  const [corrections, setCorrections] = useState([{ section: "", page: "", text: "", error: "" }]);
   const [agreeToCorrectionTerms, setAgreeToCorrectionTerms] = useState(false);
   const [agreeToUploadTerms, setAgreeToUploadTerms] = useState(false);
   const [showCorrectionTerms, setShowCorrectionTerms] = useState(false);
@@ -273,20 +270,25 @@ export function Dashboard() {
   };
 
   const handleSendCorrection = async () => {
+    const isValid = corrections.every(c => c.section.trim() && c.page.trim() && c.text.trim() && c.error.trim());
     if (
       !order ||
-      !correctionText.trim() ||
-      !correctionError.trim() ||
-      !correctionSection ||
-      !correctionPage ||
+      !isValid ||
       !agreeToCorrectionTerms
     )
       return;
+    
+    let combinedMessage = "تم إرسال طلب تصويبات متعددة:\n\n";
+    corrections.forEach((c, i) => {
+      combinedMessage += `=== تصويب رقم ${i + 1} ===\n`;
+      combinedMessage += `القسم: ${c.section}\nالصفحة: ${c.page}\nالملاحظة المطلوب تعديلها:\n${c.error}\nالتصويب المقترح:\n${c.text}\n\n`;
+    });
+
     const newMessage: Message = {
       id: Math.random().toString(36).substr(2, 9),
       senderId: currentUser.id,
       senderRole: "user",
-      text: `طلب تصويب - القسم: ${correctionSection}\nالصفحة: ${correctionPage}\n\nالخطأ المزعوم:\n${correctionError}\n\nالتصويب المقترح:\n${correctionText}`,
+      text: combinedMessage.trim(),
       createdAt: new Date().toISOString(),
     };
     
@@ -305,10 +307,7 @@ export function Dashboard() {
       console.error(e);
     }
 
-    setCorrectionText("");
-    setCorrectionError("");
-    setCorrectionPage("");
-    setCorrectionSection("");
+    setCorrections([{ section: "", page: "", text: "", error: "" }]);
     setAgreeToCorrectionTerms(false);
     setShowCorrectionTerms(false);
     alert("تم إرسال طلب التصويب بنجاح. سيقوم فريق البحث بمراجعته.");
@@ -416,7 +415,7 @@ export function Dashboard() {
               </div>
             </button>
             <div className="text-center md:text-right flex flex-col items-center md:items-start">
-              <span className="text-xs font-bold text-brand-400 mb-0.5 uppercase tracking-wider">مرحباً بك مجدداً</span>
+              <span className="text-xs font-bold text-brand-400 mb-0.5 uppercase tracking-wider">مرحباً بك</span>
               <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">
                 {currentUser.name}
               </h1>
@@ -1850,71 +1849,63 @@ export function Dashboard() {
                         </div>
                       )}
 
-                      {order.status === "طلب إيضاح" ||
-                      order.actionPhase === "طلب إيضاح" ? (
-                        <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0">
-                          <input
-                            type="file"
-                            className="hidden"
-                            ref={chatFileInputRef}
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                const file = e.target.files[0];
-                                const storageRef = ref(
-                                  storage,
-                                  `chat/${Date.now()}_${file.name}`,
-                                );
-                                const uploadTask = uploadBytesResumable(
-                                  storageRef,
-                                  file,
-                                );
-                                uploadTask.on(
-                                  "state_changed",
-                                  null,
-                                  null,
-                                  async () => {
-                                    const downloadURL = await getDownloadURL(
-                                      uploadTask.snapshot.ref,
-                                    );
-                                    setReplyAttachments([
-                                      ...replyAttachments,
-                                      downloadURL,
-                                    ]);
-                                  },
-                                );
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => chatFileInputRef.current?.click()}
-                            className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200"
-                            title="إرفاق ملف"
-                          >
-                            <Paperclip className="w-5 h-5" />
-                          </button>
-                          <input
-                            type="text"
-                            className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4"
-                            placeholder="إكتب ردك على طلب الإيضاح هنا..."
-                            value={replyText}
-                            onChange={(e) => setReplyText(e.target.value)}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" && handleSendReply()
+                      <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0 z-10">
+                        <input
+                          type="file"
+                          className="hidden"
+                          ref={chatFileInputRef}
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const file = e.target.files[0];
+                              const storageRef = ref(
+                                storage,
+                                `chat/${Date.now()}_${file.name}`,
+                              );
+                              const uploadTask = uploadBytesResumable(
+                                storageRef,
+                                file,
+                              );
+                              uploadTask.on(
+                                "state_changed",
+                                null,
+                                null,
+                                async () => {
+                                  const downloadURL = await getDownloadURL(
+                                    uploadTask.snapshot.ref,
+                                  );
+                                  setReplyAttachments([
+                                    ...replyAttachments,
+                                    downloadURL,
+                                  ]);
+                                },
+                              );
                             }
-                          />
-                          <button
-                            onClick={handleSendReply}
-                            className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold"
-                          >
-                            إرسال الرد
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="p-4 bg-brand-50 border-t border-brand-200 text-center text-sm font-bold text-brand-600 absolute bottom-0 left-0 right-0 h-[72px] flex items-center justify-center">
-                          لا يمكنك إرسال رسائل حالياً. المراسلة متاحة فقط للرد
-                          على استفسارات فريق البحث.
-                        </div>
-                      )}
+                          }}
+                        />
+                        <button
+                          onClick={() => chatFileInputRef.current?.click()}
+                          className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200"
+                          title="إرفاق ملف"
+                        >
+                          <Paperclip className="w-5 h-5" />
+                        </button>
+                        <input
+                          type="text"
+                          className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4"
+                          placeholder="اكتب رسالتك لفريق البحث هنا..."
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSendReply()
+                          }
+                        />
+                        <button
+                          onClick={handleSendReply}
+                          className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold"
+                        >
+                          إرسال
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -1946,17 +1937,54 @@ export function Dashboard() {
                             الجودة والإخراج.
                           </p>
                           <div className="flex flex-col items-center justify-center gap-6">
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                              <a
-                                href={order.digitalCopyLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
-                              >
-                                <Download className="w-6 h-6" /> تحميل النسخة
-                                الرقمية
-                              </a>
-                            </div>
+                            {(order.status === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
+                              <div className="w-full">
+                                <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden border-2 border-brand-200 shadow-xl mb-8 relative bg-gray-50 flex items-center justify-center">
+                                  <iframe 
+                                    src={order.digitalCopyLink} 
+                                    className="absolute inset-0 w-full h-full border-0" 
+                                    allowFullScreen 
+                                    title="نسخة أولية للسجل"
+                                  ></iframe>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                  <button
+                                    onClick={() => {
+                                      useAppStore.getState().addMessageToOrder(order.id, {
+                                        id: Math.random().toString(36).substr(2, 9),
+                                        senderId: currentUser.id,
+                                        senderRole: "user",
+                                        text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
+                                        createdAt: new Date().toISOString(),
+                                      }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
+                                      useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
+                                    }}
+                                    className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                                  >
+                                    <CheckCircle className="w-6 h-6" /> إعتماد النسخة الحالية للطباعة
+                                  </button>
+                                  <button
+                                    onClick={() => setActiveTab("التصويبات")}
+                                    className="flex-1 bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                                  >
+                                    <Edit3 className="w-6 h-6" /> طلب تصويب
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                <a
+                                  href={order.digitalCopyLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+                                >
+                                  <Download className="w-6 h-6" /> تحميل النسخة
+                                  الرقمية
+                                </a>
+                              </div>
+                            )}
+                            
                             {order.status === "تم الإغلاق" && (
                               <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
                                 <Package className="w-6 h-6 text-green-600 shrink-0 mt-1" />
@@ -2156,70 +2184,101 @@ export function Dashboard() {
                                 </p>
 
                                 <div className="space-y-4">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                      <label className="block text-sm font-bold text-brand-700 mb-1">
-                                        أي قسم في سجل تراث العائلة يحتاج لهذا
-                                        التصويب؟
-                                      </label>
-                                      <input
-                                        type="text"
-                                        list="sections"
-                                        className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
-                                        placeholder="اختر أو اكتب يدوياً..."
-                                        value={correctionSection}
-                                        onChange={(e) =>
-                                          setCorrectionSection(e.target.value)
-                                        }
-                                      />
-                                      <datalist id="sections">
-                                        <option value="الباب الأول: التسلسل النسبي" />
-                                        <option value="الباب الثاني: الوثائق" />
-                                        <option value="الباب الثالث: الصور" />
-                                        <option value="مقدمة السجل" />
-                                      </datalist>
-                                    </div>
-                                    <div>
-                                      <label className="block text-sm font-bold text-brand-700 mb-1">
-                                        رقم الصفحة في سجل تراث العائلة التي
-                                        تحتاج لهذا التصويب
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
-                                        placeholder="مثال: 45"
-                                        value={correctionPage}
-                                        onChange={(e) =>
-                                          setCorrectionPage(e.target.value)
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-bold text-brand-700 mb-1">
-                                      التصويب المطلوب
-                                    </label>
-                                    <textarea
-                                      className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3"
-                                      placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..."
-                                      value={correctionError}
-                                      onChange={(e) =>
-                                        setCorrectionError(e.target.value)
-                                      }
-                                    ></textarea>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-bold text-brand-700 mb-1">
-                                      مرجعية او مصدر هذا التصويب
-                                    </label>
-                                    <textarea
-                                      className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3"
-                                      placeholder="اكتب التصويب الصحيح ومصادرك..."
-                                      value={correctionText}
-                                      onChange={(e) =>
-                                        setCorrectionText(e.target.value)
-                                      }
-                                    ></textarea>
+                                  <div className="space-y-6">
+                                    {corrections.map((correction, index) => (
+                                      <div key={index} className="bg-white p-6 rounded-xl border border-brand-200 relative shadow-sm">
+                                        {corrections.length > 1 && (
+                                          <button 
+                                            onClick={() => setCorrections(c => c.filter((_, i) => i !== index))}
+                                            className="absolute top-4 left-4 text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-full"
+                                            title="حذف هذا التصويب"
+                                          >
+                                            <X className="w-4 h-4" />
+                                          </button>
+                                        )}
+                                        <h4 className="font-bold text-brand-900 mb-4 border-b border-brand-100 pb-2">التصويب رقم {index + 1}</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                          <div>
+                                            <label className="block text-sm font-bold text-brand-700 mb-1">
+                                              أي قسم في سجل تراث العائلة يحتاج لهذا
+                                              التصويب؟
+                                            </label>
+                                            <input
+                                              type="text"
+                                              list="sections"
+                                              className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
+                                              placeholder="اختر أو اكتب يدوياً..."
+                                              value={correction.section}
+                                              onChange={(e) => {
+                                                const newC = [...corrections];
+                                                newC[index].section = e.target.value;
+                                                setCorrections(newC);
+                                              }}
+                                            />
+                                            <datalist id="sections">
+                                              <option value="الباب الأول: التسلسل النسبي" />
+                                              <option value="الباب الثاني: الوثائق" />
+                                              <option value="الباب الثالث: الصور" />
+                                              <option value="مقدمة السجل" />
+                                            </datalist>
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-bold text-brand-700 mb-1">
+                                              رقم الصفحة في سجل تراث العائلة التي
+                                              تحتاج لهذا التصويب
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white p-3"
+                                              placeholder="مثال: 45"
+                                              value={correction.page}
+                                              onChange={(e) => {
+                                                const newC = [...corrections];
+                                                newC[index].page = e.target.value;
+                                                setCorrections(newC);
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-bold text-brand-700 mb-1">
+                                            الملاحظة المطلوب تعديلها
+                                          </label>
+                                          <textarea
+                                            className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[80px] p-3"
+                                            placeholder="اكتب الجملة أو المعلومات التي ترى أنها تحتاج لتصويب..."
+                                            value={correction.error}
+                                            onChange={(e) => {
+                                              const newC = [...corrections];
+                                              newC[index].error = e.target.value;
+                                              setCorrections(newC);
+                                            }}
+                                          ></textarea>
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-bold text-brand-700 mb-1">
+                                            التصويب المقترح والمصادر المرتبطة
+                                          </label>
+                                          <textarea
+                                            className="w-full border border-brand-200 rounded-xl focus:ring-brand-500 bg-white min-h-[120px] p-3"
+                                            placeholder="اكتب التصويب الصحيح ومصادرك..."
+                                            value={correction.text}
+                                            onChange={(e) => {
+                                              const newC = [...corrections];
+                                              newC[index].text = e.target.value;
+                                              setCorrections(newC);
+                                            }}
+                                          ></textarea>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    
+                                    <button
+                                      onClick={() => setCorrections(c => [...c, { section: "", page: "", text: "", error: "" }])}
+                                      className="w-full py-4 border-2 border-dashed border-brand-300 text-brand-600 bg-brand-50/50 rounded-xl font-bold hover:bg-brand-50 hover:border-brand-400 transition flex justify-center items-center gap-2"
+                                    >
+                                      الضغط هنا لإضافة طلب تصويب أخر <span className="text-xl leading-none px-2">+</span> 
+                                    </button>
                                   </div>
 
                                   <div className="flex items-start gap-3 mt-4 bg-white p-4 rounded-xl border border-brand-100">

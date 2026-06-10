@@ -89,7 +89,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                            </div>
                            <div>
                              <p className="text-xs text-brand-500 mb-1">IP Address</p>
-                             <p className="font-mono text-sm" dir="ltr">{consent.ipAddress || consent.ipHash || "N/A"}</p>
+                             <p className="font-mono text-sm" dir="ltr">{(consent.ipAddress && consent.ipAddress !== "تم تسجيلها بواسطة سيرفر أمان النظام" ? consent.ipAddress : null) || consent.ipHash || "N/A"}</p>
                            </div>
                            <div className="col-span-2">
                              <p className="text-xs text-brand-500 mb-1">تفضيلات (Preferences)</p>

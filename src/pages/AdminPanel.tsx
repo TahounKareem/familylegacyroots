@@ -317,9 +317,11 @@ export function AdminPanel() {
       if (deliveryTab === "draft") {
         phaseUpdates.actionPhase = "تم تسليم المسودة";
         phaseUpdates.issueStatus = "تم الإصدار";
+        phaseUpdates.status = "تم تسليم الإصدار الأول";
       } else if (deliveryTab === "final") {
         phaseUpdates.actionPhase = "تم التسليم";
         phaseUpdates.issueStatus = "تم الإغلاق";
+        phaseUpdates.status = "تم الإغلاق";
       }
 
       await fulfillOrder(deliveryOrder.id, {
@@ -998,16 +1000,26 @@ export function AdminPanel() {
                                     >
                                       <Search className="w-3 h-3" /> مراجعة سجل حركات الطلب
                                     </button>
-                                    { (order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم تجهيز السجل للطباعة") && (
+                                    {order.actionPhase === "تم التصميم الإلكتروني" && (
                                       <button
                                         onClick={() => {
-                                          setDeliveryTab(order.actionPhase === "تم التصميم الإلكتروني" ? "draft" : "final");
+                                          setDeliveryTab("draft");
+                                          setDeliveryOrder(order);
+                                        }}
+                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
+                                      >
+                                        <FileText className="w-3 h-3" /> تسليم النسخة الأولية
+                                      </button>
+                                    )}
+                                    {order.actionPhase === "جاهز للطباعة" && (
+                                      <button
+                                        onClick={() => {
+                                          setDeliveryTab("final");
                                           setDeliveryOrder(order);
                                         }}
                                         className="flex items-center gap-1.5 whitespace-nowrap text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
                                       >
-                                        <FileText className="w-3 h-3" /> التسليم
-                                        للعميل
+                                        <FileText className="w-3 h-3" /> التسليم للعميل
                                       </button>
                                     )}
                                     <button
@@ -2641,9 +2653,9 @@ export function AdminPanel() {
             </div>
 
             <p className="text-brand-700 mb-6 text-sm">
-              برجاء إدخال رابط الوثيقة النهائية (مثال: رابط Google Drive، أو
-              رابط Dropbox، أو رابط مباشر للملف). سيتم تغيير حالة الطلب وتسليمه
-              للعميل مباشرة.
+              {deliveryTab === "draft" 
+                ? "برجاء إدخال رابط العرض الإلكتروني للنسخة الأولية (مثال: رابط fliphtml5.com). سيتم تغيير حالة الطلب وتسليمه للعميل مباشرة للإعتماد."
+                : "برجاء إدخال رابط الوثيقة النهائية (مثال: رابط Google Drive، أو رابط Dropbox، أو رابط مباشر للملف). سيتم تغيير حالة الطلب وتسليمه للعميل مباشرة."}
             </p>
 
             <div className="flex bg-brand-100 rounded-lg p-1 mb-6 text-center">
@@ -2655,7 +2667,7 @@ export function AdminPanel() {
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
                 <label className="block font-semibold text-brand-900 mb-2">
-                  رابط النسخة الرقمية للسجل
+                  {deliveryTab === "draft" ? "رابط عرض النسخة الأولية (Flipbook)" : "رابط النسخة الرقمية للسجل"}
                 </label>
                 <input
                   type="url"
@@ -2669,30 +2681,36 @@ export function AdminPanel() {
                   className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                 />
               </div>
-              <div>
-                <label className="block font-semibold text-brand-900 mb-2">
-                  رابط بوستر المشجرة
-                </label>
-                <input
-                  type="url"
-                  value={posterLink}
-                  onChange={(e) => setPosterLink(e.target.value)}
-                  placeholder="https://..."
-                  dir="ltr"
-                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-brand-900 mb-2">
-                  التوصيات واقتراحات فريق البحث
-                </label>
-                <textarea
-                  value={researchRecommendations}
-                  onChange={(e) => setResearchRecommendations(e.target.value)}
-                  placeholder="أكتب التوصيات..."
-                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
-                />
-              </div>
+              
+              {deliveryTab !== "draft" && (
+                <>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-2">
+                      رابط بوستر المشجرة
+                    </label>
+                    <input
+                      type="url"
+                      value={posterLink}
+                      onChange={(e) => setPosterLink(e.target.value)}
+                      placeholder="https://..."
+                      dir="ltr"
+                      className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-2">
+                      التوصيات واقتراحات فريق البحث
+                    </label>
+                    <textarea
+                      value={researchRecommendations}
+                      onChange={(e) => setResearchRecommendations(e.target.value)}
+                      placeholder="أكتب التوصيات..."
+                      className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
+                    />
+                  </div>
+                </>
+              )}
+              
               <button
                 onClick={handleFulfillOrder}
                 disabled={isFulfilling || !digitalCopyLink.trim()}
