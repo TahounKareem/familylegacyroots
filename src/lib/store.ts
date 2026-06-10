@@ -93,6 +93,7 @@ export type ActionPhase =
   | "تمت المسودة"
   | "تم التصميم الإلكتروني"
   | "طلب إيضاح"
+  | "مرحلة التصويب"
   | "جاري التصويب"
   | "تم التصويب"
   | "جاهز للطباعة"
@@ -428,9 +429,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       const updateData: any = {
         ...extraUpdates,
         messages: updatedMessages,
-        actionPhase: nextActionPhase,
-        previousActionPhase: nextPreviousPhase,
       };
+      if (nextActionPhase !== undefined) updateData.actionPhase = nextActionPhase;
+      if (nextPreviousPhase !== undefined) updateData.previousActionPhase = nextPreviousPhase;
       if (newStatus) updateData.status = newStatus;
 
       await updateDoc(doc(db, "orders", orderId), updateData);

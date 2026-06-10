@@ -1183,9 +1183,10 @@ export function AdminPanel() {
                               >
                                 {(() => {
                                   const currentPhase = order.actionPhase || "مرحلة البحث";
-                                  if (currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
+                                  if (currentPhase === "مرحلة التصويب" || currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
                                     return (
                                       <>
+                                        <option value="مرحلة التصويب" disabled={currentPhase === "جاري التصويب" || currentPhase === "تم التصويب"}>مرحلة التصويب</option>
                                         <option value="جاري التصويب" disabled={currentPhase === "تم التصويب"}>جاري التصويب</option>
                                         <option value="تم التصويب">تم التصويب</option>
                                       </>

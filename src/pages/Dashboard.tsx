@@ -297,7 +297,7 @@ export function Dashboard() {
     try {
       await addMessageToOrder(order.id, newMessage, "مرحلة التصويب", {
         issueStatus: "جاري التصويب",
-        actionPhase: "جاري التصويب",
+        actionPhase: "مرحلة التصويب",
       });
 
       await useAppStore.getState().logTimelineEvent(
@@ -649,7 +649,8 @@ export function Dashboard() {
                       const isState6 =
                         order?.issueStatus === "جاري التصويب" ||
                         order?.issueStatus === "يوجد تصويبات" ||
-                        order?.actionPhase === "جاري التصويب";
+                        order?.actionPhase === "جاري التصويب" ||
+                        order?.actionPhase === "مرحلة التصويب";
                       const isState7 = order?.issueStatus === "تم الإغلاق";
 
                       let title = "";
@@ -2079,6 +2080,8 @@ export function Dashboard() {
                       order?.status !== "تم الإصدار" &&
                       order?.issueStatus !== "تم الإصدار" &&
                       order?.status !== "مرحلة التصويب" &&
+                      order?.status !== "جاري التصويب" &&
+                      order?.issueStatus !== "جاري التصويب" &&
                       order?.status !== "تم الإغلاق" ? (
                         <div className="text-center py-10 px-4">
                           <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
