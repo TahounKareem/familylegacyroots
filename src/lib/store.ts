@@ -248,7 +248,8 @@ export interface Order {
   previousActionPhase?: ActionPhase;
   assignedResearcher?: string;
   isDeleted?: boolean;
-  draftLink?: string;
+  researchDraftLink?: string;
+  initialDesignLink?: string;
   postCorrectionLink?: string;
   designLinks?: {
     recordLink: string;
@@ -386,13 +387,12 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   fulfillOrder: async (id, data) => {
     try {
-      const finalStatus = data.status || "مكتمل";
       set((state) => ({
         orders: state.orders.map((o) =>
-          o.id === id ? { ...o, ...data, status: finalStatus } : o,
+          o.id === id ? { ...o, ...data } : o,
         ),
       }));
-      await updateDoc(doc(db, "orders", id), { ...data, status: finalStatus });
+      await updateDoc(doc(db, "orders", id), { ...data });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `orders/${id}`);
     }

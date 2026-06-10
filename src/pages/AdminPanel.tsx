@@ -101,6 +101,9 @@ export function AdminPanel() {
   const [designTreeLink, setDesignTreeLink] = useState("");
   const [designCopiesShipped, setDesignCopiesShipped] = useState(false);
 
+  const [initialDesignSubmitOrder, setInitialDesignSubmitOrder] = useState<Order | null>(null);
+  const [initialDesignLink, setInitialDesignLink] = useState("");
+
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
@@ -327,7 +330,7 @@ export function AdminPanel() {
       if (researchDeliveryTab === "draft") {
         await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
           actionPhase: "تمت المسودة",
-          draftLink: researchDocumentLink
+          researchDraftLink: researchDocumentLink
         });
         await useAppStore.getState().logTimelineEvent(
           researchDeliveryOrder.id,
@@ -345,6 +348,28 @@ export function AdminPanel() {
       }
       setResearchDeliveryOrder(null);
       setResearchDocumentLink("");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء التسليم");
+    } finally {
+      setIsFulfilling(false);
+    }
+  };
+
+  const handleInitialDesignSubmit = async () => {
+    if (!initialDesignSubmitOrder || !initialDesignLink.trim()) return;
+    setIsFulfilling(true);
+    try {
+      await useAppStore.getState().fulfillOrder(initialDesignSubmitOrder.id, {
+        actionPhase: "تم التصميم الإلكتروني",
+        initialDesignLink: initialDesignLink
+      });
+      await useAppStore.getState().logTimelineEvent(
+        initialDesignSubmitOrder.id,
+        "تم تسليم تصميم السجل الأولي"
+      );
+      setInitialDesignSubmitOrder(null);
+      setInitialDesignLink("");
     } catch (e) {
       console.error(e);
       alert("حدث خطأ أثناء التسليم");
@@ -1073,31 +1098,55 @@ export function AdminPanel() {
                                       <Search className="w-3 h-3" /> مراجعة سجل حركات الطلب
                                     </button>
                                     {order.actionPhase === "تم التصميم الإلكتروني" && (
-                                      <button
-                                        onClick={() => {
-                                          setDeliveryTab("draft");
-                                          setDeliveryOrder(order);
-                                          setDigitalCopyLink(order.draftLink || "");
-                                          setDeliveryLink(order.draftLink || "");
-                                        }}
-                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
-                                      >
-                                        <FileText className="w-3 h-3" /> تسليم النسخة الأولية
-                                      </button>
+                                      <>
+                                        {order.initialDesignLink && (
+                                          <a
+                                            href={order.initialDesignLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
+                                          >
+                                            <Download className="w-3 h-3" /> تحميل مسودة السجل
+                                          </a>
+                                        )}
+                                        <button
+                                          onClick={() => {
+                                            setDeliveryTab("draft");
+                                            setDeliveryOrder(order);
+                                            setDigitalCopyLink(order.initialDesignLink || "");
+                                            setDeliveryLink(order.initialDesignLink || "");
+                                          }}
+                                          className="flex items-center gap-1.5 whitespace-nowrap text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
+                                        >
+                                          <FileText className="w-3 h-3" /> تسليم النسخة الأولية
+                                        </button>
+                                      </>
                                     )}
                                     {order.actionPhase === "جاهز للطباعة" && (
-                                      <button
-                                        onClick={() => {
-                                          setDeliveryTab("final");
-                                          setDeliveryOrder(order);
-                                          setDigitalCopyLink(order.designLinks?.recordLink || "");
-                                          setDeliveryLink(order.designLinks?.recordLink || "");
-                                          setPosterLink(order.designLinks?.treeLink || "");
-                                        }}
-                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 px-4 py-2 rounded-lg text-sm font-bold transition shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse"
-                                      >
-                                        <CheckCircle className="w-4 h-4" /> التسليم النهائي للعميل
-                                      </button>
+                                      <>
+                                        {order.designLinks?.recordLink && (
+                                          <a
+                                            href={order.designLinks.recordLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1.5 whitespace-nowrap text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
+                                          >
+                                            <Download className="w-3 h-3" /> تحميل السجل النهائي
+                                          </a>
+                                        )}
+                                        <button
+                                          onClick={() => {
+                                            setDeliveryTab("final");
+                                            setDeliveryOrder(order);
+                                            setDigitalCopyLink(order.designLinks?.recordLink || "");
+                                            setDeliveryLink(order.designLinks?.recordLink || "");
+                                            setPosterLink(order.designLinks?.treeLink || "");
+                                          }}
+                                          className="flex items-center gap-1.5 whitespace-nowrap text-white bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 px-4 py-2 rounded-lg text-sm font-bold transition shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse"
+                                        >
+                                          <CheckCircle className="w-4 h-4" /> التسليم النهائي للعميل
+                                        </button>
+                                      </>
                                     )}
                                     <button
                                       onClick={() =>
@@ -1211,67 +1260,68 @@ export function AdminPanel() {
                               </span>
                             </td>
                             <td className="px-4 py-4">
-                              <select
-                                value={order.actionPhase || "مرحلة البحث"}
-                                onChange={async (e) => {
-                                  const newPhase = e.target.value as ActionPhase;
-                                  const updateData: any = {
-                                    actionPhase: newPhase,
-                                  };
-
-                                  if (
-                                    newPhase === "مرحلة التوثيق" &&
-                                    order.totalAmount === 1980 &&
-                                    (!order.paymentStatus ||
-                                      order.paymentStatus === "مدفوع أول دفعة" ||
-                                      order.paymentStatus === "كود دعوة")
-                                  ) {
-                                    updateData.paymentStatus = "مستحق الدفعة الثانية";
-                                  }
-
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id ? { ...o, ...updateData } : o
-                                    ),
-                                  }));
-
-                                  try {
-                                    const { updateDoc, doc } = await import("firebase/firestore");
-                                    const { db } = await import("@/lib/firebase");
-                                    await updateDoc(doc(db, "orders", order.id), updateData);
-                                    if (updateData.paymentStatus) {
-                                      useAppStore.getState().logTimelineEvent(
-                                        order.id,
-                                        `استحقاق الدفعة الثانية للعميل لتنقله لمرحلة التوثيق.`
-                                      );
-                                    }
-                                    useAppStore.getState().logTimelineEvent(
-                                      order.id,
-                                      `تم تغيير الإجراء إلى: ${newPhase}`
-                                    );
-                                  } catch (error) {
-                                    console.error("Failed to update status", error);
-                                  }
-                                }}
-                                className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
-                              >
-                                {(() => {
-                                  const currentPhase = order.actionPhase || "مرحلة البحث";
-                                  if (currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
-                                    return (
-                                      <>
-                                        <option value="جاري التصويب">جاري التصويب</option>
-                                      </>
-                                    );
-                                  }
+                              {(() => {
+                                const currentPhase = order.actionPhase || "مرحلة البحث";
+                                const isResearchPhase = currentPhase === "مرحلة البحث" || currentPhase === "مرحلة التوثيق" || currentPhase === "قيد البحث";
+                                
+                                if (!isResearchPhase) {
                                   return (
-                                    <>
-                                      <option value="مرحلة البحث">مرحلة البحث</option>
-                                      <option value="مرحلة التوثيق">مرحلة التوثيق</option>
-                                    </>
+                                    <span className="px-3 py-1.5 rounded-md font-bold text-xs inline-block border bg-gray-100 text-gray-700 border-gray-300">
+                                      {currentPhase === "قيد البحث" ? "مرحلة البحث" : currentPhase}
+                                    </span>
                                   );
-                                })()}
-                              </select>
+                                }
+
+                                return (
+                                  <select
+                                    value={currentPhase === "قيد البحث" ? "مرحلة البحث" : currentPhase}
+                                    onChange={async (e) => {
+                                      const newPhase = e.target.value as ActionPhase;
+                                      const updateData: any = {
+                                        actionPhase: newPhase,
+                                      };
+
+                                      if (
+                                        newPhase === "مرحلة التوثيق" &&
+                                        order.totalAmount === 1980 &&
+                                        (!order.paymentStatus ||
+                                          order.paymentStatus === "مدفوع أول دفعة" ||
+                                          order.paymentStatus === "كود دعوة")
+                                      ) {
+                                        updateData.paymentStatus = "مستحق الدفعة الثانية";
+                                      }
+
+                                      useAppStore.setState((s) => ({
+                                        orders: s.orders.map((o) =>
+                                          o.id === order.id ? { ...o, ...updateData } : o
+                                        ),
+                                      }));
+
+                                      try {
+                                        const { updateDoc, doc } = await import("firebase/firestore");
+                                        const { db } = await import("@/lib/firebase");
+                                        await updateDoc(doc(db, "orders", order.id), updateData);
+                                        if (updateData.paymentStatus) {
+                                          useAppStore.getState().logTimelineEvent(
+                                            order.id,
+                                            `استحقاق الدفعة الثانية للعميل لتنقله لمرحلة التوثيق.`
+                                          );
+                                        }
+                                        useAppStore.getState().logTimelineEvent(
+                                          order.id,
+                                          `تم تغيير الإجراء إلى: ${newPhase}`
+                                        );
+                                      } catch (error) {
+                                        console.error("Failed to update status", error);
+                                      }
+                                    }}
+                                    className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
+                                  >
+                                    <option value="مرحلة البحث">مرحلة البحث</option>
+                                    <option value="مرحلة التوثيق">مرحلة التوثيق</option>
+                                  </select>
+                                );
+                              })()}
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex gap-2 flex-col">
@@ -1628,8 +1678,15 @@ export function AdminPanel() {
                 o.actionPhase === "تم التصميم الإلكتروني" ||
                 o.actionPhase === "تم التصويب" ||
                 o.actionPhase === "تم تجهيز السجل للطباعة" ||
+                o.actionPhase === "جاهز للطباعة" ||
                 o.actionPhase === "جاهز للتسليم"),
-          );
+          ).sort((a, b) => {
+            const needsActionA = a.actionPhase === "تمت المسودة" || a.actionPhase === "تم التصويب";
+            const needsActionB = b.actionPhase === "تمت المسودة" || b.actionPhase === "تم التصويب";
+            if (needsActionA && !needsActionB) return -1;
+            if (!needsActionA && needsActionB) return 1;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
           return (
             <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden mb-12">
               <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
@@ -1660,10 +1717,12 @@ export function AdminPanel() {
                         </td>
                       </tr>
                     ) : (
-                      designOrders.map((order) => (
+                      designOrders.map((order) => {
+                        const needsAction = order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصويب";
+                        return (
                         <tr
                           key={`sh-${order.id}`}
-                          className="hover:bg-brand-50/30 transition"
+                          className={`transition ${needsAction ? "hover:bg-brand-50/30 bg-white" : "bg-gray-100 hover:bg-gray-200 opacity-80"}`}
                         >
                           <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
                             #
@@ -1679,61 +1738,20 @@ export function AdminPanel() {
                             </p>
                           </td>
                           <td className="px-4 py-4">
-                            <select
-                              value={order.actionPhase || "تمت المسودة"}
-                              onChange={async (e) => {
-                                const newPhase = e.target.value as ActionPhase;
-                                useAppStore.setState((s) => ({
-                                  orders: s.orders.map((o) =>
-                                    o.id === order.id ? { ...o, actionPhase: newPhase } : o
-                                  ),
-                                }));
-                                try {
-                                  const { updateDoc, doc } = await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  await updateDoc(doc(db, "orders", order.id), {
-                                    actionPhase: newPhase,
-                                  });
-                                  useAppStore.getState().logTimelineEvent(
-                                    order.id,
-                                    `إدارة التصميم: تم تغيير الإجراء إلى: ${newPhase}`
-                                  );
-                                } catch (error) {
-                                  console.error("Failed to update phase", error);
-                                }
-                              }}
-                              className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold max-w-[200px] text-brand-800"
-                            >
-                              {(() => {
-                                const currentPhase = order.actionPhase || "تمت المسودة";
-                                if (currentPhase === "تم التصويب" || currentPhase === "جاهز للطباعة" || currentPhase === "تم تجهيز السجل للطباعة") {
-                                  return (
-                                    <>
-                                      <option value="تم التصويب">تم التصويب</option>
-                                    </>
-                                  );
-                                }
-                                if (currentPhase === "تمت المسودة" || currentPhase === "تم التصميم الإلكتروني") {
-                                  return (
-                                    <>
-                                      <option value="تمت المسودة" disabled={currentPhase === "تم التصميم الإلكتروني"}>تمت المسودة</option>
-                                      <option value="تم التصميم الإلكتروني">تم التصميم الإلكتروني</option>
-                                    </>
-                                  );
-                                }
-                                return (
-                                  <>
-                                    <option value={currentPhase} disabled>{currentPhase}</option>
-                                  </>
-                                );
-                              })()}
-                            </select>
+                            <span className={`px-3 py-1.5 rounded-md font-bold text-xs inline-block border ${needsAction ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-200 text-gray-700 border-gray-300'}`}>
+                               {order.actionPhase || "تمت المسودة"}
+                            </span>
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex flex-col gap-2">
-                              {order.draftLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
-                                <a href={order.draftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                              {order.initialDesignLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
+                                <a href={order.initialDesignLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                   <Download className="w-4 h-4" /> تحميل مسودة السجل
+                                </a>
+                              )}
+                              {order.researchDraftLink && order.actionPhase === "تمت المسودة" && (
+                                <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                  <Download className="w-4 h-4" /> تحميل ملف البحث
                                 </a>
                               )}
                               {order.postCorrectionLink && (
@@ -1741,7 +1759,15 @@ export function AdminPanel() {
                                   <Download className="w-4 h-4" /> تحميل السجل بعد التصويب
                                 </a>
                               )}
-                              {order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم المسودة" && order.actionPhase !== "تم التسليم" && (
+                              {order.actionPhase === "تمت المسودة" && (
+                                <button
+                                  onClick={() => setInitialDesignSubmitOrder(order)}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                >
+                                  <Upload className="w-4 h-4" /> تسليم السجل الأولي
+                                </button>
+                              )}
+                              {order.actionPhase === "تم التصويب" && (
                                 <button
                                   onClick={() => setDesignSubmitOrder(order)}
                                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
@@ -1752,7 +1778,7 @@ export function AdminPanel() {
                             </div>
                           </td>
                         </tr>
-                      ))
+                      )})
                     )}
                   </tbody>
                 </table>
@@ -2889,6 +2915,53 @@ export function AdminPanel() {
                 ) : (
                   <>
                     <Send className="w-5 h-5" /> تأكيد التسليم لإدارة التصميم
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Initial Design Modal */}
+      {initialDesignSubmitOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-6 px-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <Upload className="w-6 h-6 text-emerald-600" />
+                تسليم السجل الأولي لإدارة الطلبات
+              </h3>
+              <button
+                onClick={() => setInitialDesignSubmitOrder(null)}
+                className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط السجل الأولي</label>
+                <input
+                  type="url"
+                  value={initialDesignLink}
+                  onChange={(e) => setInitialDesignLink(e.target.value)}
+                  placeholder="أدخل رابط السجل هنا..."
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              
+              <button
+                onClick={handleInitialDesignSubmit}
+                disabled={isFulfilling || !initialDesignLink.trim()}
+                className="w-full py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isFulfilling ? (
+                  "جاري التأكيد..."
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" /> تأكيد جاهزية السجل الأولي
                   </>
                 )}
               </button>
