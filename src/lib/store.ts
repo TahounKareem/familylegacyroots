@@ -93,7 +93,6 @@ export type ActionPhase =
   | "تمت المسودة"
   | "تم التصميم الإلكتروني"
   | "طلب إيضاح"
-  | "مرحلة التصويب"
   | "جاري التصويب"
   | "تم التصويب"
   | "جاهز للطباعة"
@@ -109,7 +108,6 @@ export type OrderStatus =
   | "قيد البحث"
   | "طلب إيضاح"
   | "تم الرد"
-  | "مرحلة التصويب"
   | "تم الإغلاق"
   | "مكتمل"
   | "طلب مكتمل"
@@ -250,6 +248,13 @@ export interface Order {
   previousActionPhase?: ActionPhase;
   assignedResearcher?: string;
   isDeleted?: boolean;
+  draftLink?: string;
+  postCorrectionLink?: string;
+  designLinks?: {
+    recordLink: string;
+    treeLink: string;
+    copiesShipped: boolean;
+  };
 
   plan: "standard" | "express" | "invite" | "paid";
   printRequested: boolean;

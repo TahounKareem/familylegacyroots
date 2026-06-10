@@ -90,6 +90,15 @@ export function AdminPanel() {
   const [digitalCopyLink, setDigitalCopyLink] = useState("");
   const [posterLink, setPosterLink] = useState("");
   const [researchRecommendations, setResearchRecommendations] = useState("");
+  const [researchDeliveryOrder, setResearchDeliveryOrder] = useState<Order | null>(null);
+  const [researchDeliveryTab, setResearchDeliveryTab] = useState<"draft" | "correction">("draft");
+  const [researchDocumentLink, setResearchDocumentLink] = useState("");
+
+  const [designSubmitOrder, setDesignSubmitOrder] = useState<Order | null>(null);
+  const [designRecordLink, setDesignRecordLink] = useState("");
+  const [designTreeLink, setDesignTreeLink] = useState("");
+  const [designCopiesShipped, setDesignCopiesShipped] = useState(false);
+
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
@@ -307,6 +316,67 @@ export function AdminPanel() {
 
     setReplyText("");
     setMessagingOrder(null);
+  };
+
+  const handleResearchDelivery = async () => {
+    if (!researchDocumentLink.trim() || !researchDeliveryOrder) return;
+    setIsFulfilling(true);
+    try {
+      if (researchDeliveryTab === "draft") {
+        await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
+          actionPhase: "تمت المسودة",
+          draftLink: researchDocumentLink
+        });
+        await useAppStore.getState().logTimelineEvent(
+          researchDeliveryOrder.id,
+          "تم تسليم المسودة لإدارة التصميم"
+        );
+      } else {
+        await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
+          actionPhase: "تم التصويب",
+          postCorrectionLink: researchDocumentLink
+        });
+        await useAppStore.getState().logTimelineEvent(
+          researchDeliveryOrder.id,
+          "تم تسليم السجل بعد التصويب لإدارة التصميم"
+        );
+      }
+      setResearchDeliveryOrder(null);
+      setResearchDocumentLink("");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء التسليم");
+    } finally {
+      setIsFulfilling(false);
+    }
+  };
+
+  const handleDesignSubmit = async () => {
+    if (!designSubmitOrder) return;
+    setIsFulfilling(true);
+    try {
+      await useAppStore.getState().fulfillOrder(designSubmitOrder.id, {
+        actionPhase: "جاهز للطباعة",
+        designLinks: {
+          recordLink: designRecordLink,
+          treeLink: designTreeLink,
+          copiesShipped: designCopiesShipped
+        }
+      });
+      await useAppStore.getState().logTimelineEvent(
+        designSubmitOrder.id,
+        "تم تجهيز السجل للطباعة والتسليم النهائي للمدير"
+      );
+      setDesignSubmitOrder(null);
+      setDesignRecordLink("");
+      setDesignTreeLink("");
+      setDesignCopiesShipped(false);
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء التسليم");
+    } finally {
+      setIsFulfilling(false);
+    }
   };
 
   const handleFulfillOrder = async () => {
@@ -911,9 +981,6 @@ export function AdminPanel() {
                                   جاري التنفيذ
                                 </option>
                                 <option value="تم الإصدار">تم الإصدار</option>
-                                <option value="مرحلة التصويب">
-                                  مرحلة التصويب
-                                </option>
                                 <option value="جاري التصويب">
                                   جاري التصويب
                                 </option>
@@ -1008,6 +1075,8 @@ export function AdminPanel() {
                                         onClick={() => {
                                           setDeliveryTab("draft");
                                           setDeliveryOrder(order);
+                                          setDigitalCopyLink(order.draftLink || "");
+                                          setDeliveryLink(order.draftLink || "");
                                         }}
                                         className="flex items-center gap-1.5 whitespace-nowrap text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
                                       >
@@ -1019,10 +1088,13 @@ export function AdminPanel() {
                                         onClick={() => {
                                           setDeliveryTab("final");
                                           setDeliveryOrder(order);
+                                          setDigitalCopyLink(order.designLinks?.recordLink || "");
+                                          setDeliveryLink(order.designLinks?.recordLink || "");
+                                          setPosterLink(order.designLinks?.treeLink || "");
                                         }}
-                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md text-xs font-bold transition"
+                                        className="flex items-center gap-1.5 whitespace-nowrap text-white bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 px-4 py-2 rounded-lg text-sm font-bold transition shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse"
                                       >
-                                        <FileText className="w-3 h-3" /> التسليم للعميل
+                                        <CheckCircle className="w-4 h-4" /> التسليم النهائي للعميل
                                       </button>
                                     )}
                                     <button
@@ -1183,12 +1255,10 @@ export function AdminPanel() {
                               >
                                 {(() => {
                                   const currentPhase = order.actionPhase || "مرحلة البحث";
-                                  if (currentPhase === "مرحلة التصويب" || currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
+                                  if (currentPhase === "جاري التصويب" || currentPhase === "تم التصويب") {
                                     return (
                                       <>
-                                        <option value="مرحلة التصويب" disabled={currentPhase === "جاري التصويب" || currentPhase === "تم التصويب"}>مرحلة التصويب</option>
-                                        <option value="جاري التصويب" disabled={currentPhase === "تم التصويب"}>جاري التصويب</option>
-                                        <option value="تم التصويب">تم التصويب</option>
+                                        <option value="جاري التصويب">جاري التصويب</option>
                                       </>
                                     );
                                   }
@@ -1196,42 +1266,55 @@ export function AdminPanel() {
                                     <>
                                       <option value="مرحلة البحث">مرحلة البحث</option>
                                       <option value="مرحلة التوثيق">مرحلة التوثيق</option>
-                                      <option value="تمت المسودة">تمت المسودة</option>
                                     </>
                                   );
                                 })()}
                               </select>
                             </td>
                             <td className="px-4 py-4">
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => setSelectedOrder(order)}
-                                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
-                                >
-                                  <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setMessagingOrder(order);
-                                    markMessagesAsRead(order.id, "admin");
-                                  }}
-                                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
-                                >
-                                  <MessageSquare className="w-4 h-4" /> طلب
-                                  إيضاح
-                                  {order.messages &&
-                                    order.messages.filter(
-                                      (m) => m.senderRole === "user" && !m.isRead,
-                                    ).length > 0 && (
-                                      <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-ping"></span>
-                                    )}
-                                  {order.messages &&
-                                    order.messages.filter(
-                                      (m) => m.senderRole === "user" && !m.isRead,
-                                    ).length > 0 && (
-                                      <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full"></span>
-                                    )}
-                                </button>
+                              <div className="flex gap-2 flex-col">
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setSelectedOrder(order)}
+                                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
+                                  >
+                                    <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setMessagingOrder(order);
+                                      markMessagesAsRead(order.id, "admin");
+                                    }}
+                                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
+                                  >
+                                    <MessageSquare className="w-4 h-4" /> طلب
+                                    إيضاح
+                                    {order.messages &&
+                                      order.messages.filter(
+                                        (m) => m.senderRole === "user" && !m.isRead,
+                                      ).length > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-ping"></span>
+                                      )}
+                                    {order.messages &&
+                                      order.messages.filter(
+                                        (m) => m.senderRole === "user" && !m.isRead,
+                                      ).length > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full"></span>
+                                      )}
+                                  </button>
+                                </div>
+                                
+                                {order.actionPhase !== "تمت المسودة" && order.actionPhase !== "تم التصويب" && order.actionPhase !== "تم التصميم الإلكتروني" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم المسودة" && order.actionPhase !== "تم التسليم" && (
+                                  <button
+                                    onClick={() => {
+                                      setResearchDeliveryOrder(order);
+                                      setResearchDeliveryTab(order.actionPhase === "جاري التصويب" ? "correction" : "draft");
+                                    }}
+                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center mt-2"
+                                  >
+                                    <Upload className="w-4 h-4" /> {order.actionPhase === "جاري التصويب" ? "تسليم السجل لإدارة التصميم" : "تسليم المسودة لإدارة التصميم"}
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -1624,9 +1707,7 @@ export function AdminPanel() {
                                 if (currentPhase === "تم التصويب" || currentPhase === "جاهز للطباعة" || currentPhase === "تم تجهيز السجل للطباعة") {
                                   return (
                                     <>
-                                      <option value="تم التصويب" disabled={currentPhase === "جاهز للطباعة" || currentPhase === "تم تجهيز السجل للطباعة"}>تم التصويب</option>
-                                      <option value="جاهز للطباعة">جاهز للطباعة</option>
-                                      <option value="تم تجهيز السجل للطباعة" className="hidden">تم تجهيز السجل للطباعة</option>
+                                      <option value="تم التصويب">تم التصويب</option>
                                     </>
                                   );
                                 }
@@ -1647,12 +1728,26 @@ export function AdminPanel() {
                             </select>
                           </td>
                           <td className="px-4 py-4">
-                            <button
-                              onClick={() => setSelectedOrder(order)}
-                              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs"
-                            >
-                              <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
-                            </button>
+                            <div className="flex flex-col gap-2">
+                              {order.draftLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
+                                <a href={order.draftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                  <Download className="w-4 h-4" /> تحميل مسودة السجل
+                                </a>
+                              )}
+                              {order.postCorrectionLink && (
+                                <a href={order.postCorrectionLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                  <Download className="w-4 h-4" /> تحميل السجل بعد التصويب
+                                </a>
+                              )}
+                              {order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم المسودة" && order.actionPhase !== "تم التسليم" && (
+                                <button
+                                  onClick={() => setDesignSubmitOrder(order)}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                >
+                                  <Upload className="w-4 h-4" /> تسليم السجل جاهز للطباعة
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -2752,6 +2847,127 @@ export function AdminPanel() {
           </div>
         </div>
       )}
+
+      {/* Research Delivery Modal */}
+      {researchDeliveryOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-6 px-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <Upload className="w-6 h-6 text-emerald-600" />
+                {researchDeliveryTab === "draft" ? "تسليم المسودة لإدارة التصميم" : "تسليم السجل بعد التصويب"}
+              </h3>
+              <button
+                onClick={() => setResearchDeliveryOrder(null)}
+                className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط المستند</label>
+                <input
+                  type="url"
+                  value={researchDocumentLink}
+                  onChange={(e) => setResearchDocumentLink(e.target.value)}
+                  placeholder="أدخل رابط المستند هنا (Google Drive, DropBox, الخ)"
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+
+              <button
+                onClick={handleResearchDelivery}
+                disabled={isFulfilling || !researchDocumentLink.trim()}
+                className="w-full py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isFulfilling ? (
+                  "جاري التسليم..."
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" /> تأكيد التسليم لإدارة التصميم
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Design Submit Modal */}
+      {designSubmitOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-6 px-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+                تسليم السجل جاهز للطباعة
+              </h3>
+              <button
+                onClick={() => setDesignSubmitOrder(null)}
+                className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط السجل الرقمي</label>
+                <input
+                  type="url"
+                  value={designRecordLink}
+                  onChange={(e) => setDesignRecordLink(e.target.value)}
+                  placeholder="أدخل الرابط هنا..."
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط بوستر المشجرة (إن وجد)</label>
+                <input
+                  type="url"
+                  value={designTreeLink}
+                  onChange={(e) => setDesignTreeLink(e.target.value)}
+                  placeholder="أدخل رابط المشجرة هنا..."
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+
+              {designSubmitOrder.printRequested && (
+                <div className="flex items-center gap-2 mt-2 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                  <input
+                    type="checkbox"
+                    id="shipped-checkbox"
+                    checked={designCopiesShipped}
+                    onChange={(e) => setDesignCopiesShipped(e.target.checked)}
+                    className="w-5 h-5 text-emerald-600 rounded border-brand-300 focus:ring-emerald-500"
+                  />
+                  <label htmlFor="shipped-checkbox" className="font-semibold text-brand-900">
+                    أؤكد أنه تم شحن النسخ الورقية المطبوعة للعميل
+                  </label>
+                </div>
+              )}
+
+              <button
+                onClick={handleDesignSubmit}
+                disabled={isFulfilling || !designRecordLink.trim() || (designSubmitOrder.printRequested && !designCopiesShipped)}
+                className="w-full py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isFulfilling ? (
+                  "جاري التأكيد..."
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" /> تأكيد جاهزية السجل
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Article Modal */}
       {isArticleModalOpen && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">

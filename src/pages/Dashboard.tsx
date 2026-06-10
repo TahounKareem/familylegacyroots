@@ -295,9 +295,9 @@ export function Dashboard() {
     
     // Status update & Timeline
     try {
-      await addMessageToOrder(order.id, newMessage, "مرحلة التصويب", {
+      await addMessageToOrder(order.id, newMessage, "جاري التصويب", {
         issueStatus: "جاري التصويب",
-        actionPhase: "مرحلة التصويب",
+        actionPhase: "جاري التصويب",
       });
 
       await useAppStore.getState().logTimelineEvent(
@@ -649,8 +649,7 @@ export function Dashboard() {
                       const isState6 =
                         order?.issueStatus === "جاري التصويب" ||
                         order?.issueStatus === "يوجد تصويبات" ||
-                        order?.actionPhase === "جاري التصويب" ||
-                        order?.actionPhase === "مرحلة التصويب";
+                        order?.actionPhase === "جاري التصويب";
                       const isState7 = order?.issueStatus === "تم الإغلاق";
 
                       let title = "";
@@ -1973,7 +1972,7 @@ export function Dashboard() {
                                     <Edit3 className="w-6 h-6" /> طلب تصويب
                                   </button>
                                 </div>
-                              ) : (order.issueStatus === "جاري التصويب" || order.status === "مرحلة التصويب") ? (
+                              ) : order.issueStatus === "جاري التصويب" || order.status === "جاري التصويب" ? (
                                 <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right">
                                   <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
                                   <div>
@@ -2079,7 +2078,6 @@ export function Dashboard() {
                       order?.status !== "تم تسليم الإصدار الأول" &&
                       order?.status !== "تم الإصدار" &&
                       order?.issueStatus !== "تم الإصدار" &&
-                      order?.status !== "مرحلة التصويب" &&
                       order?.status !== "جاري التصويب" &&
                       order?.issueStatus !== "جاري التصويب" &&
                       order?.status !== "تم الإغلاق" ? (
@@ -2148,15 +2146,19 @@ export function Dashboard() {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                                 <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
 
-                                <Sparkles className="w-16 h-16 text-brand-500 mb-6" />
-                                <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">
-                                  جاري دراسة طلبكم بكل اهتمام
-                                </h3>
-                                <p className="text-brand-700 text-lg mb-8 max-w-2xl leading-relaxed">
-                                  يقوم فريق البحث حالياً بدراسة طلب التصويب
-                                  بدقة. سيتم تحديث السجل الخاص بكم فور التأكد من
-                                  مدى صحة ومطابقة التصويب مع المصادر المعتمدة.
-                                </p>
+                                {order.issueStatus !== "تم الإغلاق" && order.actionPhase !== "تم التسليم" && (
+                                  <>
+                                    <Sparkles className="w-16 h-16 text-brand-500 mb-6" />
+                                    <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">
+                                      جاري دراسة طلبكم بكل اهتمام
+                                    </h3>
+                                    <p className="text-brand-700 text-lg mb-8 max-w-2xl leading-relaxed">
+                                      يقوم فريق البحث حالياً بدراسة طلب التصويب
+                                      بدقة. سيتم تحديث السجل الخاص بكم فور التأكد من
+                                      مدى صحة ومطابقة التصويب مع المصادر المعتمدة.
+                                    </p>
+                                  </>
+                                )}
 
                                 <div className="bg-white p-8 rounded-2xl border border-brand-100 shadow-sm w-full relative z-10">
                                   <h4 className="text-xl font-bold text-brand-900 mb-3 font-serif flex items-center justify-center gap-2 text-center">
