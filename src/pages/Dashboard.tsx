@@ -296,7 +296,7 @@ export function Dashboard() {
     // Status update & Timeline
     try {
       await addMessageToOrder(order.id, newMessage, "مرحلة التصويب", {
-        issueStatus: "مرحلة التصويب",
+        issueStatus: "جاري التصويب",
         actionPhase: "جاري التصويب",
       });
 
@@ -1938,7 +1938,7 @@ export function Dashboard() {
                             الجودة والإخراج.
                           </p>
                           <div className="flex flex-col items-center justify-center gap-6">
-                            {(order.status === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
+                            {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
                               <div className="w-full">
                                 <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden border-2 border-brand-200 shadow-xl mb-8 relative bg-gray-50 flex items-center justify-center">
                                   <iframe 
@@ -2067,6 +2067,8 @@ export function Dashboard() {
                       {order?.status !== "مكتمل" &&
                       order?.status !== "طلب مكتمل" &&
                       order?.status !== "تم تسليم الإصدار الأول" &&
+                      order?.status !== "تم الإصدار" &&
+                      order?.issueStatus !== "تم الإصدار" &&
                       order?.status !== "مرحلة التصويب" &&
                       order?.status !== "تم الإغلاق" ? (
                         <div className="text-center py-10 px-4">
@@ -2318,10 +2320,7 @@ export function Dashboard() {
                                   <button
                                     onClick={handleSendCorrection}
                                     disabled={
-                                      !correctionSection ||
-                                      !correctionPage ||
-                                      !correctionText ||
-                                      !correctionError ||
+                                      corrections.some(c => !c.section.trim() || !c.page.trim() || !c.text.trim() || !c.error.trim()) ||
                                       !agreeToCorrectionTerms
                                     }
                                     className="mt-6 w-full py-4 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm"
