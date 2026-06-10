@@ -295,7 +295,7 @@ export function Dashboard() {
     
     // Status update & Timeline
     try {
-      await addMessageToOrder(order.id, newMessage, "جاري التصويب", {
+      await addMessageToOrder(order.id, newMessage, order.status, {
         issueStatus: "جاري التصويب",
         actionPhase: "جاري التصويب",
       });
@@ -1972,7 +1972,7 @@ export function Dashboard() {
                                     <Edit3 className="w-6 h-6" /> طلب تصويب
                                   </button>
                                 </div>
-                              ) : order.issueStatus === "جاري التصويب" || order.status === "جاري التصويب" ? (
+                              ) : order.issueStatus === "جاري التصويب" || order.actionPhase === "جاري التصويب" ? (
                                 <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right">
                                   <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
                                   <div>
@@ -2078,7 +2078,7 @@ export function Dashboard() {
                       order?.status !== "تم تسليم الإصدار الأول" &&
                       order?.status !== "تم الإصدار" &&
                       order?.issueStatus !== "تم الإصدار" &&
-                      order?.status !== "جاري التصويب" &&
+                      order?.actionPhase !== "جاري التصويب" &&
                       order?.issueStatus !== "جاري التصويب" &&
                       order?.status !== "تم الإغلاق" ? (
                         <div className="text-center py-10 px-4">
