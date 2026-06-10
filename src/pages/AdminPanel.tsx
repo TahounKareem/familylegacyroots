@@ -914,6 +914,9 @@ export function AdminPanel() {
                                 <option value="مرحلة التصويب">
                                   مرحلة التصويب
                                 </option>
+                                <option value="جاري التصويب">
+                                  جاري التصويب
+                                </option>
                                 <option value="تم الإغلاق">تم الإغلاق</option>
                                 {order.recordType === "الأبواب المغلقة" && (
                                   <>
@@ -1207,7 +1210,10 @@ export function AdminPanel() {
                                   <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
                                 </button>
                                 <button
-                                  onClick={() => setMessagingOrder(order)}
+                                  onClick={() => {
+                                    setMessagingOrder(order);
+                                    markMessagesAsRead(order.id, "admin");
+                                  }}
                                   className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
                                 >
                                   <MessageSquare className="w-4 h-4" /> طلب

@@ -1938,16 +1938,17 @@ export function Dashboard() {
                             الجودة والإخراج.
                           </p>
                           <div className="flex flex-col items-center justify-center gap-6">
-                            {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
-                              <div className="w-full">
-                                <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden border-2 border-brand-200 shadow-xl mb-8 relative bg-gray-50 flex items-center justify-center">
-                                  <iframe 
-                                    src={order.digitalCopyLink} 
-                                    className="absolute inset-0 w-full h-full border-0" 
-                                    allowFullScreen 
-                                    title="نسخة أولية للسجل"
-                                  ></iframe>
-                                </div>
+                            <div className="w-full">
+                              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden border-2 border-brand-200 shadow-xl mb-8 relative bg-gray-50 flex items-center justify-center">
+                                <iframe 
+                                  src={order.digitalCopyLink} 
+                                  className="absolute inset-0 w-full h-full border-0" 
+                                  allowFullScreen 
+                                  title="نسخة أولية للسجل"
+                                ></iframe>
+                              </div>
+                              
+                              {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
                                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
                                   <button
                                     onClick={() => {
@@ -1971,20 +1972,28 @@ export function Dashboard() {
                                     <Edit3 className="w-6 h-6" /> طلب تصويب
                                   </button>
                                 </div>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                                <a
-                                  href={order.digitalCopyLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
-                                >
-                                  <Download className="w-6 h-6" /> تحميل النسخة
-                                  الرقمية
-                                </a>
-                              </div>
-                            )}
+                              ) : (order.issueStatus === "جاري التصويب" || order.status === "مرحلة التصويب") ? (
+                                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right">
+                                  <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
+                                  <div>
+                                    <h4 className="font-bold text-lg mb-2">سجل تراث عائلتكم قيد التصويب</h4>
+                                    <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                  <a
+                                    href={order.digitalCopyLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+                                  >
+                                    <Download className="w-6 h-6" /> تحميل النسخة
+                                    الرقمية
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                             
                             {order.status === "تم الإغلاق" && (
                               <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl text-sm md:text-base font-semibold max-w-lg mt-2 flex items-start gap-4 text-right">
@@ -2086,7 +2095,7 @@ export function Dashboard() {
                         <div className="px-6 md:px-12 py-8">
                           {order?.messages &&
                           order.messages.filter((m) =>
-                            m.text?.includes("طلب تصويب - القسم"),
+                            m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة"),
                           ).length > 0 ? (
                             <div className="space-y-8">
                               {/* Previous Corrections List */}
@@ -2098,7 +2107,7 @@ export function Dashboard() {
                                 <div className="space-y-4">
                                   {order.messages
                                     .filter((m) =>
-                                      m.text?.includes("طلب تصويب - القسم"),
+                                      m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة"),
                                     )
                                     .map((msg) => (
                                       <div
