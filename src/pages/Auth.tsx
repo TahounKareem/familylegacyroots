@@ -78,7 +78,7 @@ export function Auth() {
           }
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           
-          let country = "غير محدد";
+          const country = "غير محدد";
           let ipAddress = "غير متوفر";
           try {
             const res = await fetch('https://api.ipify.org?format=json');

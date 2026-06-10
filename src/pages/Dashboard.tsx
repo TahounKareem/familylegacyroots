@@ -42,6 +42,7 @@ import {
   Users,
   Book,
   X,
+  Edit3,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 
@@ -2083,7 +2084,7 @@ export function Dashboard() {
                         <div className="px-6 md:px-12 py-8">
                           {order?.messages &&
                           order.messages.filter((m) =>
-                            m.text.includes("طلب تصويب - القسم"),
+                            m.text?.includes("طلب تصويب - القسم"),
                           ).length > 0 ? (
                             <div className="space-y-8">
                               {/* Previous Corrections List */}
@@ -2095,7 +2096,7 @@ export function Dashboard() {
                                 <div className="space-y-4">
                                   {order.messages
                                     .filter((m) =>
-                                      m.text.includes("طلب تصويب - القسم"),
+                                      m.text?.includes("طلب تصويب - القسم"),
                                     )
                                     .map((msg) => (
                                       <div

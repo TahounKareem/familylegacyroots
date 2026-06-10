@@ -1208,10 +1208,22 @@ export function AdminPanel() {
                                 </button>
                                 <button
                                   onClick={() => setMessagingOrder(order)}
-                                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
+                                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
                                 >
                                   <MessageSquare className="w-4 h-4" /> طلب
                                   إيضاح
+                                  {order.messages &&
+                                    order.messages.filter(
+                                      (m) => m.senderRole === "user" && !m.isRead,
+                                    ).length > 0 && (
+                                      <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-ping"></span>
+                                    )}
+                                  {order.messages &&
+                                    order.messages.filter(
+                                      (m) => m.senderRole === "user" && !m.isRead,
+                                    ).length > 0 && (
+                                      <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full"></span>
+                                    )}
                                 </button>
                               </div>
                             </td>
@@ -2543,12 +2555,15 @@ export function AdminPanel() {
 
       {/* Messaging Modal */}
       {messagingOrder && (
+        (() => {
+          const currentMessagingOrder = orders.find(o => o.id === messagingOrder.id) || messagingOrder;
+          return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right">
             <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50">
               <h3 className="font-bold text-brand-900 flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-brand-600" />
-                مراسلة وتوجيهات للعميل: {messagingOrder.data.firstName}
+                مراسلة وتوجيهات للعميل: {currentMessagingOrder.data.firstName}
               </h3>
               <button
                 onClick={() => setMessagingOrder(null)}
@@ -2559,13 +2574,13 @@ export function AdminPanel() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 max-h-80">
-              {!messagingOrder.messages ||
-              messagingOrder.messages.length === 0 ? (
+              {!currentMessagingOrder.messages ||
+              currentMessagingOrder.messages.length === 0 ? (
                 <div className="text-center text-gray-500 text-sm py-4">
                   ابداً المحادثة مع العميل الآن.
                 </div>
               ) : (
-                messagingOrder.messages.map((msg) => (
+                currentMessagingOrder.messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex flex-col ${msg.senderRole === "admin" ? "items-start" : "items-end"}`}
@@ -2633,6 +2648,8 @@ export function AdminPanel() {
             </div>
           </div>
         </div>
+        );
+        })()
       )}
 
       {/* Delivery Modal */}
