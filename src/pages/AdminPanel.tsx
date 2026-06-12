@@ -37,6 +37,7 @@ import {
   Send,
   AlertCircle,
   Book,
+  Check,
   Plus,
   Trash2,
   HeartHandshake,
@@ -90,6 +91,7 @@ export function AdminPanel() {
   const [replyText, setReplyText] = useState("");
   const [deliveryLink, setDeliveryLink] = useState("");
   const [digitalCopyLink, setDigitalCopyLink] = useState("");
+  const [digitalCopyDownloadLink, setDigitalCopyDownloadLink] = useState("");
   const [posterLink, setPosterLink] = useState("");
   const [researchRecommendations, setResearchRecommendations] = useState("");
   const [researchDeliveryOrder, setResearchDeliveryOrder] = useState<Order | null>(null);
@@ -424,6 +426,7 @@ export function AdminPanel() {
       await fulfillOrder(deliveryOrder.id, {
         deliveryLink,
         digitalCopyLink,
+        digitalCopyDownloadLink,
         posterLink,
         researchRecommendations,
         ...phaseUpdates,
@@ -890,139 +893,24 @@ export function AdminPanel() {
                               </p>
                             </td>
                             <td className="px-2 py-3">
-                              <select
-                                value={order.recordType || "سجل أساسي"}
-                                onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  await updateDoc(doc(db, "orders", order.id), {
-                                    recordType: e.target.value,
-                                  });
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? {
-                                            ...o,
-                                            recordType: e.target.value as any,
-                                          }
-                                        : o,
-                                    ),
-                                  }));
-                                }}
-                                className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] text-brand-700 font-bold outline-none cursor-pointer max-w-[90px]"
-                              >
-                                <option value="سجل أساسي">سجل أساسي</option>
-                                <option value="الأبواب المغلقة">
-                                  الأبواب المغلقة
-                                </option>
-                              </select>
+                              <span className="inline-block px-2 py-1 border border-brand-200 bg-white text-[10px] sm:text-[11px] text-brand-700 font-bold rounded min-w-[70px] text-center">
+                                {order.recordType || "سجل أساسي"}
+                              </span>
                             </td>
                             <td className="px-2 py-3">
-                              <select
-                                value={
+                              <span className="inline-block px-2 py-1 border border-brand-200 bg-white text-[10px] sm:text-[11px] text-brand-800 font-medium rounded min-w-[70px] text-center">
+                                {
                                   order.paymentStatus ||
                                   (order.plan === "invite"
                                     ? "كود دعوة"
                                     : "غير مدفوع")
                                 }
-                                onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  const newPaymentStatus = e.target
-                                    .value as PaymentStatus;
-                                  await updateDoc(doc(db, "orders", order.id), {
-                                    paymentStatus: newPaymentStatus,
-                                  });
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? {
-                                            ...o,
-                                            paymentStatus: newPaymentStatus,
-                                          }
-                                        : o,
-                                    ),
-                                  }));
-                                  useAppStore
-                                    .getState()
-                                    .logTimelineEvent(
-                                      order.id,
-                                      `تم تغيير حالة الدفع إلى: ${newPaymentStatus}`,
-                                    );
-                                }}
-                                className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] text-brand-800 outline-none cursor-pointer max-w-[90px]"
-                              >
-                                <option value="غير مدفوع">غير مدفوع</option>
-                                <option value="مدفوع بالكامل">
-                                  مدفوع بالكامل
-                                </option>
-                                <option value="مدفوع أول دفعة">
-                                  مدفوع أول دفعة
-                                </option>
-                                <option value="مدفوع ثاني دفعة">
-                                  مدفوع ثاني دفعة
-                                </option>
-                                <option value="مدفوع ثالث دفعة">
-                                  مدفوع ثالث دفعة
-                                </option>
-                                <option value="كود دعوة">كود دعوة</option>
-                              </select>
+                              </span>
                             </td>
                             <td className="px-2 py-3 bg-brand-50/20">
-                              <select
-                                value={order.issueStatus || "طلب غير مكتمل"}
-                                onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  const newStatus = e.target
-                                    .value as IssueStatus;
-                                  await updateDoc(doc(db, "orders", order.id), {
-                                    issueStatus: newStatus,
-                                  });
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? { ...o, issueStatus: newStatus }
-                                        : o,
-                                    ),
-                                  }));
-                                  useAppStore
-                                    .getState()
-                                    .logTimelineEvent(
-                                      order.id,
-                                      `تم تغيير حالة الطلب العامة إلى: ${newStatus}`,
-                                    );
-                                }}
-                                className="border border-brand-200 rounded px-1 py-1 bg-white text-[10px] sm:text-[11px] font-bold text-brand-800 outline-none cursor-pointer w-full max-w-[100px]"
-                              >
-                                <option value="طلب غير مكتمل">
-                                  طلب غير مكتمل
-                                </option>
-                                <option value="بإنتظار إتمام الدفع">
-                                  بإنتظار إتمام الدفع
-                                </option>
-                                <option value="جاري التنفيذ">
-                                  جاري التنفيذ
-                                </option>
-                                <option value="تم الإصدار">تم الإصدار</option>
-                                <option value="جاري التصويب">
-                                  جاري التصويب
-                                </option>
-                                <option value="تم الإغلاق">تم الإغلاق</option>
-                                {order.recordType === "الأبواب المغلقة" && (
-                                  <>
-                                    <option value="يوجد تصويبات">
-                                      يوجد تصويبات
-                                    </option>
-                                    <option value="قبول توصيات">
-                                      قبول توصيات
-                                    </option>
-                                  </>
-                                )}
-                              </select>
+                              <span className="inline-block px-2 py-1 border border-brand-200 bg-gray-50 text-[10px] sm:text-[11px] text-brand-800 font-bold rounded min-w-[70px] text-center">
+                                {order.issueStatus || "طلب غير مكتمل"}
+                              </span>
                             </td>
                             <td className="px-2 py-3 bg-brand-50/20">
                               <span className="inline-block px-2 py-1 bg-brand-100 text-brand-700 text-[10px] sm:text-[11px] font-bold rounded">
@@ -1291,16 +1179,8 @@ export function AdminPanel() {
                                         updateData.paymentStatus = "مستحق الدفعة الثانية";
                                       }
 
-                                      useAppStore.setState((s) => ({
-                                        orders: s.orders.map((o) =>
-                                          o.id === order.id ? { ...o, ...updateData } : o
-                                        ),
-                                      }));
-
                                       try {
-                                        const { updateDoc, doc } = await import("firebase/firestore");
-                                        const { db } = await import("@/lib/firebase");
-                                        await updateDoc(doc(db, "orders", order.id), updateData);
+                                        await useAppStore.getState().fulfillOrder(order.id, updateData);
                                         if (updateData.paymentStatus) {
                                           useAppStore.getState().logTimelineEvent(
                                             order.id,
@@ -2448,26 +2328,38 @@ export function AdminPanel() {
                     </p>
                   </div>
                 )}
-                {selectedOrder.data.managerWord && (
-                  <div className="bg-white border border-brand-100 p-4 rounded-xl md:col-span-2">
-                    <strong className="text-brand-600 block mb-1">
-                      كلمة أمين السجل:
-                    </strong>{" "}
-                    <p className="mt-1 whitespace-pre-wrap">
-                      {selectedOrder.data.managerWord}
-                    </p>
-                  </div>
-                )}
-                {selectedOrder.data.historicalNotes && (
-                  <div className="bg-white border border-brand-100 p-4 rounded-xl md:col-span-2">
-                    <strong className="text-brand-600 block mb-1">
-                      ملاحظات تاريخية (نبذة عن العائلة):
-                    </strong>{" "}
-                    <p className="mt-1 whitespace-pre-wrap">
-                      {selectedOrder.data.historicalNotes}
-                    </p>
-                  </div>
-                )}
+                {[
+                  { key: "managerWord", label: "كلمة أمين السجل" },
+                  { key: "historicalNotes", label: "نبذة عن العائلة" },
+                  { key: "placesAssociated", label: "أماكن ارتبطت بالعائلة" },
+                  { key: "familyNames", label: "أعلام الأسرة وألقابها" },
+                  { key: "familyPersonalities", label: "شخصيات ورموز العائلة" },
+                  { key: "professions", label: "المهن والأعمال والإرث المهني" },
+                  { key: "familyMemory", label: "ذاكرة العائلة والإرث الاجتماعي" },
+                ].map(({ key, label }) => {
+                  const val = (selectedOrder.data as any)[key];
+                  if (!val) return null;
+                  const isClosed = selectedOrder.data.sectionStatuses?.[key] === "closed";
+                  return (
+                    <div key={key} className={`border p-4 rounded-xl md:col-span-2 ${isClosed ? "bg-emerald-50/30 border-emerald-100" : "bg-white border-brand-100"}`}>
+                      <div className="flex items-center justify-between gap-4 mb-2">
+                        <strong className="text-brand-700">{label}:</strong>
+                        {isClosed ? (
+                          <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full flex items-center gap-1">
+                            <Check className="w-3 h-3" /> نسخة نهائية (مُغلقة)
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200">
+                            مسودة مُعلقة (قابلة للتعديل من العميل)
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap text-brand-900 leading-relaxed">
+                        {val}
+                      </p>
+                    </div>
+                  );
+                })}
                 {selectedOrder.contractSigned && selectedOrder.data.contractUrl && selectedOrder.data.contractUrl.startsWith('data:image') && (
                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl md:col-span-2">
                     <strong className="text-blue-800 block mb-2 flex items-center gap-2">
@@ -2814,7 +2706,7 @@ export function AdminPanel() {
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
                 <label className="block font-semibold text-brand-900 mb-2">
-                  {deliveryTab === "draft" ? "رابط عرض النسخة الأولية (Flipbook)" : "رابط النسخة الرقمية للسجل"}
+                  {deliveryTab === "draft" ? "رابط عرض النسخة الأولية للتصفح (Flipbook)" : "رابط النسخة الرقمية للسجل للتصفح"}
                 </label>
                 <input
                   type="url"
@@ -2831,6 +2723,19 @@ export function AdminPanel() {
               
               {deliveryTab !== "draft" && (
                 <>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-2">
+                       رابط النسخة الرقمية للسجل للتحميل
+                    </label>
+                    <input
+                      type="url"
+                      value={digitalCopyDownloadLink}
+                      onChange={(e) => setDigitalCopyDownloadLink(e.target.value)}
+                      placeholder="https://..."
+                      dir="ltr"
+                      className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                    />
+                  </div>
                   <div>
                     <label className="block font-semibold text-brand-900 mb-2">
                       رابط بوستر المشجرة

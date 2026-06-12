@@ -55,6 +55,8 @@ export function ServiceAgreement() {
     }
   };
 
+  const [showDeclarations, setShowDeclarations] = useState(false);
+
   const allChecked = req1 && req2;
   const canProceed = allChecked;
 
@@ -275,27 +277,30 @@ export function ServiceAgreement() {
           dummyInvoiceId={dummyInvoiceId}
           pendingOrderData={pendingOrderData}
           currentUser={currentUser}
+          onOpen={() => setShowDeclarations(true)}
         />
         <div className="mb-8"></div>
         
-        {/* Requirements Checkboxes */}
-        <div className="bg-white rounded-3xl p-8 border border-brand-300 shadow-md transition-all duration-500 mb-8">
-          <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الاعتماد القانوني والتوقيع الإلكتروني <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgment & Electronic Signature</span></h3>
-          
-          <div className="space-y-4">
-            <label className="flex flex-col p-6 border border-brand-200 rounded-2xl cursor-pointer hover:bg-brand-50 transition shadow-sm bg-white">
-              <div className="flex items-center gap-2 mb-3 border-b border-brand-100 pb-2">
-                <Check className="w-5 h-5 text-brand-600" />
-                <h4 className="font-bold text-brand-900">اعتماد بيانات الطلب</h4>
-              </div>
-              <p className="text-sm text-brand-800 leading-relaxed mb-4 font-medium">
-                أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل والمعلومات التعريفية الخاصة بالإصدار.
-              </p>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
-                  checked={req1}
+        {showDeclarations && (
+          <>
+            {/* Requirements Checkboxes */}
+            <div className="bg-white rounded-3xl p-8 border border-brand-300 shadow-md transition-all duration-500 mb-8 animate-in fade-in slide-in-from-top-4">
+              <h3 className="text-xl font-bold text-brand-900 mb-6 border-b border-brand-100 pb-4">الاعتماد القانوني والتوقيع الإلكتروني <span className="text-base text-slate-500 font-medium ml-2">| Legal Acknowledgment & Electronic Signature</span></h3>
+              
+              <div className="space-y-4">
+                <label className="flex flex-col p-6 border border-brand-200 rounded-2xl cursor-pointer hover:bg-brand-50 transition shadow-sm bg-white">
+                  <div className="flex items-center gap-2 mb-3 border-b border-brand-100 pb-2">
+                    <Check className="w-5 h-5 text-brand-600" />
+                    <h4 className="font-bold text-brand-900">اعتماد بيانات الطلب</h4>
+                  </div>
+                  <p className="text-sm text-brand-800 leading-relaxed mb-4 font-medium">
+                    أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل والمعلومات التعريفية الخاصة بالإصدار.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+                      checked={req1}
                   onChange={(e) => { setReq1(e.target.checked); if(e.target.checked) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
                 />
                 <span className="font-bold text-sm text-brand-900">أوافق على اعتماد بيانات الطلب الحالية.</span>
@@ -321,11 +326,12 @@ export function ServiceAgreement() {
               </div>
             </label>
           </div>
-
         </div>
+        </>
+      )}
 
-        {/* Action Bar */}
-        <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100">
+      {showDeclarations ? (
+        <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-brand-100 animate-in fade-in slide-in-from-bottom-4">
           <button 
             type="button" 
             onClick={() => navigate("/order?step=2")} 
@@ -345,6 +351,17 @@ export function ServiceAgreement() {
             <p className="text-xs font-bold text-brand-600">بالمتابعة، يبدأ تجهيز ملف العمل وإدراج الطلب ضمن قائمة التنفيذ البحثي.</p>
           </div>
         </div>
+      ) : (
+        <div className="flex justify-start bg-transparent p-4">
+          <button 
+            type="button" 
+            onClick={() => navigate("/order?step=2")} 
+            className="px-6 py-3 rounded-2xl font-medium text-brand-600 hover:bg-white transition flex items-center gap-2 border border-brand-200"
+          >
+           <ArrowRight className="w-5 h-5" /> عودة
+          </button>
+        </div>
+      )}
 
       </div>
 

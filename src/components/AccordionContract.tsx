@@ -8,16 +8,20 @@ interface AccordionContractProps {
   dummyInvoiceId: string;
   pendingOrderData: any;
   currentUser: any;
+  onOpen?: () => void;
 }
 
-export function AccordionContract({ sections, orderDetailsContract, dummyOrderId, dummyInvoiceId, pendingOrderData, currentUser }: AccordionContractProps) {
+export function AccordionContract({ sections, orderDetailsContract, dummyOrderId, dummyInvoiceId, pendingOrderData, currentUser, onOpen }: AccordionContractProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   if (!isOpen) {
     return (
       <button 
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+          onOpen?.();
+        }}
         className="w-full bg-[#541214] text-white p-6 justify-between flex items-center rounded-2xl shadow-md border hover:bg-[#6b1e22] transition-all group"
       >
         <div className="flex items-center gap-4">

@@ -43,8 +43,16 @@ import {
   Book,
   X,
   Edit3,
+  PenTool,
+  ShieldCheck,
+  Briefcase,
+  HeartHandshake,
+  Archive,
+  FolderTree,
+  Save,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
+import { TimelineBuilder } from "./TimelineBuilder";
 
 export function Dashboard() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder } =
@@ -178,24 +186,7 @@ export function Dashboard() {
     order.status !== "بإنتظار إتمام الدفع";
 
   const handleResumePayment = async () => {
-    if (!order) return;
-    try {
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          userName: currentUser.name,
-          userEmail: currentUser.email,
-          packagePrice: 1999,
-        }),
-      });
-      const data = await response.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) {
-      console.error(e);
-      alert("حدث خطأ.");
-    }
+    navigate("/order?step=4");
   };
 
   const updateSpecificData = async (updates: Partial<FamilyData>) => {
@@ -518,51 +509,66 @@ export function Dashboard() {
 
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2 pr-4 flex items-center">
-                  بيانات "الإدراج الإختياري"
+                  إثراء سجل العائلة
                   <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
                     <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help">
                       i
                     </div>
                     <div className="absolute bottom-full mb-2 right-0 w-64 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none normal-case z-50">
-                      هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) –
-                      عند رغبته – ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم
-                      (بين يدي السجل ) من أجل جعل السجل أكثر خصوصية للعائلة
-                      والذي قد يشمل على سبيل المثال مايلي: ( كلمة لأمين السجل /
-                      العميل - نبذة تاريخية عن العائلة - مشجر الأحياء من العائلة
-                      والأسلاف ضمن عمود النسب ).
+                      هذا القسم يتيح لك إضافة المعلومات التي تجعل من السجل خاصاً ومميزاً لعائلتك. يمكنك من خلاله توثيق التاريخ والأماكن والشخصيات والذكريات.
                     </div>
                   </div>
                 </h3>
                 <div className="space-y-1">
                   <SidebarItem
+                    title="كلمة أمين السجل"
+                    isActive={activeTab === "كلمة أمين السجل"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
                     title="نبذة عن العائلة"
                     isActive={activeTab === "نبذة عن العائلة"}
                     isLocked={!isPaid}
-                    info="اكتب – اذا رغبت - ماتتذكره من قصص الأجداد ومآثرهم ، كما يمكنك ان تكتب على سبيل المثال عن ؛ ،موطن العائلة الأصلي ، هجرة العائلة ، ابرز شخصيات العائلة"
                   />
                   <SidebarItem
-                    title="بين يدي السجل"
-                    isActive={activeTab === "بين يدي السجل"}
+                    title="أماكن ارتبطت بالعائلة"
+                    isActive={activeTab === "أماكن ارتبطت بالعائلة"}
                     isLocked={!isPaid}
-                    info="هذا هو القسم الإختياري الذي يقدمه (أمين السجل / العميل) عند رغبته ليكون أحد أقسام السجل الأساسي ويسمى هذا القسم (بين يدي السجل) من أجل جعل السجل أكثر خصوصية للعائلة"
+                  />
+                  <SidebarItem
+                    title="أعلام الأسرة وألقابها"
+                    isActive={activeTab === "أعلام الأسرة وألقابها"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="شخصيات ورموز العائلة"
+                    isActive={activeTab === "شخصيات ورموز العائلة"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="المهن والأعمال والإرث المهني"
+                    isActive={activeTab === "المهن والأعمال والإرث المهني"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="ذاكرة العائلة والإرث الاجتماعي"
+                    isActive={activeTab === "ذاكرة العائلة والإرث الاجتماعي"}
+                    isLocked={!isPaid}
+                  />
+                  <SidebarItem
+                    title="خزانة السجل (أرشيف العائلة)"
+                    isActive={activeTab === "خزانة السجل (أرشيف العائلة)"}
+                    isLocked={!isPaid}
                   />
                   <SidebarItem
                     title="نافذة الإدراج العائلي"
                     isActive={activeTab === "نافذة الإدراج العائلي"}
                     isLocked={!isPaid}
-                    info="مشجر للأحياء من العائلة والأسلاف ضمن عمود النسب : ويقصد بها المشجرة التي يقوم (امين السجل / العميل ) بإدراجها عبر المنصة ، وينحصر التشجير في ذرية أمين السجل /العميل أو والده أو الجد المباشر فقط ولايشمل تشجير ذرية الأعمام ."
                   />
                   <SidebarItem
-                    title="إدراج وثائق"
-                    isActive={activeTab === "إدراج وثائق"}
+                    title="التسلسل الزمني للعائلة"
+                    isActive={activeTab === "التسلسل الزمني للعائلة"}
                     isLocked={!isPaid}
-                    info="الوثائق : يمكن ادراج اي وثائق يرغب أمين السجل / العميل في ادراجها، مثل مشجرات تقليدية – شهادات – وثائق اثبات شخصية قديمة –وثائق وزاج – ولادة - وثائق صادرة من المحاكم الشرعية فيها معلومات عن العائلة او الأسلاف ..الخ ، ملحوظة : يتعين أن تكون الوثائق المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ."
-                  />
-                  <SidebarItem
-                    title="إدراج صور"
-                    isActive={activeTab === "إدراج صور"}
-                    isLocked={!isPaid}
-                    info="الصور : يمكن لأمين السجل /العميل إدراج صور لأفراد العائلة مثل ( صور الأشخاص المدرجين ضمن مشجر الأحياء ، او صور بقية الأشخاص في عمود النسب الصاعد فقط . ملحوظة : يتعين أن تكون الصور المدرجة ذات علاقة بالسجل ويتم إدراجها على مسؤلية أمين السجل / العميل الخاصة ، كما هو منصوص عليه في عقد تقديم الخدمة ."
                   />
                 </div>
               </div>
@@ -809,112 +815,117 @@ export function Dashboard() {
                           </div>
 
                           {(isState3 || isState4) && (
-                            <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
-                              <div className="text-center mb-8">
-                                <h3 className="text-2xl font-bold text-brand-900 mb-2">
-                                  المحتوى الإثرائي للسجل :{" "}
-                                  <span className="text-brand-500 font-normal">
-                                    "إدراج إختياري"
-                                  </span>
-                                </h3>
-                                <p className="text-black font-medium leading-relaxed max-w-2xl mx-auto">
-                                  يمكنكم إثراء سجل العائلة بإضافة الصور والوثائق
-                                  والروايات والنصوص التعريفية التي تساعد فريق
-                                  البحث والإخراج على بناء سجل أكثر عمقًا وتميزًا
-                                </p>
+                            <>
+                              <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
+                                <div className="text-center mb-8">
+                                  <h3 className="text-2xl font-bold text-brand-900 mb-2">
+                                    المحتوى الإثرائي للسجل :{" "}
+                                    <span className="text-brand-500 font-normal">
+                                      "إثراء سجل العائلة"
+                                    </span>
+                                  </h3>
+                                  <p className="text-black font-medium leading-relaxed max-w-2xl mx-auto">
+                                    يمكنكم إثراء سجل العائلة بإضافة الصور والوثائق
+                                    والروايات والنصوص التعريفية التي تساعد فريق
+                                    البحث والإخراج على بناء سجل أكثر عمقًا وتميزًا
+                                  </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {[
+                                    { tab: "كلمة أمين السجل", icon: <PenTool className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "تقديم وكلمة شخصية", desc: "نافذة تتيح لك كتابة تقديم لسجلك بحرية كاملة." },
+                                    { tab: "نبذة عن العائلة", icon: <FileText className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "اكتب قصة عائلتكم", desc: "أضف نبذة تعريفية تُمهّد لسجل العائلة وتعكس هويتها." },
+                                    { tab: "أماكن ارتبطت بالعائلة", icon: <MapPin className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "المأوى والجذور", desc: "وثق الأماكن التي ارتبطت بتطور واستقرار العائلة." },
+                                    { tab: "أعلام الأسرة وألقابها", icon: <ShieldCheck className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الألقاب والأسماء", desc: "نبذة عن الألقاب التاريخية ومصادر أسماء العائلة." },
+                                    { tab: "شخصيات ورموز العائلة", icon: <Star className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الرموز والشخصيات", desc: "توثيق للشخصيات البارزة والمحورية في تاريخ العائلة." },
+                                    { tab: "المهن والأعمال والإرث المهني", icon: <Briefcase className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "النشاط المهني والتجاري", desc: "ما تميزت به العائلة من مهن وتجارة عبر الأجيال." },
+                                    { tab: "ذاكرة العائلة والإرث الاجتماعي", icon: <HeartHandshake className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "العادات والتراث", desc: "تدوين للتراث الاجتماعي والعادات التي احتفظت بها العائلة." },
+                                    { tab: "خزانة السجل (أرشيف العائلة)", icon: <Archive className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الصور والوثائق", desc: "أرشيف يضم الوثائق والمخطوطات والصور القديمة." },
+                                    { tab: "نافذة الإدراج العائلي", icon: <Users className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "مخطط شجرة العائلة", desc: "أدرج أفراد عائلتك في مخطط الشجرة المدمج." },
+                                  ].map((item, idx) => {
+                                    const keyMap: Record<string, string> = {
+                                      "كلمة أمين السجل": "managerWord",
+                                      "نبذة عن العائلة": "historicalNotes",
+                                      "أماكن ارتبطت بالعائلة": "placesAssociated",
+                                      "أعلام الأسرة وألقابها": "familyNames",
+                                      "شخصيات ورموز العائلة": "familyPersonalities",
+                                      "المهن والأعمال والإرث المهني": "professions",
+                                      "ذاكرة العائلة والإرث الاجتماعي": "familyMemory",
+                                    };
+                                    const storeKey = keyMap[item.tab];
+                                    const status = storeKey ? order.data.sectionStatuses?.[storeKey] : null;
+                                    const hasData = storeKey ? !!(order.data as any)[storeKey] : false;
+
+                                    return (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setActiveTab(item.tab)}
+                                        className="relative p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group flex flex-col items-start overflow-hidden"
+                                      >
+                                        {status === "closed" && (
+                                          <div className="absolute top-0 right-0 left-0 bg-emerald-500 text-white text-[10px] font-bold py-1 px-3 text-center shadow-sm">
+                                            مغلق - نسخة نهائية
+                                          </div>
+                                        )}
+                                        {!status && hasData && (
+                                          <div className="absolute top-0 right-0 left-0 bg-amber-500 text-white text-[10px] font-bold py-1 px-3 text-center shadow-sm">
+                                            مسودة قيد التعديل
+                                          </div>
+                                        )}
+                                        {status === "draft" && (
+                                          <div className="absolute top-0 right-0 left-0 bg-amber-500 text-white text-[10px] font-bold py-1 px-3 text-center shadow-sm">
+                                            مسودة قيد التعديل
+                                          </div>
+                                        )}
+                                        <div className={`mt-${status || hasData ? '4' : '0'}`}>
+                                          {item.icon}
+                                        </div>
+                                        <h4 className="font-bold text-brand-900 text-lg mb-2">
+                                          {item.tab}
+                                        </h4>
+                                        <p className="text-brand-600 font-bold mb-2">
+                                          {item.subtitle}
+                                        </p>
+                                        <p className="text-xs text-brand-500 leading-relaxed mt-auto">
+                                          {item.desc}
+                                        </p>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <button
-                                  onClick={() =>
-                                    setActiveTab("نبذة عن العائلة")
-                                  }
-                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
-                                >
-                                  <Quote className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
-                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
-                                    نبذة عن العائلة
-                                  </h4>
-                                  <p className="text-brand-600 font-bold mb-2">
-                                    اكتب قصة عائلتكم
+                              <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
+                                <div className="text-center mb-8">
+                                  <h3 className="text-2xl font-bold text-brand-900 mb-2">
+                                    التسلسل الزمني للعائلة
+                                  </h3>
+                                  <p className="text-black font-medium leading-relaxed max-w-2xl mx-auto">
+                                    وثق أهم المحطات والأحداث التاريخية التي مرت بها العائلة وصنع منها تسلسلاً زمنياً
                                   </p>
-                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
-                                    أضف نبذة تعريفية أو كلمة افتتاحية تُمهّد
-                                    لسجل العائلة وتعكس هويتها وامتدادها التاريخي
-                                  </p>
-                                </button>
+                                </div>
 
-                                <button
-                                  onClick={() => setActiveTab("إدراج وثائق")}
-                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
-                                >
-                                  <FileText className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
-                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
-                                    إدراج الوثائق
-                                  </h4>
-                                  <p className="text-brand-600 font-bold mb-2">
-                                    دعم الرواية بالمصادر
-                                  </p>
-                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
-                                    أرفق الوثائق أو المشجرات أو الصور التاريخية
-                                    التي تساعد في توثيق السجل.
-                                  </p>
-                                </button>
-
-                                <button
-                                  onClick={() => setActiveTab("إدراج صور")}
-                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
-                                >
-                                  <ImageIcon className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
-                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
-                                    إدراج الصور
-                                  </h4>
-                                  <p className="text-brand-600 font-bold mb-2">
-                                    أرشيف الذاكرة البصرية
-                                  </p>
-                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
-                                    أضف الصور التاريخية أو العائلية التي ترون
-                                    أهمية تضمينها داخل السجل.
-                                  </p>
-                                </button>
-
-                                <button
-                                  onClick={() =>
-                                    setActiveTab("نافذة الإدراج العائلي")
-                                  }
-                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group"
-                                >
-                                  <Users className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
-                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
-                                    نافذة الإدراج العائلي
-                                  </h4>
-                                  <p className="text-brand-600 font-bold mb-2">
-                                    مخطط شجرة العائلة
-                                  </p>
-                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
-                                    أدرج افراد عائلتك ليظهر ارتباطهم بعمود النسب
-                                    في سجل تراث عائلتك.
-                                  </p>
-                                </button>
-
-                                <button
-                                  onClick={() => setActiveTab("بين يدي السجل")}
-                                  className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group lg:col-start-2 lg:col-span-1"
-                                >
-                                  <Book className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />
-                                  <h4 className="font-bold text-brand-900 text-lg mb-2">
-                                    بين يدي السجل
-                                  </h4>
-                                  <p className="text-brand-600 font-bold mb-2">
-                                    قدم سجلك
-                                  </p>
-                                  <p className="text-xs text-brand-500 leading-relaxed mt-auto">
-                                    نافذة تتيح لك كتابة تقديم لسجلك ، ضع بصمتك
-                                    الشخصية في مقدمة السجل .
-                                  </p>
-                                </button>
+                                <div className="grid grid-cols-1 gap-6">
+                                  <button
+                                    onClick={() => setActiveTab("التسلسل الزمني للعائلة")}
+                                    className="p-6 bg-brand-50/30 border border-brand-100 rounded-2xl hover:border-brand-300 hover:bg-brand-50 transition text-right group flex flex-col md:flex-row items-start gap-6"
+                                  >
+                                    <Clock className="w-16 h-16 text-brand-400 group-hover:text-brand-600 transition shrink-0" />
+                                    <div>
+                                      <h4 className="font-bold text-brand-900 text-xl mb-2">
+                                        التسلسل الزمني للعائلة
+                                      </h4>
+                                      <p className="text-brand-600 font-bold mb-2">
+                                        سجل الأحداث والتواريخ
+                                      </p>
+                                      <p className="text-sm text-brand-500 leading-relaxed max-w-2xl">
+                                        هذه الإضافة تتيح للمستخدم توثيق أهم المحطات التاريخية (مثل سنوات القحط، بناء مسجد، المشاركة في معركة، أو تولي منصب).
+                                      </p>
+                                    </div>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
+                            </>
                           )}
                         </div>
                       );
@@ -1259,91 +1270,98 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "نبذة عن العائلة" && (
+                  {["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي"].includes(activeTab) && (() => {
+                    const key = activeTab === "كلمة أمين السجل" ? "managerWord" :
+                              activeTab === "نبذة عن العائلة" ? "historicalNotes" :
+                              activeTab === "أماكن ارتبطت بالعائلة" ? "placesAssociated" :
+                              activeTab === "أعلام الأسرة وألقابها" ? "familyNames" :
+                              activeTab === "شخصيات ورموز العائلة" ? "familyPersonalities" :
+                              activeTab === "المهن والأعمال والإرث المهني" ? "professions" :
+                              "familyMemory";
+                    const status = order.data.sectionStatuses?.[key] || "draft";
+                    return (
                     <div className="space-y-6">
-                      <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
-                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
-                          <BookOpen className="w-5 h-5 text-brand-600" />
-                          نبذة تاريخية عن العائلة
-                        </p>
-                        <p className="text-brand-600 mb-4 text-sm">
-                          اكتب كل ما تود إرفاقه فيما يتعلق بالنبذة التاريخية
-                          (يُدرج بسجلكم بخصوصية).
+                      <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm relative">
+                        {status === "closed" && (
+                          <div className="absolute left-6 top-6 flex items-center gap-1 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200" dir="rtl">
+                            <Check className="w-3 h-3" /> تم الحفظ والإغلاق (مرسل للإدارة)
+                          </div>
+                        )}
+                        <p className="text-brand-900 font-bold mb-4 flex items-center gap-2 text-xl">
+                          <BookOpen className="w-6 h-6 text-brand-600" />
+                          {activeTab}
                         </p>
                         <textarea
-                          className="w-full h-48 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900"
-                          value={order.data.historicalNotes || ""}
+                          className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${status === "closed" ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
+                          readOnly={status === "closed"}
+                          value={(order.data as any)[key] || ""}
                           onChange={(e) => {
+                            if (status === "closed") return;
                             const val = e.target.value;
                             useAppStore.setState((s) => ({
                               orders: s.orders.map((o) =>
                                 o.id === order.id
                                   ? {
                                       ...o,
-                                      data: { ...o.data, historicalNotes: val },
+                                      data: { ...o.data, [key]: val },
                                     }
                                   : o,
                               ),
                             }));
                           }}
-                          onBlur={(e) =>
-                            updateSpecificData({
-                              historicalNotes: e.target.value,
-                            })
-                          }
                           placeholder="ابدا الكتابة هنا..."
                         />
+                        
+                        {status !== "closed" ? (
+                          <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
+                            <button
+                              onClick={() => {
+                                updateSpecificData({
+                                  [key]: (order.data as any)[key],
+                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "draft" }
+                                });
+                                alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
+                              }}
+                              className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
+                            >
+                              <Save className="w-5 h-5" /> حفظ كمسودة
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
+                                  updateSpecificData({
+                                    [key]: (order.data as any)[key],
+                                    sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "closed" }
+                                  });
+                                }
+                              }}
+                              className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                            >
+                              <CheckCircle className="w-5 h-5" /> حفظ وإغلاق 
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end mt-4">
+                            <button
+                              onClick={() => {
+                                updateSpecificData({
+                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "draft" }
+                                });
+                              }}
+                              className="text-brand-600 text-sm font-bold flex items-center gap-1 hover:underline p-2 rounded hover:bg-brand-50 transition"
+                            >
+                              <Edit3 className="w-4 h-4" /> فتح المسودة للتعديل مجددًا
+                            </button>
+                          </div>
+                        )}
                       </div>
-
-                      <p className="text-xs text-brand-400 mt-2 text-center">
-                        يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
-                      </p>
                     </div>
-                  )}
-
-                  {activeTab === "بين يدي السجل" && (
-                    <div className="space-y-6">
-                      <div className="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm">
-                        <p className="text-brand-900 font-bold mb-2 flex items-center gap-2">
-                          <MessageSquare className="w-5 h-5 text-brand-600" />
-                          كلمة أمين السجل
-                        </p>
-                        <p className="text-brand-600 mb-4 text-sm">
-                          مساحة مخصصة لكتابة كلمتك كأمين سجل والتي سيتم اعتمادها
-                          وإدراجها.
-                        </p>
-                        <textarea
-                          className="w-full h-32 border-brand-200 bg-brand-50 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900"
-                          value={order.data.managerWord || ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            useAppStore.setState((s) => ({
-                              orders: s.orders.map((o) =>
-                                o.id === order.id
-                                  ? {
-                                      ...o,
-                                      data: { ...o.data, managerWord: val },
-                                    }
-                                  : o,
-                              ),
-                            }));
-                          }}
-                          onBlur={(e) =>
-                            updateSpecificData({ managerWord: e.target.value })
-                          }
-                          placeholder="ابدا الكتابة هنا..."
-                        />
-                      </div>
-
-                      <p className="text-xs text-brand-400 mt-2 text-center">
-                        يتم حفظ التعديلات تلقائياً عند النقر خارج المربع.
-                      </p>
-                    </div>
-                  )}
+                  );
+                  })()}
 
                   {activeTab === "نافذة الإدراج العائلي" && (
                     <div className="space-y-4">
-                      <p className="text-brand-600 mb-4">
+                      <p className="text-brand-600 mb-4 font-medium text-lg">
                         أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك
                         المباشر في هذا المخطط).
                       </p>
@@ -1360,13 +1378,16 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "إدراج وثائق" && (
+                  {activeTab === "خزانة السجل (أرشيف العائلة)" && (
                     <div className="space-y-6">
+                      <p className="text-brand-600 mb-4 font-medium text-lg">
+                        خزانة السجل (أرشيف العائلة): قم بإدراج الوثائق أو الصور التاريخية هنا.
+                      </p>
                       {pendingUpload?.arrayName === "documents" ? (
                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2">
                             <FileText className="w-5 h-5 text-brand-500" />{" "}
-                            تفاصيل الوثيقة:{" "}
+                            تفاصيل المرفق:{" "}
                             <span className="text-brand-600 font-normal">
                               {pendingUpload.file.name}
                             </span>
@@ -1374,7 +1395,7 @@ export function Dashboard() {
                           <div className="space-y-4">
                             <div>
                               <label className="block text-sm font-semibold text-brand-700 mb-1">
-                                عنوان الوثيقة (إختياري)
+                                عنوان المرفق (إختياري)
                               </label>
                               <input
                                 type="text"
@@ -1386,7 +1407,7 @@ export function Dashboard() {
                                     title: e.target.value,
                                   })
                                 }
-                                placeholder="مثال: وثيقة زواج جدي"
+                                placeholder="مثال: وثيقة أو صورة عائلية"
                               />
                             </div>
                             <div>
@@ -1403,7 +1424,7 @@ export function Dashboard() {
                                     kind: e.target.value,
                                   })
                                 }
-                                placeholder="صك محكمة، شهادة ميلاد..."
+                                placeholder="صورة، صك محكمة، شهادة..."
                               />
                             </div>
                             <div>
@@ -1420,7 +1441,7 @@ export function Dashboard() {
                                     description: e.target.value,
                                   })
                                 }
-                                placeholder="أي تفاصيل تود توضيحها حول هذه الوثيقة..."
+                                placeholder="أي تفاصيل تود توضيحها حول هذا المرفق..."
                               ></textarea>
                             </div>
                             <div>
@@ -1458,7 +1479,7 @@ export function Dashboard() {
                                   onChange={(e) => setAgreeToUploadTerms(e.target.checked)}
                                 />
                                 <label htmlFor="upload-terms-doc" className="text-sm text-brand-800 font-medium leading-relaxed">
-                                  أقر بأنني أمتلك حقوق هذه الوثيقة وأنها صحيحة ولا تنتهك أي حقوق نشر أو خصوصية طرف ثالث، وأتحمل المسؤولية القانونية الكاملة عن رفعها أو مشاركتها في هذا السجل كما هو موضح بشروط الاستخدام.
+                                  أقر بأنني أمتلك حقوق هذا المرفق وأنه صحيح ولا ينتهك أي حقوق نشر أو خصوصية طرف ثالث، وأتحمل المسؤولية القانونية الكاملة عن رفعه أو مشاركته في هذا السجل كما هو موضح بشروط الاستخدام.
                                 </label>
                             </div>
 
@@ -1474,7 +1495,7 @@ export function Dashboard() {
                                     جاري الرفع...
                                   </>
                                 ) : (
-                                  "حفظ ورفع الوثيقة"
+                                  "حفظ ورفع المرفق"
                                 )}
                               </button>
                               <button
@@ -1512,23 +1533,24 @@ export function Dashboard() {
                           />
                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
                           <p className="text-brand-800 font-bold mb-2">
-                            انقر هنا لرفع وثيقة تاريخية جديدة
+                            انقر هنا لرفع وثيقة تاريخية أو صورة جديدة
                           </p>
                           <p className="text-sm text-brand-600">
                             (الرفع لمرفق واحد في كل مرة)
                           </p>
                         </div>
                       )}
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {order.data.documents?.map((docItem, i) => {
                           if (!docItem) return null;
                           const isStr = typeof docItem === "string";
                           const url = isStr ? docItem : docItem.url;
                           const title = isStr
-                            ? url.split("%2F").pop()?.split("?")[0] || "وثيقة"
+                            ? url.split("%2F").pop()?.split("?")[0] || "مرفق"
                             : docItem.title ||
                               url.split("%2F").pop()?.split("?")[0] ||
-                              "وثيقة";
+                              "مرفق";
                           return (
                             <a
                               key={i}
@@ -1567,207 +1589,13 @@ export function Dashboard() {
                     </div>
                   )}
 
-                  {activeTab === "إدراج صور" && (
-                    <div className="space-y-6">
-                      {pendingUpload?.arrayName === "photos" ? (
-                        <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
-                          <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2">
-                            <ImageIcon className="w-5 h-5 text-brand-500" />{" "}
-                            تفاصيل الصورة:{" "}
-                            <span className="text-brand-600 font-normal">
-                              {pendingUpload.file.name}
-                            </span>
-                          </h4>
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-semibold text-brand-700 mb-1">
-                                عنوان الصورة (إختياري)
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
-                                value={mediaMeta.title}
-                                onChange={(e) =>
-                                  setMediaMeta({
-                                    ...mediaMeta,
-                                    title: e.target.value,
-                                  })
-                                }
-                                placeholder="مثال: صورة للعائلة في قرية..."
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-semibold text-brand-700 mb-1">
-                                النوع (إختياري)
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
-                                value={mediaMeta.kind}
-                                onChange={(e) =>
-                                  setMediaMeta({
-                                    ...mediaMeta,
-                                    kind: e.target.value,
-                                  })
-                                }
-                                placeholder="صورة شخصية، صورة جماعية، معلم أثري..."
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-semibold text-brand-700 mb-1">
-                                الوصف (إختياري)
-                              </label>
-                              <textarea
-                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
-                                rows={3}
-                                value={mediaMeta.description}
-                                onChange={(e) =>
-                                  setMediaMeta({
-                                    ...mediaMeta,
-                                    description: e.target.value,
-                                  })
-                                }
-                                placeholder="أي تفاصيل تود توضيحها حول هذه الصورة..."
-                              ></textarea>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-semibold text-brand-700 mb-1">
-                                الغرض من الإدراج
-                              </label>
-                              <select
-                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none bg-white"
-                                value={mediaMeta.purpose}
-                                onChange={(e) =>
-                                  setMediaMeta({
-                                    ...mediaMeta,
-                                    purpose: e.target.value,
-                                  })
-                                }
-                              >
-                                <option value="إضافة لسجل تراث العائلة">
-                                  إضافة لسجل تراث العائلة الرئيسي
-                                </option>
-                                <option value="مشاركة للغرض البحثي فقط">
-                                  مشاركة مع فريق البحث للغرض البحثي فقط
-                                </option>
-                                <option value="غلاف للسجل">
-                                  استخدام الصورة كغلاف لسجل تراث العائلة
-                                </option>
-                              </select>
-                            </div>
-                            
-                            <div className="flex items-start gap-3 mt-4 bg-brand-50 p-4 rounded-xl border border-brand-100">
-                                <input
-                                  type="checkbox"
-                                  id="upload-terms-photo"
-                                  className="mt-1 w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
-                                  checked={agreeToUploadTerms}
-                                  onChange={(e) => setAgreeToUploadTerms(e.target.checked)}
-                                />
-                                <label htmlFor="upload-terms-photo" className="text-sm text-brand-800 font-medium leading-relaxed">
-                                  أقر بأنني أمتلك حقوق هذه الصورة وأنها صحيحة ولا تنتهك أي حقوق نشر أو خصوصية طرف ثالث، وأتحمل المسؤولية القانونية الكاملة عن رفعها أو مشاركتها في هذا السجل كما هو موضح بشروط الاستخدام.
-                                </label>
-                            </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-2">
-                              <button
-                                disabled={isUploading || !agreeToUploadTerms}
-                                onClick={confirmUpload}
-                                className="flex-1 bg-brand-600 text-white rounded-xl py-3 font-bold hover:bg-brand-700 transition flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {isUploading ? (
-                                  <>
-                                    <UploadCloud className="w-5 h-5 animate-pulse" />{" "}
-                                    جاري الرفع...
-                                  </>
-                                ) : (
-                                  "حفظ ورفع الصورة"
-                                )}
-                              </button>
-                              <button
-                                disabled={isUploading}
-                                onClick={() => setPendingUpload(null)}
-                                className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition"
-                              >
-                                إلغاء
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() =>
-                            !isUploading && photosInputRef.current?.click()
-                          }
-                          className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-50 cursor-pointer"}`}
-                        >
-                          <input
-                            type="file"
-                            className="hidden"
-                            ref={photosInputRef}
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                uploadFileAndUpdate(
-                                  e.target.files[0],
-                                  "photos",
-                                );
-                                e.target.value = "";
-                              }
-                            }}
-                            accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
-                            disabled={isUploading}
-                          />
-                          <ImageIcon className="w-12 h-12 text-brand-400 mx-auto mb-4" />
-                          <p className="text-brand-800 font-bold mb-2">
-                            انقر هنا لرفع صورة عائلية موثقة
-                          </p>
-                          <p className="text-sm text-brand-600">
-                            (الرفع لمرفق واحد في كل مرة)
-                          </p>
-                        </div>
-                      )}
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {order.data.photos?.map((photoItem, i) => {
-                          if (!photoItem) return null;
-                          const isStr = typeof photoItem === "string";
-                          const url = isStr ? photoItem : photoItem.url;
-                          const title =
-                            !isStr && photoItem.title ? photoItem.title : "";
-                          return (
-                            <a
-                              key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="aspect-[4/5] bg-white rounded-xl overflow-hidden border border-brand-200 hover:border-brand-400 hover:shadow-md transition block relative group"
-                            >
-                              <img
-                                src={url}
-                                alt={`Photo ${i}`}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                  e.currentTarget.parentElement!.innerHTML =
-                                    '<div class="flex items-center justify-center h-full text-xs text-brand-400 p-2 text-center">لا يمكن عرض الصورة هنا، انقر للعرض</div>';
-                                }}
-                              />
-                              {!isStr &&
-                                (photoItem.title || photoItem.purpose) && (
-                                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform">
-                                    <p className="text-xs font-bold line-clamp-1">
-                                      {photoItem.title || "صورة عائلية"}
-                                    </p>
-                                    <p className="text-[10px] opacity-80 mt-0.5 line-clamp-1">
-                                      {photoItem.purpose}
-                                    </p>
-                                  </div>
-                                )}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  {activeTab === "التسلسل الزمني للعائلة" && (
+                    <TimelineBuilder 
+                      events={order.data.timelineEvents || []}
+                      onChange={(events) => updateSpecificData({ timelineEvents: events })}
+                    />
                   )}
 
                   {activeTab === "استيضاحات فريق البحث" && (
@@ -1980,10 +1808,10 @@ export function Dashboard() {
                                     <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
                                   </div>
                                 </div>
-                              ) : (
+                              ) : order.status === "تم الإغلاق" ? (
                                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
                                   <a
-                                    href={order.digitalCopyLink}
+                                    href={order.digitalCopyDownloadLink || order.digitalCopyLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
@@ -1992,7 +1820,7 @@ export function Dashboard() {
                                     الرقمية
                                   </a>
                                 </div>
-                              )}
+                              ) : null}
                             </div>
                             
                             {order.status === "تم الإغلاق" && (

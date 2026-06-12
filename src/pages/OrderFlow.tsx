@@ -15,7 +15,8 @@ export function OrderFlow() {
 
   // Redirect if they already have an order
   useEffect(() => {
-    if (orders.find(o => o.userId === currentUser?.id)) {
+    const existingOrder = orders.find(o => o.userId === currentUser?.id);
+    if (existingOrder && existingOrder.status !== "بإنتظار إتمام الدفع" && existingOrder.status !== "بانتظار الدفع") {
       navigate("/dashboard", { replace: true });
     }
   }, [orders, currentUser, navigate]);
@@ -79,6 +80,7 @@ export function OrderFlow() {
   const [agreedToService, setAgreedToService] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentType, setPaymentType] = useState<"full" | "installment">("full");
+  const [showPaymentConfirmationModal, setShowPaymentConfirmationModal] = useState(false);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
@@ -239,6 +241,40 @@ export function OrderFlow() {
         <div className="sticky top-0 z-50 bg-brand-50 pt-2 pb-4">
           <OrderStepper currentStep={step} />
         </div>
+
+        {/* Payment Confirmation Modal */}
+        {showPaymentConfirmationModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-3xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden text-right py-8 px-8">
+              <h3 className="text-2xl font-bold text-brand-900 mb-4 whitespace-pre-wrap leading-relaxed">
+                تأكيد اختيار نظام الدفع
+              </h3>
+              <p className="text-brand-700 mb-6 font-medium">
+                لقد اخترت نظام الدفع: <span className="font-bold text-brand-900">{paymentType === "full" ? "السداد المبكر بالكامل (1780 دولار)" : "الدفع المرن (مقسم على 3 دفعات - الدفعة الحالية 693 دولار)"}</span>.
+                <br/><br/>
+                هل أنت متأكد من رغبتك في إتمام عملية الدفع بهذا النظام؟
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowPaymentConfirmationModal(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-brand-50 text-brand-600 hover:bg-brand-100 transition"
+                >
+                  رجوع وتعديل
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPaymentConfirmationModal(false);
+                    submitOrder();
+                  }}
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-brand-600 text-white hover:bg-brand-700 transition"
+                >
+                  تأكيد ومتابعة الدفع
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Steps Content */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-brand-100 p-8 md:p-12 mb-8">
@@ -749,7 +785,7 @@ export function OrderFlow() {
             </button>
           ) : (
             <button 
-              onClick={submitOrder} 
+              onClick={() => setShowPaymentConfirmationModal(true)} 
               disabled={isSubmitting || showInviteModal}
               className="px-10 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
             >

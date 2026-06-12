@@ -189,6 +189,19 @@ export interface MediaItem {
   isCover?: boolean;
 }
 
+export interface TimelineFormEvent {
+  id: string;
+  title: string;
+  type?: string;
+  period: string;
+  description: string;
+  location?: string;
+  associatedPeople?: string;
+  attachments?: (string | MediaItem)[];
+  dateAccuracy?: "مؤكد" | "تقريبي" | "رواية متوارثة" | "غير محدد";
+  source?: string;
+}
+
 export interface FamilyData {
   firstName: string;
   fatherName: string;
@@ -202,10 +215,17 @@ export interface FamilyData {
   startingPointName?: string;
   startingPoint?: string; // keeping for backward compatibility
   designTemplate?: string;
-  documents: (string | MediaItem)[];
-  photos: (string | MediaItem)[];
-  historicalNotes: string;
-  managerWord?: string;
+  documents: (string | MediaItem)[]; // To be used in Family Archive
+  photos: (string | MediaItem)[];    // To be used in Family Archive
+  historicalNotes: string;           // Maps to "Family Overview"
+  managerWord?: string;              // Maps to "Word of the Record Keeper"
+  placesAssociated?: string;         // New
+  familyNames?: string;              // New
+  familyPersonalities?: string;      // New
+  professions?: string;              // New
+  familyMemory?: string;             // New
+  timelineEvents?: TimelineFormEvent[]; // New
+  sectionStatuses?: Record<string, "draft" | "closed">;
   mobileNumber?: string;
   email?: string;
   currentResidenceCountry?: string;
@@ -267,6 +287,7 @@ export interface Order {
   timeline?: TimelineEvent[];
   deliveryLink?: string;
   digitalCopyLink?: string;
+  digitalCopyDownloadLink?: string;
   posterLink?: string;
   researchRecommendations?: string;
   contractSigned?: boolean;
