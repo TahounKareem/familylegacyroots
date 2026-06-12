@@ -50,6 +50,9 @@ import {
   ChevronLeft,
   Download,
   Upload,
+  Palette,
+  MapPin,
+  Bell,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { ComplianceDashboard } from "../components/admin/ComplianceDashboard";
@@ -599,6 +602,12 @@ export function AdminPanel() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button className="relative bg-white border border-brand-200 text-brand-700 p-2.5 rounded-full hover:bg-brand-50 transition shadow-sm">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white shadow-sm">
+                4
+              </span>
+            </button>
             <button
               onClick={() => setActiveTab("lobby")}
               className="flex items-center gap-2 bg-[#C3262A] text-white border border-[#C3262A] px-4 py-2 rounded-md hover:bg-[#a61c20] transition shadow-sm font-medium"
@@ -991,10 +1000,18 @@ export function AdminPanel() {
                                             href={order.initialDesignLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
+                                            className="flex items-center justify-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[11px] font-bold transition shadow-sm w-full"
                                           >
-                                            <Download className="w-3 h-3" /> تحميل مسودة السجل
+                                            <Download className="w-3 h-3" /> مسودة السجل
                                           </a>
+                                        )}
+                                        {order.data.designTemplate && (order.initialDesignLink || order.researchDraftLink) && (
+                                          <button
+                                            onClick={() => alert('قالب التصميم المختار: ' + order.data.designTemplate)}
+                                            className="flex items-center justify-center gap-1.5 whitespace-nowrap text-brand-700 bg-brand-100 hover:bg-brand-200 px-3 py-1.5 rounded-md text-[11px] font-bold transition shadow-sm w-full"
+                                          >
+                                            <Palette className="w-3 h-3" /> عرض قالب التصميم
+                                          </button>
                                         )}
                                         <button
                                           onClick={() => {
@@ -1626,18 +1643,46 @@ export function AdminPanel() {
                             <div className="flex flex-col gap-2">
                               {order.initialDesignLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
                                 <a href={order.initialDesignLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                  <Download className="w-4 h-4" /> تحميل مسودة السجل
+                                  <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
                               {order.researchDraftLink && order.actionPhase === "تمت المسودة" && (
-                                <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                  <Download className="w-4 h-4" /> تحميل ملف البحث
-                                </a>
+                                <>
+                                  <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                    <Download className="w-4 h-4" /> تحميل ملف البحث
+                                  </a>
+                                  {order.data.designTemplate && (
+                                    <button
+                                      onClick={() => alert('قالب التصميم المختار: ' + order.data.designTemplate)}
+                                      className="px-4 py-2 bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs w-full"
+                                    >
+                                      <Palette className="w-4 h-4" /> عرض قالب التصميم
+                                    </button>
+                                  )}
+                                </>
                               )}
                               {order.postCorrectionLink && (
                                 <a href={order.postCorrectionLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                   <Download className="w-4 h-4" /> تحميل السجل بعد التصويب
                                 </a>
+                              )}
+                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة") && (
+                                <button
+                                  onClick={() => alert(`بيانات التواصل:
+الاسم: ${order.data.firstName} ${order.data.fatherName} ${order.data.familyName}
+رقم الجوال: ${order.data.mobileNumber || 'غير محدد'}
+البريد الإلكتروني: ${order.data.contactEmail || 'غير محدد'}
+
+عنوان الشحن:
+الدولة: ${order.data.shippingAddress?.country || 'غير محدد'}
+المنطقة/المقاطعة: ${order.data.shippingAddress?.state || 'غير محدد'}
+المدينة/القرية: ${order.data.shippingAddress?.city || 'غير محدد'}
+الشارع: ${order.data.shippingAddress?.street || 'غير محدد'}
+الرمز البريدي: ${order.data.shippingAddress?.zip || 'غير محدد'}`)}
+                                  className="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 text-xs border border-brand-500 animate-pulse hover:animate-none"
+                                >
+                                  <MapPin className="w-4 h-4" /> عرض بيانات التواصل والعنوان البريدي
+                                </button>
                               )}
                               {order.actionPhase === "تمت المسودة" && (
                                 <button
@@ -2322,7 +2367,7 @@ export function AdminPanel() {
                     </p>
                   </div>
                 )}
-                {selectedOrder.data.designTemplate && (
+                {selectedOrder.data.designTemplate && currentTab !== "research" && (
                   <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl md:col-span-2">
                     <strong className="text-brand-600 block mb-1">
                       القالب المختار:
@@ -2453,18 +2498,12 @@ export function AdminPanel() {
                               {idx + 1}
                             </div>
                             <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-brand-100 bg-brand-50 shadow-sm text-right">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="font-bold text-brand-900">
-                                  {event.message}
-                                </p>
-                                <span
-                                  className="text-[10px] text-brand-500 font-mono bg-white px-2 py-1 rounded-md border border-brand-100"
-                                  dir="ltr"
-                                >
+                              <div className="flex flex-col mb-2">
+                                <p className="font-bold text-brand-900 leading-relaxed mb-2 text-sm">{event.message}</p>
+                                <span className="text-[10px] text-brand-500 font-mono bg-white px-2 py-1 rounded-md border border-brand-100 self-start" dir="ltr">
                                   {new Intl.DateTimeFormat("ar-SA", {
-                                    weekday: "long",
                                     year: "numeric",
-                                    month: "long",
+                                    month: "short",
                                     day: "numeric",
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -2472,11 +2511,19 @@ export function AdminPanel() {
                                 </span>
                               </div>
                               {event.userName && (
-                                <p className="text-xs text-brand-600 flex items-center gap-1">
-                                  <Users className="w-3 h-3" /> بواسطة:{" "}
-                                  {event.userName} (
-                                  {roleNames[event.role || ""] || event.role})
-                                </p>
+                                <div className="mt-3 pt-3 border-t border-brand-100/50 flex items-center justify-end">
+                                  <div className="flex items-center gap-2 bg-gradient-to-r from-brand-50 to-white px-3 py-1.5 rounded-full border border-brand-200 shadow-sm hover:shadow-md transition">
+                                    <div className="bg-brand-600 text-white rounded-full p-1">
+                                      <User className="w-3 h-3" />
+                                    </div>
+                                    <span className="text-xs font-bold text-brand-900">
+                                      {event.userName}
+                                    </span>
+                                    <span className="text-[10px] bg-brand-100 text-brand-700 px-2 py-0.5 rounded-md font-medium">
+                                      {roleNames[event.role || ""] || event.role}
+                                    </span>
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>

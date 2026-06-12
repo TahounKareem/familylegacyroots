@@ -856,10 +856,13 @@ export function Dashboard() {
                                       "شخصيات ورموز العائلة": "familyPersonalities",
                                       "المهن والأعمال والإرث المهني": "professions",
                                       "ذاكرة العائلة والإرث الاجتماعي": "familyMemory",
+                                      "خزانة السجل (أرشيف العائلة)": "archive",
+                                      "نافذة الإدراج العائلي": "familyTree",
                                     };
                                     const storeKey = keyMap[item.tab];
                                     const status = storeKey ? order.data.sectionStatuses?.[storeKey] : null;
-                                    const hasData = storeKey ? !!(order.data as any)[storeKey] : false;
+                                    const arrayData = storeKey === 'archive' ? order.data.documents : storeKey === 'familyTree' ? order.data.treeData?.nodes : null;
+                                    const hasData = storeKey ? !!(storeKey === 'archive' || storeKey === 'familyTree' ? (arrayData && arrayData.length > 0) : (order.data as any)[storeKey]) : false;
 
                                     return (
                                       <button
@@ -897,6 +900,22 @@ export function Dashboard() {
                                       </button>
                                     );
                                   })}
+                                </div>
+                                <div className="mt-12 bg-white rounded-3xl p-8 border-2 border-brand-200 shadow-sm text-center relative overflow-hidden">
+                                  <div className="absolute top-0 start-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl -translate-x-10 -translate-y-10 opacity-50 pointer-events-none"></div>
+                                  <div className="absolute bottom-0 end-0 w-32 h-32 bg-brand-100 rounded-full blur-3xl translate-x-10 translate-y-10 opacity-50 pointer-events-none"></div>
+                                  <h3 className="text-2xl font-bold text-brand-900 mb-4 relative z-10 flex items-center justify-center gap-2">
+                                    <Sparkles className="w-6 h-6 text-brand-500" />
+                                    تراث عائلتك بين يديك
+                                    <Sparkles className="w-6 h-6 text-brand-500" />
+                                  </h3>
+                                  <p className="text-brand-700 leading-relaxed max-w-2xl mx-auto mb-6 relative z-10">
+                                    كل معلومة تضيفها هنا، وكل وثيقة ترفقها، هي لبنة تسهم في صرح تاريخ العائلة.
+                                    ندعوك لاستكمال الأقسام ومراجعتها، كي يصبح هذا السجل مرجعاً تقر به أعين الأجيال القادمة وتفخر به عبر الزمن.
+                                  </p>
+                                  <div className="inline-block bg-brand-50 px-6 py-3 rounded-xl border border-brand-100 relative z-10">
+                                    <span className="font-bold text-brand-800">نشكر لك حرصك على تدوين إرث عائلتك العريق.</span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -2056,8 +2075,21 @@ export function Dashboard() {
                                 ></iframe>
                               </div>
                               
-                              {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
-                                order.actionPhase === "تم التصويب" || order.status === "جاهز للطباعة" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "جاهز للتسليم" ? (
+                              {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول" || order.status === "تم الإغلاق") ? (
+                                order.status === "تم الإغلاق" ? (
+                                  <div className="w-full relative z-10 flex flex-col items-center justify-center -mt-6 mb-6">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-brand-100/50 via-brand-200/50 to-brand-100/50 blur-xl rounded-full"></div>
+                                    <a
+                                      href={order.digitalCopyDownloadLink || order.digitalCopyLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="relative bg-brand-600 text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(30,58,138,0.3)] hover:shadow-[0_0_25px_rgba(30,58,138,0.5)] hover:-translate-y-1 w-full sm:w-auto overflow-hidden group"
+                                    >
+                                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                      <Download className="w-7 h-7" /> تحميل نسختك الرقمية الفاخرة
+                                    </a>
+                                  </div>
+                                ) : order.actionPhase === "تم التصويب" || order.status === "جاهز للطباعة" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "جاهز للتسليم" ? (
                                   <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-xl flex items-start gap-4 text-right shadow-sm w-full animate-in fade-in zoom-in duration-500 max-w-2xl mx-auto">
                                     <CheckCircle className="w-8 h-8 text-emerald-500 shrink-0 mt-1" />
                                     <div>
@@ -2073,18 +2105,6 @@ export function Dashboard() {
                                       <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
                                     </div>
                                   </div>
-                                ) : order.status === "تم الإغلاق" ? (
-                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                                    <a
-                                      href={order.digitalCopyDownloadLink || order.digitalCopyLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
-                                    >
-                                      <Download className="w-6 h-6" /> تحميل النسخة
-                                      الرقمية
-                                    </a>
-                                  </div>
                                 ) : (
                                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
                                     <button
@@ -2096,7 +2116,7 @@ export function Dashboard() {
                                           text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
                                           createdAt: new Date().toISOString(),
                                         }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
-                                        useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
+                                        useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.", currentUser.name);
                                       }}
                                       className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
                                     >
