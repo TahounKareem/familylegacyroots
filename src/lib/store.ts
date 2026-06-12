@@ -273,6 +273,7 @@ export interface Order {
   postCorrectionLink?: string;
   designLinks?: {
     recordLink: string;
+    downloadLink?: string;
     treeLink: string;
     copiesShipped: boolean;
   };

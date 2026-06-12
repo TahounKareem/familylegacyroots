@@ -818,17 +818,22 @@ export function Dashboard() {
                             <>
                               <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
                                 <div className="text-center mb-8">
-                                  <h3 className="text-2xl font-bold text-brand-900 mb-2">
-                                    المحتوى الإثرائي للسجل :{" "}
-                                    <span className="text-brand-500 font-normal">
-                                      "إثراء سجل العائلة"
-                                    </span>
+                                  <h3 className="text-2xl font-bold text-brand-900 mb-4">
+                                    إثراء السجل العائلي
                                   </h3>
-                                  <p className="text-black font-medium leading-relaxed max-w-2xl mx-auto">
-                                    يمكنكم إثراء سجل العائلة بإضافة الصور والوثائق
-                                    والروايات والنصوص التعريفية التي تساعد فريق
-                                    البحث والإخراج على بناء سجل أكثر عمقًا وتميزًا
-                                  </p>
+                                  <div className="space-y-4 text-brand-700 leading-relaxed max-w-3xl mx-auto">
+                                    <h4 className="text-xl font-bold text-brand-800">ساهم في بناء ذاكرة عائلتك</h4>
+                                    <p>
+                                      لا تقتصر قيمة سجل تراث العائلة على ما تذكره المصادر والوثائق التاريخية فقط، بل تمتد إلى الروايات والذكريات والصور والوثائق الخاصة التي حفظتها العائلة عبر الأجيال.
+                                    </p>
+                                    <p>
+                                      من خلال الأقسام التالية يمكنك إضافة ما تراه مناسباً من معلومات أو صور أو وثائق أو قصص عائلية، لتصبح جزءاً من المادة التي يستفيد منها فريق البحث عند إعداد سجل تراث عائلتك.
+                                    </p>
+                                    <p>
+                                      جميع الأقسام التالية اختيارية، ويمكن استكمالها أو تعديلها في أي وقت خلال فترة إعداد السجل.<br />
+                                      <strong>كل معلومة تضيفها اليوم قد تصبح جزءاً من الذاكرة التي تحفظها عائلتك للأجيال القادمة.</strong>
+                                    </p>
+                                  </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1291,6 +1296,137 @@ export function Dashboard() {
                           <BookOpen className="w-6 h-6 text-brand-600" />
                           {activeTab}
                         </p>
+                        
+                        {key === "managerWord" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">هذه المساحة مخصصة لك لتكتب كلمة افتتاحية تمثل رؤيتك لهذا العمل، وتعبر عن سبب اهتمامك بتوثيق تاريخ العائلة وحفظه للأبناء والأحفاد.</p>
+                            <p className="mb-1 font-semibold">يمكنك التحدث عن:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>سبب إنشاء السجل.</li>
+                              <li>أهمية هذا العمل بالنسبة للعائلة.</li>
+                              <li>ما تتمنى أن يحققه هذا السجل للأجيال القادمة.</li>
+                              <li>رسالة أو إهداء ترغب في تضمينه.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>ما الذي دفعك للبدء في هذا المشروع؟</li>
+                              <li>ماذا يعني لك حفظ تاريخ العائلة؟</li>
+                              <li>ماذا تتمنى أن يستفيد الأبناء والأحفاد من هذا السجل؟</li>
+                              <li>هل ترغب في إهداء هذا العمل لشخص أو جيل معين؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "historicalNotes" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">قدّم تعريفاً عاماً بالعائلة كما تعرفها اليوم، وساعد في رسم صورة أولية عن تاريخها وامتدادها وخصائصها العامة.</p>
+                            <p className="mb-1 font-semibold">يمكنك التحدث عن:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>الموطن المعروف للعائلة.</li>
+                              <li>مناطق الاستقرار أو الانتشار.</li>
+                              <li>المحطات التاريخية المهمة.</li>
+                              <li>السمات أو الأدوار التي اشتهرت بها العائلة.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>أين استقرت العائلة عبر الأجيال؟</li>
+                              <li>ما أبرز ما تُعرف به العائلة؟</li>
+                              <li>هل ارتبطت العائلة بأدوار أو أنشطة معينة؟</li>
+                              <li>هل توجد أحداث مهمة يتناقلها أفراد الأسرة؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "placesAssociated" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">وثّق الأماكن التي ارتبطت بتاريخ العائلة أو شكلت جزءاً من ذاكرتها الجماعية عبر الأجيال.</p>
+                            <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>المدن أو القرى أو الأحياء.</li>
+                              <li>المنازل القديمة.</li>
+                              <li>المزارع أو الأوقاف.</li>
+                              <li>المجالس أو المواقع التاريخية.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>ما أهم الأماكن التي ارتبطت بتاريخ العائلة؟</li>
+                              <li>هل يوجد منزل أو موقع قديم ما زال حاضراً في ذاكرة الأسرة؟</li>
+                              <li>هل انتقلت العائلة بين مناطق مختلفة عبر الزمن؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "familyNames" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">يساعد هذا القسم على توثيق الأسماء والكنى والألقاب المتداولة داخل العائلة، بما يعكس جانباً من هويتها الثقافية والاجتماعية.</p>
+                            <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>الأسماء المتكررة عبر الأجيال.</li>
+                              <li>الكنى المشهورة والألقاب العائلية.</li>
+                              <li>أسباب التسميات إن كانت معروفة.</li>
+                              <li>الألقاب الخاصة ببعض الفروع.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>ما الأسماء الأكثر تكراراً في العائلة؟</li>
+                              <li>هل توجد ألقاب أو كنى متوارثة؟</li>
+                              <li>هل تعرف قصة أو سبب تسمية بعض الأسماء أو الألقاب؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "familyPersonalities" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">وثّق الشخصيات التي تركت أثراً في تاريخ العائلة أو في حياة أفرادها، سواء كانت شخصيات عامة أو مؤثرة داخل الأسرة.</p>
+                            <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>شخصيات علمية أو دينية.</li>
+                              <li>شخصيات اجتماعية أو قيادية.</li>
+                              <li>شخصيات تركت أثراً خاصاً في العائلة.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>من الشخصيات التي يتذكرها أفراد العائلة باستمرار؟</li>
+                              <li>ما الأثر الذي تركته هذه الشخصية؟</li>
+                              <li>ما القيم أو الإنجازات التي اشتهرت بها؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "professions" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">ساعدنا في توثيق الأنشطة والأعمال والمهن التي ارتبطت بالعائلة عبر الأجيال، لما تمثله من جانب مهم في تاريخها الاجتماعي والاقتصادي.</p>
+                            <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>التجارة والزراعة.</li>
+                              <li>التعليم والقضاء.</li>
+                              <li>الحرف التقليدية.</li>
+                              <li>الأعمال المهنية أو الحرفية.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>ما أبرز المهن التي عُرفت بها العائلة؟</li>
+                              <li>هل ارتبطت بعض الفروع بمهن محددة؟</li>
+                              <li>هل توجد أعمال أو مؤسسات أنشأها أفراد العائلة؟</li>
+                            </ul>
+                          </div>
+                        )}
+                        {key === "familyMemory" && (
+                          <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                            <p className="mb-2 font-bold">هذا القسم مخصص للذكريات والعادات والتقاليد والروايات الاجتماعية التي شكلت ذاكرة العائلة عبر الأجيال.</p>
+                            <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                            <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                              <li>العادات المتوارثة وتقاليد المناسبات.</li>
+                              <li>المجالس والتجمعات العائلية.</li>
+                              <li>الحكم والأمثال المتداولة.</li>
+                              <li>القصص والذكريات المشتركة.</li>
+                              <li>المواقف التي ما زال أفراد العائلة يتذكرونها.</li>
+                            </ul>
+                            <p className="mb-1 font-semibold">أسئلة تساعدك على الكتابة:</p>
+                            <ul className="list-disc list-inside space-y-1 pr-2">
+                              <li>ما أبرز العادات التي حافظت عليها العائلة؟</li>
+                              <li>ما الذكريات التي يتحدث عنها كبار السن باستمرار؟</li>
+                              <li>هل توجد عبارات أو حكم أو وصايا متوارثة؟</li>
+                              <li>ما المناسبات التي كانت تمثل أهمية خاصة للعائلة؟</li>
+                            </ul>
+                          </div>
+                        )}
+
                         <textarea
                           className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${status === "closed" ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
                           readOnly={status === "closed"}
@@ -1340,49 +1476,102 @@ export function Dashboard() {
                               <CheckCircle className="w-5 h-5" /> حفظ وإغلاق 
                             </button>
                           </div>
-                        ) : (
-                          <div className="flex justify-end mt-4">
-                            <button
-                              onClick={() => {
-                                updateSpecificData({
-                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "draft" }
-                                });
-                              }}
-                              className="text-brand-600 text-sm font-bold flex items-center gap-1 hover:underline p-2 rounded hover:bg-brand-50 transition"
-                            >
-                              <Edit3 className="w-4 h-4" /> فتح المسودة للتعديل مجددًا
-                            </button>
-                          </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   );
                   })()}
 
-                  {activeTab === "نافذة الإدراج العائلي" && (
+                  {activeTab === "نافذة الإدراج العائلي" && (() => {
+                    const status = order.data.sectionStatuses?.familyTree || "draft";
+                    return (
                     <div className="space-y-4">
-                      <p className="text-brand-600 mb-4 font-medium text-lg">
-                        أضف أفراد عائلتك لبناء مشجرة الأحياء (اقتصر على إشرافك
-                        المباشر في هذا المخطط).
-                      </p>
+                      
+                      <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                        <p className="mb-2 font-bold">تمكنك هذه النافذة من تشجير مبسط لإضافة أفراد العائلة الذين ترغب في إظهارهم ضمن صفحات الإدراج العائلي المخصصة في السجل، وفق حدود الإدراج المعتمدة للخدمة.</p>
+                        <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                          <li>الآب والأجداد.</li>
+                          <li>الأبناء والبنات.</li>
+                          <li>الإخوة والأخوات.</li>
+                        </ul>
+                        <p className="mb-1 font-semibold">يمكنك أيضاً:</p>
+                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                          <li>إضافة صورة.</li>
+                          <li>إضافة نبذة مختصرة.</li>
+                          <li>إضافة معلومات تعريفية مساندة.</li>
+                        </ul>
+                        <p className="text-brand-600"><strong>ملاحظة:</strong> لا يؤدي إدراج الأشخاص في هذه النافذة تلقائياً إلى اعتمادهم ضمن نتائج التوثيق أو عمود النسب، وإنما يهدف إلى إثراء السجل وإظهار الروابط العائلية ضمن حدود الإدراج المعتمدة.</p>
+                      </div>
+
                       <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
                         <TreeBuilder
                           initialNodes={order.data.treeData?.nodes || []}
                           initialEdges={order.data.treeData?.edges || []}
-                          onChange={(nodes, edges) =>
+                          readOnly={status === "closed"}
+                          onChange={(nodes, edges) => {
+                            if (status === "closed") return;
                             updateSpecificData({ treeData: { nodes, edges } })
-                          }
+                          }}
                           familyName={order.data.familyName}
                         />
                       </div>
-                    </div>
-                  )}
 
-                  {activeTab === "خزانة السجل (أرشيف العائلة)" && (
+                      {status !== "closed" && (
+                        <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
+                          <button
+                            onClick={() => {
+                              updateSpecificData({
+                                sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "draft" }
+                              });
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
+                            }}
+                            className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
+                          >
+                            <Save className="w-5 h-5" /> حفظ كمسودة
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
+                                updateSpecificData({
+                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "closed" }
+                                });
+                              }
+                            }}
+                            className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle className="w-5 h-5" /> حفظ وإغلاق 
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                  })()}
+
+                  {activeTab === "خزانة السجل (أرشيف العائلة)" && (() => {
+                    const status = order.data.sectionStatuses?.archive || "draft";
+                    return (
                     <div className="space-y-6">
-                      <p className="text-brand-600 mb-4 font-medium text-lg">
-                        خزانة السجل (أرشيف العائلة): قم بإدراج الوثائق أو الصور التاريخية هنا.
-                      </p>
+                      <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                        <p className="mb-2 font-bold">هذه المساحة مخصصة لحفظ المواد الأرشيفية التي ترغب بإيداعها ضمن ملف السجل، سواء كانت مرتبطة بأحد الأقسام السابقة أو مواد مستقلة ذات قيمة عائلية أو تاريخية.</p>
+                        <p className="mb-1 font-semibold">يمكنك إضافة:</p>
+                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2 grid grid-cols-2">
+                          <li>الصور العائلية.</li>
+                          <li>الوثائق.</li>
+                          <li>الرسائل.</li>
+                          <li>الشهادات.</li>
+                          <li>صور المقتنيات التاريخية.</li>
+                          <li>المواد الأرشيفية المختلفة.</li>
+                        </ul>
+                        <p className="mb-1 font-semibold">لكل مادة يمكن إضافة:</p>
+                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
+                          <li>عنوان.</li>
+                          <li>وصف.</li>
+                          <li>تاريخ تقريبي.</li>
+                          <li>الأشخاص أو الأماكن المرتبطة بها.</li>
+                          <li>ملاحظات إضافية.</li>
+                        </ul>
+                      </div>
                       {pendingUpload?.arrayName === "documents" ? (
                         <div className="bg-brand-50 p-6 md:p-8 rounded-2xl border border-brand-200">
                           <h4 className="font-bold text-brand-900 mb-6 flex items-center gap-2">
@@ -1586,17 +1775,108 @@ export function Dashboard() {
                           );
                         })}
                       </div>
+
+                      {order.data.sectionStatuses?.archive !== "closed" && (
+                        <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
+                          <button
+                            onClick={() => {
+                              updateSpecificData({
+                                sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "draft" }
+                              });
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
+                            }}
+                            className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
+                          >
+                            <Save className="w-5 h-5" /> حفظ كمسودة
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
+                                updateSpecificData({
+                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "closed" }
+                                });
+                              }
+                            }}
+                            className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle className="w-5 h-5" /> حفظ وإغلاق 
+                          </button>
+                        </div>
+                      )}
+
                     </div>
-                  )}
+                  );
+                  })()}
 
 
 
-                  {activeTab === "التسلسل الزمني للعائلة" && (
-                    <TimelineBuilder 
-                      events={order.data.timelineEvents || []}
-                      onChange={(events) => updateSpecificData({ timelineEvents: events })}
-                    />
-                  )}
+                  {activeTab === "التسلسل الزمني للعائلة" && (() => {
+                    const status = order.data.sectionStatuses?.timeline || "draft";
+                    return (
+                    <div className="space-y-4">
+                      <div className="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-800 leading-relaxed text-sm">
+                        <p className="mb-2 font-bold">تساعدك هذه الصفحة على توثيق المحطات والأحداث التي شكلت تاريخ عائلتك عبر الزمن. لا يشترط معرفة التواريخ بدقة، ويمكن تسجيل الأحداث التقريبية أو الروايات المتوارثة كما تعرفها.</p>
+                        <p className="mb-2 font-semibold">قد تكون هذه الأحداث مرتبطة بالهجرات أو الاستقرار أو الشخصيات المؤثرة أو المنازل القديمة أو الأنشطة الاقتصادية أو غيرها من المحطات التي أسهمت في تشكيل مسيرة العائلة.</p>
+                        <p className="mb-1 font-semibold">أمثلة للأحداث التي يمكن إضافتها:</p>
+                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2 grid grid-cols-2">
+                          <li>انتقال العائلة إلى منطقة جديدة.</li>
+                          <li>استقرار أحد الفروع في مدينة أو بلد آخر.</li>
+                          <li>إنشاء وقف أو مزرعة أو تجارة معروفة.</li>
+                          <li>بناء منزل تاريخي.</li>
+                          <li>ظهور شخصية بارزة.</li>
+                          <li>حدث عائلي مهم.</li>
+                          <li>هجرة أو عودة.</li>
+                          <li>تأسيس مؤسسة أو نشاط اقتصادي.</li>
+                          <li>أي محطة ترى أنها مؤثرة في تاريخ العائلة.</li>
+                        </ul>
+                        <p className="mb-1 font-semibold">أسئلة تساعدك على التوثيق:</p>
+                        <ul className="list-disc list-inside space-y-1 pr-2">
+                          <li>ما أقدم حدث تتذكره أو تعرفه عن العائلة؟</li>
+                          <li>هل مرت العائلة بمرحلة انتقال أو هجرة؟</li>
+                          <li>متى ظهرت أبرز الفروع المعروفة؟</li>
+                          <li>هل توجد أحداث يتكرر ذكرها بين كبار السن؟</li>
+                          <li>هل ارتبط تاريخ العائلة بحدث تاريخي أو اجتماعي معروف؟</li>
+                        </ul>
+                      </div>
+                      <TimelineBuilder 
+                        events={order.data.timelineEvents || []}
+                        readOnly={status === "closed"}
+                        onChange={(events) => {
+                          if (status === "closed") return;
+                          updateSpecificData({ timelineEvents: events })
+                        }}
+                      />
+
+                      {status !== "closed" && (
+                        <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
+                          <button
+                            onClick={() => {
+                              updateSpecificData({
+                                sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "draft" }
+                              });
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
+                            }}
+                            className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
+                          >
+                            <Save className="w-5 h-5" /> حفظ كمسودة
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
+                                updateSpecificData({
+                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "closed" }
+                                });
+                              }
+                            }}
+                            className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle className="w-5 h-5" /> حفظ وإغلاق 
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    );
+                  })()}
 
                   {activeTab === "استيضاحات فريق البحث" && (
                     <div className="bg-white border rounded-2xl flex flex-col h-[600px] border-brand-200 overflow-hidden relative">
@@ -1777,49 +2057,59 @@ export function Dashboard() {
                               </div>
                               
                               {(order.issueStatus === "تم الإصدار" || order.status === "تم تسليم الإصدار الأول") ? (
-                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                                  <button
-                                    onClick={() => {
-                                      useAppStore.getState().addMessageToOrder(order.id, {
-                                        id: Math.random().toString(36).substr(2, 9),
-                                        senderId: currentUser.id,
-                                        senderRole: "user",
-                                        text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
-                                        createdAt: new Date().toISOString(),
-                                      }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
-                                      useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
-                                    }}
-                                    className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
-                                  >
-                                    <CheckCircle className="w-6 h-6" /> إعتماد النسخة الحالية للطباعة
-                                  </button>
-                                  <button
-                                    onClick={() => setActiveTab("التصويبات")}
-                                    className="flex-1 bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
-                                  >
-                                    <Edit3 className="w-6 h-6" /> طلب تصويب
-                                  </button>
-                                </div>
-                              ) : order.issueStatus === "جاري التصويب" || order.actionPhase === "جاري التصويب" ? (
-                                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right">
-                                  <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
-                                  <div>
-                                    <h4 className="font-bold text-lg mb-2">سجل تراث عائلتكم قيد التصويب</h4>
-                                    <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
+                                order.actionPhase === "تم التصويب" || order.status === "جاهز للطباعة" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "جاهز للتسليم" ? (
+                                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-xl flex items-start gap-4 text-right shadow-sm w-full animate-in fade-in zoom-in duration-500 max-w-2xl mx-auto">
+                                    <CheckCircle className="w-8 h-8 text-emerald-500 shrink-0 mt-1" />
+                                    <div>
+                                      <h4 className="font-bold text-xl mb-2 text-emerald-900">سجل عائلتكم في مرحلة الطباعة النهائية!</h4>
+                                      <p className="text-emerald-800 leading-relaxed font-medium">يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.</p>
+                                    </div>
                                   </div>
-                                </div>
-                              ) : order.status === "تم الإغلاق" ? (
-                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                                  <a
-                                    href={order.digitalCopyDownloadLink || order.digitalCopyLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
-                                  >
-                                    <Download className="w-6 h-6" /> تحميل النسخة
-                                    الرقمية
-                                  </a>
-                                </div>
+                                ) : order.issueStatus === "جاري التصويب" || order.actionPhase === "جاري التصويب" ? (
+                                  <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right w-full max-w-2xl mx-auto">
+                                    <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
+                                    <div>
+                                      <h4 className="font-bold text-lg mb-2">سجل تراث عائلتكم قيد التصويب</h4>
+                                      <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
+                                    </div>
+                                  </div>
+                                ) : order.status === "تم الإغلاق" ? (
+                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                    <a
+                                      href={order.digitalCopyDownloadLink || order.digitalCopyLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+                                    >
+                                      <Download className="w-6 h-6" /> تحميل النسخة
+                                      الرقمية
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                    <button
+                                      onClick={() => {
+                                        useAppStore.getState().addMessageToOrder(order.id, {
+                                          id: Math.random().toString(36).substr(2, 9),
+                                          senderId: currentUser.id,
+                                          senderRole: "user",
+                                          text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
+                                          createdAt: new Date().toISOString(),
+                                        }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
+                                        useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
+                                      }}
+                                      className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                                    >
+                                      <CheckCircle className="w-6 h-6" /> إعتماد النسخة الحالية للطباعة
+                                    </button>
+                                    <button
+                                      onClick={() => setActiveTab("التصويبات")}
+                                      className="flex-1 bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                                    >
+                                      <Edit3 className="w-6 h-6" /> طلب تصويب
+                                    </button>
+                                  </div>
+                                )
                               ) : null}
                             </div>
                             

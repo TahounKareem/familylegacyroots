@@ -100,6 +100,7 @@ export function AdminPanel() {
 
   const [designSubmitOrder, setDesignSubmitOrder] = useState<Order | null>(null);
   const [designRecordLink, setDesignRecordLink] = useState("");
+  const [designDownloadLink, setDesignDownloadLink] = useState("");
   const [designTreeLink, setDesignTreeLink] = useState("");
   const [designCopiesShipped, setDesignCopiesShipped] = useState(false);
 
@@ -388,6 +389,7 @@ export function AdminPanel() {
         actionPhase: "جاهز للطباعة",
         designLinks: {
           recordLink: designRecordLink,
+          downloadLink: designDownloadLink,
           treeLink: designTreeLink,
           copiesShipped: designCopiesShipped
         }
@@ -398,6 +400,7 @@ export function AdminPanel() {
       );
       setDesignSubmitOrder(null);
       setDesignRecordLink("");
+      setDesignDownloadLink("");
       setDesignTreeLink("");
       setDesignCopiesShipped(false);
     } catch (e) {
@@ -856,22 +859,18 @@ export function AdminPanel() {
                               <select
                                 value={order.priority || "عادي"}
                                 onChange={async (e) => {
-                                  const { updateDoc, doc } =
-                                    await import("firebase/firestore");
-                                  const { db } = await import("@/lib/firebase");
-                                  await updateDoc(doc(db, "orders", order.id), {
-                                    priority: e.target.value,
-                                  });
-                                  useAppStore.setState((s) => ({
-                                    orders: s.orders.map((o) =>
-                                      o.id === order.id
-                                        ? {
-                                            ...o,
-                                            priority: e.target.value as any,
-                                          }
-                                        : o,
-                                    ),
-                                  }));
+                                  try {
+                                    const newVal = e.target.value as "عادي" | "عاجل";
+                                    await useAppStore.getState().fulfillOrder(order.id, {
+                                      priority: newVal,
+                                    });
+                                    await useAppStore.getState().logTimelineEvent(
+                                      order.id,
+                                      `تم تغيير الأولوية إلى: ${newVal}`
+                                    );
+                                  } catch (err) {
+                                    console.error("Failed to update priority", err);
+                                  }
                                 }}
                                 className={`border rounded px-1 py-1 text-[10px] sm:text-[11px] focus:ring-brand-500 font-bold outline-none cursor-pointer ${order.priority === "عاجل" ? "bg-red-50 text-red-700 border-red-200" : "bg-white text-gray-700 border-gray-200"}`}
                               >
@@ -1027,6 +1026,7 @@ export function AdminPanel() {
                                             setDeliveryTab("final");
                                             setDeliveryOrder(order);
                                             setDigitalCopyLink(order.designLinks?.recordLink || "");
+                                            setDigitalCopyDownloadLink(order.designLinks?.downloadLink || "");
                                             setDeliveryLink(order.designLinks?.recordLink || "");
                                             setPosterLink(order.designLinks?.treeLink || "");
                                           }}
@@ -2281,24 +2281,28 @@ export function AdminPanel() {
                   </strong>{" "}
                   {selectedOrder.data.country} - {selectedOrder.data.homeland}
                 </div>
-                <div className="bg-white p-4 border border-brand-100 rounded-xl">
-                  <strong className="text-brand-600 block mb-1">
-                    رقم هاتف العميل:
-                  </strong>{" "}
-                  <span dir="ltr">
-                    {selectedOrder.data.mobileNumber || "غير متوفر"}
-                  </span>
-                </div>
-                {selectedOrder.data.shippingAddress && (
-                  <div className="bg-white p-4 border border-brand-100 rounded-xl md:col-span-2">
-                    <strong className="text-brand-600 block mb-1">
-                      عنوان الشحن:
-                    </strong>
-                    {selectedOrder.data.shippingAddress.country}،{" "}
-                    {selectedOrder.data.shippingAddress.state}،{" "}
-                    {selectedOrder.data.shippingAddress.street} (الرمز البريدي:{" "}
-                    {selectedOrder.data.shippingAddress.zip})
-                  </div>
+                {currentTab === "orders" && (
+                  <>
+                    <div className="bg-white p-4 border border-brand-100 rounded-xl">
+                      <strong className="text-brand-600 block mb-1">
+                        رقم هاتف العميل:
+                      </strong>{" "}
+                      <span dir="ltr">
+                        {selectedOrder.data.mobileNumber || "غير متوفر"}
+                      </span>
+                    </div>
+                    {selectedOrder.data.shippingAddress && (
+                      <div className="bg-white p-4 border border-brand-100 rounded-xl md:col-span-2">
+                        <strong className="text-brand-600 block mb-1">
+                          عنوان الشحن:
+                        </strong>
+                        {selectedOrder.data.shippingAddress.country}،{" "}
+                        {selectedOrder.data.shippingAddress.state}،{" "}
+                        {selectedOrder.data.shippingAddress.street} (الرمز البريدي:{" "}
+                        {selectedOrder.data.shippingAddress.zip})
+                      </div>
+                    )}
+                  </>
                 )}
                 {(selectedOrder.data.startingPoint ||
                   selectedOrder.data.startingPointType) && (
@@ -2372,6 +2376,47 @@ export function AdminPanel() {
                   </div>
                 )}
               </div>
+
+              {selectedOrder.data.timelineEvents && selectedOrder.data.timelineEvents.length > 0 && (
+                <>
+                  <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">
+                    التسلسل الزمني للعائلة
+                  </h4>
+                  <div className="bg-white rounded-xl border border-brand-200 p-6 mb-6">
+                    <div className="space-y-4">
+                      {selectedOrder.data.timelineEvents.map((evt, idx) => (
+                        <div key={idx} className="flex gap-4 p-4 border border-brand-100 rounded-lg bg-brand-50/50">
+                          <div className="w-24 shrink-0 text-center">
+                            <div className="bg-brand-100 text-brand-800 font-bold py-1 px-2 rounded-lg text-sm mb-1">{evt.date}</div>
+                            {evt.dateAccuracy && (
+                              <span className="text-[10px] text-brand-500 whitespace-nowrap">
+                                {evt.dateAccuracy === "confirmed" && "مؤكد"}
+                                {evt.dateAccuracy === "approximate" && "تقريبي"}
+                                {evt.dateAccuracy === "inherited" && "متوارث"}
+                                {evt.dateAccuracy === "unknown" && "غير محدد"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="font-bold text-brand-900 mb-1">{evt.title}</h5>
+                            <p className="text-sm text-brand-700 leading-relaxed mb-2">{evt.description}</p>
+                            {(evt.associatedPeople?.length || evt.location || evt.source || evt.type) && (
+                              <div className="flex flex-wrap gap-3 text-xs text-brand-500 bg-white p-2 border border-brand-100 rounded">
+                                {evt.type && <span>النوع: {evt.type}</span>}
+                                {evt.location && <span>المكان: {evt.location}</span>}
+                                {evt.source && <span>المصدر: {evt.source}</span>}
+                                {evt.associatedPeople && evt.associatedPeople.length > 0 && (
+                                  <span>ارتباط: {evt.associatedPeople.join("، ")}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">
                 مخطط شجرة العائلة المرفق
@@ -2894,12 +2939,23 @@ export function AdminPanel() {
             
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
-                <label className="block font-semibold text-brand-900 mb-2">رابط السجل الرقمي</label>
+                <label className="block font-semibold text-brand-900 mb-2">رابط النسخة الرقمية للسجل للتصفح</label>
                 <input
                   type="url"
                   value={designRecordLink}
                   onChange={(e) => setDesignRecordLink(e.target.value)}
-                  placeholder="أدخل الرابط هنا..."
+                  placeholder="أدخل رابط التصفح هنا..."
+                  className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-brand-900 mb-2">رابط النسخة الرقمية للسجل للتحميل</label>
+                <input
+                  type="url"
+                  value={designDownloadLink}
+                  onChange={(e) => setDesignDownloadLink(e.target.value)}
+                  placeholder="أدخل رابط التحميل هنا..."
                   className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                 />
               </div>

@@ -5,9 +5,10 @@ import { Plus, Trash2, Edit3, Calendar, MapPin, Users, HelpCircle, Save, X } fro
 interface TimelineBuilderProps {
   events: TimelineFormEvent[];
   onChange: (events: TimelineFormEvent[]) => void;
+  readOnly?: boolean;
 }
 
-export function TimelineBuilder({ events, onChange }: TimelineBuilderProps) {
+export function TimelineBuilder({ events, onChange, readOnly = false }: TimelineBuilderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<TimelineFormEvent>>({});
@@ -196,13 +197,15 @@ export function TimelineBuilder({ events, onChange }: TimelineBuilderProps) {
             سجل أهم الأحداث والتواريخ المفصلية في مسيرة العائلة وتاريخها.
           </p>
         </div>
-        <button
-          onClick={handleAddNew}
-          className="bg-brand-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-brand-700 transition"
-        >
-          <Plus className="w-5 h-5" />
-          إضافة حدث جديد
-        </button>
+        {!readOnly && (
+          <button
+            onClick={handleAddNew}
+            className="bg-brand-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-brand-700 transition"
+          >
+            <Plus className="w-5 h-5" />
+            إضافة حدث جديد
+          </button>
+        )}
       </div>
 
       {events.length === 0 ? (
@@ -214,14 +217,16 @@ export function TimelineBuilder({ events, onChange }: TimelineBuilderProps) {
         <div className="space-y-4">
           {events.map((event, index) => (
             <div key={index} className="bg-white p-5 rounded-2xl border border-brand-200 hover:border-brand-400 transition group relative shadow-sm">
-              <div className="absolute top-5 left-5 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                <button onClick={() => handleEdit(index)} className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg">
-                  <Edit3 className="w-4 h-4" />
-                </button>
-                <button onClick={() => handleDelete(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              {!readOnly && (
+                <div className="absolute top-5 left-5 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <button onClick={() => handleEdit(index)} className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg">
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               
               <div className="flex items-start gap-4 pr-2">
                 <div className="w-20 text-center shrink-0">
