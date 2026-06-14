@@ -781,8 +781,7 @@ export function Dashboard() {
                             </h2>
                           </div>
 
-                          {/* Hidden per user request */}
-                          <div className="hidden">
+                          {activeTab !== "ساهم في بناء ذاكرة عائلتك" && (
                             <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative">
                               <div className="bg-brand-50 p-6 border-b border-brand-100 text-center">
                                 <h3 className="font-bold text-2xl text-brand-900 mb-1">
@@ -821,7 +820,7 @@ export function Dashboard() {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          )}
 
                           {(subText || actionButton) && (
                             <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative mt-4">
