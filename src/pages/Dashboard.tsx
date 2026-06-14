@@ -822,10 +822,10 @@ export function Dashboard() {
                             </div>
                           )}
 
-                          {(subText || actionButton) && (
+                          {((subText && !(activeTab === "ساهم في بناء ذاكرة عائلتك" && isState3)) || actionButton) && (
                             <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative mt-4">
                               <div className="p-8 space-y-6">
-                                {subText && (
+                                {(subText && !(activeTab === "ساهم في بناء ذاكرة عائلتك" && isState3)) && (
                                   <p className="text-lg text-brand-800 leading-relaxed font-medium text-center">
                                     {subText}
                                   </p>
