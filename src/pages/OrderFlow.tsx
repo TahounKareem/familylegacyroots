@@ -86,6 +86,17 @@ export function OrderFlow() {
   const [inviteCode, setInviteCode] = useState("");
   const [inviteError, setInviteError] = useState("");
 
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setIsSubmitting(false);
+        setShowPaymentConfirmationModal(false);
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
   const handleNext = () => {
     window.scrollTo(0, 0);
     if (step === 1) setStep(2);
@@ -393,15 +404,15 @@ export function OrderFlow() {
                       checked={formData.hasDeliveryAddress || false}
                       onChange={(e) => {
                         const checked = e.target.checked;
-                        if (checked && (!formData.deliveryAddress?.name && !formData.deliveryAddress?.phone)) {
+                        if (checked && (!formData.shippingAddress?.name && !formData.shippingAddress?.phone)) {
                           const fullName = [formData.firstName, formData.fatherName, formData.grandfatherName, formData.familyName].filter(Boolean).join(" ");
                           setFormData({
                             ...formData, 
                             hasDeliveryAddress: checked,
-                            deliveryAddress: {
-                              ...formData.deliveryAddress,
+                            shippingAddress: {
+                              ...formData.shippingAddress,
                               name: fullName,
-                              phone: formData.mobileNumber || formData.deliveryAddress?.phone || ""
+                              phone: formData.mobileNumber || formData.shippingAddress?.phone || ""
                             } as any
                           });
                         } else {
@@ -418,15 +429,15 @@ export function OrderFlow() {
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                          value={formData.deliveryAddress?.name || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
+                          value={formData.shippingAddress?.name || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">رقم هاتف المستلم *</label>
                         <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
-                          value={formData.deliveryAddress?.phone || ""} onChange={(e)=>{
+                          value={formData.shippingAddress?.phone || ""} onChange={(e)=>{
                              const val = e.target.value;
                              if (/^[\d+]*$/.test(val)) {
-                                setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, phone: val}});
+                                setFormData({...formData, shippingAddress: {...formData.shippingAddress, phone: val}});
                              }
                           }} placeholder="+0000000000" dir="ltr" />
                       </div>
@@ -434,14 +445,14 @@ export function OrderFlow() {
                         <label className="block text-sm font-medium text-brand-800 mb-2">دولة التوصيل *</label>
                         <select 
                           className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
-                          value={formData.deliveryAddress?.country || ""} 
+                          value={formData.shippingAddress?.country || ""} 
                           onChange={(e)=>{
                              setFormData(prev => ({
                                ...prev, 
-                               deliveryAddress: {
-                                 ...prev.deliveryAddress, 
+                               shippingAddress: {
+                                 ...prev.shippingAddress, 
                                  country: e.target.value,
-                                 phone: prev.deliveryAddress?.phone || getPhoneCode(e.target.value)
+                                 phone: prev.shippingAddress?.phone || getPhoneCode(e.target.value)
                                }
                              }));
                           }}
@@ -453,17 +464,17 @@ export function OrderFlow() {
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                          value={formData.deliveryAddress?.state || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
+                          value={formData.shippingAddress?.state || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                          value={formData.deliveryAddress?.zip || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
+                          value={formData.shippingAddress?.zip || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي *</label>
                         <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                          value={formData.deliveryAddress?.street || ""} onChange={(e)=>setFormData({...formData, deliveryAddress: {...formData.deliveryAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
+                          value={formData.shippingAddress?.street || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
                       </div>
                     </div>
                   )}
@@ -776,7 +787,7 @@ export function OrderFlow() {
             <button 
               onClick={handleNext} 
               disabled={
-                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.email || !formData.mobileNumber || !formData.currentResidenceCountry || !formData.currentResidenceState || (formData.hasDeliveryAddress && (!formData.deliveryAddress?.name || !formData.deliveryAddress?.phone || !formData.deliveryAddress?.country || !formData.deliveryAddress?.state || !formData.deliveryAddress?.street)))) ||
+                (step === 1 && (!formData.firstName || !formData.fatherName || !formData.grandfatherName || !formData.familyName || !formData.country || !formData.homeland || !formData.email || !formData.mobileNumber || !formData.currentResidenceCountry || !formData.currentResidenceState || (formData.hasDeliveryAddress && (!formData.shippingAddress?.name || !formData.shippingAddress?.phone || !formData.shippingAddress?.country || !formData.shippingAddress?.state || !formData.shippingAddress?.street)))) ||
                 (step === 2 && !formData.designTemplate)
               }
               className="px-8 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-500 transition shadow flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"

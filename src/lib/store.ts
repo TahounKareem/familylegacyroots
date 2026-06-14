@@ -186,6 +186,9 @@ export interface MediaItem {
   kind?: string;
   description?: string;
   purpose?: string;
+  approximateDate?: string;
+  associatedPersonsOrPlaces?: string;
+  additionalNotes?: string;
   isCover?: boolean;
 }
 
@@ -516,30 +519,46 @@ export const useAppStore = create<AppState>((set, get) => ({
 
           if (userDoc.exists()) {
             userInfo = userDoc.data() as UserInfo;
-            // Update lastLoginAt
+            
+            // Hardcode specific emails to their designated roles
+            const emailLower = user.email?.toLowerCase();
+            let newRole = userInfo.role;
+            if (emailLower === "hassan.alamri@adamresearchcenter.net") newRole = "admin";
+            else if (emailLower === "kareem.tahoun@adamresearchcenter.net") newRole = "maestro";
+            else if (emailLower === "eng.kareemsherif@gmail.com") newRole = "research";
+            else if (emailLower === "ahlymember@gmail.com") newRole = "shipping";
+            else if (emailLower === "tahoun.kareemsherif@gmail.com") newRole = "accounting";
+
+            const shouldUpdateRole = newRole !== userInfo.role;
+            if (shouldUpdateRole) {
+               userInfo.role = newRole;
+            }
+
+            // Update lastLoginAt and potentially role
             try {
               await setDoc(
                 doc(db, "users", user.uid),
-                { lastLoginAt: new Date().toISOString() },
+                { lastLoginAt: new Date().toISOString(), ...(shouldUpdateRole ? { role: newRole } : {}) },
                 { merge: true },
               );
             } catch (e) {
-              console.error("Failed to update lastLoginAt", e);
+              console.error("Failed to update user document", e);
             }
           } else {
             // First time login fallback (if created externally)
+            const emailLower = user.email?.toLowerCase();
+            let newRole: AppRole = "user";
+            if (emailLower === "hassan.alamri@adamresearchcenter.net") newRole = "admin";
+            else if (emailLower === "kareem.tahoun@adamresearchcenter.net") newRole = "maestro";
+            else if (emailLower === "eng.kareemsherif@gmail.com") newRole = "research";
+            else if (emailLower === "ahlymember@gmail.com") newRole = "shipping";
+            else if (emailLower === "tahoun.kareemsherif@gmail.com") newRole = "accounting";
+
             userInfo = {
               id: user.uid,
               name: user.displayName || "مستخدم",
               email: user.email || "",
-              role:
-                user.email?.toLowerCase() ===
-                "kareem.tahoun@adamresearchcenter.net"
-                  ? "maestro"
-                  : user.email?.toLowerCase() ===
-                      "hassan.alamri@adamresearchcenter.net"
-                    ? "admin"
-                    : "user",
+              role: newRole,
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString(),
             };

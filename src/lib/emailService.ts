@@ -9,6 +9,8 @@ import { db } from "./firebase";
 
 export interface EmailTemplate {
   to: string | string[];
+  bcc?: string | string[];
+  from?: string;
   message: {
     subject: string;
     text: string;
@@ -19,11 +21,15 @@ export interface EmailTemplate {
 // دالة أساسية لإرسال الإيميل
 const queueEmail = async (emailData: EmailTemplate) => {
   try {
-    await addDoc(collection(db, "mail"), {
+    const docData: any = {
       to: emailData.to,
       message: emailData.message,
       createdAt: serverTimestamp(),
-    });
+    };
+    if (emailData.bcc) docData.bcc = emailData.bcc;
+    if (emailData.from) docData.from = emailData.from;
+    
+    await addDoc(collection(db, "mail"), docData);
     console.log("Email queued for sending successfully.");
   } catch (error) {
     console.error("Error queueing email:", error);
@@ -175,3 +181,228 @@ export const createSupportTicket = async (name: string, email: string, message: 
   });
 };
 
+const DEFAULT_FROM = "info@thefamilylegacyroots.com";
+const DEFAULT_BCC = "no-reply@thefamilylegacyroots.com";
+
+/**
+ * 1. إشعار مدير المحاسبة بانتهاء مرحلة البحث (لتحصيل الدفعة الثانية)
+ */
+export const sendAccountingPhaseEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: "accounting@thefamilylegacyroots.com",
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `تحديث طلب #${orderId}: انتهاء مرحلة البحث لعائلة (${familyName})`,
+      text: `تم الإنتهاء من مرحلة البحث الخاصة بعائلة (${familyName}). يمكن الآن تحصيل الدفعة الثانية في حال اختار العميل نظام الدفع المرن.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">إشعار استكمال البحث</h2>
+          <p>تحية طيبة،</p>
+          <p>نود إعلامكم بأنه قد <strong>تم الإنتهاء من مرحلة البحث والتوثيق</strong> الخاصة بسجل عائلة (<strong>${familyName}</strong>) للطلب رقم #${orderId}.</p>
+          <p>يمكنكم الآن المضي قدماً في إجراءات تحصيل الدفعة الثانية إذا كان العميل قد اختار نظام الدفع المرن.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 2. إشعار مدير التصميم (تسليم المسودة من البحث إلى التصميم)
+ */
+export const sendDesignDraftReadyEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: "design@thefamilylegacyroots.com",
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `السجل جاهز للتصميم المبدئي #${orderId} - عائلة (${familyName})`,
+      text: `تم الإنتهاء من البحث والتوثيق الخاص بعائلة (${familyName}). مسودة سجل تراث العائلة أصبحت جاهزة، يمكنكم البدء بتصميم النسخة المبدئية.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">مسودة السجل جاهزة للتصميم</h2>
+          <p>تحية طيبة،</p>
+          <p>نود إعلامكم بأنه قد <strong>تم الإنتهاء من البحث والتوثيق</strong> الخاص بعائلة (<strong>${familyName}</strong>) للطلب رقم #${orderId}.</p>
+          <p>مسودة سجل تراث العائلة أصبحت جاهزة الآن، وبالتالي يمكنكم البدء بالعمل على تصميم النسخة الإلكترونية (النسخة الأولية) وتسليمها إلى إدارة الطلبات.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 3. إشعار العميل باستلام المسودة الأولية
+ */
+export const sendCustomerDraftReadyEmail = async (userEmail: string, userName: string, orderId: string, downloadLink: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `مسودة سجل تراث عائلتكم أصبحت جاهزة - طلب #${orderId.toUpperCase()}`,
+      text: `أهلاً ${userName}، يسعدنا إعلامك بأن المسودة الأولية لسجل تراث عائلتك أصبحت جاهزة للتصفح.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>يسعدنا جداً إعلامك بأن <strong>النسخة الأولية (المسودة)</strong> من سجل تراث العائلة أصبحت جاهزة للتصفح!</p>
+          <p>لقد قمنا بجمع وتوثيق وتصميم المعلومات الأولية بعناية، وندعوك الآن للاطلاع عليها ومراجعتها.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">الانتقال إلى لوحة التحكم لاستعراض السجل</a>
+          </div>
+          <p>يمكنك أيضاً الوصول إليها وإبداء ملاحظاتك أو طلب تصويب عبر لوحة التحكم الخاصة بك.</p>
+          <br/><p>أطيب التحيات،<br/><strong>فريق سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 4. إشعار مدير البحوث بالتصويبات من العميل
+ */
+export const sendResearchCorrectionsEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: "research@thefamilylegacyroots.com",
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `طلب تصويب جديد للطلب #${orderId} - عائلة (${familyName})`,
+      text: `قام العميل بطلب تصويبات على المسودة الأولية لسجل عائلة (${familyName}). يرجى المراجعة والعمل على التصويبات.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">طلب تصويبات جديد</h2>
+          <p>تحية طيبة،</p>
+          <p>نحيطكم علماً بأن العميل قد قام برفع طلب <strong>تصويبات</strong> على المسودة الأولية الخاصة بسجل عائلة (<strong>${familyName}</strong>) رقم #${orderId}.</p>
+          <p>يرجى الدخول إلى لوحة التحكم لمراجعة الملاحظات والعمل على إجراء التصويبات اللازمة لإصدار النسخة التالية.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 5. إشعار مدير التصميم بانتهاء التصويبات (جاهز للتصميم النهائي)
+ */
+export const sendDesignCorrectionsAppliedEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: "design@thefamilylegacyroots.com",
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `التصويبات مكتملة وجاهزة للتصميم #${orderId} - عائلة (${familyName})`,
+      text: `تم الإنتهاء من التصويبات المطلوبة لسجل عائلة (${familyName}). يمكنكم الآن تصميم النسخة النهائية للسجل الجاهزة للطباعة.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">إشعار انتهاء التصويبات المعتمدة</h2>
+          <p>تحية طيبة،</p>
+          <p>نود إعلامكم بأنه قد تم <strong>الإنتهاء من التصويبات المطلوبة</strong> التي حددها العميل على مسودة سجل عائلة (<strong>${familyName}</strong>) رقم #${orderId}.</p>
+          <p>يمكنكم الآن بناءً على ذلك العمل على تصميم النسخة النهائية للسجل وتجهيزها للطباعة.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 6. إشعار مدير التصميم باعتماد العميل للطباعة
+ */
+export const sendDesignPrintApprovedEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: "design@thefamilylegacyroots.com",
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `اعتماد الطباعة للطلب #${orderId} - عائلة (${familyName})`,
+      text: `قام العميل باعتماد النسخة للطباعة والتسليم النهائي لعائلة (${familyName}). يمكنكم البدء في التجهيز للطباعة.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">اعتماد العميل للطباعة</h2>
+          <p>تحية طيبة،</p>
+          <p>خبر سار! لقد <strong>قام العميل باعتماد النسخة النهائية</strong> لسجل عائلة (<strong>${familyName}</strong>) رقم #${orderId} استعداداً للطباعة.</p>
+          <p>يرجى اتخاذ الإجراءات اللازمة للبدء في تجهيز السجلات لعمليات الطباعة والتغليف والتسليم النهائي.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 7. إشعار إدارة الطلبات والمدير العام والمايسترو باستلام الروابط النهائية
+ */
+export const sendFinalLinksReadyEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: ["orders@thefamilylegacyroots.com", "manager@thefamilylegacyroots.com", "maestro@thefamilylegacyroots.com"],
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `السجل النهائي جاهز للعميل #${orderId} - عائلة (${familyName})`,
+      text: `أرسل مدير التصميم الروابط النهائية الخاصة بسجل عائلة (${familyName}). السجل أصبح جاهزاً ويستطيع مدير الطلبات إرساله للعميل.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">النسخة النهائية جاهزة للتسليم</h2>
+          <p>تحية طيبة للجميع،</p>
+          <p>لقد قام فريق التصميم برفع <strong>الروابط والملفات النهائية</strong> المتعلقة بسجل عائلة (<strong>${familyName}</strong>) رقم #${orderId}.</p>
+          <p>هذا إشعار بأن السجل أصبح الآن في صورته النهائية الكاملة وجاهز بنسبة 100%. يمكن للإدارة المعنية (إدارة الطلبات) القيام بإرساله مباشرة إلى العميل عبر لوحة التحكم.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 8. إشعار التسليم النهائي للعميل
+ */
+export const sendFinalDeliveryToCustomerEmail = async (userEmail: string, userName: string, orderId: string, finalLink: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `تم اعتماد النسخة النهائية وجاهزية المطبوعات - طلب #${orderId.toUpperCase()}`,
+      text: `أهلاً ${userName}، يسرنا تسليمك النسخة الرقمية النهائية الفاخرة، جاري طباعة وتجهيز المطبوعات الفاخرة ليتم إرسالها إليكم قريباً.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>اكتملت مسيرة التوثيق والتصميم، ويسرنا جداً أن نضع بين أيديكم <strong>النسخة الرقمية النهائية الفاخرة</strong> من سجل تراث العائلة.</p>
+          <p>لقد تم اعتماد هذه النسخة، ونعمل حالياً بكل اعتزاز على إتمام عمليات الطباعة الفاخرة والتجليد لتجهيز الشحنة المرسلة إليكم خلال الأيام القليلة القادمة.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">تسجيل الدخول لاستعراض السجل في لوحة التحكم</a>
+          </div>
+          <p>سنوافيك بتفاصيل الشحن ورقم التتبع بمجرد انطلاق الشحنة في طريقها إليك.</p>
+          <p>شكرًا لثقتك الغالية في مركز آدم للبحوث وتوثيق التراث.</p>
+          <br/><p>أطيب التحيات،<br/><strong>فريق سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 9. إشعار إدارة الطلبات والمدير العام والمايسترو بانتهاء التصميم الأولية
+ */
+export const sendInitialDesignReadyEmail = async (familyName: string, orderId: string) => {
+  await queueEmail({
+    to: ["orders@thefamilylegacyroots.com", "manager@thefamilylegacyroots.com", "maestro@thefamilylegacyroots.com"],
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `النسخة الإلكترونية الأولية جاهزة للطلب #${orderId} - عائلة (${familyName})`,
+      text: `أنهى مدير التصميم إعداد النسخة الإلكترونية الأولية لسجل عائلة (${familyName}). يرجى المراجعة وتسليمها للعميل.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">النسخة الإلكترونية الأولية جاهزة</h2>
+          <p>تحية طيبة للجميع،</p>
+          <p>لقد أنهى فريق التصميم تصميم <strong>النسخة الإلكترونية الأولية (المسودة)</strong> الخاصة بسجل عائلة (<strong>${familyName}</strong>) رقم #${orderId}.</p>
+          <p>يرجى من مدراء إدارة الطلبات استلام هذه المسودة من لوحة التحكم وإرسالها للعميل للإطلاع وإبداء الملاحظات.</p>
+          <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `
+    }
+  });
+};

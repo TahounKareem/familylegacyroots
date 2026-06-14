@@ -105,11 +105,15 @@ export function Dashboard() {
       setIsUploading(false);
     }
   };
-  const [mediaMeta, setMediaMeta] = useState({
+  const [mediaMeta, setMediaMeta] = useState<MediaItem>({
+    url: "",
     title: "",
     kind: "",
     description: "",
     purpose: "إضافة لسجل تراث العائلة",
+    approximateDate: "",
+    associatedPersonsOrPlaces: "",
+    additionalNotes: "",
     isCover: false,
   });
 
@@ -521,6 +525,13 @@ export function Dashboard() {
                 </h3>
                 <div className="space-y-1">
                   <SidebarItem
+                    title="المساهمة في بناء إرث عائلتك"
+                    isActive={activeTab === "المساهمة في بناء إرث عائلتك"}
+                    isLocked={!isPaid}
+                  />
+                  {(activeTab === "المساهمة في بناء إرث عائلتك" || ["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي", "خزانة السجل (أرشيف العائلة)", "نافذة الإدراج العائلي", "التسلسل الزمني للعائلة"].includes(activeTab)) && (
+                    <div className="pr-4 border-r-2 border-brand-100 flex flex-col gap-1 mt-1 mb-2">
+                  <SidebarItem
                     title="كلمة أمين السجل"
                     isActive={activeTab === "كلمة أمين السجل"}
                     isLocked={!isPaid}
@@ -570,6 +581,8 @@ export function Dashboard() {
                     isActive={activeTab === "التسلسل الزمني للعائلة"}
                     isLocked={!isPaid}
                   />
+                  </div>
+                  )}
                 </div>
               </div>
 
@@ -639,7 +652,7 @@ export function Dashboard() {
                     {activeTab}
                   </h2>
 
-                  {activeTab === "السجل الأساسي" &&
+                  {(activeTab === "السجل الأساسي" || activeTab === "المساهمة في بناء إرث عائلتك") &&
                     (() => {
                       const isState1 = !order || order.issueStatus === "طلب غير مكتمل";
                       const isState2 =
@@ -1512,15 +1525,8 @@ export function Dashboard() {
                         <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
                           <li>الآب والأجداد.</li>
                           <li>الأبناء والبنات.</li>
-                          <li>الإخوة والأخوات.</li>
                         </ul>
-                        <p className="mb-1 font-semibold">يمكنك أيضاً:</p>
-                        <ul className="list-disc list-inside mb-3 space-y-1 pr-2">
-                          <li>إضافة صورة.</li>
-                          <li>إضافة نبذة مختصرة.</li>
-                          <li>إضافة معلومات تعريفية مساندة.</li>
-                        </ul>
-                        <p className="text-brand-600"><strong>ملاحظة:</strong> لا يؤدي إدراج الأشخاص في هذه النافذة تلقائياً إلى اعتمادهم ضمن نتائج التوثيق أو عمود النسب، وإنما يهدف إلى إثراء السجل وإظهار الروابط العائلية ضمن حدود الإدراج المعتمدة.</p>
+                        <p className="text-brand-600 mt-4"><strong>ملاحظة:</strong> لا يؤدي إدراج الأشخاص في هذه النافذة تلقائياً إلى اعتمادهم ضمن نتائج التوثيق أو عمود النسب، وإنما يهدف إلى إثراء السجل وإظهار الروابط العائلية ضمن حدود الإدراج المعتمدة.</p>
                       </div>
 
                       <div className="h-[75vh] min-h-[600px] border-2 border-brand-100 rounded-2xl overflow-hidden bg-white shadow-inner relative">
@@ -1654,6 +1660,40 @@ export function Dashboard() {
                             </div>
                             <div>
                               <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                تاريخ تقريبي (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.approximateDate}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    approximateDate: e.target.value,
+                                  })
+                                }
+                                placeholder="مثال: ١٩٥٠ أو القرن العشرين"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                الأشخاص أو الأماكن المرتبطة (إختياري)
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={mediaMeta.associatedPersonsOrPlaces}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    associatedPersonsOrPlaces: e.target.value,
+                                  })
+                                }
+                                placeholder="مثال: الجد المؤسس أو مدينة الطائف"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
                                 الغرض من الإدراج
                               </label>
                               <select
@@ -1676,6 +1716,23 @@ export function Dashboard() {
                                   استخدام كغلاف لسجل تراث العائلة
                                 </option>
                               </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-brand-700 mb-1">
+                                ملاحظات إضافية (إختياري)
+                              </label>
+                              <textarea
+                                className="w-full border border-brand-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-500 outline-none"
+                                rows={2}
+                                value={mediaMeta.additionalNotes}
+                                onChange={(e) =>
+                                  setMediaMeta({
+                                    ...mediaMeta,
+                                    additionalNotes: e.target.value,
+                                  })
+                                }
+                                placeholder="أي ملاحظات أخرى تود إضافتها..."
+                              ></textarea>
                             </div>
                             
                             <div className="flex items-start gap-3 mt-4 bg-brand-50 p-4 rounded-xl border border-brand-100">

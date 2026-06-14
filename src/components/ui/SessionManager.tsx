@@ -37,6 +37,14 @@ export function SessionManager() {
     setShowWarning(false);
   }, [logout, currentUser]);
 
+  const getSessionTimeout = (role: string) => {
+    // 15 min for admins/maestro, 30 min for users
+    if (["admin", "maestro", "research", "design", "marketing", "accounting", "compliance", "shipping"].includes(role)) {
+      return { total: 15 * 60 * 1000, warning: 13 * 60 * 1000 };
+    }
+    return { total: 30 * 60 * 1000, warning: 28 * 60 * 1000 };
+  };
+
   const resetTimers = useCallback(() => {
     if (!currentUser) return;
 
@@ -46,6 +54,8 @@ export function SessionManager() {
 
     setShowWarning(false);
     setTimeLeft(120);
+
+    const timeouts = getSessionTimeout(currentUser.role || 'user');
 
     warningTimerRef.current = setTimeout(() => {
       setShowWarning(true);
@@ -60,9 +70,9 @@ export function SessionManager() {
         });
       }, 1000);
       
-    }, WARNING_TIMEOUT);
+    }, timeouts.warning);
 
-    timerRef.current = setTimeout(handleLogout, SESSION_TIMEOUT);
+    timerRef.current = setTimeout(handleLogout, timeouts.total);
   }, [currentUser, handleLogout]);
 
   useEffect(() => {

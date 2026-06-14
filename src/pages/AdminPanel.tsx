@@ -995,24 +995,6 @@ export function AdminPanel() {
                                     </button>
                                     {order.actionPhase === "تم التصميم الإلكتروني" && (
                                       <>
-                                        {order.initialDesignLink && (
-                                          <a
-                                            href={order.initialDesignLink}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center justify-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[11px] font-bold transition shadow-sm w-full"
-                                          >
-                                            <Download className="w-3 h-3" /> مسودة السجل
-                                          </a>
-                                        )}
-                                        {order.data.designTemplate && (order.initialDesignLink || order.researchDraftLink) && (
-                                          <button
-                                            onClick={() => alert('قالب التصميم المختار: ' + order.data.designTemplate)}
-                                            className="flex items-center justify-center gap-1.5 whitespace-nowrap text-brand-700 bg-brand-100 hover:bg-brand-200 px-3 py-1.5 rounded-md text-[11px] font-bold transition shadow-sm w-full"
-                                          >
-                                            <Palette className="w-3 h-3" /> عرض قالب التصميم
-                                          </button>
-                                        )}
                                         <button
                                           onClick={() => {
                                             setDeliveryTab("draft");
@@ -1028,16 +1010,6 @@ export function AdminPanel() {
                                     )}
                                     {order.actionPhase === "جاهز للطباعة" && (
                                       <>
-                                        {order.designLinks?.recordLink && (
-                                          <a
-                                            href={order.designLinks.recordLink}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 whitespace-nowrap text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm"
-                                          >
-                                            <Download className="w-3 h-3" /> تحميل السجل النهائي
-                                          </a>
-                                        )}
                                         <button
                                           onClick={() => {
                                             setDeliveryTab("final");
@@ -1675,8 +1647,7 @@ export function AdminPanel() {
 
 عنوان الشحن:
 الدولة: ${order.data.shippingAddress?.country || 'غير محدد'}
-المنطقة/المقاطعة: ${order.data.shippingAddress?.state || 'غير محدد'}
-المدينة/القرية: ${order.data.shippingAddress?.city || 'غير محدد'}
+المدينة / المحافظة: ${order.data.shippingAddress?.state || 'غير محدد'}
 الشارع: ${order.data.shippingAddress?.street || 'غير محدد'}
 الرمز البريدي: ${order.data.shippingAddress?.zip || 'غير محدد'}`)}
                                   className="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 text-xs border border-brand-500 animate-pulse hover:animate-none"
