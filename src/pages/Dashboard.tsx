@@ -525,11 +525,11 @@ export function Dashboard() {
                 </h3>
                 <div className="space-y-1">
                   <SidebarItem
-                    title="المساهمة في بناء إرث عائلتك"
-                    isActive={activeTab === "المساهمة في بناء إرث عائلتك"}
+                    title="ساهم في بناء ذاكرة عائلتك"
+                    isActive={activeTab === "ساهم في بناء ذاكرة عائلتك"}
                     isLocked={!isPaid}
                   />
-                  {(activeTab === "المساهمة في بناء إرث عائلتك" || ["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي", "خزانة السجل (أرشيف العائلة)", "نافذة الإدراج العائلي", "التسلسل الزمني للعائلة"].includes(activeTab)) && (
+                  {(activeTab === "ساهم في بناء ذاكرة عائلتك" || ["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي", "خزانة السجل (أرشيف العائلة)", "نافذة الإدراج العائلي", "التسلسل الزمني للعائلة"].includes(activeTab)) && (
                     <div className="pr-4 border-r-2 border-brand-100 flex flex-col gap-1 mt-1 mb-2">
                   <SidebarItem
                     title="كلمة أمين السجل"
@@ -652,7 +652,7 @@ export function Dashboard() {
                     {activeTab}
                   </h2>
 
-                  {(activeTab === "السجل الأساسي" || activeTab === "المساهمة في بناء إرث عائلتك") &&
+                  {(activeTab === "السجل الأساسي" || activeTab === "ساهم في بناء ذاكرة عائلتك") &&
                     (() => {
                       const isState1 = !order || order.issueStatus === "طلب غير مكتمل";
                       const isState2 =
@@ -781,51 +781,60 @@ export function Dashboard() {
                             </h2>
                           </div>
 
-                          <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative">
-                            <div className="bg-brand-50 p-6 border-b border-brand-100 text-center">
-                              <h3 className="font-bold text-2xl text-brand-900 mb-1">
-                                السجل الأساسي
-                              </h3>
-                              <p className="text-brand-600">
-                                مركز إدارة ومتابعة إصدار سجل تراث عائلتكم
-                              </p>
-                            </div>
-
-                            <div className="p-8 space-y-6">
-                              <div className="flex flex-col md:flex-row gap-6">
-                                <div className="flex-1 bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <CheckCircle className="w-6 h-6 text-brand-400" />
-                                    <h4 className="font-bold text-brand-900 text-lg">
-                                      حالة السجل :
-                                    </h4>
-                                  </div>
-                                  <p className="text-xl font-bold text-brand-600 mt-2">
-                                    {statusText || "جاري التنفيذ"}
-                                  </p>
-                                </div>
-
-                                <div className="flex-[2] bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <Compass className="w-6 h-6 text-brand-400" />
-                                    <h4 className="font-bold text-brand-900 text-lg">
-                                      الإجراء :{" "}
-                                      <span className="font-normal text-brand-700">
-                                        {actionText}
-                                      </span>
-                                    </h4>
-                                  </div>
-                                  {subText && (
-                                    <p className="text-sm text-black leading-relaxed mt-3 pt-3 border-t border-brand-100/50 font-medium">
-                                      {subText}
-                                    </p>
-                                  )}
-                                </div>
+                          {/* Hidden per user request */}
+                          <div className="hidden">
+                            <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative">
+                              <div className="bg-brand-50 p-6 border-b border-brand-100 text-center">
+                                <h3 className="font-bold text-2xl text-brand-900 mb-1">
+                                  السجل الأساسي
+                                </h3>
+                                <p className="text-brand-600">
+                                  مركز إدارة ومتابعة إصدار سجل تراث عائلتكم
+                                </p>
                               </div>
 
-                              {actionButton}
+                              <div className="p-8 space-y-6">
+                                <div className="flex flex-col md:flex-row gap-6">
+                                  <div className="flex-1 bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <CheckCircle className="w-6 h-6 text-brand-400" />
+                                      <h4 className="font-bold text-brand-900 text-lg">
+                                        حالة السجل :
+                                      </h4>
+                                    </div>
+                                    <p className="text-xl font-bold text-brand-600 mt-2">
+                                      {statusText || "جاري التنفيذ"}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex-[2] bg-brand-50/50 p-6 rounded-2xl border border-brand-100">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <Compass className="w-6 h-6 text-brand-400" />
+                                      <h4 className="font-bold text-brand-900 text-lg">
+                                        الإجراء :{" "}
+                                        <span className="font-normal text-brand-700">
+                                          {actionText}
+                                        </span>
+                                      </h4>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
+
+                          {(subText || actionButton) && (
+                            <div className="bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm relative mt-4">
+                              <div className="p-8 space-y-6">
+                                {subText && (
+                                  <p className="text-lg text-brand-800 leading-relaxed font-medium text-center">
+                                    {subText}
+                                  </p>
+                                )}
+                                {actionButton}
+                              </div>
+                            </div>
+                          )}
 
                           {(isState3 || isState4) && (
                             <>

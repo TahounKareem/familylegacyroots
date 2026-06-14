@@ -2158,6 +2158,21 @@ export function AdminPanel() {
                             <div className="text-sm text-brand-700">
                               {event.details}
                             </div>
+                            {event.userName && (
+                              <div className="mt-3 pt-3 border-t border-brand-50 flex items-center justify-start">
+                                <div className="flex items-center gap-2 bg-gradient-to-r from-brand-50 to-white px-3 py-1.5 rounded-full border border-brand-200 shadow-sm hover:shadow-md transition">
+                                  <div className="bg-brand-600 text-white rounded-full p-1">
+                                    <User className="w-3 h-3" />
+                                  </div>
+                                  <span className="text-xs font-bold text-brand-900">
+                                    {event.userName}
+                                  </span>
+                                  <span className="text-[10px] bg-brand-100 text-brand-700 px-2 py-0.5 rounded-md font-medium">
+                                    {roleNames[event.role || ""] || event.role}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

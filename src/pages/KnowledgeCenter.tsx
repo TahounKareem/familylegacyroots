@@ -97,11 +97,13 @@ export function KnowledgeCenter() {
             name="email"
             placeholder="البريد الإلكتروني" 
             required
-            className="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/95 focus:bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C3262A] text-[10px] sm:text-xs text-right font-medium"
+            className="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/95 focus:bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C3262A] text-[10px] sm:text-xs text-center font-medium"
           />
-          <button type="submit" className="w-full bg-[#C3262A] hover:bg-[#a61c20] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-bold transition-colors text-[10px] sm:text-xs shadow-sm">
-            انضم
-          </button>
+          <div className="flex justify-end w-full">
+            <button type="submit" className="w-[75%] bg-[#C3262A] hover:bg-[#a61c20] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-bold transition-colors text-[10px] sm:text-xs shadow-sm pl-4">
+              انضم
+            </button>
+          </div>
         </form>
       </div>
     </div>

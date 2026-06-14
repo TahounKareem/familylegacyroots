@@ -204,7 +204,7 @@ export function Contact() {
 
                   <div>
                     <label className="block text-sm font-bold text-brand-800 mb-2">عنوان الموضوع *</label>
-                    <input type="text" required className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="مثال: الاستفسار عن نطاق التوثيق في الإصدار الأساسي" />
+                    <input type="text" required className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="" />
                   </div>
 
                   <div>
