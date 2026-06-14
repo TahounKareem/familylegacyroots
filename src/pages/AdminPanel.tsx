@@ -9,6 +9,8 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  limit,
+  arrayUnion,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
@@ -112,6 +114,46 @@ export function AdminPanel() {
 
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role === "user") return;
+    const q = query(
+      collection(db, "notifications"),
+      orderBy("timestamp", "desc"),
+      limit(50)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data: any[] = [];
+      snapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      setNotifications(data);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  const unreadNotificationsCount = notifications.filter(
+    (n) => !(n.readBy || []).includes(currentUser?.id)
+  ).length;
+
+  const handleMarkNotificationsAsRead = async () => {
+    if (!currentUser) return;
+    try {
+      const unreadNotifs = notifications.filter(
+        (n) => !(n.readBy || []).includes(currentUser.id)
+      );
+      for (const n of unreadNotifs) {
+        await updateDoc(doc(db, "notifications", n.id), {
+          readBy: arrayUnion(currentUser.id),
+        });
+      }
+    } catch (err) {
+      console.error("Error marking notifications read:", err);
+    }
+  };
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
   const [userTab, setUserTab] = useState<"team" | "users">("team");
@@ -602,12 +644,71 @@ export function AdminPanel() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <button className="relative bg-white border border-brand-200 text-brand-700 p-2.5 rounded-full hover:bg-brand-50 transition shadow-sm">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white shadow-sm">
-                4
-              </span>
-            </button>
+            <div className="relative z-50">
+              <button
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications && unreadNotificationsCount > 0) {
+                    handleMarkNotificationsAsRead();
+                  }
+                }}
+                className="relative bg-white border border-brand-200 text-brand-700 p-2.5 rounded-full hover:bg-brand-50 transition shadow-sm"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white shadow-sm animate-pulse">
+                    {unreadNotificationsCount > 9 ? "9+" : unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-80 bg-white border border-brand-200 shadow-2xl rounded-xl overflow-hidden z-50 transform origin-top-left flex flex-col max-h-[80vh]">
+                  <div className="p-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
+                    <h3 className="font-bold text-brand-900 flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-brand-600" /> مركز التنبيهات المباشرة
+                    </h3>
+                    <button onClick={() => setShowNotifications(false)} className="text-brand-400 hover:text-brand-600">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto flex-1">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-brand-500 text-sm">
+                        <div className="bg-brand-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Bell className="w-5 h-5 text-brand-400" />
+                        </div>
+                        لا توجد إشعارات حتى الآن.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-brand-100">
+                        {notifications.map((notif) => {
+                          const isUnread = !(notif.readBy || []).includes(currentUser?.id);
+                          return (
+                            <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
+                              <p className="text-sm text-brand-900 font-medium leading-relaxed mb-2">
+                                {notif.message}
+                              </p>
+                              <div className="flex items-center justify-between text-[10px] text-brand-500 font-mono">
+                                <span className="bg-brand-100 px-2 py-0.5 rounded-md text-brand-700 truncate max-w-[120px]">{notif.createdBy || "النظام"}</span>
+                                <span dir="ltr">
+                                  {new Intl.DateTimeFormat("ar-SA", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }).format(new Date(notif.timestamp))}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setActiveTab("lobby")}
               className="flex items-center gap-2 bg-[#C3262A] text-white border border-[#C3262A] px-4 py-2 rounded-md hover:bg-[#a61c20] transition shadow-sm font-medium"
@@ -642,6 +743,71 @@ export function AdminPanel() {
       {currentTab === "lobby" && (
         <div className="space-y-10">
           <div className="flex justify-end gap-3 mb-2">
+            <div className="relative z-50">
+              <button
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications && unreadNotificationsCount > 0) {
+                    handleMarkNotificationsAsRead();
+                  }
+                }}
+                className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 p-2.5 rounded-full hover:bg-brand-50 transition shadow-sm font-medium relative"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white shadow-sm animate-pulse">
+                    {unreadNotificationsCount > 9 ? "9+" : unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-80 bg-white border border-brand-200 shadow-2xl rounded-xl overflow-hidden z-50 transform origin-top-left flex flex-col max-h-[80vh]">
+                  <div className="p-4 border-b border-brand-100 bg-brand-50 flex justify-between items-center">
+                    <h3 className="font-bold text-brand-900 flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-brand-600" /> مركز التنبيهات المباشرة
+                    </h3>
+                    <button onClick={() => setShowNotifications(false)} className="text-brand-400 hover:text-brand-600">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto flex-1">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-brand-500 text-sm">
+                        <div className="bg-brand-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Bell className="w-5 h-5 text-brand-400" />
+                        </div>
+                        لا توجد إشعارات حتى الآن.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-brand-100">
+                        {notifications.map((notif) => {
+                          const isUnread = !(notif.readBy || []).includes(currentUser?.id);
+                          return (
+                            <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
+                              <p className="text-sm text-brand-900 font-medium leading-relaxed mb-2">
+                                {notif.message}
+                              </p>
+                              <div className="flex items-center justify-between text-[10px] text-brand-500 font-mono">
+                                <span className="bg-brand-100 px-2 py-0.5 rounded-md text-brand-700 truncate max-w-[120px]">{notif.createdBy || "النظام"}</span>
+                                <span dir="ltr">
+                                  {new Intl.DateTimeFormat("ar-SA", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }).format(new Date(notif.timestamp))}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <Link
               to="/"
               className="flex items-center gap-2 bg-white text-brand-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-brand-50 transition shadow-sm font-medium"

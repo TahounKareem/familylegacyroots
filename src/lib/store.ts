@@ -405,6 +405,19 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const updateData: any = { timeline: updatedTimeline };
       await updateDoc(doc(db, "orders", orderId), updateData);
+      
+      // Add a global staff notification
+      try {
+        await addDoc(collection(db, "notifications"), {
+          message: `طلب #${order.orderNumber || order.id.substring(0,6)}: ${message}`,
+          timestamp: new Date().toISOString(),
+          orderId: order.id,
+          readBy: [],
+          createdBy: user?.name || "النظام",
+        });
+      } catch (notifErr) {
+        console.error("Failed to add notification", notifErr);
+      }
     } catch (e) {
       console.error(e);
     }
