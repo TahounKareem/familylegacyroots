@@ -384,6 +384,10 @@ export function AdminPanel() {
           researchDeliveryOrder.id,
           "تم تسليم المسودة لإدارة التصميم"
         );
+        import("@/lib/emailService").then(({ sendDesignDraftReadyEmail, sendDocumentationPhaseEmail }) => {
+          sendDesignDraftReadyEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+          sendDocumentationPhaseEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+        });
       } else {
         await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
           actionPhase: "تم التصويب",
@@ -1137,6 +1141,10 @@ export function AdminPanel() {
                                             order.id,
                                             `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`,
                                           );
+                                        
+                                        import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
+                                          sendResearchAssignedEmail(order.data.familyName, order.id).catch(console.error);
+                                        });
                                       }}
                                     >
                                       <option value="">
