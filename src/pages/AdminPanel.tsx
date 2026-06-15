@@ -640,7 +640,7 @@ export function AdminPanel() {
     editor: "مدير تحرير المركز المعرفي",
     marketing: "مدير التسويق",
     customer_service: "مدير خدمة العملاء",
-    shipping: "مدير إدارة الشحن",
+    shipping: "مدير إدارة التصميم والطباعة والتوصيل",
     accounting: "مدير المحاسبة",
     compliance: "مدير الإمتثال",
     user: "مستخدم",
@@ -2211,7 +2211,7 @@ export function AdminPanel() {
                                   مدير خدمة العملاء
                                 </option>
                                 <option value="shipping">
-                                  مدير إدارة الشحن
+                                  مدير إدارة التصميم والطباعة والتوصيل
                                 </option>
                                 <option value="accounting">
                                   مدير المحاسبة
