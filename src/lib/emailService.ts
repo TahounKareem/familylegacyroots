@@ -630,3 +630,112 @@ export const sendCustomerCorrectionsAppliedEmail = async (userEmail: string, use
     }
   });
 };
+
+/**
+ * 17. رسالة إعادة تعيين كلمة المرور (عند استخدام رابط مخصص مستقبلاً)
+ */
+export const sendCustomPasswordResetEmail = async (userEmail: string, userName: string, resetLink: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `إعادة تعيين كلمة المرور`,
+      text: `أهلاً ${userName}، تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابكم. يرجى استخدام الرابط التالي: ${resetLink}`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">إعادة تعيين كلمة المرور</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابكم في منصة سجل تراث العائلة.</p>
+          <p>لإنشاء كلمة مرور جديدة، يرجى الضغط على الزر أدناه:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">إعادة تعيين كلمة المرور</a>
+          </div>
+          <p>لأسباب أمنية، تنتهي صلاحية هذا الرابط بعد فترة محددة، لذا نوصي بإتمام العملية في أقرب وقت.</p>
+          <p>إذا لم تقم بطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذه الرسالة بأمان، ولن يتم إجراء أي تغيير على حسابكم.</p>
+          <p>في حال واجهتكم أي صعوبة، يسعد فريق الدعم الفني بمساعدتكم.</p>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 18. رسالة تم تغيير كلمة المرور بنجاح
+ */
+export const sendPasswordChangedSuccessEmail = async (userEmail: string, userName: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `تم تغيير كلمة المرور بنجاح`,
+      text: `أهلاً ${userName}، نود إبلاغكم بأنه تم تحديث كلمة المرور الخاصة بحسابكم في منصة سجل تراث العائلة بنجاح.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">تم تغيير كلمة المرور بنجاح</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>نود إبلاغكم بأنه تم تحديث كلمة المرور الخاصة بحسابكم في منصة سجل تراث العائلة بنجاح.</p>
+          <p>يمكنكم الآن استخدام كلمة المرور الجديدة لتسجيل الدخول إلى حسابكم والاستفادة من خدمات المنصة.</p>
+          <p>إذا كنتم أنتم من قام بإجراء هذا التغيير، فلا يلزم اتخاذ أي إجراء إضافي.</p>
+          <p>أما إذا لم تقوموا بتغيير كلمة المرور أو لديكم أي مخاوف تتعلق بأمان الحساب، فنرجو التواصل مع فريق الدعم الفني فوراً.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">تسجيل الدخول إلى حسابي</a>
+          </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 19. رسالة تسجيل دخول جديد إلى حسابكم (تم التعرف على جهاز/متصفح جديد)
+ */
+export const sendNewLoginEmail = async (userEmail: string, userName: string, loginTime: string, deviceInfo?: string, locationInfo?: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `تسجيل دخول جديد إلى حسابكم`,
+      text: `أهلاً ${userName}، تم تسجيل دخول جديد إلى حسابكم في منصة سجل تراث العائلة.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">تسجيل دخول جديد إلى حسابكم</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>تم تسجيل دخول جديد إلى حسابكم في منصة سجل تراث العائلة.</p>
+          <p><strong>تفاصيل تسجيل الدخول:</strong></p>
+          <ul>
+            <li><strong>التاريخ والوقت:</strong> ${loginTime}</li>
+            ${deviceInfo ? `<li><strong>الجهاز أو المتصفح:</strong> ${deviceInfo}</li>` : ''}
+            ${locationInfo ? `<li><strong>الموقع التقريبي:</strong> ${locationInfo}</li>` : ''}
+          </ul>
+          <p>إذا كنتم أنتم من قام بتسجيل الدخول، فلا يلزم اتخاذ أي إجراء إضافي.</p>
+          <p>أما إذا لم تتعرفوا على هذا النشاط أو كانت لديكم أي مخاوف تتعلق بأمان الحساب، فننصحكم بتغيير كلمة المرور فوراً والتواصل مع فريق الدعم الفني في أقرب وقت ممكن.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">إدارة الحساب</a>
+          </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
