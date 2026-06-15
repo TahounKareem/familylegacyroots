@@ -142,13 +142,14 @@ export function Dashboard() {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(
-                ({ sendOrderConfirmationEmail }) => {
+                ({ sendOrderConfirmationEmail, sendCustomerResearchStartedEmail }) => {
                   sendOrderConfirmationEmail(
                     userData.email,
                     userData.name || "العميل الكريم",
                     order.orderNumber || orderId,
                     isInvite,
                   );
+                  sendCustomerResearchStartedEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || orderId);
                 },
               );
             }
@@ -299,6 +300,14 @@ export function Dashboard() {
         order.id,
         "العميل أرسل طلب تصويب - تم تغيير الحالة إلى جاري التصويب"
       );
+      
+      import("@/lib/emailService").then(({ sendCustomerCorrectionsReceivedEmail }) => {
+        sendCustomerCorrectionsReceivedEmail(
+          currentUser.email || "info@thefamilylegacyroots.com", 
+          currentUser.name || "العميل الكريم", 
+          order.orderNumber || order.id
+        ).catch(console.error);
+      });
     } catch (e) {
       console.error(e);
     }

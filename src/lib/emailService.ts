@@ -313,18 +313,23 @@ export const sendCustomerDraftReadyEmail = async (userEmail: string, userName: s
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
-      subject: `مسودة سجل تراث عائلتكم أصبحت جاهزة - طلب #${orderId.toUpperCase()}`,
-      text: `أهلاً ${userName}، يسعدنا إعلامك بأن المسودة الأولية لسجل تراث عائلتك أصبحت جاهزة للتصفح.`,
+      subject: `النسخة الأولية من سجل تراث عائلتكم أصبحت جاهزة`,
+      text: `أهلاً ${userName}، يسرنا أن نشارككم أولى ثمار هذه الرحلة. لقد انتهى فريقنا من إعداد النسخة الأولية لسجل تراث عائلتكم.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>يسعدنا جداً إعلامك بأن <strong>النسخة الأولية (المسودة)</strong> من سجل تراث العائلة أصبحت جاهزة للتصفح!</p>
-          <p>لقد قمنا بجمع وتوثيق وتصميم المعلومات الأولية بعناية، وندعوك الآن للاطلاع عليها ومراجعتها.</p>
+          <p>يسرنا أن نشارككم أولى ثمار هذه الرحلة.</p>
+          <p>لقد انتهى فريقنا من إعداد النسخة الأولية لسجل تراث عائلتكم، والتي تجمع ما تم التوصل إليه خلال مراحل البحث والتوثيق والإعداد الأولي.</p>
+          <p>ندعوكم الآن إلى استعراض السجل بعناية، وإضافة ما ترونه من ملاحظات أو تصويبات خلال الفترة المخصصة للمراجعة، لنتمكن من إكمال العمل بالصورة التي تليق بتاريخ عائلتكم وإرثها.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">الانتقال إلى لوحة التحكم لاستعراض السجل</a>
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض النسخة الأولية</a>
           </div>
-          <p>يمكنك أيضاً الوصول إليها وإبداء ملاحظاتك أو طلب تصويب عبر لوحة التحكم الخاصة بك.</p>
-          <br/><p>أطيب التحيات،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
         </div>
       `
     }
@@ -436,19 +441,190 @@ export const sendFinalDeliveryToCustomerEmail = async (userEmail: string, userNa
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
-      subject: `تم اعتماد النسخة النهائية وجاهزية المطبوعات - طلب #${orderId.toUpperCase()}`,
-      text: `أهلاً ${userName}، يسرنا تسليمك النسخة الرقمية النهائية الفاخرة، جاري طباعة وتجهيز المطبوعات الفاخرة ليتم إرسالها إليكم قريباً.`,
+      subject: `اكتملت رحلة توثيق سجل تراث عائلتكم`,
+      text: `أهلاً ${userName}، اكتملت رحلة التوثيق. ويسعدنا اليوم أن نضع بين أيديكم النسخة النهائية من سجل تراث عائلتكم.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>اكتملت مسيرة التوثيق والتصميم، ويسرنا جداً أن نضع بين أيديكم <strong>النسخة الرقمية النهائية الفاخرة</strong> من سجل تراث العائلة.</p>
-          <p>لقد تم اعتماد هذه النسخة، ونعمل حالياً بكل اعتزاز على إتمام عمليات الطباعة الفاخرة والتجليد لتجهيز الشحنة المرسلة إليكم خلال الأيام القليلة القادمة.</p>
+          <p>اكتملت رحلة التوثيق.</p>
+          <p>ويسعدنا اليوم أن نضع بين أيديكم النسخة النهائية من سجل تراث عائلتكم.</p>
+          <p>لقد جمع هذا السجل بين ما توفر من روايات ووثائق ومواد تاريخية ومعلومات عائلية ضمن عمل واحد أُعد ليكون مرجعاً يحفظ ذاكرة العائلة للأبناء والأحفاد والأجيال القادمة.</p>
+          <p>يمكنكم الآن استعراض النسخة الرقمية النهائية من خلال لوحة التحكم.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">تسجيل الدخول لاستعراض السجل في لوحة التحكم</a>
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">استعراض السجل في لوحة التحكم</a>
           </div>
-          <p>سنوافيك بتفاصيل الشحن ورقم التتبع بمجرد انطلاق الشحنة في طريقها إليك.</p>
-          <p>شكرًا لثقتك الغالية في مركز آدم للبحوث وتوثيق التراث.</p>
-          <br/><p>أطيب التحيات،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <p>كما بدأ فريقنا إجراءات إعداد النسخ الورقية للطباعة والتجليد تمهيداً لشحنها إليكم، وسنزودكم بمعلومات الشحن فور جاهزيتها.</p>
+          <p>شكراً لثقتكم بنا ومشاركتنا هذه الرحلة.</p>
+          <p>لأن بعض الأشياء لا تُشترى... بل تُورث.</p>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 12. إشعار العميل ببدء البحث بعد الدفع
+ */
+export const sendCustomerResearchStartedEmail = async (userEmail: string, userName: string, orderId: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `بدأت رحلة توثيق سجل تراث عائلتكم`,
+      text: `أهلاً ${userName}، نشكر لكم ثقتكم واختياركم خدمة سجل تراث العائلة. يسرنا إبلاغكم بأنه تم تأكيد طلبكم واستلام الدفعة المستحقة بنجاح، وقد انتقل مشروعكم الآن إلى مرحلة البحث.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>نشكر لكم ثقتكم واختياركم خدمة سجل تراث العائلة.</p>
+          <p>يسرنا إبلاغكم بأنه تم تأكيد طلبكم واستلام الدفعة المستحقة بنجاح، وقد انتقل مشروعكم الآن إلى <strong>مرحلة البحث</strong>.</p>
+          <p>سيباشر فريقنا خلال هذه المرحلة مراجعة البيانات والمواد المقدمة، والاستفادة من المصادر وقواعد البيانات المتاحة وفق المنهجية البحثية المعتمدة لإعداد سجل تراث عائلتكم.</p>
+          <p>يمكنكم في أي وقت متابعة حالة السجل الأساسي من خلال لوحة التحكم، كما يمكنكم البدء في إثراء السجل العائلي بإضافة الصور والوثائق والذكريات والمعلومات التي ترون أنها تسهم في حفظ تاريخ عائلتكم.</p>
+          <p>هذه هي الخطوة الأولى في رحلة تهدف إلى جمع ما تفرق من الروايات والوثائق والذكريات في سجل واحد يبقى مرجعاً للأبناء والأحفاد والأجيال القادمة.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض حالة السجل الأساسي</a>
+          </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 13. إشعار العميل بالانتقال إلى مرحلة التوثيق
+ */
+export const sendCustomerDocumentationPhaseEmail = async (userEmail: string, userName: string, orderId: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `اكتملت مرحلة البحث وبدأت مرحلة التوثيق`,
+      text: `أهلاً ${userName}، يسرنا إبلاغكم بأن فريق البحث قد أكمل المرحلة البحثية الخاصة بسجل تراث عائلتكم، وانتقل المشروع الآن إلى مرحلة التوثيق.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>يسرنا إبلاغكم بأن فريق البحث قد أكمل المرحلة البحثية الخاصة بسجل تراث عائلتكم، وانتقل المشروع الآن إلى <strong>مرحلة التوثيق</strong>.</p>
+          <p>خلال هذه المرحلة يعمل فريقنا على مراجعة وتنظيم وتحليل النتائج المتوصل إليها، وربط المعلومات بالمصادر ذات الصلة، وإعداد المحتوى الذي سيشكل الأساس العلمي والتوثيقي للسجل.</p>
+          <p>كما نود التذكير بأنه لا يزال بإمكانكم إثراء السجل العائلي من خلال إضافة الصور أو الوثائق أو الذكريات أو المعلومات التي ترون أنها تستحق أن تكون جزءاً من هذا العمل.</p>
+          <p>يمكنكم متابعة حالة المشروع وتطوراته من خلال لوحة التحكم الخاصة بكم في أي وقت.</p>
+          <p>لقد أصبحت صورة تاريخ عائلتكم أكثر وضوحاً، ونحن نواصل العمل على تحويل ما تم جمعه من روايات ووثائق ومعلومات إلى سجل متكامل يحفظ إرث العائلة للأجيال القادمة.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض حالة السجل الأساسي</a>
+          </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 14. إشعار العميل بالانتقال إلى مرحلة الإخراج الفني (التصميم)
+ */
+export const sendCustomerDesignPhaseEmail = async (userEmail: string, userName: string, orderId: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `انتقل سجل تراث عائلتكم إلى مرحلة الإخراج الفني`,
+      text: `أهلاً ${userName}، يسرنا إبلاغكم بأن مشروع سجل تراث عائلتكم قد انتقل إلى مرحلة الإخراج الفني.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>يسرنا إبلاغكم بأن مشروع سجل تراث عائلتكم قد انتقل إلى <strong>مرحلة الإخراج الفني</strong>.</p>
+          <p>بعد اكتمال مراحل البحث والتوثيق، يعمل فريقنا الآن على إعداد السجل في صورته النهائية، من خلال تنظيم المحتوى وإخراجه بأسلوب أنيق ومتناسق يليق بتاريخ عائلتكم وإرثها.</p>
+          <p>خلال هذه المرحلة يتم العمل على تنسيق النصوص، وإعداد الصفحات، وتنظيم الصور والوثائق والمحتويات المعتمدة، تمهيداً لإصدار النسخة الأولية من السجل ومشاركتها معكم للمراجعة.</p>
+          <p>يمكنكم متابعة حالة السجل الأساسي (المشروع) من خلال لوحة التحكم الخاصة بكم في أي وقت.</p>
+          <p>لقد بدأت الآن ملامح سجل تراث عائلتكم بالظهور، ونحن نواصل العمل على تحويل ما جُمع من روايات ووثائق وذكريات إلى سجل متكامل يحفظ تاريخ العائلة للأبناء والأحفاد والأجيال القادمة.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض حالة السجل الأساسي</a>
+          </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 15. إشعار العميل باستلام التصويبات
+ */
+export const sendCustomerCorrectionsReceivedEmail = async (userEmail: string, userName: string, orderId: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `تم استلام ملاحظاتكم وتصويباتكم`,
+      text: `أهلاً ${userName}، تم استلام ملاحظاتكم وتصويباتكم بنجاح. سيقوم فريق البحث والتوثيق بمراجعتها والعمل على دراستها.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>تم استلام ملاحظاتكم وتصويباتكم بنجاح.</p>
+          <p>سيقوم فريق البحث والتوثيق بمراجعة كافة الملاحظات الواردة والعمل على دراستها وإدراج ما يلزم منها ضمن النسخة النهائية للسجل وفق المنهجية المعتمدة.</p>
+          <p>سنوافيكم بالتحديثات فور اكتمال هذه المرحلة.</p>
+          <p>شكراً لمساهمتكم في إثراء سجل تراث عائلتكم.</p>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `
+    }
+  });
+};
+
+/**
+ * 16. رسالة للعميل تفيد بانتهاء مراجعة التصويبات (اكتملت مراجعة التصويبات وإعداد النسخة النهائية)
+ */
+export const sendCustomerCorrectionsAppliedEmail = async (userEmail: string, userName: string, orderId: string) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `اكتملت مراجعة التصويبات وإعداد النسخة النهائية`,
+      text: `أهلاً ${userName}، يسرنا إبلاغكم بأن فريقنا قد انتهى من مراجعة الملاحظات والتصويبات الواردة من قبلكم.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
+          <p>يسرنا إبلاغكم بأن فريقنا قد انتهى من مراجعة الملاحظات والتصويبات الواردة من قبلكم، وتم استكمال ما يلزم منها وفق المنهجية المعتمدة في إعداد السجل.</p>
+          <p>وبذلك أصبح سجل تراث عائلتكم في صورته النهائية بعد استكمال مراحل البحث والتوثيق والإخراج الفني والمراجعة.</p>
+          <p>نشكر لكم مساهمتكم في إثراء هذا العمل، وما قدمتموه من ملاحظات ومعلومات أسهمت في تعزيز محتوى السجل وإظهاره بأفضل صورة ممكنة.</p>
+          <p>يجري حالياً استكمال الإجراءات النهائية الخاصة بالتسليم والإغلاق، وسنوافيكم قريباً بإشعار اكتمال رحلة التوثيق وتسليم النسخة النهائية من السجل.</p>
+          <p>يمكنكم متابعة حالة المشروع (السجل الأساسي) من خلال لوحة التحكم الخاصة بكم في أي وقت.</p>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
         </div>
       `
     }

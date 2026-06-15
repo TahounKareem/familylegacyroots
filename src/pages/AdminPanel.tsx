@@ -384,9 +384,19 @@ export function AdminPanel() {
           researchDeliveryOrder.id,
           "تم تسليم المسودة لإدارة التصميم"
         );
-        import("@/lib/emailService").then(({ sendDesignDraftReadyEmail, sendDocumentationPhaseEmail }) => {
+        import("@/lib/emailService").then(({ sendDesignDraftReadyEmail, sendDocumentationPhaseEmail, sendCustomerDesignPhaseEmail }) => {
           sendDesignDraftReadyEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
           sendDocumentationPhaseEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+          const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
+            import("@/lib/firebase").then(({db}) => {
+              getDoc(doc(db, "users", researchDeliveryOrder.userId)).then((userDoc) => {
+                if(userDoc.exists()) {
+                  const userData = userDoc.data();
+                  sendCustomerDesignPhaseEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id).catch(console.error);
+                }
+              });
+            });
+          });
         });
       } else {
         await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
@@ -397,6 +407,18 @@ export function AdminPanel() {
           researchDeliveryOrder.id,
           "تم تسليم السجل بعد التصويب لإدارة التصميم"
         );
+        import("@/lib/emailService").then(({ sendCustomerCorrectionsAppliedEmail }) => {
+          const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
+            import("@/lib/firebase").then(({db}) => {
+              getDoc(doc(db, "users", researchDeliveryOrder.userId)).then((userDoc) => {
+                if(userDoc.exists()) {
+                  const userData = userDoc.data();
+                  sendCustomerCorrectionsAppliedEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id).catch(console.error);
+                }
+              });
+            });
+          });
+        });
       }
       setResearchDeliveryOrder(null);
       setResearchDocumentLink("");
@@ -1354,6 +1376,21 @@ export function AdminPanel() {
                                           order.id,
                                           `تم تغيير الإجراء إلى: ${newPhase}`
                                         );
+
+                                        if (newPhase === "مرحلة التوثيق") {
+                                          import("@/lib/emailService").then(({ sendCustomerDocumentationPhaseEmail }) => {
+                                            const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
+                                              import("@/lib/firebase").then(({db}) => {
+                                                getDoc(doc(db, "users", order.userId)).then((userDoc) => {
+                                                  if(userDoc.exists()) {
+                                                    const userData = userDoc.data();
+                                                    sendCustomerDocumentationPhaseEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || order.id).catch(console.error);
+                                                  }
+                                                });
+                                              });
+                                            });
+                                          });
+                                        }
                                       } catch (error) {
                                         console.error("Failed to update status", error);
                                       }
