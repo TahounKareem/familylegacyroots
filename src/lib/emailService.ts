@@ -28,7 +28,7 @@ const queueEmail = async (emailData: EmailTemplate) => {
     };
     if (emailData.bcc) docData.bcc = emailData.bcc;
     if (emailData.from) docData.from = emailData.from;
-    
+
     await addDoc(collection(db, "mail"), docData);
     console.log("Email queued for sending successfully.");
   } catch (error) {
@@ -40,9 +40,17 @@ const queueEmail = async (emailData: EmailTemplate) => {
 /**
  * إرسال إيميل تأكيد استلام الطلب
  */
-export const sendOrderConfirmationEmail = async (userEmail: string, userName: string, orderId: string, isInvite: boolean = false) => {
-  const subject = isInvite ? `مبروك! تم اعتماد طلب السجل الخاص بكم - طلب رقم #${orderId.toUpperCase()}` : `تأكيد استلام طلب وثيقة تراث العائلة - طلب رقم #${orderId.toUpperCase()}`;
-  const htmlContent = isInvite ? `
+export const sendOrderConfirmationEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+  isInvite: boolean = false,
+) => {
+  const subject = isInvite
+    ? `مبروك! تم اعتماد طلب السجل الخاص بكم - طلب رقم #${orderId.toUpperCase()}`
+    : `تأكيد استلام طلب وثيقة تراث العائلة - طلب رقم #${orderId.toUpperCase()}`;
+  const htmlContent = isInvite
+    ? `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
           <p>نهنئكم لإعتماد السجل الخاص بكم عبر الكود التسويقي، وقد تم البدء في البحث من قبل فريقنا المختص.</p>
@@ -53,7 +61,8 @@ export const sendOrderConfirmationEmail = async (userEmail: string, userName: st
           <br />
           <p>أطيب التحيات،<br /><strong>سجل تراث العائلة</strong></p>
         </div>
-      ` : `
+      `
+    : `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
           <p>شكرًا لثقتك بسجل تراث العائلة. تم استلام طلبك لتوثيق السجل العائلي بنجاح.</p>
@@ -71,16 +80,23 @@ export const sendOrderConfirmationEmail = async (userEmail: string, userName: st
     to: userEmail,
     message: {
       subject,
-      text: isInvite ? `أهلاً ${userName}، نهنئكم لإعتماد السجل الخاص بكم عبر الكود التسويقي.` : `أهلاً ${userName}، شكرًا لثقتك بنا. تم استلام طلبك لتوثيق السجل العائلي بنجاح.`,
-      html: htmlContent
-    }
+      text: isInvite
+        ? `أهلاً ${userName}، نهنئكم لإعتماد السجل الخاص بكم عبر الكود التسويقي.`
+        : `أهلاً ${userName}، شكرًا لثقتك بنا. تم استلام طلبك لتوثيق السجل العائلي بنجاح.`,
+      html: htmlContent,
+    },
   });
 };
 
 /**
  * إرسال إيميل طلب استيضاح أو بيانات إضافية من الباحث
  */
-export const sendClarificationRequestEmail = async (userEmail: string, userName: string, orderId: string, messageBody: string) => {
+export const sendClarificationRequestEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+  messageBody: string,
+) => {
   await queueEmail({
     to: userEmail,
     message: {
@@ -97,15 +113,20 @@ export const sendClarificationRequestEmail = async (userEmail: string, userName:
           <br />
           <a href="https://adam.tahoun.live/dashboard" style="background-color: #6d5b3f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">الانتقال إلى لوحة التحكم</a>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * إرسال إيميل تسليم السجل النهائي
  */
-export const sendDeliveryEmail = async (userEmail: string, userName: string, orderId: string, downloadLink: string) => {
+export const sendDeliveryEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+  downloadLink: string,
+) => {
   await queueEmail({
     to: userEmail,
     message: {
@@ -123,21 +144,25 @@ export const sendDeliveryEmail = async (userEmail: string, userName: string, ord
           <br />
           <p>شكراً لثقتكم الغالية.<br /><strong>فريق مركز آدم للبحوث</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * فتح تذكرة دعم فني من الـ Chatbot
  */
-export const createSupportTicket = async (name: string, email: string, message: string) => {
+export const createSupportTicket = async (
+  name: string,
+  email: string,
+  message: string,
+) => {
   // 1. Save ticket into "support_tickets" collection
   const ticketRef = await addDoc(collection(db, "support_tickets"), {
     name,
     email,
     message,
-    status: 'open',
+    status: "open",
     createdAt: serverTimestamp(),
   });
 
@@ -157,8 +182,8 @@ export const createSupportTicket = async (name: string, email: string, message: 
           </div>
           <p><small style="color:#666;">رقم التذكرة الأرشيفي: ${ticketRef.id}</small></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 
   // 3. Email User (Confirmation)
@@ -176,18 +201,21 @@ export const createSupportTicket = async (name: string, email: string, message: 
           <br />
           <p>أطيب التحيات،<br /><strong>فريق الدعم - مركز آدم للبحوث</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 const DEFAULT_FROM = "info@thefamilylegacyroots.com";
-const DEFAULT_BCC = "no-reply@thefamilylegacyroots.com";
+const DEFAULT_BCC: string | undefined = undefined; // "no-reply@thefamilylegacyroots.com";
 
 /**
  * 1. إشعار إدارة البحوث بإسناد طلب جديد للبحث والتوثيق
  */
-export const sendResearchAssignedEmail = async (familyName: string, orderId: string) => {
+export const sendResearchAssignedEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "research@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -203,15 +231,18 @@ export const sendResearchAssignedEmail = async (familyName: string, orderId: str
           <p>يرجى البدء بالإجراءات المتبعة في منهجية البحث والتوثيق.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 2. إشعار إدارة المحاسبة بانتهاء البحث (لتحصيل الدفعة الثانية)
  */
-export const sendAccountingPhaseEmail = async (familyName: string, orderId: string) => {
+export const sendAccountingPhaseEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "accounting@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -227,15 +258,18 @@ export const sendAccountingPhaseEmail = async (familyName: string, orderId: stri
           <p>يمكنكم الآن المضي قدماً في إجراءات تحصيل الدفعة الثانية إذا كان العميل قد اختار نظام الدفع المرن.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 3. إشعار إدارة المحاسبة بانتهاء التوثيق (لتحصيل الدفعة الثالثة)
  */
-export const sendDocumentationPhaseEmail = async (familyName: string, orderId: string) => {
+export const sendDocumentationPhaseEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "accounting@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -251,15 +285,18 @@ export const sendDocumentationPhaseEmail = async (familyName: string, orderId: s
           <p>يمكنكم الآن المضي قدماً في إجراءات تحصيل الدفعة الثالثة إذا كان العميل قد اختار نظام الدفع المرن.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 4. إشعار إدارة التصميم بتسليم المسودة (من البحث للتصميم)
  */
-export const sendDesignDraftReadyEmail = async (familyName: string, orderId: string) => {
+export const sendDesignDraftReadyEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "design@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -275,17 +312,24 @@ export const sendDesignDraftReadyEmail = async (familyName: string, orderId: str
           <p>مسودة سجل تراث العائلة أصبحت جاهزة الآن، وبالتالي يمكنكم البدء بالعمل على تصميم النسخة الإلكترونية (النسخة الأولية) وتسليمها إلى إدارة الطلبات.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 5. إشعار إدارة الطلبات بانتهاء التصميم الأولي (المسودة)
  */
-export const sendInitialDesignReadyEmail = async (familyName: string, orderId: string) => {
+export const sendInitialDesignReadyEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
-    to: ["orders@thefamilylegacyroots.com", "manager@thefamilylegacyroots.com", "maestro@thefamilylegacyroots.com"],
+    to: [
+      "orders@thefamilylegacyroots.com",
+      "manager@thefamilylegacyroots.com",
+      "maestro@thefamilylegacyroots.com",
+    ],
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -299,15 +343,20 @@ export const sendInitialDesignReadyEmail = async (familyName: string, orderId: s
           <p>يرجى من مدراء إدارة الطلبات استلام هذه المسودة من لوحة التحكم وإرسالها للعميل للإطلاع وإبداء الملاحظات.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 6. إشعار العميل باستلام المسودة الأولية
  */
-export const sendCustomerDraftReadyEmail = async (userEmail: string, userName: string, orderId: string, downloadLink: string) => {
+export const sendCustomerDraftReadyEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+  downloadLink: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -331,15 +380,18 @@ export const sendCustomerDraftReadyEmail = async (userEmail: string, userName: s
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 7. إشعار إدارة البحوث بطلب تصويبات من العميل
  */
-export const sendResearchCorrectionsEmail = async (familyName: string, orderId: string) => {
+export const sendResearchCorrectionsEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "research@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -355,15 +407,18 @@ export const sendResearchCorrectionsEmail = async (familyName: string, orderId: 
           <p>يرجى الدخول إلى لوحة التحكم لمراجعة الملاحظات والعمل على إجراء التصويبات اللازمة لإصدار النسخة التالية.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 8. إشعار إدارة التصميم باعتماد العميل للطباعة
  */
-export const sendDesignPrintApprovedEmail = async (familyName: string, orderId: string) => {
+export const sendDesignPrintApprovedEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "design@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -379,15 +434,18 @@ export const sendDesignPrintApprovedEmail = async (familyName: string, orderId: 
           <p>يرجى اتخاذ الإجراءات اللازمة للبدء في تجهيز السجلات لعمليات الطباعة والتغليف والتسليم النهائي.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 9. إشعار إدارة التصميم بانتهاء التصويبات
  */
-export const sendDesignCorrectionsAppliedEmail = async (familyName: string, orderId: string) => {
+export const sendDesignCorrectionsAppliedEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: "design@thefamilylegacyroots.com",
     bcc: DEFAULT_BCC,
@@ -403,17 +461,24 @@ export const sendDesignCorrectionsAppliedEmail = async (familyName: string, orde
           <p>يمكنكم الآن بناءً على ذلك العمل على تصميم النسخة النهائية للسجل وتجهيزها للطباعة.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 10. إشعار إدارة الطلبات باستلام الروابط النهائية (من التصميم لإدارة الطلبات)
  */
-export const sendFinalLinksReadyEmail = async (familyName: string, orderId: string) => {
+export const sendFinalLinksReadyEmail = async (
+  familyName: string,
+  orderId: string,
+) => {
   await queueEmail({
-    to: ["orders@thefamilylegacyroots.com", "manager@thefamilylegacyroots.com", "maestro@thefamilylegacyroots.com"],
+    to: [
+      "orders@thefamilylegacyroots.com",
+      "manager@thefamilylegacyroots.com",
+      "maestro@thefamilylegacyroots.com",
+    ],
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -427,15 +492,20 @@ export const sendFinalLinksReadyEmail = async (familyName: string, orderId: stri
           <p>هذا إشعار بأن السجل أصبح الآن في صورته النهائية الكاملة وجاهز بنسبة 100%. يمكن للإدارة المعنية (إدارة الطلبات) القيام بإرساله مباشرة إلى العميل عبر لوحة التحكم.</p>
           <br/><p>مع التحية،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 11. إشعار العميل باستلام السجل النهائي
  */
-export const sendFinalDeliveryToCustomerEmail = async (userEmail: string, userName: string, orderId: string, finalLink: string) => {
+export const sendFinalDeliveryToCustomerEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+  finalLink: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -463,15 +533,19 @@ export const sendFinalDeliveryToCustomerEmail = async (userEmail: string, userNa
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 12. إشعار العميل ببدء البحث بعد الدفع
  */
-export const sendCustomerResearchStartedEmail = async (userEmail: string, userName: string, orderId: string) => {
+export const sendCustomerResearchStartedEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -497,15 +571,19 @@ export const sendCustomerResearchStartedEmail = async (userEmail: string, userNa
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 13. إشعار العميل بالانتقال إلى مرحلة التوثيق
  */
-export const sendCustomerDocumentationPhaseEmail = async (userEmail: string, userName: string, orderId: string) => {
+export const sendCustomerDocumentationPhaseEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -531,15 +609,19 @@ export const sendCustomerDocumentationPhaseEmail = async (userEmail: string, use
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 14. إشعار العميل بالانتقال إلى مرحلة الإخراج الفني (التصميم)
  */
-export const sendCustomerDesignPhaseEmail = async (userEmail: string, userName: string, orderId: string) => {
+export const sendCustomerDesignPhaseEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -565,15 +647,19 @@ export const sendCustomerDesignPhaseEmail = async (userEmail: string, userName: 
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 15. إشعار العميل باستلام التصويبات
  */
-export const sendCustomerCorrectionsReceivedEmail = async (userEmail: string, userName: string, orderId: string) => {
+export const sendCustomerCorrectionsReceivedEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -595,15 +681,19 @@ export const sendCustomerCorrectionsReceivedEmail = async (userEmail: string, us
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 16. رسالة للعميل تفيد بانتهاء مراجعة التصويبات (اكتملت مراجعة التصويبات وإعداد النسخة النهائية)
  */
-export const sendCustomerCorrectionsAppliedEmail = async (userEmail: string, userName: string, orderId: string) => {
+export const sendCustomerCorrectionsAppliedEmail = async (
+  userEmail: string,
+  userName: string,
+  orderId: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -626,15 +716,19 @@ export const sendCustomerCorrectionsAppliedEmail = async (userEmail: string, use
             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 17. رسالة إعادة تعيين كلمة المرور (عند استخدام رابط مخصص مستقبلاً)
  */
-export const sendCustomPasswordResetEmail = async (userEmail: string, userName: string, resetLink: string) => {
+export const sendCustomPasswordResetEmail = async (
+  userEmail: string,
+  userName: string,
+  resetLink: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -661,15 +755,18 @@ export const sendCustomPasswordResetEmail = async (userEmail: string, userName: 
             منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 18. رسالة تم تغيير كلمة المرور بنجاح
  */
-export const sendPasswordChangedSuccessEmail = async (userEmail: string, userName: string) => {
+export const sendPasswordChangedSuccessEmail = async (
+  userEmail: string,
+  userName: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -695,15 +792,21 @@ export const sendPasswordChangedSuccessEmail = async (userEmail: string, userNam
             منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
 
 /**
  * 19. رسالة تسجيل دخول جديد إلى حسابكم (تم التعرف على جهاز/متصفح جديد)
  */
-export const sendNewLoginEmail = async (userEmail: string, userName: string, loginTime: string, deviceInfo?: string, locationInfo?: string) => {
+export const sendNewLoginEmail = async (
+  userEmail: string,
+  userName: string,
+  loginTime: string,
+  deviceInfo?: string,
+  locationInfo?: string,
+) => {
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -719,8 +822,8 @@ export const sendNewLoginEmail = async (userEmail: string, userName: string, log
           <p><strong>تفاصيل تسجيل الدخول:</strong></p>
           <ul>
             <li><strong>التاريخ والوقت:</strong> ${loginTime}</li>
-            ${deviceInfo ? `<li><strong>الجهاز أو المتصفح:</strong> ${deviceInfo}</li>` : ''}
-            ${locationInfo ? `<li><strong>الموقع التقريبي:</strong> ${locationInfo}</li>` : ''}
+            ${deviceInfo ? `<li><strong>الجهاز أو المتصفح:</strong> ${deviceInfo}</li>` : ""}
+            ${locationInfo ? `<li><strong>الموقع التقريبي:</strong> ${locationInfo}</li>` : ""}
           </ul>
           <p>إذا كنتم أنتم من قام بتسجيل الدخول، فلا يلزم اتخاذ أي إجراء إضافي.</p>
           <p>أما إذا لم تتعرفوا على هذا النشاط أو كانت لديكم أي مخاوف تتعلق بأمان الحساب، فننصحكم بتغيير كلمة المرور فوراً والتواصل مع فريق الدعم الفني في أقرب وقت ممكن.</p>
@@ -734,8 +837,7 @@ export const sendNewLoginEmail = async (userEmail: string, userName: string, log
             منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
-      `
-    }
+      `,
+    },
   });
 };
-
