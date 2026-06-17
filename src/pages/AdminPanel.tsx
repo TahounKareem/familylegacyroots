@@ -150,17 +150,17 @@ export function AdminPanel() {
         for (const event of order.timeline || []) {
           let includeEvent = true;
           if (role === "research") {
-             if (event.message.includes("طباعة") || event.message.includes("دفع") || event.message.includes("شحن") || event.message.includes("شريط")) includeEvent = false;
+             if ((event.message || "").includes("طباعة") || (event.message || "").includes("دفع") || (event.message || "").includes("شحن") || (event.message || "").includes("شريط")) includeEvent = false;
           } else if (role === "shipping") {
-             if (event.message.includes("دفع") || event.message.includes("باحث") || event.message.includes("بحث")) includeEvent = false;
+             if ((event.message || "").includes("دفع") || (event.message || "").includes("باحث") || (event.message || "").includes("بحث")) includeEvent = false;
           }
 
           if (includeEvent) {
             events.push({
                id: event.id,
-               title: event.message,
-               message: `تحديث في طلب العائلة: ${order.data.firstName} ${order.data.familyName} - #${order.orderNumber || order.id.substring(0, 6)}`,
-               timestamp: new Date(event.timestamp).getTime(),
+               title: event.message || event.event || "تحديث",
+               message: `تحديث في طلب العائلة: ${order.data?.firstName || ''} ${order.data?.familyName || ''} - #${order.orderNumber || order.id.substring(0, 6)}`,
+               timestamp: new Date(event.timestamp || Date.now()).getTime(),
                orderId: order.id,
                type: "order_update"
             });
@@ -2458,7 +2458,7 @@ export function AdminPanel() {
                       العقود والإقرارات الموقعة (Signnow)
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedAuditOrder.data.documents
+                      {(selectedAuditOrder.data.documents || [])
                         .filter((d) => {
                           if (!d) return false;
                           const kind = typeof d === "string" ? "" : d.kind;
@@ -2677,7 +2677,7 @@ export function AdminPanel() {
                   </h4>
                   <div className="bg-white rounded-xl border border-brand-200 p-6 mb-6">
                     <div className="space-y-4">
-                      {selectedOrder.data.timelineEvents.map((evt, idx) => (
+                      {(selectedOrder.data.timelineEvents || []).map((evt, idx) => (
                         <div key={idx} className="flex gap-4 p-4 border border-brand-100 rounded-lg bg-brand-50/50">
                           <div className="w-24 shrink-0 text-center">
                             <div className="bg-brand-100 text-brand-800 font-bold py-1 px-2 rounded-lg text-sm mb-1">{evt.date}</div>
@@ -2711,17 +2711,21 @@ export function AdminPanel() {
                 </>
               )}
 
-              <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">
-                مخطط شجرة العائلة المرفق
-              </h4>
-              <div className="rounded-xl border border-brand-200 overflow-hidden bg-brand-50 mb-6">
-                <TreeBuilder
-                  initialNodes={selectedOrder.data.treeData.nodes}
-                  initialEdges={selectedOrder.data.treeData.edges}
-                  readOnly={true}
-                  onChange={() => {}}
-                />
-              </div>
+              {selectedOrder.data.treeData && (
+                <>
+                  <h4 className="font-bold text-lg text-brand-900 mb-4 border-b border-brand-100 pb-2 mt-8">
+                    مخطط شجرة العائلة المرفق
+                  </h4>
+                  <div className="rounded-xl border border-brand-200 overflow-hidden bg-brand-50 mb-6">
+                    <TreeBuilder
+                      initialNodes={selectedOrder.data.treeData.nodes || []}
+                      initialEdges={selectedOrder.data.treeData.edges || []}
+                      readOnly={true}
+                      onChange={() => {}}
+                    />
+                  </div>
+                </>
+              )}
 
               {activeTab === "orders" && selectedOrder.timeline && selectedOrder.timeline.length > 0 && (
                 <>
@@ -2788,7 +2792,7 @@ export function AdminPanel() {
                       الوثائق والمرفقات
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedOrder.data.documents.map((docItem, idx) => {
+                      {(selectedOrder.data.documents || []).map((docItem, idx) => {
                         if (!docItem) return null;
                         const isStr = typeof docItem === "string";
                         const url = isStr ? docItem : docItem.url;
@@ -2847,7 +2851,7 @@ export function AdminPanel() {
                       الصور المرفقة
                     </h4>
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      {selectedOrder.data.photos.map((photoItem, idx) => {
+                      {(selectedOrder.data.photos || []).map((photoItem, idx) => {
                         if (!photoItem) return null;
                         const isStr = typeof photoItem === "string";
                         const url = isStr ? photoItem : photoItem.url;
