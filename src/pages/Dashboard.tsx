@@ -2290,7 +2290,7 @@ export function Dashboard() {
                                  طلبات التصويب السابقة
                                </h3>
                                <div className="space-y-4">
-                                 {order.messages.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map((msg) => (
+                                 {order?.messages?.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map((msg) => (
                                    <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
                                      <div className="flex justify-between items-start mb-2">
                                        <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
@@ -2327,7 +2327,7 @@ export function Dashboard() {
                                طلبات التصويب السابقة
                              </h3>
                              <div className="space-y-4">
-                               {order.messages.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map((msg) => (
+                               {order?.messages?.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map((msg) => (
                                  <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
                                    <div className="flex justify-between items-start mb-2">
                                      <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
@@ -2520,10 +2520,10 @@ export function Dashboard() {
                               <div className="pt-4 border-t border-brand-100">
                                 <button
                                   disabled={
-                                    !isValid ||
+                                    !corrections.every(c => c.section.trim() && c.page.trim() && c.text.trim() && c.error.trim()) ||
                                     !agreeToCorrectionTerms
                                   }
-                                  onClick={handleSendCorrectionRequest}
+                                  onClick={handleSendCorrection}
                                   className="w-full md:w-auto px-10 py-4 bg-brand-600 text-white rounded-xl font-bold text-lg hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                                 >
                                   <Send className="w-5 h-5" /> إرسال طلب
