@@ -6,6 +6,7 @@ import { useAppStore, FamilyData } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { getPhoneCode } from "../data/countries";
 import { CountrySelectOptions } from "../data/CountrySelectOptions";
+import { StateSelect } from "../data/StateSelect";
 
 export function OrderFlow() {
   const [step, setStep] = useState(1);
@@ -71,6 +72,12 @@ export function OrderFlow() {
       notes: ""
     }
   });
+
+  useEffect(() => {
+    if (currentUser?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: currentUser.email || "" }));
+    }
+  }, [currentUser, formData.email]);
 
   // Always update pending order data when formData changes to persist it through the flow
   useEffect(() => {
@@ -380,10 +387,17 @@ export function OrderFlow() {
                       className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 bg-white" 
                       value={formData.currentResidenceCountry || ""} 
                       onChange={(e)=>{
-                         setFormData(prev => ({
-                           ...prev, 
-                           currentResidenceCountry: e.target.value
-                         }));
+                         const newCountry = e.target.value;
+                         const code = getPhoneCode(newCountry);
+                         setFormData(prev => {
+                           let newMobile = prev.mobileNumber || "";
+                           if (!newMobile) newMobile = code;
+                           return {
+                             ...prev, 
+                             currentResidenceCountry: newCountry,
+                             mobileNumber: newMobile
+                           };
+                         });
                       }}
                     >
                       <option value="" disabled>اختر الدولة...</option>
@@ -392,7 +406,12 @@ export function OrderFlow() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.currentResidenceState || ""} onChange={(e)=>setFormData({...formData, currentResidenceState: e.target.value})} placeholder="المدينة / المحافظة" />
+                    <StateSelect 
+                      countryId={formData.currentResidenceCountry} 
+                      value={formData.currentResidenceState || ""} 
+                      onChange={(val) => setFormData({...formData, currentResidenceState: val})} 
+                      placeholder="المدينة / المحافظة"
+                    />
                   </div>
                 </div>
 
@@ -412,7 +431,9 @@ export function OrderFlow() {
                             shippingAddress: {
                               ...formData.shippingAddress,
                               name: fullName,
-                              phone: formData.mobileNumber || formData.shippingAddress?.phone || ""
+                              phone: formData.mobileNumber || formData.shippingAddress?.phone || "",
+                              country: formData.currentResidenceCountry || formData.shippingAddress?.country || "",
+                              state: formData.currentResidenceState || formData.shippingAddress?.state || ""
                             } as any
                           });
                         } else {
@@ -463,8 +484,12 @@ export function OrderFlow() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">المدينة / المحافظة *</label>
-                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
-                          value={formData.shippingAddress?.state || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: e.target.value}})} placeholder="المدينة أو المحافظة" />
+                        <StateSelect 
+                          countryId={formData.shippingAddress?.country || formData.currentResidenceCountry || ""} 
+                          value={formData.shippingAddress?.state || ""} 
+                          onChange={(val) => setFormData({...formData, shippingAddress: {...formData.shippingAddress, state: val}})} 
+                          placeholder="المدينة أو المحافظة"
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
@@ -796,7 +821,13 @@ export function OrderFlow() {
             </button>
           ) : (
             <button 
-              onClick={() => setShowPaymentConfirmationModal(true)} 
+              onClick={() => {
+                if (paymentType === "full") {
+                  submitOrder();
+                } else {
+                  setShowPaymentConfirmationModal(true);
+                }
+              }} 
               disabled={isSubmitting || showInviteModal}
               className="px-10 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
             >

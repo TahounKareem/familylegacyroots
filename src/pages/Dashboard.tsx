@@ -931,22 +931,6 @@ export function Dashboard() {
                                     );
                                   })}
                                 </div>
-                                <div className="mt-12 bg-white rounded-3xl p-8 border-2 border-brand-200 shadow-sm text-center relative overflow-hidden">
-                                  <div className="absolute top-0 start-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl -translate-x-10 -translate-y-10 opacity-50 pointer-events-none"></div>
-                                  <div className="absolute bottom-0 end-0 w-32 h-32 bg-brand-100 rounded-full blur-3xl translate-x-10 translate-y-10 opacity-50 pointer-events-none"></div>
-                                  <h3 className="text-2xl font-bold text-brand-900 mb-4 relative z-10 flex items-center justify-center gap-2">
-                                    <Sparkles className="w-6 h-6 text-brand-500" />
-                                    تراث عائلتك بين يديك
-                                    <Sparkles className="w-6 h-6 text-brand-500" />
-                                  </h3>
-                                  <p className="text-brand-700 leading-relaxed max-w-2xl mx-auto mb-6 relative z-10">
-                                    كل معلومة تضيفها هنا، وكل وثيقة ترفقها، هي لبنة تسهم في صرح تاريخ العائلة.
-                                    ندعوك لاستكمال الأقسام ومراجعتها، كي يصبح هذا السجل مرجعاً تقر به أعين الأجيال القادمة وتفخر به عبر الزمن.
-                                  </p>
-                                  <div className="inline-block bg-brand-50 px-6 py-3 rounded-xl border border-brand-100 relative z-10">
-                                    <span className="font-bold text-brand-800">نشكر لك حرصك على تدوين إرث عائلتك العريق.</span>
-                                  </div>
-                                </div>
                               </div>
 
                               <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
@@ -978,6 +962,47 @@ export function Dashboard() {
                                     </div>
                                   </button>
                                 </div>
+                              </div>
+
+                              <div className="mt-8 bg-white rounded-3xl p-8 border-2 border-brand-200 shadow-sm text-center relative overflow-hidden">
+                                <div className="absolute top-0 start-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl -translate-x-10 -translate-y-10 opacity-50 pointer-events-none"></div>
+                                <div className="absolute bottom-0 end-0 w-32 h-32 bg-brand-100 rounded-full blur-3xl translate-x-10 translate-y-10 opacity-50 pointer-events-none"></div>
+                                <h3 className="text-2xl font-bold text-brand-900 mb-6 relative z-10">
+                                  نسبة إنجاز ملف العائلة
+                                </h3>
+                                {(() => {
+                                  const closedCount = Object.values(order.data.sectionStatuses || {}).filter(s => s === "closed").length;
+                                  const completionPercentage = (closedCount / 10) * 100;
+                                  const orderDate = new Date(order.createdAt);
+                                  const endDate = new Date(orderDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+                                  const today = new Date();
+                                  const remainingMs = endDate.getTime() - today.getTime();
+                                  const remainingDays = remainingMs > 0 ? Math.ceil(remainingMs / (1000 * 60 * 60 * 24)) : 0;
+                                  
+                                  return (
+                                    <div className="relative z-10 max-w-2xl mx-auto">
+                                      <div className="w-full bg-gray-100 rounded-full h-8 mb-4 border border-gray-200 overflow-hidden relative">
+                                        <div 
+                                          className="bg-green-500 h-8 rounded-full transition-all duration-1000 flex items-center justify-center text-white font-bold text-sm"
+                                          style={{ width: `${completionPercentage}%` }}
+                                        >
+                                          {completionPercentage > 5 && `${completionPercentage}%`}
+                                        </div>
+                                        {completionPercentage <= 5 && <div className="absolute inset-0 flex items-center justify-center text-brand-700 font-bold text-sm">{completionPercentage}%</div>}
+                                      </div>
+                                      
+                                      {completionPercentage === 100 ? (
+                                        <p className="text-green-600 font-bold text-lg flex items-center justify-center gap-2 animate-pulse">
+                                          <Sparkles className="w-5 h-5"/> شكراً لك، لقد أتممت ملف العائلة بنجاح! <Sparkles className="w-5 h-5"/>
+                                        </p>
+                                      ) : (
+                                        <p className="text-brand-700 font-bold text-lg bg-brand-50 p-3 rounded-xl inline-block border border-brand-100 shadow-sm">
+                                          لازال أمامك ({remainingDays} يوم) لاستكمال ملف عائلتك
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </>
                           )}
@@ -2354,11 +2379,12 @@ export function Dashboard() {
                               </div>
 
                               {/* Marketing Message */}
-                              <div className="bg-brand-50 p-8 rounded-2xl border flex flex-col items-center justify-center text-center border-brand-200 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                                <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
+                              {!order.messages?.some(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")) && (
+                                <div className="bg-brand-50 p-8 rounded-2xl border flex flex-col items-center justify-center text-center border-brand-200 shadow-sm relative overflow-hidden">
+                                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
 
-                                {order.issueStatus !== "تم الإغلاق" && order.actionPhase !== "تم التسليم" && (
+                                  {order.issueStatus !== "تم الإغلاق" && order.actionPhase !== "تم التسليم" && (
                                   <>
                                     <Sparkles className="w-16 h-16 text-brand-500 mb-6" />
                                     <h3 className="text-2xl font-bold text-brand-900 mb-4 font-serif">
@@ -2398,7 +2424,8 @@ export function Dashboard() {
                                   </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
+                          </div>
                           ) : (
                             <>
                               <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">

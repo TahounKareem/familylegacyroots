@@ -348,7 +348,6 @@ export function ServiceAgreement() {
             >
               حفظ ومتابعة <ArrowLeft className="w-5 h-5" />
             </button>
-            <p className="text-xs font-bold text-brand-600">بالمتابعة، يبدأ تجهيز ملف العمل وإدراج الطلب ضمن قائمة التنفيذ البحثي.</p>
           </div>
         </div>
       ) : (

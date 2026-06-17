@@ -78,7 +78,7 @@ export function Contact() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row-reverse gap-12">
         
         {/* Main Content */}
         <div className="flex-1 space-y-12">

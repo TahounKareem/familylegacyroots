@@ -1,0 +1,210 @@
+
+/app/applet/replace.cjs
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  1:12  error  'require' is not defined                 no-undef
+
+/app/applet/replace2.cjs
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  1:12  error  'require' is not defined                 no-undef
+
+/app/applet/replace3.cjs
+   1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+   1:12  error  'require' is not defined                 no-undef
+   9:62  error  Unnecessary escape character: \{         no-useless-escape
+   9:67  error  Unnecessary escape character: \}         no-useless-escape
+  19:62  error  Unnecessary escape character: \{         no-useless-escape
+  19:67  error  Unnecessary escape character: \}         no-useless-escape
+
+/app/applet/replace4.cjs
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  1:12  error  'require' is not defined                 no-undef
+
+/app/applet/server.ts
+  83:15  warning  'userName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/admin/ComplianceDashboard.tsx
+   3:10  warning  'Shield' is defined but never used                  @typescript-eslint/no-unused-vars
+   3:78  warning  'Plus' is defined but never used                    @typescript-eslint/no-unused-vars
+   3:84  warning  'ChevronDown' is defined but never used             @typescript-eslint/no-unused-vars
+   3:97  warning  'ChevronUp' is defined but never used               @typescript-eslint/no-unused-vars
+   4:34  warning  'getDocs' is defined but never used                 @typescript-eslint/no-unused-vars
+   4:43  warning  'updateDoc' is defined but never used               @typescript-eslint/no-unused-vars
+  44:11  warning  'DocumentVersion' is defined but never used         @typescript-eslint/no-unused-vars
+  66:10  warning  'docContent' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  66:22  warning  'setDocContent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  87:16  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/admin/UserComplianceReport.tsx
+  2:45  warning  'orderBy' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Footer.tsx
+  2:10  warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
+  2:20  warning  'MapPin' is defined but never used    @typescript-eslint/no-unused-vars
+  2:28  warning  'Phone' is defined but never used     @typescript-eslint/no-unused-vars
+  2:35  warning  'Mail' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Layout.tsx
+  4:10  warning  'MessageSquare' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Navbar.tsx
+  2:19  warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/ui/Chatbot.tsx
+   2:34  warning  'ChevronDown' is defined but never used     @typescript-eslint/no-unused-vars
+  13:7   warning  'QA_DB' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/ui/SessionManager.tsx
+   8:7  warning  'SESSION_TIMEOUT' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+   9:7  warning  'WARNING_TIMEOUT' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+  38:6  warning  React Hook useCallback has a missing dependency: 'writeAuditLog'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  98:6  warning  React Hook useEffect has a missing dependency: 'writeAuditLog'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+
+/app/applet/src/lib/emailService.ts
+  356:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  357:3  warning  'downloadLink' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  504:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  505:3  warning  'finalLink' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  545:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  583:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  621:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  659:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+  693:3  warning  'orderId' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/firebase.ts
+  4:10  warning  'getFirestore' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/legalService.ts
+  118:14  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+  206:14  warning  'ignore' is defined but never used  @typescript-eslint/no-unused-vars
+  255:16  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/store.ts
+  13:3  warning  'getDocs' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/About.tsx
+  2:10  warning  'BookOpen' is defined but never used   @typescript-eslint/no-unused-vars
+  2:20  warning  'Milestone' is defined but never used  @typescript-eslint/no-unused-vars
+  2:31  warning  'Users' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/AdminAuth.tsx
+   3:33  warning  'Link' is defined but never used               @typescript-eslint/no-unused-vars
+   4:10  warning  'Home' is defined but never used               @typescript-eslint/no-unused-vars
+   4:47  warning  'Lock' is defined but never used               @typescript-eslint/no-unused-vars
+   4:53  warning  'Users' is defined but never used              @typescript-eslint/no-unused-vars
+  18:9   warning  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/AdminPanel.tsx
+     9:3   warning  'query' is defined but never used                        @typescript-eslint/no-unused-vars
+    10:3   warning  'orderBy' is defined but never used                      @typescript-eslint/no-unused-vars
+    11:3   warning  'serverTimestamp' is defined but never used              @typescript-eslint/no-unused-vars
+    12:3   warning  'limit' is defined but never used                        @typescript-eslint/no-unused-vars
+    13:3   warning  'arrayUnion' is defined but never used                   @typescript-eslint/no-unused-vars
+    22:3   warning  'PaymentStatus' is defined but never used                @typescript-eslint/no-unused-vars
+    23:3   warning  'IssueStatus' is defined but never used                  @typescript-eslint/no-unused-vars
+   186:10  warning  'userTab' is assigned a value but never used             @typescript-eslint/no-unused-vars
+   186:19  warning  'setUserTab' is assigned a value but never used          @typescript-eslint/no-unused-vars
+   365:9   warning  'handleStatusChange' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   421:17  warning  'uDoc' is assigned a value but never used                @typescript-eslint/no-unused-vars
+   442:17  warning  'uDoc' is assigned a value but never used                @typescript-eslint/no-unused-vars
+  1057:29  warning  'teamMembers' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  1418:51  warning  'uDoc' is assigned a value but never used                @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Auth.tsx
+  22:9  warning  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Contact.tsx
+  2:37  warning  'PhoneCall' is defined but never used  @typescript-eslint/no-unused-vars
+  2:54  warning  'ArrowLeft' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Dashboard.tsx
+     3:32  warning  'Order' is defined but never used                           @typescript-eslint/no-unused-vars
+     9:3   warning  'Printer' is defined but never used                         @typescript-eslint/no-unused-vars
+    27:3   warning  'Phone' is defined but never used                           @typescript-eslint/no-unused-vars
+    28:3   warning  'CalendarCheck' is defined but never used                   @typescript-eslint/no-unused-vars
+    33:3   warning  'Play' is defined but never used                            @typescript-eslint/no-unused-vars
+    36:12  warning  'ImageIcon' is defined but never used                       @typescript-eslint/no-unused-vars
+    39:3   warning  'MoreVertical' is defined but never used                    @typescript-eslint/no-unused-vars
+    41:3   warning  'Quote' is defined but never used                           @typescript-eslint/no-unused-vars
+    43:3   warning  'Book' is defined but never used                            @typescript-eslint/no-unused-vars
+    51:3   warning  'FolderTree' is defined but never used                      @typescript-eslint/no-unused-vars
+    72:9   warning  'photosInputRef' is assigned a value but never used         @typescript-eslint/no-unused-vars
+   336:9   warning  'calculateDeliveryDate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1619:27  warning  'status' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/ESignature.tsx
+    3:23   warning  'ArrowLeft' is defined but never used                                @typescript-eslint/no-unused-vars
+    4:23   warning  'FamilyData' is defined but never used                               @typescript-eslint/no-unused-vars
+   38:13   warning  'timestamp' is assigned a value but never used                       @typescript-eslint/no-unused-vars
+   39:13   warning  'userAgent' is assigned a value but never used                       @typescript-eslint/no-unused-vars
+  111:144  warning  'e' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Home.tsx
+  4:20   warning  'Shield' is defined but never used         @typescript-eslint/no-unused-vars
+  4:28   warning  'TreeDeciduous' is defined but never used  @typescript-eslint/no-unused-vars
+  4:54   warning  'Star' is defined but never used           @typescript-eslint/no-unused-vars
+  4:60   warning  'ChevronLeft' is defined but never used    @typescript-eslint/no-unused-vars
+  4:79   warning  'FolderPlus' is defined but never used     @typescript-eslint/no-unused-vars
+  4:91   warning  'Database' is defined but never used       @typescript-eslint/no-unused-vars
+  4:101  warning  'SearchCheck' is defined but never used    @typescript-eslint/no-unused-vars
+  4:114  warning  'Gift' is defined but never used           @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/KnowledgeCenter.tsx
+   2:28   warning  'LinkIcon' is defined but never used            @typescript-eslint/no-unused-vars
+   2:38   warning  'Book' is defined but never used                @typescript-eslint/no-unused-vars
+   2:44   warning  'X' is defined but never used                   @typescript-eslint/no-unused-vars
+   2:66   warning  'Share2' is defined but never used              @typescript-eslint/no-unused-vars
+   2:93   warning  'Mail' is defined but never used                @typescript-eslint/no-unused-vars
+   2:105  warning  'Instagram' is defined but never used           @typescript-eslint/no-unused-vars
+   3:34   warning  'query' is defined but never used               @typescript-eslint/no-unused-vars
+   3:41   warning  'orderBy' is defined but never used             @typescript-eslint/no-unused-vars
+  59:10   warning  'isPlaying' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Legal.tsx
+  62:9  warning  'location' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/OrderFlow.tsx
+    2:23  warning  'Link' is defined but never used                         @typescript-eslint/no-unused-vars
+   87:10  warning  'agreedToService' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   87:27  warning  'setAgreedToService' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  189:13  warning  'planPrice' is assigned a value but never used           @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/ServiceAgreement.tsx
+    1:46  warning  'useMemo' is defined but never used                              @typescript-eslint/no-unused-vars
+    3:30  warning  'Mail' is defined but never used                                 @typescript-eslint/no-unused-vars
+    3:36  warning  'Phone' is defined but never used                                @typescript-eslint/no-unused-vars
+    3:43  warning  'MapPin' is defined but never used                               @typescript-eslint/no-unused-vars
+    3:57  warning  'FileText' is defined but never used                             @typescript-eslint/no-unused-vars
+    3:90  warning  'Loader2' is defined but never used                              @typescript-eslint/no-unused-vars
+    3:99  warning  'PenTool' is defined but never used                              @typescript-eslint/no-unused-vars
+    8:10  warning  'arabicContractText' is defined but never used                   @typescript-eslint/no-unused-vars
+   25:10  warning  'req3' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   25:16  warning  'setReq3' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   26:10  warning  'req4' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   26:16  warning  'setReq4' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   27:10  warning  'req5' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   27:16  warning  'setReq5' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   28:10  warning  'req6' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   28:16  warning  'setReq6' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   43:9   warning  'handleScroll' is assigned a value but never used                @typescript-eslint/no-unused-vars
+   63:10  warning  'isSigning' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+   63:21  warning  'setIsSigning' is assigned a value but never used                @typescript-eslint/no-unused-vars
+   64:35  warning  'setShowManuallySignedModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   65:10  warning  'signedInternally' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   65:28  warning  'setSignedInternally' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  172:9   warning  'priceAmount' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+  177:9   warning  'handleCopy' is assigned a value but never used                  @typescript-eslint/no-unused-vars
+  379:10  warning  'CheckboxLabel' is defined but never used                        @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Services.tsx
+   4:36  warning  'ShieldCheck' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+  51:6   warning  React Hook useEffect has a missing dependency: 'sections'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/applet/src/pages/TreeBuilder.tsx
+   2:31  warning  'ChevronDown' is defined but never used            @typescript-eslint/no-unused-vars
+  43:10  warning  'editRelation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/vite.config.ts
+  6:32  warning  'mode' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 145 problems (12 errors, 133 warnings)
+

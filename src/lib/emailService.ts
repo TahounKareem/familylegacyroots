@@ -217,7 +217,7 @@ export const sendResearchAssignedEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "research@thefamilylegacyroots.com",
+    to: "eng.kareemsherif@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -244,7 +244,7 @@ export const sendAccountingPhaseEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "accounting@thefamilylegacyroots.com",
+    to: "tahoun.kareemsherif@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -271,7 +271,7 @@ export const sendDocumentationPhaseEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "accounting@thefamilylegacyroots.com",
+    to: "tahoun.kareemsherif@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -298,7 +298,7 @@ export const sendDesignDraftReadyEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "design@thefamilylegacyroots.com",
+    to: "ahlymember@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -326,9 +326,8 @@ export const sendInitialDesignReadyEmail = async (
 ) => {
   await queueEmail({
     to: [
-      "orders@thefamilylegacyroots.com",
-      "manager@thefamilylegacyroots.com",
-      "maestro@thefamilylegacyroots.com",
+      "hassan.alamri@adamresearchcenter.net",
+      "kareem.tahoun@adamresearchcenter.net",
     ],
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
@@ -393,7 +392,7 @@ export const sendResearchCorrectionsEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "research@thefamilylegacyroots.com",
+    to: "eng.kareemsherif@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -420,7 +419,7 @@ export const sendDesignPrintApprovedEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "design@thefamilylegacyroots.com",
+    to: "ahlymember@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -447,7 +446,7 @@ export const sendDesignCorrectionsAppliedEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: "design@thefamilylegacyroots.com",
+    to: "ahlymember@gmail.com",
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -475,9 +474,8 @@ export const sendFinalLinksReadyEmail = async (
 ) => {
   await queueEmail({
     to: [
-      "orders@thefamilylegacyroots.com",
-      "manager@thefamilylegacyroots.com",
-      "maestro@thefamilylegacyroots.com",
+      "hassan.alamri@adamresearchcenter.net",
+      "kareem.tahoun@adamresearchcenter.net",
     ],
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,

@@ -111,48 +111,75 @@ export function AdminPanel() {
 
   const [initialDesignSubmitOrder, setInitialDesignSubmitOrder] = useState<Order | null>(null);
   const [initialDesignLink, setInitialDesignLink] = useState("");
+  const [shippingContactOrder, setShippingContactOrder] = useState<Order | null>(null);
+  const [printReadyLink, setPrintReadyLink] = useState("");
+  const [paymentRequestOrder, setPaymentRequestOrder] = useState<Order | null>(null);
 
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
-  const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [lastReadNotifsTime, setLastReadNotifsTime] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("lastReadNotifsTime");
+      return stored ? parseInt(stored) : 0;
+    }
+    return 0;
+  });
 
-  useEffect(() => {
-    if (!currentUser || currentUser.role === "user") return;
-    const q = query(
-      collection(db, "notifications"),
-      orderBy("timestamp", "desc"),
-      limit(50)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data: any[] = [];
-      snapshot.forEach((doc) => {
-        data.push({ id: doc.id, ...doc.data() });
-      });
-      setNotifications(data);
-    });
-    return () => unsubscribe();
-  }, [currentUser]);
+  const notifications = useMemo(() => {
+    if (!currentUser || currentUser.role === "user") return [];
+    const events: any[] = [];
+    const role = currentUser.role;
+
+    for (const order of orders) {
+      if (order.isDeleted) continue;
+
+      let isRelevant = false;
+      if (role === "maestro" || role === "admin" || role === "customer_service" || role === "accounting" || role === "editor" || role === "marketing") {
+        isRelevant = true;
+      } else if (role === "research") {
+        isRelevant = true;
+      } else if (role === "shipping") {
+        if (order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "تم التسليم") {
+           isRelevant = true;
+        }
+      }
+
+      if (isRelevant) {
+        for (const event of order.timeline || []) {
+          let includeEvent = true;
+          if (role === "research") {
+             if (event.title.includes("طباعة") || event.title.includes("دفع") || event.title.includes("شحن") || event.title.includes("شريط")) includeEvent = false;
+          } else if (role === "shipping") {
+             if (event.title.includes("دفع") || event.title.includes("باحث") || event.title.includes("بحث")) includeEvent = false;
+          }
+
+          if (includeEvent) {
+            events.push({
+               id: event.id,
+               title: event.title,
+               message: `تحديث في طلب العائلة: ${order.data.firstName} ${order.data.familyName} - #${order.orderNumber || order.id.substring(0, 6)}`,
+               timestamp: new Date(event.date).getTime(),
+               orderId: order.id,
+               type: "order_update"
+            });
+          }
+        }
+      }
+    }
+
+    return events.sort((a,b) => b.timestamp - a.timestamp).slice(0, 50);
+  }, [orders, currentUser]);
 
   const unreadNotificationsCount = notifications.filter(
-    (n) => !(n.readBy || []).includes(currentUser?.id)
+    (n) => n.timestamp > lastReadNotifsTime
   ).length;
 
   const handleMarkNotificationsAsRead = async () => {
-    if (!currentUser) return;
-    try {
-      const unreadNotifs = notifications.filter(
-        (n) => !(n.readBy || []).includes(currentUser.id)
-      );
-      for (const n of unreadNotifs) {
-        await updateDoc(doc(db, "notifications", n.id), {
-          readBy: arrayUnion(currentUser.id),
-        });
-      }
-    } catch (err) {
-      console.error("Error marking notifications read:", err);
-    }
+    const now = Date.now();
+    setLastReadNotifsTime(now);
+    localStorage.setItem("lastReadNotifsTime", now.toString());
   };
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
@@ -320,6 +347,7 @@ export function AdminPanel() {
       "admin",
       "maestro",
       "research",
+      "design",
       "marketing",
       "accounting",
       "compliance",
@@ -327,7 +355,10 @@ export function AdminPanel() {
       "customer_service",
       "editor",
     ].includes(currentUser.role);
-  if (!currentUser || !isStaff) {
+  if (!currentUser) {
+    return <Navigate to="/Team" />;
+  }
+  if (!isStaff) {
     return <Navigate to="/dashboard" />;
   }
 
@@ -382,7 +413,7 @@ export function AdminPanel() {
         });
         await useAppStore.getState().logTimelineEvent(
           researchDeliveryOrder.id,
-          "تم تسليم المسودة لإدارة التصميم"
+          "تم تسليم النسخة الأولية لإدارة التصميم"
         );
         import("@/lib/emailService").then(({ sendDesignDraftReadyEmail, sendDocumentationPhaseEmail, sendCustomerDesignPhaseEmail }) => {
           sendDesignDraftReadyEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
@@ -488,7 +519,7 @@ export function AdminPanel() {
     try {
       const phaseUpdates: any = {};
       if (deliveryTab === "draft") {
-        phaseUpdates.actionPhase = "تم تسليم المسودة";
+        phaseUpdates.actionPhase = "تم تسليم النسخة الأولية";
         phaseUpdates.issueStatus = "تم الإصدار";
         phaseUpdates.status = "تم تسليم الإصدار الأول";
       } else if (deliveryTab === "final") {
@@ -709,10 +740,11 @@ export function AdminPanel() {
                     ) : (
                       <div className="divide-y divide-brand-100">
                         {notifications.map((notif) => {
-                          const isUnread = !(notif.readBy || []).includes(currentUser?.id);
+                          const isUnread = notif.timestamp > lastReadNotifsTime;
                           return (
                             <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
-                              <p className="text-sm text-brand-900 font-medium leading-relaxed mb-2">
+                              <p className="text-sm text-brand-900 font-bold mb-1">{notif.title}</p>
+                              <p className="text-xs text-brand-700 font-medium leading-relaxed mb-2">
                                 {notif.message}
                               </p>
                               <div className="flex items-center justify-between text-[10px] text-brand-500 font-mono">
@@ -808,10 +840,11 @@ export function AdminPanel() {
                     ) : (
                       <div className="divide-y divide-brand-100">
                         {notifications.map((notif) => {
-                          const isUnread = !(notif.readBy || []).includes(currentUser?.id);
+                          const isUnread = notif.timestamp > lastReadNotifsTime;
                           return (
                             <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
-                              <p className="text-sm text-brand-900 font-medium leading-relaxed mb-2">
+                              <p className="text-sm text-brand-900 font-bold mb-1">{notif.title}</p>
+                              <p className="text-xs text-brand-700 font-medium leading-relaxed mb-2">
                                 {notif.message}
                               </p>
                               <div className="flex items-center justify-between text-[10px] text-brand-500 font-mono">
@@ -1131,42 +1164,45 @@ export function AdminPanel() {
                                       className="border border-brand-200 rounded px-3 py-1.5 text-xs bg-white font-bold text-brand-800 outline-none cursor-pointer min-w-[150px]"
                                       value={order.assignedResearcher || ""}
                                       onChange={async (e) => {
-                                        const { updateDoc, doc } =
-                                          await import("firebase/firestore");
-                                        const { db } =
-                                          await import("@/lib/firebase");
-                                        const newResearcherId = e.target.value;
-                                        const researcherName =
-                                          usersList.find(
-                                            (u) => u.id === newResearcherId,
-                                          )?.name || "باحث";
+                                        try {
+                                          const newResearcherId = e.target.value;
+                                          const researcherName =
+                                            usersList.find(
+                                              (u) => u.id === newResearcherId,
+                                            )?.name || "باحث";
 
-                                        const updateData = {
-                                          assignedResearcher: newResearcherId,
-                                          issueStatus: "جاري التنفيذ" as const,
-                                          actionPhase: "مرحلة البحث" as const,
-                                        };
-                                        await updateDoc(
-                                          doc(db, "orders", order.id),
-                                          updateData,
-                                        );
-                                        useAppStore.setState((s) => ({
-                                          orders: s.orders.map((o) =>
-                                            o.id === order.id
-                                              ? { ...o, ...updateData }
-                                              : o,
-                                          ),
-                                        }));
-                                        useAppStore
-                                          .getState()
-                                          .logTimelineEvent(
-                                            order.id,
-                                            `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`,
+                                          const updateData = {
+                                            assignedResearcher: newResearcherId,
+                                            issueStatus: "جاري التنفيذ" as const,
+                                            actionPhase: "مرحلة البحث" as const,
+                                          };
+                                          await updateDoc(
+                                            doc(db, "orders", order.id),
+                                            updateData,
                                           );
-                                        
-                                        import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
-                                          sendResearchAssignedEmail(order.data.familyName, order.id).catch(console.error);
-                                        });
+                                          useAppStore.setState((s) => ({
+                                            orders: s.orders.map((o) =>
+                                              o.id === order.id
+                                                ? { ...o, ...updateData }
+                                                : o,
+                                            ),
+                                          }));
+                                          await useAppStore
+                                            .getState()
+                                            .logTimelineEvent(
+                                              order.id,
+                                              `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`,
+                                            );
+                                          
+                                          // Note: sendResearchAssignedEmail handles any potential async issues gracefully
+                                          import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
+                                            sendResearchAssignedEmail(order.data?.familyName || "العائلة", order.id).catch(console.error);
+                                          });
+                                          alert("تم تعيين الباحث وتحديث حالة الطلب بنجاح!");
+                                        } catch (error) {
+                                          console.error("Assignment error:", error);
+                                          alert("حدث خطأ أثناء المحاولة، يرجى التأكد من الصلاحيات والاتصال بالإنترنت.");
+                                        }
                                       }}
                                     >
                                       <option value="">
@@ -1300,7 +1336,7 @@ export function AdminPanel() {
                       .filter((o) => !o.isDeleted)
                       .map((order) => (
                         <React.Fragment key={`rm-${order.id}`}>
-                          <tr className="hover:bg-brand-50/30 transition">
+                          <tr className={order.actionPhase === "تم التسليم" ? "bg-gray-100/60 opacity-80 transition" : "hover:bg-brand-50/30 transition"}>
                             <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
                               #
                               {order.orderNumber ||
@@ -1404,50 +1440,56 @@ export function AdminPanel() {
                               })()}
                             </td>
                             <td className="px-4 py-4">
-                              <div className="flex gap-2 flex-col">
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => setSelectedOrder(order)}
-                                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
-                                  >
-                                    <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setMessagingOrder(order);
-                                      markMessagesAsRead(order.id, "admin");
-                                    }}
-                                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
-                                  >
-                                    <MessageSquare className="w-4 h-4" /> طلب
-                                    إيضاح
-                                    {order.messages &&
-                                      order.messages.filter(
-                                        (m) => m.senderRole === "user" && !m.isRead,
-                                      ).length > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-ping"></span>
-                                      )}
-                                    {order.messages &&
-                                      order.messages.filter(
-                                        (m) => m.senderRole === "user" && !m.isRead,
-                                      ).length > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full"></span>
-                                      )}
-                                  </button>
+                              {order.actionPhase !== "تم التسليم" ? (
+                                <div className="flex gap-2 flex-col">
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => setSelectedOrder(order)}
+                                      className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center"
+                                    >
+                                      <Eye className="w-4 h-4" /> عرض تفاصيل الطلب
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setMessagingOrder(order);
+                                        markMessagesAsRead(order.id, "admin");
+                                      }}
+                                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center relative"
+                                    >
+                                      <MessageSquare className="w-4 h-4" /> طلب
+                                      إيضاح
+                                      {order.messages &&
+                                        order.messages.filter(
+                                          (m) => m.senderRole === "user" && !m.isRead,
+                                        ).length > 0 && (
+                                          <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-ping"></span>
+                                        )}
+                                      {order.messages &&
+                                        order.messages.filter(
+                                          (m) => m.senderRole === "user" && !m.isRead,
+                                        ).length > 0 && (
+                                          <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full"></span>
+                                        )}
+                                    </button>
+                                  </div>
+                                  
+                                  {order.actionPhase !== "تمت المسودة" && order.actionPhase !== "تم التصويب" && order.actionPhase !== "تم التصميم الإلكتروني" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم النسخة الأولية" && (
+                                    <button
+                                      onClick={() => {
+                                        setResearchDeliveryOrder(order);
+                                        setResearchDeliveryTab(order.actionPhase === "جاري التصويب" ? "correction" : "draft");
+                                      }}
+                                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center mt-2"
+                                    >
+                                      <Upload className="w-4 h-4" /> {order.actionPhase === "جاري التصويب" ? "تسليم السجل لإدارة التصميم" : "تسليم المسودة لإدارة التصميم"}
+                                    </button>
+                                  )}
                                 </div>
-                                
-                                {order.actionPhase !== "تمت المسودة" && order.actionPhase !== "تم التصويب" && order.actionPhase !== "تم التصميم الإلكتروني" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم المسودة" && order.actionPhase !== "تم التسليم" && (
-                                  <button
-                                    onClick={() => {
-                                      setResearchDeliveryOrder(order);
-                                      setResearchDeliveryTab(order.actionPhase === "جاري التصويب" ? "correction" : "draft");
-                                    }}
-                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-2 text-xs w-full justify-center mt-2"
-                                  >
-                                    <Upload className="w-4 h-4" /> {order.actionPhase === "جاري التصويب" ? "تسليم السجل لإدارة التصميم" : "تسليم المسودة لإدارة التصميم"}
-                                  </button>
-                                )}
-                              </div>
+                              ) : (
+                                <div className="text-center text-gray-500 font-bold text-xs py-2 bg-gray-50 rounded-lg border border-gray-200">
+                                  تم تسليم السجل للعميل (مكتمل)
+                                </div>
+                              )}
                             </td>
                           </tr>
                         </React.Fragment>
@@ -1621,13 +1663,20 @@ export function AdminPanel() {
                         <th className="px-4 py-4 font-medium">رقم الطلب</th>
                         <th className="px-4 py-4 font-medium">نوع الدفع</th>
                         <th className="px-4 py-4 font-medium">حالة الدفع</th>
+                        <th className="px-4 py-4 font-medium">الإجراء الحالي</th>
                         <th className="px-4 py-4 font-medium">
                           الإجراءات المحاسبية
                         </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-50">
-                      {accountingOrders.map((order) => (
+                      {accountingOrders.map((order) => {
+                        const isFlexible = order.totalAmount === 1980;
+                        const showFirstRequest = isFlexible && order.actionPhase === "مرحلة التوثيق"; // Note: User meant مرحلة التوثيق as "تم التوثيق" is not an actionPhase. Wait, "تم التوثيق" might be what they mean by "مرحلة التوثيق". 
+                        const showSecondRequest = isFlexible && order.actionPhase === "تم التصميم الإلكتروني";
+                        const showRequestBtn = showFirstRequest || showSecondRequest;
+                        
+                        return (
                         <tr
                           key={`acc-${order.id}`}
                           className="hover:bg-brand-50/30 transition"
@@ -1638,7 +1687,7 @@ export function AdminPanel() {
                               order.id.toUpperCase().substring(0, 6)}
                           </td>
                           <td className="px-4 py-4 font-bold">
-                            {order.totalAmount === 1980
+                            {isFlexible
                               ? "دفع مرن (دفعات)"
                               : "دفع كامل"}
                           </td>
@@ -1649,7 +1698,10 @@ export function AdminPanel() {
                               {order.paymentStatus || "غير محدد"}
                             </span>
                           </td>
-                          <td className="px-4 py-4 flex gap-2">
+                          <td className="px-4 py-4 text-brand-600 font-bold text-xs">
+                             {order.actionPhase || "مرحلة البحث"}
+                          </td>
+                          <td className="px-4 py-4 flex gap-2 flex-wrap">
                             <button className="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg transition border border-brand-200 text-xs shadow-sm">
                               إصدار فاتورة
                             </button>
@@ -1658,9 +1710,17 @@ export function AdminPanel() {
                                 تأكيد تحصيل الدفعة
                               </button>
                             )}
+                            {showRequestBtn && (
+                              <button 
+                                onClick={() => setPaymentRequestOrder(order)}
+                                className="px-3 py-1.5 bg-gradient-to-r from-red-600 to-[#C3262A] hover:bg-red-700 text-white font-bold rounded-lg transition text-xs shadow-md border border-red-500 animate-pulse hover:animate-none"
+                              >
+                                مطالبة العميل بتحصيل الدفعة
+                              </button>
+                            )}
                           </td>
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </table>
                 </div>
@@ -1759,7 +1819,8 @@ export function AdminPanel() {
                 o.actionPhase === "تم التصويب" ||
                 o.actionPhase === "تم تجهيز السجل للطباعة" ||
                 o.actionPhase === "جاهز للطباعة" ||
-                o.actionPhase === "جاهز للتسليم"),
+                o.actionPhase === "جاهز للتسليم" ||
+                o.actionPhase === "تم التسليم"),
           ).sort((a, b) => {
             const needsActionA = a.actionPhase === "تمت المسودة" || a.actionPhase === "تم التصويب";
             const needsActionB = b.actionPhase === "تمت المسودة" || b.actionPhase === "تم التصويب";
@@ -1799,10 +1860,11 @@ export function AdminPanel() {
                     ) : (
                       designOrders.map((order) => {
                         const needsAction = order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصويب";
+                        const isDelivered = order.actionPhase === "تم التسليم";
                         return (
                         <tr
                           key={`sh-${order.id}`}
-                          className={`transition ${needsAction ? "hover:bg-brand-50/30 bg-white" : "bg-gray-100 hover:bg-gray-200 opacity-80"}`}
+                          className={`transition ${needsAction ? "hover:bg-brand-50/30 bg-white" : isDelivered ? "bg-gray-100/60 opacity-80" : "bg-gray-100 hover:bg-gray-200"}`}
                         >
                           <td className="px-4 py-4 font-mono font-bold text-brand-600 uppercase">
                             #
@@ -1818,18 +1880,18 @@ export function AdminPanel() {
                             </p>
                           </td>
                           <td className="px-4 py-4">
-                            <span className={`px-3 py-1.5 rounded-md font-bold text-xs inline-block border ${needsAction ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-200 text-gray-700 border-gray-300'}`}>
+                            <span className={`px-3 py-1.5 rounded-md font-bold text-xs inline-block border ${needsAction ? 'bg-amber-50 text-amber-700 border-amber-200' : isDelivered ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-200 text-gray-700 border-gray-300'}`}>
                                {order.actionPhase || "تمت المسودة"}
                             </span>
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex flex-col gap-2">
-                              {order.initialDesignLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
+                              {!isDelivered && order.initialDesignLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
                                 <a href={order.initialDesignLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {order.researchDraftLink && order.actionPhase === "تمت المسودة" && (
+                              {!isDelivered && order.researchDraftLink && order.actionPhase === "تمت المسودة" && (
                                 <>
                                   <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                     <Download className="w-4 h-4" /> تحميل ملف البحث
@@ -1844,29 +1906,18 @@ export function AdminPanel() {
                                   )}
                                 </>
                               )}
-                              {order.postCorrectionLink && (
-                                <a href={order.postCorrectionLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                  <Download className="w-4 h-4" /> تحميل السجل بعد التصويب
-                                </a>
-                              )}
-                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة") && (
+                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم") && (
                                 <button
-                                  onClick={() => alert(`بيانات التواصل:
-الاسم: ${order.data.firstName} ${order.data.fatherName} ${order.data.familyName}
-رقم الجوال: ${order.data.mobileNumber || 'غير محدد'}
-البريد الإلكتروني: ${order.data.contactEmail || 'غير محدد'}
-
-عنوان الشحن:
-الدولة: ${order.data.shippingAddress?.country || 'غير محدد'}
-المدينة / المحافظة: ${order.data.shippingAddress?.state || 'غير محدد'}
-الشارع: ${order.data.shippingAddress?.street || 'غير محدد'}
-الرمز البريدي: ${order.data.shippingAddress?.zip || 'غير محدد'}`)}
-                                  className="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 text-xs border border-brand-500 animate-pulse hover:animate-none"
+                                  onClick={() => {
+                                    setPrintReadyLink(order.printReadyLink || "");
+                                    setShippingContactOrder(order);
+                                  }}
+                                  className="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 text-xs border border-brand-500 hover:animate-none"
                                 >
                                   <MapPin className="w-4 h-4" /> عرض بيانات التواصل والعنوان البريدي
                                 </button>
                               )}
-                              {order.actionPhase === "تمت المسودة" && (
+                              {!isDelivered && order.actionPhase === "تمت المسودة" && (
                                 <button
                                   onClick={() => setInitialDesignSubmitOrder(order)}
                                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
@@ -1874,7 +1925,7 @@ export function AdminPanel() {
                                   <Upload className="w-4 h-4" /> تسليم السجل الأولي
                                 </button>
                               )}
-                              {order.actionPhase === "تم التصويب" && (
+                              {!isDelivered && order.actionPhase === "تم التصويب" && (
                                 <button
                                   onClick={() => setDesignSubmitOrder(order)}
                                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
@@ -2988,7 +3039,7 @@ export function AdminPanel() {
 
             <div className="flex bg-brand-100 rounded-lg p-1 mb-6 text-center">
               <div className="flex-1 py-2 text-sm font-bold rounded-md transition bg-white text-brand-900 shadow-sm">
-                {deliveryTab === "draft" ? "تسليم مسودة للإعتماد" : "التسليم النهائي للسجل"}
+                {deliveryTab === "draft" ? "تسليم النسخة الأولية للإعتماد" : "التسليم النهائي للسجل"}
               </div>
             </div>
 
@@ -3112,6 +3163,191 @@ export function AdminPanel() {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Initial Design Modal */}
+      {paymentRequestOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-6 px-8 relative">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+              <h3 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <Calculator className="w-6 h-6 text-[#C3262A]" />
+                إرسال مطالبة تحصيل الدفعة
+              </h3>
+              <button
+                onClick={() => setPaymentRequestOrder(null)}
+                className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+              <div className="bg-brand-50/50 p-4 rounded-xl border border-brand-100">
+                <p className="font-bold text-brand-900 mb-2 border-b border-brand-100 pb-2">تفاصيل المطالبة (رسالة البريد الإلكتروني):</p>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {(() => {
+                    const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
+                    const amount = isPhase2 ? "693" : "594";
+                    const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
+                    const paymentLink = isPhase2 
+                      ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
+                      : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
+                    
+                    const name = paymentRequestOrder.data.firstName ? `${paymentRequestOrder.data.firstName} ${paymentRequestOrder.data.fatherName}` : "عميلنا الكريم";
+                    
+                    return `أهلاً بك ${name}،\n\nنهديكم أطيب التحيات من منصة سجل تراث العائلة.\nيُسعدنا إبلاغكم بأننا قد أنجزنا بنجاح خطوات مهمة في إعداد سجل عائلتكم العريق، حيث وصل الطلب الآن إلى ${phaseName}.\n\nوفقاً لنظام "الدفع المرن" المختار، فقد استُحقت الآن الدفعة التالية وقدرها (${amount} دولار).\nنرجو منكم التكرم بإتمام عملية السداد لضمان استمرار سير العمل بسلاسة انتقالاً للمرحلة القادمة.\n\nرابط إتمام الدفع (آمن ومباشر):\n${paymentLink}\n\nنشكر لكم ثقتكم وحرصكم الدائم، ونسعد دوماً بخدمتكم وتدوين إرث عائلتكم الممتد.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`;
+                  })()}
+                </div>
+              </div>
+              
+              <button
+                onClick={async () => {
+                  const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
+                  const amount = isPhase2 ? "693" : "594";
+                  const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
+                  const paymentLink = isPhase2 
+                    ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
+                    : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
+                  const name = paymentRequestOrder.data.firstName ? `${paymentRequestOrder.data.firstName} ${paymentRequestOrder.data.fatherName}` : "عميلنا الكريم";
+                  const emailBody = `أهلاً بك ${name}،\n\nنهديكم أطيب التحيات من منصة سجل تراث العائلة.\nيُسعدنا إبلاغكم بأننا قد أنجزنا بنجاح خطوات مهمة في إعداد سجل عائلتكم العريق، حيث وصل الطلب الآن إلى ${phaseName}.\n\nوفقاً لنظام "الدفع المرن" المختار، فقد استُحقت الآن الدفعة التالية وقدرها (${amount} دولار).\nنرجو منكم التكرم بإتمام عملية السداد لضمان استمرار سير العمل بسلاسة انتقالاً للمرحلة القادمة.\n\nرابط إتمام الدفع (آمن ومباشر):\n${paymentLink}\n\nنشكر لكم ثقتكم وحرصكم الدائم، ونسعد دوماً بخدمتكم وتدوين إرث عائلتكم الممتد.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`;
+                  
+                  // Use window.open with mailto as fallback, or our email service if extended
+                  const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.contactEmail;
+                  const subject = encodeURIComponent(`مطالبة سداد مستحقة - ${phaseName} - منصة سجل تراث العائلة`);
+                  const body = encodeURIComponent(emailBody);
+                  window.open(`mailto:${toEmail}?subject=${subject}&body=${body}`, '_blank');
+                  
+                  // Optimistically update timeline
+                  useAppStore.getState().logTimelineEvent(
+                    paymentRequestOrder.id,
+                    `تم إرسال مطالبة تحصيل الدفعة (${amount} دولار) للعميل بنجاح.`
+                  );
+                  alert("تم تجهيز الايميل وتسجيل الإجراء في حركات الطلب!");
+                  setPaymentRequestOrder(null);
+                }}
+                className="w-full py-4 rounded-xl font-bold bg-[#C3262A] text-white hover:bg-[#a61c20] transition flex items-center justify-center gap-2 mt-4 shadow-md text-lg"
+              >
+                <Send className="w-5 h-5" /> إرسال المطالبة للعميل عبر الإيميل
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {shippingContactOrder && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md p-4 print:bg-white print:p-0">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-8 px-10 relative print:shadow-none print:w-full print:max-w-full print:h-full print:overflow-visible">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2 print:hidden"></div>
+            
+            <div className="flex justify-between items-center mb-8 relative z-10 print:hidden">
+              <h3 className="font-bold text-2xl text-brand-900 flex items-center gap-3">
+                <MapPin className="w-8 h-8 text-indigo-600" />
+                بيانات التوصيل والطباعة
+              </h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => window.print()}
+                  className="text-brand-600 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition shadow-sm"
+                  title="طباعة"
+                >
+                  <MapPin className="w-5 h-5 hidden" />
+                  <span className="font-bold px-2 py-1 text-sm">طباعة البطاقة</span>
+                </button>
+                <button
+                  onClick={() => setShippingContactOrder(null)}
+                  className="text-brand-500 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-full p-2 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-6 overflow-y-auto pr-2 pb-4 relative z-10 print:overflow-visible">
+              
+              <div className="bg-gradient-to-br from-indigo-50 to-brand-50 p-6 rounded-2xl border border-indigo-100 shadow-sm print:border-none print:shadow-none">
+                <h4 className="text-lg font-bold text-indigo-900 mb-4 border-b border-indigo-200 pb-2">بيانات العميل للإتصال</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-xs font-bold text-indigo-500 mb-1">اسم المستلم</span>
+                    <p className="font-bold text-brand-900 text-lg">{shippingContactOrder.data.firstName} {shippingContactOrder.data.fatherName} {shippingContactOrder.data.familyName}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-indigo-500 mb-1">رقم الجوال</span>
+                    <p className="font-bold text-brand-900 text-lg dir-ltr text-right">{shippingContactOrder.data.mobileNumber || '—'}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="block text-xs font-bold text-indigo-500 mb-1">البريد الإلكتروني</span>
+                    <p className="font-bold text-brand-900">{shippingContactOrder.data.contactEmail || '—'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-100 shadow-sm print:border-none print:shadow-none">
+                <h4 className="text-lg font-bold text-emerald-900 mb-4 border-b border-emerald-200 pb-2">عنوان التوصيل المعتمد</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-xs font-bold text-emerald-500 mb-1">الدولة</span>
+                    <p className="font-bold text-brand-900 text-lg">{shippingContactOrder.data.shippingAddress?.country || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-emerald-500 mb-1">المدينة / المحافظة</span>
+                    <p className="font-bold text-brand-900 text-lg">{shippingContactOrder.data.shippingAddress?.state || '—'}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="block text-xs font-bold text-emerald-500 mb-1">الشارع / العنوان بالتفصيل</span>
+                    <p className="font-bold text-brand-900">{shippingContactOrder.data.shippingAddress?.street || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-emerald-500 mb-1">الرمز البريدي</span>
+                    <p className="font-bold text-brand-900">{shippingContactOrder.data.shippingAddress?.zip || '—'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="print:hidden bg-white p-6 rounded-2xl border border-gray-200">
+                <label className="block font-bold text-brand-900 mb-2">رابط تحميل السجل (مُجهز للطباعة)</label>
+                <div className="flex gap-3">
+                  <input
+                    type="url"
+                    value={printReadyLink}
+                    onChange={(e) => setPrintReadyLink(e.target.value)}
+                    placeholder="أدخل رابط السجل هنا..."
+                    className="flex-1 border border-brand-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition outline-none"
+                  />
+                  <button
+                    onClick={async () => {
+                      if(!printReadyLink.trim()) return;
+                      setIsFulfilling(true);
+                      try {
+                        const { updateDoc, doc } = await import("firebase/firestore");
+                        const { db } = await import("@/lib/firebase");
+                        await updateDoc(doc(db, "orders", shippingContactOrder.id), {
+                          printReadyLink: printReadyLink
+                        });
+                        useAppStore.setState((s) => ({
+                          orders: s.orders.map((o) =>
+                            o.id === shippingContactOrder.id ? { ...o, printReadyLink } : o
+                          ),
+                        }));
+                        alert("تم حفظ رابط الطباعة بنجاح");
+                      } catch(e) {
+                        console.error(e);
+                      } finally {
+                        setIsFulfilling(false);
+                      }
+                    }}
+                    disabled={isFulfilling || !printReadyLink.trim()}
+                    className="px-6 py-3 rounded-xl font-bold bg-brand-600 text-white hover:bg-brand-700 transition disabled:bg-gray-300 shadow-sm"
+                  >
+                    {isFulfilling ? "جاري الحفظ" : "حفظ الرابط"}
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
