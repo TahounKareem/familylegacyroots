@@ -119,12 +119,14 @@ export function AdminPanel() {
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [lastReadNotifsTime, setLastReadNotifsTime] = useState<number>(() => {
+  const [readNotifIds, setReadNotifIds] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("lastReadNotifsTime");
-      return stored ? parseInt(stored) : 0;
+      try {
+        const stored = localStorage.getItem("readNotifIds");
+        if (stored) return new Set(JSON.parse(stored));
+      } catch (e) {}
     }
-    return 0;
+    return new Set();
   });
 
   const notifications = useMemo(() => {
@@ -155,9 +157,13 @@ export function AdminPanel() {
              if ((event.message || "").includes("دفع") || (event.message || "").includes("باحث") || (event.message || "").includes("بحث")) includeEvent = false;
           }
 
+          // Don't notify the user about their own actions
+          if (event.userId === currentUser.id) includeEvent = false;
+
           if (includeEvent) {
-            events.push({
-               id: event.id,
+             const tId = event.id || Math.random().toString();
+             events.push({
+               id: tId + "_" + order.id,
                title: event.message || event.event || "تحديث",
                message: `تحديث في طلب العائلة: ${order.data?.firstName || ''} ${order.data?.familyName || ''} - #${order.orderNumber || order.id.substring(0, 6)}`,
                timestamp: new Date(event.timestamp || Date.now()).getTime(),
@@ -173,13 +179,14 @@ export function AdminPanel() {
   }, [orders, currentUser]);
 
   const unreadNotificationsCount = notifications.filter(
-    (n) => n.timestamp > lastReadNotifsTime
+    (n) => !readNotifIds.has(n.id)
   ).length;
 
   const handleMarkNotificationsAsRead = async () => {
-    const now = Date.now();
-    setLastReadNotifsTime(now);
-    localStorage.setItem("lastReadNotifsTime", now.toString());
+    const newIds = new Set(readNotifIds);
+    notifications.forEach(n => newIds.add(n.id));
+    setReadNotifIds(newIds);
+    localStorage.setItem("readNotifIds", JSON.stringify(Array.from(newIds).slice(-100)));
   };
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
@@ -740,7 +747,7 @@ export function AdminPanel() {
                     ) : (
                       <div className="divide-y divide-brand-100">
                         {notifications.map((notif) => {
-                          const isUnread = notif.timestamp > lastReadNotifsTime;
+                          const isUnread = (!readNotifIds.has(notif.id));
                           return (
                             <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
                               <p className="text-sm text-brand-900 font-bold mb-1">{notif.title}</p>
@@ -840,7 +847,7 @@ export function AdminPanel() {
                     ) : (
                       <div className="divide-y divide-brand-100">
                         {notifications.map((notif) => {
-                          const isUnread = notif.timestamp > lastReadNotifsTime;
+                          const isUnread = (!readNotifIds.has(notif.id));
                           return (
                             <div key={notif.id} className={`p-4 transition ${isUnread ? 'bg-red-50/30' : 'bg-white hover:bg-brand-50/30'}`}>
                               <p className="text-sm text-brand-900 font-bold mb-1">{notif.title}</p>
@@ -1672,7 +1679,7 @@ export function AdminPanel() {
                     <tbody className="divide-y divide-brand-50">
                       {accountingOrders.map((order) => {
                         const isFlexible = order.totalAmount === 1980;
-                        const showFirstRequest = isFlexible && order.actionPhase === "مرحلة التوثيق"; // Note: User meant مرحلة التوثيق as "تم التوثيق" is not an actionPhase. Wait, "تم التوثيق" might be what they mean by "مرحلة التوثيق". 
+                        const showFirstRequest = isFlexible && (order.actionPhase === "مرحلة التوثيق" || order.actionPhase === "تم التوثيق");
                         const showSecondRequest = isFlexible && order.actionPhase === "تم التصميم الإلكتروني";
                         const showRequestBtn = showFirstRequest || showSecondRequest;
                         
@@ -3194,9 +3201,9 @@ export function AdminPanel() {
                 <p className="font-bold text-brand-900 mb-2 border-b border-brand-100 pb-2">تفاصيل المطالبة (رسالة البريد الإلكتروني):</p>
                 <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {(() => {
-                    const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق";
+                    const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
                     const amount = isPhase2 ? "693" : "594";
-                    const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
+                    const phaseName = isPhase2 ? "تم التوثيق" : "التصميم الإلكتروني";
                     const paymentLink = isPhase2 
                       ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
                       : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
@@ -3210,9 +3217,9 @@ export function AdminPanel() {
               
               <button
                 onClick={async () => {
-                  const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق";
+                  const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
                   const amount = isPhase2 ? "693" : "594";
-                  const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
+                  const phaseName = isPhase2 ? "تم التوثيق" : "التصميم الإلكتروني";
                   const paymentLink = isPhase2 
                     ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
                     : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
@@ -3244,7 +3251,7 @@ export function AdminPanel() {
 
       {shippingContactOrder && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md p-4 print:bg-white print:p-0">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-8 px-10 relative print:shadow-none print:w-full print:max-w-full print:h-full print:overflow-visible">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-right py-8 px-10 relative print:shadow-none print:w-full print:max-w-full print:h-auto print:overflow-visible print:block">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2 print:hidden"></div>
             
             <div className="flex justify-between items-center mb-8 relative z-10 print:hidden">
@@ -3285,7 +3292,7 @@ export function AdminPanel() {
                   </div>
                   <div className="md:col-span-2">
                     <span className="block text-xs font-bold text-indigo-500 mb-1">البريد الإلكتروني</span>
-                    <p className="font-bold text-brand-900">{shippingContactOrder.data.contactEmail || '—'}</p>
+                    <p className="font-bold text-brand-900">{shippingContactOrder.data.email || '—'}</p>
                   </div>
                 </div>
               </div>
@@ -3311,6 +3318,13 @@ export function AdminPanel() {
                   </div>
                 </div>
               </div>
+
+              {(shippingContactOrder.printReadyLink || printReadyLink) && (
+                <div className="hidden print:block bg-gray-50 p-6 border border-gray-200 text-left dir-ltr mt-6 break-inside-avoid">
+                  <span className="block text-xs font-bold text-gray-500 mb-1 dir-rtl text-right">رابط تحميل السجل الأساسي (مُجهز للطباعة)</span>
+                  <a href={shippingContactOrder.printReadyLink || printReadyLink} className="text-blue-600 font-mono text-sm underline break-all">{shippingContactOrder.printReadyLink || printReadyLink}</a>
+                </div>
+              )}
 
               <div className="print:hidden bg-white p-6 rounded-2xl border border-gray-200">
                 <label className="block font-bold text-brand-900 mb-2">رابط تحميل السجل (مُجهز للطباعة)</label>

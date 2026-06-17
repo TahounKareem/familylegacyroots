@@ -57,7 +57,85 @@ const ISO_MAP: Record<string, string> = {
 
 export const getStatesForCountry = (countryId: string | undefined): { name: string, isoCode: string }[] => {
   if (!countryId) return [];
-  const iso2 = ISO_MAP[countryId];
-  if (!iso2) return [];
-  return State.getStatesOfCountry(iso2) || [];
+  
+  if (countryId === "السعودية") {
+    return [
+      { name: "الرياض", isoCode: "01" },
+      { name: "مكة المكرمة", isoCode: "02" },
+      { name: "المدينة المنورة", isoCode: "03" },
+      { name: "القصيم", isoCode: "04" },
+      { name: "المنطقة الشرقية", isoCode: "05" },
+      { name: "عسير", isoCode: "06" },
+      { name: "تبوك", isoCode: "07" },
+      { name: "حائل", isoCode: "08" },
+      { name: "الحدود الشمالية", isoCode: "09" },
+      { name: "جازان", isoCode: "10" },
+      { name: "نجران", isoCode: "11" },
+      { name: "الباحة", isoCode: "12" },
+      { name: "الجوف", isoCode: "14" }
+    ];
+  }
+  
+  if (countryId === "الامارات") {
+    return [
+      { name: "أبو ظبي", isoCode: "AZ" },
+      { name: "دبي", isoCode: "DU" },
+      { name: "الشارقة", isoCode: "SH" },
+      { name: "عجمان", isoCode: "AJ" },
+      { name: "أم القيوين", isoCode: "UQ" },
+      { name: "رأس الخيمة", isoCode: "RK" },
+      { name: "الفجيرة", isoCode: "FU" }
+    ];
+  }
+
+  if (countryId === "الكويت") {
+    return [
+      { name: "العاصمة", isoCode: "KU" },
+      { name: "حولي", isoCode: "HA" },
+      { name: "الفروانية", isoCode: "FA" },
+      { name: "مبارك الكبير", isoCode: "MU" },
+      { name: "الأحمدي", isoCode: "AH" },
+      { name: "الجهراء", isoCode: "JA" }
+    ];
+  }
+
+  if (countryId === "البحرين") {
+    return [
+      { name: "العاصمة", isoCode: "13" },
+      { name: "المحرق", isoCode: "15" },
+      { name: "الشمالية", isoCode: "17" },
+      { name: "الجنوبية", isoCode: "14" }
+    ];
+  }
+  
+  if (countryId === "قطر") {
+    return [
+      { name: "الدوحة", isoCode: "DA" },
+      { name: "الريان", isoCode: "RA" },
+      { name: "الوكرة", isoCode: "WA" },
+      { name: "الخور", isoCode: "KH" },
+      { name: "الشمال", isoCode: "SH" },
+      { name: "أم صلال", isoCode: "US" },
+      { name: "الضعاين", isoCode: "ZA" }
+    ];
+  }
+  
+  if (countryId === "عمان") {
+     return [
+      { name: "مسقط", isoCode: "MU" },
+      { name: "ظفار", isoCode: "ZU" },
+      { name: "مسندم", isoCode: "MU" },
+      { name: "البريمي", isoCode: "BU" },
+      { name: "الداخلية", isoCode: "DA" },
+      { name: "شمال الباطنة", isoCode: "BS" },
+      { name: "جنوب الباطنة", isoCode: "BJ" },
+      { name: "شمال الشرقية", isoCode: "SS" },
+      { name: "جنوب الشرقية", isoCode: "SJ" },
+      { name: "الظاهرة", isoCode: "ZA" },
+      { name: "الوسطى", isoCode: "WU" }
+     ];
+  }
+
+  // Fallback to empty array which renders a text input for the user to type in Arabic manually
+  return [];
 };

@@ -675,7 +675,9 @@ export function Dashboard() {
                         order?.actionPhase === "مرحلة البحث";
                       const isState4 =
                         order?.issueStatus === "جاري التنفيذ" &&
-                        order?.actionPhase === "مرحلة التوثيق";
+                        (order?.actionPhase === "مرحلة التوثيق" || 
+                         order?.actionPhase === "تمت المسودة" ||
+                         order?.actionPhase === "تم التصميم الإلكتروني");
                       const isState5 = order?.issueStatus === "تم الإصدار";
                       const isState6 =
                         order?.issueStatus === "جاري التصويب" ||
@@ -2313,7 +2315,45 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {order?.status !== "مكتمل" &&
+                      {order?.issueStatus === "تم الإغلاق" || order?.actionPhase === "تم التسليم" ? (
+                        <div className="text-center py-10 px-4">
+                           <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                           <h3 className="text-xl font-bold text-brand-900 mb-2">
+                             تم إصدار النسخة النهائية من سجل تراث عائلتكم
+                           </h3>
+                           <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed mb-8">
+                             ويمكنكم استعراض وتحميل هذه النسخة من نافذة "النسخة الرقمية" كما تم ارسال النسخ الورقية وبوستر مخطط عمود النسب الى عنوانكم البريدي.
+                           </p>
+                           {order?.messages && order.messages.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).length > 0 && (
+                             <div className="mt-8 text-right bg-white p-6 rounded-2xl border border-brand-200 shadow-sm max-w-4xl mx-auto">
+                               <h4 className="font-bold mb-6 text-xl flex items-center justify-center gap-2"><Clock className="w-6 h-6 text-brand-600" />طلبات التصويب السابقة</h4>
+                               <div className="space-y-4">
+                                {order.messages.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map(msg => (
+                                  <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
+                                     <div className="flex justify-between items-start mb-2">
+                                       <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">تم الإرسال</span>
+                                       <span className="text-xs text-brand-500 font-mono" dir="ltr">
+                                         {new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(msg.createdAt))}
+                                       </span>
+                                     </div>
+                                     <p className="text-brand-800 whitespace-pre-line text-sm mt-3">{msg.text}</p>
+                                  </div>
+                                ))}
+                               </div>
+                             </div>
+                           )}
+                        </div>
+                      ) : order?.actionPhase === "تم التصويب" || order?.actionPhase === "جاهز للطباعة" || order?.actionPhase === "تم تجهيز السجل للطباعة" || order?.status === "تأكيد اعتماد النسخة" ? (
+                        <div className="text-center py-10 px-4">
+                           <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                           <h3 className="text-xl font-bold text-brand-900 mb-2">
+                             سجل عائلتكم في مرحلة الطباعة النهائية!
+                           </h3>
+                           <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed">
+                             يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
+                           </p>
+                        </div>
+                      ) : order?.status !== "مكتمل" &&
                       order?.status !== "طلب مكتمل" &&
                       order?.status !== "تم تسليم الإصدار الأول" &&
                       order?.status !== "تم الإصدار" &&

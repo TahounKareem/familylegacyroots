@@ -212,7 +212,7 @@ export function OrderFlow() {
         recordType: "سجل أساسي",
         paymentStatus: paymentType === "full" ? "مدفوع بالكامل" : "مدفوع أول دفعة",
         issueStatus: "بإنتظار إتمام الدفع", // Will change to جاري التنفيذ after payment hook, but for now we set it as waiting
-        actionPhase: "مرحلة البحث",
+        actionPhase: "بإنتظار إتمام الدفع",
         totalAmount: totalCost,
         contractSigned: true,
         contractSignedAt: new Date().toISOString(),
@@ -239,7 +239,14 @@ export function OrderFlow() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         
         {/* Navigation Back */}
-        <div className="mb-6 flex justify-end items-center">
+        <div className="mb-6 flex justify-between items-center">
+          <button 
+            onClick={() => navigate("/dashboard")} 
+            className="flex items-center gap-2 text-brand-600 hover:text-brand-800 font-bold bg-white px-4 py-2 rounded-full border border-brand-200 shadow-sm transition-all hover:bg-brand-50"
+          >
+            <ArrowRight className="w-4 h-4" />
+            العودة للرئيسية
+          </button>
           
           {currentUser && (
             <div className="flex items-center gap-3 text-sm font-medium text-brand-700 bg-white px-4 py-2 rounded-full border border-brand-100 shadow-sm">
