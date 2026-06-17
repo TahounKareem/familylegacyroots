@@ -50,6 +50,7 @@ import {
   Archive,
   FolderTree,
   Save,
+  Trash2,
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { TimelineBuilder } from "./TimelineBuilder";
