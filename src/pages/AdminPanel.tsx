@@ -117,6 +117,7 @@ export function AdminPanel() {
 
   const [isFulfilling, setIsFulfilling] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [showDesignModal, setShowDesignModal] = useState<string | null>(null);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [readNotifIds, setReadNotifIds] = useState<Set<string>>(() => {
@@ -1163,67 +1164,73 @@ export function AdminPanel() {
                             <tr className="bg-brand-50/80 border-b border-brand-100">
                               <td colSpan={10} className="px-4 py-3">
                                 <div className="flex flex-col md:flex-row items-center gap-4 bg-white p-3 rounded-lg shadow-sm border border-brand-100 w-full justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <label className="text-xs text-brand-600 font-bold whitespace-nowrap">
-                                      الباحث المسؤول:
-                                    </label>
-                                    <select
-                                      className="border border-brand-200 rounded px-3 py-1.5 text-xs bg-white font-bold text-brand-800 outline-none cursor-pointer min-w-[150px]"
-                                      value={order.assignedResearcher || ""}
-                                      onChange={async (e) => {
-                                        try {
-                                          const newResearcherId = e.target.value;
-                                          const researcherName =
-                                            usersList.find(
-                                              (u) => u.id === newResearcherId,
-                                            )?.name || "باحث";
-
-                                          const updateData = {
-                                            assignedResearcher: newResearcherId,
-                                            issueStatus: "جاري التنفيذ" as const,
-                                            actionPhase: "مرحلة البحث" as const,
-                                          };
-                                          await updateDoc(
-                                            doc(db, "orders", order.id),
-                                            updateData,
-                                          );
-                                          useAppStore.setState((s) => ({
-                                            orders: s.orders.map((o) =>
-                                              o.id === order.id
-                                                ? { ...o, ...updateData }
-                                                : o,
-                                            ),
-                                          }));
-                                          await useAppStore
-                                            .getState()
-                                            .logTimelineEvent(
-                                              order.id,
-                                              `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`,
+                                  {order.issueStatus !== "طلب غير مكتمل" ? (
+                                    <div className="flex items-center gap-2">
+                                      <label className="text-xs text-brand-600 font-bold whitespace-nowrap">
+                                        الباحث المسؤول:
+                                      </label>
+                                      <select
+                                        className="border border-brand-200 rounded px-3 py-1.5 text-xs bg-white font-bold text-brand-800 outline-none cursor-pointer min-w-[150px]"
+                                        value={order.assignedResearcher || ""}
+                                        onChange={async (e) => {
+                                          try {
+                                            const newResearcherId = e.target.value;
+                                            const researcherName =
+                                              usersList.find(
+                                                (u) => u.id === newResearcherId,
+                                              )?.name || "باحث";
+  
+                                            const updateData = {
+                                              assignedResearcher: newResearcherId,
+                                              issueStatus: "جاري التنفيذ" as const,
+                                              actionPhase: "مرحلة البحث" as const,
+                                            };
+                                            await updateDoc(
+                                              doc(db, "orders", order.id),
+                                              updateData,
                                             );
-                                          
-                                          // Note: sendResearchAssignedEmail handles any potential async issues gracefully
-                                          import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
-                                            sendResearchAssignedEmail(order.data?.familyName || "العائلة", order.id).catch(console.error);
-                                          });
-                                          alert("تم تعيين الباحث وتحديث حالة الطلب بنجاح!");
-                                        } catch (error) {
-                                          console.error("Assignment error:", error);
-                                          alert("حدث خطأ أثناء المحاولة، يرجى التأكد من الصلاحيات والاتصال بالإنترنت.");
-                                        }
-                                      }}
-                                    >
-                                      <option value="">
-                                        -- لم يتم التعيين --
-                                      </option>
-                                      {usersList
-                                        .filter((u) => u.role !== "user")
-                                        .map((u) => (
-                                          <option key={u.id} value={u.id}>
-                                            {u.name || u.email}
-                                          </option>
-                                        ))}
-                                    </select>
-                                  </div>
+                                            useAppStore.setState((s) => ({
+                                              orders: s.orders.map((o) =>
+                                                o.id === order.id
+                                                  ? { ...o, ...updateData }
+                                                  : o,
+                                              ),
+                                            }));
+                                            await useAppStore
+                                              .getState()
+                                              .logTimelineEvent(
+                                                order.id,
+                                                `تم تعيين الباحث: ${researcherName} وتغيير الحالة إلى جاري التنفيذ.`,
+                                              );
+                                            
+                                            // Note: sendResearchAssignedEmail handles any potential async issues gracefully
+                                            import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
+                                              sendResearchAssignedEmail(order.data?.familyName || "العائلة", order.id).catch(console.error);
+                                            });
+                                            alert("تم تعيين الباحث وتحديث حالة الطلب بنجاح!");
+                                          } catch (error) {
+                                            console.error("Assignment error:", error);
+                                            alert("حدث خطأ أثناء المحاولة، يرجى التأكد من الصلاحيات والاتصال بالإنترنت.");
+                                          }
+                                        }}
+                                      >
+                                        <option value="">
+                                          -- لم يتم التعيين --
+                                        </option>
+                                        {usersList
+                                          .filter((u) => u.role !== "user")
+                                          .map((u) => (
+                                            <option key={u.id} value={u.id}>
+                                              {u.name || u.email}
+                                            </option>
+                                          ))}
+                                      </select>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center">
+                                      <span className="text-xs text-gray-500 font-bold bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">الطلب غير مكتمل ولا يمكن تعيين باحث حالياً.</span>
+                                    </div>
+                                  )}
 
                                   <div className="flex items-center gap-2 overflow-x-auto">
                                     <button
@@ -1340,7 +1347,7 @@ export function AdminPanel() {
                   </thead>
                   <tbody className="divide-y divide-brand-50">
                     {orders
-                      .filter((o) => !o.isDeleted)
+                      .filter((o) => !o.isDeleted && o.issueStatus !== "بإنتظار إتمام الدفع" && o.issueStatus !== "طلب غير مكتمل")
                       .map((order) => (
                         <React.Fragment key={`rm-${order.id}`}>
                           <tr className={order.actionPhase === "تم التسليم" ? "bg-gray-100/60 opacity-80 transition" : "hover:bg-brand-50/30 transition"}>
@@ -1440,7 +1447,7 @@ export function AdminPanel() {
                                     }}
                                     className="border border-brand-300 rounded px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white shadow-sm font-bold w-full max-w-[150px]"
                                   >
-                                    <option value="مرحلة البحث">مرحلة البحث</option>
+                                    {currentPhase === "مرحلة البحث" && <option value="مرحلة البحث">مرحلة البحث</option>}
                                     <option value="مرحلة التوثيق">مرحلة التوثيق</option>
                                   </select>
                                 );
@@ -1905,7 +1912,7 @@ export function AdminPanel() {
                                   </a>
                                   {order.data.designTemplate && (
                                     <button
-                                      onClick={() => alert('قالب التصميم المختار: ' + order.data.designTemplate)}
+                                      onClick={() => setShowDesignModal(order.data.designTemplate)}
                                       className="px-4 py-2 bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs w-full"
                                     >
                                       <Palette className="w-4 h-4" /> عرض قالب التصميم
@@ -3173,6 +3180,34 @@ export function AdminPanel() {
                     <Send className="w-5 h-5" /> تأكيد التسليم لإدارة التصميم
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDesignModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-brand-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div className="p-8 text-center relative z-10">
+              <div className="w-20 h-20 bg-brand-50 border border-brand-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <Palette className="w-10 h-10 text-brand-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-brand-900 mb-2 font-serif">قالب التصميم المختار</h3>
+              <p className="text-brand-600 mb-8 font-medium">الرجاء اعتماد هذا التصميم للعمل عليه</p>
+              
+              <div className="bg-gradient-to-tr from-brand-50 to-white border ${showDesignModal.toLowerCase().includes('فضي') ? 'border-gray-300' : showDesignModal.toLowerCase().includes('ذهب') ? 'border-yellow-400' : 'border-brand-200'} rounded-2xl p-6 mb-8 transform transition-transform hover:scale-105 shadow-md">
+                <div className="text-3xl font-bold text-brand-800 leading-relaxed font-serif pb-2 border-b border-brand-100 mb-4">{showDesignModal}</div>
+                <div className="text-sm text-brand-600 font-medium whitespace-pre-wrap leading-relaxed">بناءً على طلب العميل، هذا هو الخيار الذي تم الاستقرار عليه لتجهيز السجل.</div>
+              </div>
+              
+              <button
+                onClick={() => setShowDesignModal(null)}
+                className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition shadow-md hover:shadow-lg text-lg"
+              >
+                حسناً، إغلاق
               </button>
             </div>
           </div>
