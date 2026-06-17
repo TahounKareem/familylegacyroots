@@ -15,13 +15,13 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
         const consentsSnap = await getDocs(consentsQ);
         const consentsData = consentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // Manually sort since we don't have composite index for orderBy right now
-        consentsData.sort((a, b) => (b.acceptedAt?.toMillis() || 0) - (a.acceptedAt?.toMillis() || 0));
+        consentsData.sort((a: any, b: any) => (b.acceptedAt?.toMillis() || 0) - (a.acceptedAt?.toMillis() || 0));
         setConsents(consentsData);
 
         const evidenceQ = query(collection(db, 'order_evidence'), where('userId', '==', userId));
         const evidenceSnap = await getDocs(evidenceQ);
         const evidenceData = evidenceSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        evidenceData.sort((a, b) => (b.generatedAt?.toMillis() || 0) - (a.generatedAt?.toMillis() || 0));
+        evidenceData.sort((a: any, b: any) => (b.generatedAt?.toMillis() || 0) - (a.generatedAt?.toMillis() || 0));
         setEvidences(evidenceData);
       } catch (e) {
         console.error("Failed to fetch compliance report data", e);

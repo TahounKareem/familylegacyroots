@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useAppStore,
   Order,
@@ -150,17 +150,17 @@ export function AdminPanel() {
         for (const event of order.timeline || []) {
           let includeEvent = true;
           if (role === "research") {
-             if (event.title.includes("طباعة") || event.title.includes("دفع") || event.title.includes("شحن") || event.title.includes("شريط")) includeEvent = false;
+             if (event.message.includes("طباعة") || event.message.includes("دفع") || event.message.includes("شحن") || event.message.includes("شريط")) includeEvent = false;
           } else if (role === "shipping") {
-             if (event.title.includes("دفع") || event.title.includes("باحث") || event.title.includes("بحث")) includeEvent = false;
+             if (event.message.includes("دفع") || event.message.includes("باحث") || event.message.includes("بحث")) includeEvent = false;
           }
 
           if (includeEvent) {
             events.push({
                id: event.id,
-               title: event.title,
+               title: event.message,
                message: `تحديث في طلب العائلة: ${order.data.firstName} ${order.data.familyName} - #${order.orderNumber || order.id.substring(0, 6)}`,
-               timestamp: new Date(event.date).getTime(),
+               timestamp: new Date(event.timestamp).getTime(),
                orderId: order.id,
                type: "order_update"
             });
@@ -1371,19 +1371,19 @@ export function AdminPanel() {
                             <td className="px-4 py-4">
                               {(() => {
                                 const currentPhase = order.actionPhase || "مرحلة البحث";
-                                const isResearchPhase = currentPhase === "مرحلة البحث" || currentPhase === "مرحلة التوثيق" || currentPhase === "قيد البحث";
+                                const isResearchPhase = currentPhase === "مرحلة البحث" || currentPhase === "مرحلة التوثيق";
                                 
                                 if (!isResearchPhase) {
                                   return (
                                     <span className="px-3 py-1.5 rounded-md font-bold text-xs inline-block border bg-gray-100 text-gray-700 border-gray-300">
-                                      {currentPhase === "قيد البحث" ? "مرحلة البحث" : currentPhase}
+                                      {currentPhase}
                                     </span>
                                   );
                                 }
 
                                 return (
                                   <select
-                                    value={currentPhase === "قيد البحث" ? "مرحلة البحث" : currentPhase}
+                                    value={currentPhase}
                                     onChange={async (e) => {
                                       const newPhase = e.target.value as ActionPhase;
                                       const updateData: any = {
@@ -3190,7 +3190,7 @@ export function AdminPanel() {
                 <p className="font-bold text-brand-900 mb-2 border-b border-brand-100 pb-2">تفاصيل المطالبة (رسالة البريد الإلكتروني):</p>
                 <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {(() => {
-                    const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
+                    const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق";
                     const amount = isPhase2 ? "693" : "594";
                     const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
                     const paymentLink = isPhase2 
@@ -3206,7 +3206,7 @@ export function AdminPanel() {
               
               <button
                 onClick={async () => {
-                  const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
+                  const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق";
                   const amount = isPhase2 ? "693" : "594";
                   const phaseName = isPhase2 ? "مرحلة التوثيق" : "التصميم الإلكتروني";
                   const paymentLink = isPhase2 

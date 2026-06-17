@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import { useAppStore, Message, Order, FamilyData } from "@/lib/store";
+import { useAppStore, Message, Order, FamilyData, MediaItem } from "@/lib/store";
 import { storage, auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -209,10 +209,13 @@ export function Dashboard() {
     setPendingUpload({ file, arrayName: type });
     setAgreeToUploadTerms(false);
     setMediaMeta({
+      url: "",
       title: "",
       kind: "",
       description: "",
       purpose: "إضافة لسجل تراث العائلة",
+      approximateDate: "",
+      associatedPersonsOrPlaces: "",
       isCover: false,
     });
   };
@@ -2215,7 +2218,7 @@ export function Dashboard() {
                                           text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
                                           createdAt: new Date().toISOString(),
                                         }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
-                                        useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.", currentUser.name);
+                                        useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
                                       }}
                                       className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
                                     >

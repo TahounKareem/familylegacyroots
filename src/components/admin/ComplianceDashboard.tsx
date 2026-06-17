@@ -37,8 +37,10 @@ interface AuditLog {
   action: string;
   userId: string;
   details: string;
-  timestamp: string;
+  timestamp: string | any;
   ipAddress?: string;
+  eventType?: string;
+  preferences?: any;
 }
 
 interface DocumentVersion {

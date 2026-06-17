@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  addDoc,
 } from "firebase/firestore";
 
 enum OperationType {
@@ -196,12 +197,13 @@ export interface TimelineFormEvent {
   id: string;
   title: string;
   type?: string;
+  date?: string; // added to match code
   period: string;
   description: string;
   location?: string;
-  associatedPeople?: string;
+  associatedPeople?: string[]; // force array
   attachments?: (string | MediaItem)[];
-  dateAccuracy?: "مؤكد" | "تقريبي" | "رواية متوارثة" | "غير محدد";
+  dateAccuracy?: "مؤكد" | "تقريبي" | "رواية متوارثة" | "غير محدد" | "confirmed" | "approximate" | "inherited" | "unknown";
   source?: string;
 }
 
@@ -211,6 +213,7 @@ export interface FamilyData {
   grandfatherName: string;
   familyName: string;
   tribeName?: string;
+  contactEmail?: string;
   country: string;
   homeland: string;
   startingPointType?: string;
@@ -274,6 +277,7 @@ export interface Order {
   researchDraftLink?: string;
   initialDesignLink?: string;
   postCorrectionLink?: string;
+  printReadyLink?: string;
   designLinks?: {
     recordLink: string;
     downloadLink?: string;
