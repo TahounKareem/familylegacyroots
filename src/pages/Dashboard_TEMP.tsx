@@ -73,7 +73,6 @@ export function Dashboard() {
   const photosInputRef = useRef<HTMLInputElement>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
   const [replyAttachments, setReplyAttachments] = useState<string[]>([]);
-  const [successModal, setSuccessModal] = useState<{isOpen: boolean, title: string, subtitle: string, isDone?: boolean}>({isOpen: false, title: "", subtitle: ""});
   const chatFileInputRef = useRef<HTMLInputElement>(null);
 
   const [pendingUpload, setPendingUpload] = useState<{
@@ -306,14 +305,10 @@ export function Dashboard() {
         "العميل أرسل طلب تصويب - تم تغيير الحالة إلى جاري التصويب"
       );
       
-      import("@/lib/emailService").then(({ sendCustomerCorrectionsReceivedEmail, sendResearchCorrectionsEmail }) => {
+      import("@/lib/emailService").then(({ sendCustomerCorrectionsReceivedEmail }) => {
         sendCustomerCorrectionsReceivedEmail(
           currentUser.email || "info@thefamilylegacyroots.com", 
           currentUser.name || "العميل الكريم", 
-          order.orderNumber || order.id
-        ).catch(console.error);
-        sendResearchCorrectionsEmail(
-          order.data?.familyName || "العائلة",
           order.orderNumber || order.id
         ).catch(console.error);
       });
@@ -323,12 +318,8 @@ export function Dashboard() {
 
     setCorrections([{ section: "", page: "", text: "", error: "" }]);
     setAgreeToCorrectionTerms(false);
-    setSuccessModal({
-      isOpen: true,
-      title: "تم إرسال طلب التصويب بنجاح!",
-      subtitle: "استلمنا طلب التصويب، سيقوم فريق البحث والتوثيق بمراجعته ودراسته وسنوافيك بالتحديثات فور الانتهاء."
-    });
     setShowCorrectionTerms(false);
+    alert("تم إرسال طلب التصويب بنجاح. سيقوم فريق البحث بمراجعته.");
   };
 
   const handleSendReply = () => {
@@ -861,48 +852,7 @@ export function Dashboard() {
 
                           {(isState3 || isState4) && (
                             <>
-                                                            <div className="mt-8 bg-white rounded-3xl p-8 border-2 border-brand-200 shadow-sm text-center relative overflow-hidden">
-                                <div className="absolute top-0 start-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl -translate-x-10 -translate-y-10 opacity-50 pointer-events-none"></div>
-                                <div className="absolute bottom-0 end-0 w-32 h-32 bg-brand-100 rounded-full blur-3xl translate-x-10 translate-y-10 opacity-50 pointer-events-none"></div>
-                                <h3 className="text-2xl font-bold text-brand-900 mb-6 relative z-10">
-                                  نسبة المساهمة في الإثراء
-                                </h3>
-                                {(() => {
-                                  const closedCount = Object.values(order.data.sectionStatuses || {}).filter(s => s === "closed").length;
-                                  const completionPercentage = (closedCount / 10) * 100;
-                                  const orderDate = new Date(order.createdAt);
-                                  const endDate = new Date(orderDate.getTime() + 15 * 24 * 60 * 60 * 1000);
-                                  const today = new Date();
-                                  const remainingMs = endDate.getTime() - today.getTime();
-                                  const remainingDays = remainingMs > 0 ? Math.ceil(remainingMs / (1000 * 60 * 60 * 24)) : 0;
-                                  
-                                  return (
-                                    <div className="relative z-10 max-w-2xl mx-auto">
-                                      <div className="w-full bg-gray-100 rounded-full h-8 mb-4 border border-gray-200 overflow-hidden relative">
-                                        <div 
-                                          className="bg-green-500 h-8 rounded-full transition-all duration-1000 flex items-center justify-center text-white font-bold text-sm"
-                                          style={{ width: `${completionPercentage}%` }}
-                                        >
-                                          {completionPercentage > 5 && `${completionPercentage}%`}
-                                        </div>
-                                        {completionPercentage <= 5 && <div className="absolute inset-0 flex items-center justify-center text-brand-700 font-bold text-sm">{completionPercentage}%</div>}
-                                      </div>
-                                      
-                                      {completionPercentage === 100 ? (
-                                        <p className="text-green-600 font-bold text-lg flex items-center justify-center gap-2 animate-pulse">
-                                          <Sparkles className="w-5 h-5"/> شكراً لك، لقد أتممت مساهمتك في الإثراء بنجاح! <Sparkles className="w-5 h-5"/>
-                                        </p>
-                                      ) : (
-                                        <p className="text-brand-700 font-bold text-lg bg-brand-50 p-3 rounded-xl inline-block border border-brand-100 shadow-sm">
-                                          لازال أمامك ({remainingDays} يوم) لاستكمال المساهمة في الإثراء
-                                        </p>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-
-<div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
+                              <div className="bg-white rounded-3xl p-8 border border-brand-100 shadow-sm mt-8">
                                 <div className="text-center mb-8">
                                   <h3 className="text-2xl font-bold text-brand-900 mb-4">
                                     إثراء السجل العائلي
@@ -927,12 +877,12 @@ export function Dashboard() {
                                     { tab: "كلمة أمين السجل", icon: <PenTool className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "تقديم وكلمة شخصية", desc: "نافذة تتيح لك كتابة تقديم لسجلك بحرية كاملة." },
                                     { tab: "نبذة عن العائلة", icon: <FileText className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "اكتب قصة عائلتكم", desc: "أضف نبذة تعريفية تُمهّد لسجل العائلة وتعكس هويتها." },
                                     { tab: "أماكن ارتبطت بالعائلة", icon: <MapPin className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "المأوى والجذور", desc: "وثق الأماكن التي ارتبطت بتطور واستقرار العائلة." },
-                                    { tab: "أعلام الأسرة وألقابها", icon: <Users className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الألقاب والأسماء", desc: "نبذة عن الألقاب التاريخية ومصادر أسماء العائلة." },
+                                    { tab: "أعلام الأسرة وألقابها", icon: <ShieldCheck className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الألقاب والأسماء", desc: "نبذة عن الألقاب التاريخية ومصادر أسماء العائلة." },
                                     { tab: "شخصيات ورموز العائلة", icon: <Star className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الرموز والشخصيات", desc: "توثيق للشخصيات البارزة والمحورية في تاريخ العائلة." },
                                     { tab: "المهن والأعمال والإرث المهني", icon: <Briefcase className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "النشاط المهني والتجاري", desc: "ما تميزت به العائلة من مهن وتجارة عبر الأجيال." },
                                     { tab: "ذاكرة العائلة والإرث الاجتماعي", icon: <HeartHandshake className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "العادات والتراث", desc: "تدوين للتراث الاجتماعي والعادات التي احتفظت بها العائلة." },
                                     { tab: "خزانة السجل (أرشيف العائلة)", icon: <Archive className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "الصور والوثائق", desc: "أرشيف يضم الوثائق والمخطوطات والصور القديمة." },
-                                    { tab: "نافذة الإدراج العائلي", icon: <FolderTree className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "مخطط شجرة العائلة", desc: "أدرج أفراد عائلتك في مخطط الشجرة المدمج." },
+                                    { tab: "نافذة الإدراج العائلي", icon: <Users className="w-10 h-10 text-brand-400 mb-4 group-hover:text-brand-600 transition" />, subtitle: "مخطط شجرة العائلة", desc: "أدرج أفراد عائلتك في مخطط الشجرة المدمج." },
                                   ].map((item, idx) => {
                                     const keyMap: Record<string, string> = {
                                       "كلمة أمين السجل": "managerWord",
@@ -1020,7 +970,46 @@ export function Dashboard() {
                                 </div>
                               </div>
 
-
+                              <div className="mt-8 bg-white rounded-3xl p-8 border-2 border-brand-200 shadow-sm text-center relative overflow-hidden">
+                                <div className="absolute top-0 start-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl -translate-x-10 -translate-y-10 opacity-50 pointer-events-none"></div>
+                                <div className="absolute bottom-0 end-0 w-32 h-32 bg-brand-100 rounded-full blur-3xl translate-x-10 translate-y-10 opacity-50 pointer-events-none"></div>
+                                <h3 className="text-2xl font-bold text-brand-900 mb-6 relative z-10">
+                                  نسبة إنجاز ملف العائلة
+                                </h3>
+                                {(() => {
+                                  const closedCount = Object.values(order.data.sectionStatuses || {}).filter(s => s === "closed").length;
+                                  const completionPercentage = (closedCount / 10) * 100;
+                                  const orderDate = new Date(order.createdAt);
+                                  const endDate = new Date(orderDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+                                  const today = new Date();
+                                  const remainingMs = endDate.getTime() - today.getTime();
+                                  const remainingDays = remainingMs > 0 ? Math.ceil(remainingMs / (1000 * 60 * 60 * 24)) : 0;
+                                  
+                                  return (
+                                    <div className="relative z-10 max-w-2xl mx-auto">
+                                      <div className="w-full bg-gray-100 rounded-full h-8 mb-4 border border-gray-200 overflow-hidden relative">
+                                        <div 
+                                          className="bg-green-500 h-8 rounded-full transition-all duration-1000 flex items-center justify-center text-white font-bold text-sm"
+                                          style={{ width: `${completionPercentage}%` }}
+                                        >
+                                          {completionPercentage > 5 && `${completionPercentage}%`}
+                                        </div>
+                                        {completionPercentage <= 5 && <div className="absolute inset-0 flex items-center justify-center text-brand-700 font-bold text-sm">{completionPercentage}%</div>}
+                                      </div>
+                                      
+                                      {completionPercentage === 100 ? (
+                                        <p className="text-green-600 font-bold text-lg flex items-center justify-center gap-2 animate-pulse">
+                                          <Sparkles className="w-5 h-5"/> شكراً لك، لقد أتممت ملف العائلة بنجاح! <Sparkles className="w-5 h-5"/>
+                                        </p>
+                                      ) : (
+                                        <p className="text-brand-700 font-bold text-lg bg-brand-50 p-3 rounded-xl inline-block border border-brand-100 shadow-sm">
+                                          لازال أمامك ({remainingDays} يوم) لاستكمال ملف عائلتك
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
                             </>
                           )}
                         </div>
@@ -1496,7 +1485,7 @@ export function Dashboard() {
                           placeholder="ابدا الكتابة هنا..."
                         />
                         
-                        {status !== "closed" ? (
+                        {status !== "closed" && !isPostInitialDelivery ? (
                           <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                             <button
                               onClick={() => {
@@ -1504,7 +1493,7 @@ export function Dashboard() {
                                   [key]: (order.data as any)[key],
                                   sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "draft" }
                                 });
-                                setSuccessModal({isOpen: true, title: "تم الحفظ كمسودة بنجاح!", subtitle: "لقد تم الحفظ بنجاح، يمكنك العودة لتعديل هذه البيانات في أي وقت."});
+                                alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
                               }}
                               className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
                             >
@@ -1513,12 +1502,10 @@ export function Dashboard() {
                             <button
                               onClick={() => {
                                 if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
                                   updateSpecificData({
                                     [key]: (order.data as any)[key],
                                     sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "closed" }
                                   });
-                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
                                 }
                               }}
                               className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
@@ -1560,14 +1547,14 @@ export function Dashboard() {
                         />
                       </div>
 
-                      {status !== "closed" && (
+                      {status !== "closed" && !isPostInitialDelivery && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
                               updateSpecificData({
                                 sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "draft" }
                               });
-                              setSuccessModal({isOpen: true, title: "تم الحفظ كمسودة بنجاح!", subtitle: "لقد تم الحفظ بنجاح، يمكنك العودة لتعديل هذه البيانات في أي وقت."});
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
                             }}
                             className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
                           >
@@ -1576,11 +1563,9 @@ export function Dashboard() {
                           <button
                             onClick={() => {
                               if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
                                 updateSpecificData({
                                   sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "closed" }
                                 });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
                               }
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
@@ -1879,7 +1864,7 @@ export function Dashboard() {
                               updateSpecificData({
                                 sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "draft" }
                               });
-                              setSuccessModal({isOpen: true, title: "تم الحفظ كمسودة بنجاح!", subtitle: "لقد تم الحفظ بنجاح، يمكنك العودة لتعديل هذه البيانات في أي وقت."});
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
                             }}
                             className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
                           >
@@ -1888,11 +1873,9 @@ export function Dashboard() {
                           <button
                             onClick={() => {
                               if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
                                 updateSpecificData({
                                   sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "closed" }
                                 });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
                               }
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
@@ -1945,14 +1928,14 @@ export function Dashboard() {
                         }}
                       />
 
-                      {status !== "closed" && (
+                      {status !== "closed" && !isPostInitialDelivery && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
                               updateSpecificData({
                                 sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "draft" }
                               });
-                              setSuccessModal({isOpen: true, title: "تم الحفظ كمسودة بنجاح!", subtitle: "لقد تم الحفظ بنجاح، يمكنك العودة لتعديل هذه البيانات في أي وقت."});
+                              alert("تم حفظ كمسودة بنجاح. يمكنك العودة لتعديلها لاحقاً.");
                             }}
                             className="flex-1 bg-white text-brand-700 font-bold py-3 px-4 rounded-xl border-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300 transition flex items-center justify-center gap-2"
                           >
@@ -1961,11 +1944,9 @@ export function Dashboard() {
                           <button
                             onClick={() => {
                               if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
                                 updateSpecificData({
                                   sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "closed" }
                                 });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
                               }
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
@@ -2374,9 +2355,10 @@ export function Dashboard() {
                              يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
                            </p>
                         </div>
-                      ) : !["مكتمل", "طلب مكتمل", "تم تسليم الإصدار الأول", "تم الإصدار", "جاهز للطباعة", "جاهز للتسليم للعميل"].includes(order?.status || "") &&
-                        !["جاري التصويب", "تم التصويب", "تم إصدار النسخة الأولية"].includes(order?.actionPhase || "") &&
-                        !["جاري التصويب", "تم التصويب"].includes(order?.issueStatus || "") ? (
+                      ) : !["مكتمل", "طلب مكتمل", "تم الإصدار", "تم تسليم الإصدار الأول"].includes(order?.status || "") &&
+                        !["جاري التصويب", "تم التصويب"].includes(order?.actionPhase || "") &&
+                        !["جاري التصويب", "تم التصويب", "تم الإصدار"].includes(order?.issueStatus || "") &&
+                        order?.actionPhase !== "تم إصدار النسخة الأولية" ? (
                         <div className="text-center py-10 px-4">
                           <CheckCircle className="w-16 h-16 text-brand-300 mx-auto mb-4" />
                           <h3 className="text-xl font-bold text-brand-900 mb-2">
@@ -2390,7 +2372,17 @@ export function Dashboard() {
                         </div>
                       ) : (
                         <div className="px-6 md:px-12 py-8">
-
+                          <div className="mb-4 bg-brand-50 p-6 rounded-2xl border border-brand-200">
+                             <div className="text-center mb-8">
+                               <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                               <h3 className="text-xl font-bold text-brand-900 mb-2">
+                                 تم إصدار النسخة النهائية من سجل تراث عائلتكم
+                               </h3>
+                               <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed">
+                                 ويمكنكم استعراض وتحميل هذه النسخة من نافذة "النسخة الرقمية" كما تم ارسال النسخ الورقية وبوستر مخطط عمود النسب الى عنوانكم البريدي.
+                               </p>
+                             </div>
+                          </div>
                           <h3 className="text-2xl font-bold text-brand-900 mb-6 flex items-center gap-3">
                             <FileText className="w-8 h-8 text-brand-600" />{" "}
                             نموذج طلب تصويب
@@ -2419,17 +2411,21 @@ export function Dashboard() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                       <div>
                                         <label className="block text-sm font-bold text-brand-700 mb-1">القسم</label>
-                                        <input
-                                          type="text"
+                                        <select
                                           className="w-full px-4 py-3 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
-                                          placeholder="اكتب اسم القسم هنا..."
                                           value={correction.section}
                                           onChange={(e) => {
                                             const newC = [...corrections];
                                             newC[index].section = e.target.value;
                                             setCorrections(newC);
                                           }}
-                                        />
+                                        >
+                                          <option value="">اختر القسم</option>
+                                          <option value="البيانات الشخصية">البيانات الشخصية</option>
+                                          <option value="نسب العائلة">نسب العائلة</option>
+                                          <option value="شيوخ وأعلام">شيوخ وأعلام</option>
+                                          <option value="ديار ومواطن">ديار ومواطن</option>
+                                        </select>
                                       </div>
                                       <div>
                                         <label className="block text-sm font-bold text-brand-700 mb-1">رقم الصفحة</label>
@@ -2701,6 +2697,11 @@ export function Dashboard() {
                           </div>
                           
                           <div className="flex flex-col md:flex-row gap-4 mb-2 border-t border-brand-100/50 pt-4">
+                            <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
+                              <span className="text-xs font-bold text-brand-400">البريد الإلكتروني</span>
+                              <span className="text-sm font-mono text-brand-800 break-all">{currentUser.email}</span>
+                            </div>
+                            
                             {order && (
                               <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
                                 <span className="text-xs font-bold text-brand-400">رقم الطلب</span>
@@ -3029,27 +3030,6 @@ export function Dashboard() {
         </div>
       </div>
       
-      
-      {successModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-md p-8 text-center shadow-2xl animate-fade-in relative overflow-hidden border border-brand-200">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-400 via-brand-600 to-brand-800"></div>
-            <div className="bg-brand-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-              <CheckCircle className="w-12 h-12 text-emerald-500" />
-            </div>
-            <h3 className="text-2xl font-bold text-brand-900 mb-3">{successModal.title}</h3>
-            <p className="text-brand-600 font-light mb-8 leading-relaxed">
-              {successModal.subtitle}
-            </p>
-            <button
-              onClick={() => setSuccessModal({isOpen: false, title: "", subtitle: ""})}
-              className="w-full bg-brand-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-brand-700 hover:shadow-xl transition-all duration-300"
-            >
-              حسناً، فهمت
-            </button>
-          </div>
-        </div>
-      )}
       {/* Footer */}
       <footer className="mt-20 border-t border-brand-200 bg-brand-50 pt-12 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-brand-700">

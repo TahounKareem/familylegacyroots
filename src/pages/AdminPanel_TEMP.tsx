@@ -131,9 +131,9 @@ export function AdminPanel() {
   });
 
   const notifications = useMemo(() => {
-    if (!currentUser || currentUser.role === "user") return [];
+    if (!currentUser || currentUser?.role === "user") return [];
     const events: any[] = [];
-    const role = currentUser.role;
+    const role = currentUser?.role;
 
     for (const order of orders) {
       if (order.isDeleted) continue;
@@ -159,7 +159,7 @@ export function AdminPanel() {
           }
 
           // Don't notify the user about their own actions
-          if (event.userId === currentUser.id) includeEvent = false;
+          if (event.userId === currentUser?.id) includeEvent = false;
 
           if (includeEvent) {
              const tId = event.id || Math.random().toString();
@@ -362,7 +362,7 @@ export function AdminPanel() {
       "shipping",
       "customer_service",
       "editor",
-    ].includes(currentUser.role);
+    ].includes(currentUser?.role);
   if (!currentUser) {
     return <Navigate to="/Team" />;
   }
@@ -381,7 +381,7 @@ export function AdminPanel() {
       messagingOrder.id,
       {
         id: Math.random().toString(36).substr(2, 9),
-        senderId: currentUser.id,
+        senderId: currentUser?.id,
         senderRole: "admin",
         text: replyText,
         createdAt: new Date().toISOString(),
@@ -1337,14 +1337,11 @@ export function AdminPanel() {
                         اسم العميل والعائلة
                       </th>
                       <th className="px-4 py-4 font-medium">نوع السجل</th>
-                      <th className="px-4 py-4 font-medium text-center text-xs">
-                        المساهمة في الإثراء
-                      </th>
                       <th className="px-4 py-4 font-medium">
                         مرحلة التنفيذ (الإجراء)
                       </th>
                       <th className="px-4 py-4 font-medium">
-                        التفاصيل
+                        الإجراءات التسويقية
                       </th>
                     </tr>
                   </thead>
@@ -1385,26 +1382,6 @@ export function AdminPanel() {
                                 {order.recordType || "سجل أساسي"}
                               </span>
                             </td>
-                            {(() => {
-                              const orderCreatedDate = new Date(order.createdAt);
-                              const targetDate = new Date(orderCreatedDate);
-                              targetDate.setDate(targetDate.getDate() + 15);
-                              const diffTime = targetDate.getTime() - new Date().getTime();
-                              const remDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                              const validDays = remDays > 0 ? remDays : 0;
-                              
-                              const closedCount = Object.values(order.data?.sectionStatuses || {}).filter(s => s === "closed").length;
-                              const pct = Math.round((closedCount / 10) * 100);
-                              
-                              return (
-                                <td className="px-4 py-4 text-center">
-                                  <div className="w-24 bg-brand-100 rounded-full h-1.5 mb-1 dark:bg-brand-200 mx-auto">
-                                    <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${pct}%` }}></div>
-                                  </div>
-                                  <span className="text-[10px] font-bold text-brand-600 block">{pct}% - متبقي {validDays} يوم</span>
-                                </td>
-                              )
-                            })()}
                             <td className="px-4 py-4">
                               {(() => {
                                 const currentPhase = order.actionPhase || "مرحلة البحث";
@@ -1524,7 +1501,7 @@ export function AdminPanel() {
                                 </div>
                               ) : (
                                 <div className="text-center text-gray-500 font-bold text-xs py-2 bg-gray-50 rounded-lg border border-gray-200">
-                                  تم تسليم السجل للعميل (مغلق)
+                                  تم تسليم السجل للعميل (مكتمل)
                                 </div>
                               )}
                             </td>
@@ -1943,7 +1920,7 @@ export function AdminPanel() {
                                   )}
                                 </>
                               )}
-                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم" || order.actionPhase === "تمت المسودة") && (
+                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم") && (
                                 <button
                                   onClick={() => {
                                     setPrintReadyLink(order.printReadyLink || "");
@@ -1963,23 +1940,12 @@ export function AdminPanel() {
                                 </button>
                               )}
                               {!isDelivered && order.actionPhase === "تم التصويب" && (
-                                <>
-                                  <button
-                                    onClick={() => setDesignSubmitOrder(order)}
-                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                                  >
-                                    <Upload className="w-4 h-4" /> روابط النسخة الرقمية
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setPrintReadyLink(order.printReadyLink || "");
-                                      setShippingContactOrder(order);
-                                    }}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.3)] mt-2 w-full"
-                                  >
-                                    <Printer className="w-4 h-4" /> تجهيز وتأكيد الطباعة/الشحن
-                                  </button>
-                                </>
+                                <button
+                                  onClick={() => setDesignSubmitOrder(order)}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                >
+                                  <Upload className="w-4 h-4" /> تسليم السجل جاهز للطباعة
+                                </button>
                               )}
                             </div>
                           </td>
@@ -2288,8 +2254,8 @@ export function AdminPanel() {
                         </td>
                         <td className="px-4 py-4 flex items-center gap-2">
                           {currentUser &&
-                          (currentUser.role === "maestro" ||
-                            currentUser.role === "admin") ? (
+                          (currentUser?.role === "maestro" ||
+                            currentUser?.role === "admin") ? (
                             <>
                               <select
                                 value={user.role}

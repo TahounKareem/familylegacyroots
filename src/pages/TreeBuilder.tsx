@@ -24,7 +24,7 @@ interface TreeBuilderProps {
 }
 
 export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, readOnly = false, familyName }: TreeBuilderProps) {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes.length ? initialNodes : [{ id: "root", name: familyName || "أنت", relation: "نقطة البداية", x: 300, y: 50 }]);
+  const [nodes, setNodes] = useState<Node[]>(initialNodes.length ? initialNodes : [{ id: "root", name: familyName || "اسم العائلة", relation: "نقطة البداية", x: 300, y: 50 }]);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   
   // Sync root node name with familyName if it hasn't been heavily manually changed and it's the beginning
