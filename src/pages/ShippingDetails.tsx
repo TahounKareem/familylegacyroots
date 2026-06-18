@@ -10,7 +10,7 @@ export function ShippingDetails() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/auth", { replace: true });
+      navigate("/auth?redirect=/shipping-details", { replace: true });
     } else if (!pendingOrderData) {
       navigate("/order", { replace: true });
     }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAppStore, AppRole } from "@/lib/store";
-import { useNavigate, Navigate, Link } from "react-router";
+import { useNavigate, Navigate, Link, useLocation } from "react-router";
 import { Home, Eye, EyeOff, UserPlus } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut, sendPasswordResetEmail } from "firebase/auth";
@@ -20,6 +20,7 @@ export function Auth() {
   
   const currentUser = useAppStore((state) => state.currentUser);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,6 +182,11 @@ export function Auth() {
   };
 
   if (currentUser) {
+    const searchParams = new URLSearchParams(location.search);
+    const redirectUrl = searchParams.get("redirect");
+    if (redirectUrl) {
+      return <Navigate to={redirectUrl} replace />;
+    }
     return <Navigate to={currentUser.role === "admin" ? "/admin" : "/dashboard"} replace />;
   }
 

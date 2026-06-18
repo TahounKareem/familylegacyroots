@@ -341,9 +341,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   orders: [],
   isAuthReady: false,
-  pendingOrderData: null,
+  pendingOrderData: (() => {
+    if (typeof window !== "undefined") {
+      try {
+        const item = localStorage.getItem("pendingOrderData");
+        return item ? JSON.parse(item) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  })(),
 
   setPendingOrderData: (data) => {
+    if (typeof window !== "undefined") {
+      if (data) {
+        localStorage.setItem("pendingOrderData", JSON.stringify(data));
+      } else {
+        localStorage.removeItem("pendingOrderData");
+      }
+    }
     set({ pendingOrderData: data });
   },
 
@@ -363,8 +380,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   placeOrder: async (order) => {
     try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("pendingOrderData");
+      }
       // Optimistic update
-      set((state) => ({ orders: [...state.orders, order] }));
+      set((state) => ({ 
+        orders: [...state.orders, order],
+        pendingOrderData: null
+      }));
       await setDoc(doc(db, "orders", order.id), order);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `orders/${order.id}`);

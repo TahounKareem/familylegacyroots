@@ -14,7 +14,7 @@ export function ServiceAgreement() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/auth", { replace: true });
+      navigate("/auth?redirect=/service-agreement", { replace: true });
     } else if (!pendingOrderData || !pendingOrderData.shippingAddress) {
       navigate("/shipping-details", { replace: true });
     }
