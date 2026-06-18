@@ -341,14 +341,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: null,
   orders: [],
   isAuthReady: false,
-  pendingOrderData:
-    typeof window !== "undefined" && localStorage.getItem("pendingOrderData")
-      ? JSON.parse(localStorage.getItem("pendingOrderData")!)
-      : null,
+  pendingOrderData: null,
 
   setPendingOrderData: (data) => {
-    if (data) localStorage.setItem("pendingOrderData", JSON.stringify(data));
-    else localStorage.removeItem("pendingOrderData");
     set({ pendingOrderData: data });
   },
 

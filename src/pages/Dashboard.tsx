@@ -263,7 +263,7 @@ export function Dashboard() {
         await updateSpecificData({
           [pendingUpload.arrayName]: [
             ...currentArr,
-            { url: downloadURL, ...mediaMeta },
+            { ...mediaMeta, url: downloadURL },
           ],
         });
         setIsUploading(false);
@@ -1897,8 +1897,9 @@ export function Dashboard() {
                           </button>
                           <button
                             onClick={() => {
-                              const files = order.data?.uploadedFiles || [];
-                              if (files.length === 0) {
+                              const docs = order.data?.documents || [];
+                              const photos = order.data?.photos || [];
+                              if (docs.length === 0 && photos.length === 0) {
                                 alert("يرجى رفع مرفقات قبل حفظ وإغلاق الخزانة.");
                                 return;
                               }
