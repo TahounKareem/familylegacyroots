@@ -101,9 +101,9 @@ export function Dashboard() {
         photoUrl: url,
       });
       useAppStore.setState({ currentUser: { ...currentUser, photoUrl: url } });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Profile photo upload failed", err);
-      alert("حدث خطأ أثناء رفع الصورة الشخصية.");
+      alert("حدث خطأ أثناء رفع الصورة الشخصية: " + (err.message || ''));
     } finally {
       setIsUploading(false);
     }
@@ -735,7 +735,7 @@ export function Dashboard() {
                           "“كل إضافة اليوم… تصبح جزءًا محفوظًا من ذاكرة العائلة للأجيال القادمة.”";
                         actionText = "حالياً نقوم بالأعمال البحثية";
                         subText =
-                          "نقوم بالأعمال البحثية وبناء عمود النسب لسجل عائلتكم وفق المواد والمعلومات المعتمدة. يمكنكم من هذه البوابة متابعة حالة الإصدار، وإضافة المحتوى الإثرائي الذي ترونه مناسبًا لإدراجه ضمن السجل.";
+                          "نقوم بالأعمال البحثية وبناء عمود النسب لسجل عائلتكم وفق المواد والمعلومات المعتمدة.";
                       } else if (isState4) {
                         title =
                           "“كل إضافة اليوم… تصبح جزءًا محفوظًا من ذاكرة العائلة للأجيال القادمة.”";
@@ -1477,11 +1477,11 @@ export function Dashboard() {
                         )}
 
                         <textarea
-                          className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${status === "closed" ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
-                          readOnly={status === "closed"}
+                          className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${(status === "closed" || order?.actionPhase === "تمت المسودة") ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
+                          readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
                           value={(order.data as any)[key] || ""}
                           onChange={(e) => {
-                            if (status === "closed") return;
+                            if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
                             const val = e.target.value;
                             useAppStore.setState((s) => ({
                               orders: s.orders.map((o) =>
@@ -1497,7 +1497,7 @@ export function Dashboard() {
                           placeholder="ابدا الكتابة هنا..."
                         />
                         
-                        {status !== "closed" ? (
+                        {status !== "closed" && order?.actionPhase !== "تمت المسودة" ? (
                           <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                             <button
                               onClick={() => {
@@ -1513,14 +1513,19 @@ export function Dashboard() {
                             </button>
                             <button
                               onClick={() => {
+                                const val = (order.data as any)[key];
+                                if (!val || typeof val !== "string" || val.trim() === "") {
+                                  alert("يرجى إضافة محتوى قبل الحفظ والإغلاق.");
+                                  return;
+                                }
                                 setConfirmState({
                                   isOpen: true,
                                   action: () => {
                                     updateSpecificData({
-                                      [key]: (order.data as any)[key],
+                                      [key]: val,
                                       sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "closed" }
                                     });
-                                    setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                    
                                   }
                                 });
                               }}
@@ -1554,16 +1559,16 @@ export function Dashboard() {
                         <TreeBuilder
                           initialNodes={order.data.treeData?.nodes || []}
                           initialEdges={order.data.treeData?.edges || []}
-                          readOnly={status === "closed"}
+                          readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
                           onChange={(nodes, edges) => {
-                            if (status === "closed") return;
+                            if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
                             updateSpecificData({ treeData: { nodes, edges } })
                           }}
                           familyName={order.data.familyName}
                         />
                       </div>
 
-                      {status !== "closed" && (
+                      {status !== "closed" && order?.actionPhase !== "تمت المسودة" && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1584,7 +1589,7 @@ export function Dashboard() {
                                   updateSpecificData({
                                     sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "closed" }
                                   });
-                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                  
                                 }
                               });
                             }}
@@ -1789,7 +1794,7 @@ export function Dashboard() {
                                 )}
                               </button>
                               <button
-                                disabled={isUploading}
+                                disabled={isUploading || order?.actionPhase === "تمت المسودة"}
                                 onClick={() => setPendingUpload(null)}
                                 className="flex-1 bg-white text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl py-3 font-bold transition"
                               >
@@ -1819,7 +1824,7 @@ export function Dashboard() {
                               }
                             }}
                             accept=".pdf,.doc,.docx,image/png,image/jpeg,image/jpg,image/webp"
-                            disabled={isUploading}
+                            disabled={isUploading || order?.actionPhase === "تمت المسودة"}
                           />
                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
                           <p className="text-brand-800 font-bold mb-2">
@@ -1877,7 +1882,7 @@ export function Dashboard() {
                         })}
                       </div>
 
-                      {order.data.sectionStatuses?.archive !== "closed" && (
+                      {order.data.sectionStatuses?.archive !== "closed" && order?.actionPhase !== "تمت المسودة" && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1892,13 +1897,18 @@ export function Dashboard() {
                           </button>
                           <button
                             onClick={() => {
+                              const files = order.data?.uploadedFiles || [];
+                              if (files.length === 0) {
+                                alert("يرجى رفع مرفقات قبل حفظ وإغلاق الخزانة.");
+                                return;
+                              }
                               setConfirmState({
                                 isOpen: true,
                                 action: () => {
                                   updateSpecificData({
                                     sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "closed" }
                                   });
-                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                  
                                 }
                               });
                             }}
@@ -1945,14 +1955,14 @@ export function Dashboard() {
                       </div>
                       <TimelineBuilder 
                         events={order.data.timelineEvents || []}
-                        readOnly={status === "closed"}
+                        readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
                         onChange={(events) => {
-                          if (status === "closed") return;
+                          if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
                           updateSpecificData({ timelineEvents: events })
                         }}
                       />
 
-                      {status !== "closed" && (
+                      {status !== "closed" && order?.actionPhase !== "تمت المسودة" && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1973,7 +1983,7 @@ export function Dashboard() {
                                   updateSpecificData({
                                     sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "closed" }
                                   });
-                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                  
                                 }
                               });
                             }}
@@ -2413,6 +2423,44 @@ export function Dashboard() {
                              </div>
                            </div>
                         </div>
+                      ) : order?.actionPhase === "جاري التصويب" || order?.issueStatus === "جاري التصويب" ? (
+                        <div className="text-center py-10 px-4">
+                           <div className="w-20 h-20 bg-amber-100 text-amber-600 mb-6 rounded-full flex items-center justify-center ring-4 ring-amber-50 shadow-inner mx-auto">
+                              <Edit3 className="w-10 h-10" />
+                           </div>
+                           <h3 className="text-2xl font-bold text-brand-900 mb-2">
+                             سجل تراث عائلتكم قيد التصويب
+                           </h3>
+                           <p className="text-brand-600 font-medium max-w-lg mx-auto leading-relaxed mb-8">
+                             نعمل حاليًا على مراجعة طلب التصويب لسجلكم، ستتغير حالة السجل آلياً عند صدور النسخة النهائية.
+                           </p>
+
+                           {order?.messages?.some(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")) && (
+                             <div className="mt-8 text-right bg-white p-6 md:p-8 rounded-2xl border border-brand-200 shadow-sm max-w-4xl mx-auto">
+                               <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center justify-center gap-2">
+                                 <Clock className="w-6 h-6 text-brand-600" />
+                                 طلبات التصويب السابقة
+                               </h3>
+                               <div className="space-y-4">
+                                 {order?.messages?.filter(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")).map((msg) => (
+                                   <div key={msg.id} className="bg-brand-50 p-5 rounded-xl border border-brand-100">
+                                     <div className="flex justify-between items-start mb-2">
+                                       <span className="text-sm font-bold text-brand-700 bg-white px-3 py-1 rounded-md border border-brand-200">
+                                         تم الإرسال
+                                       </span>
+                                       <span className="text-xs text-brand-500 font-mono" dir="ltr">
+                                         {new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(msg.createdAt))}
+                                       </span>
+                                     </div>
+                                     <p className="text-brand-800 whitespace-pre-line text-sm mt-3 text-right">
+                                       {msg.text}
+                                     </p>
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                           )}
+                        </div>
                       ) : order?.status === "تأكيد اعتماد النسخة" ? (
                         <div className="text-center py-10 px-4">
                            <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
@@ -2750,10 +2798,20 @@ export function Dashboard() {
                           </div>
                           
                           <div className="flex flex-col md:flex-row gap-4 mb-2 border-t border-brand-100/50 pt-4">
-                            {order && (
+                            <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
+                              <span className="text-xs font-bold text-brand-400">البريد الإلكتروني</span>
+                              <span className="text-sm font-mono text-brand-800 break-all">{currentUser.email}</span>
+                            </div>
+                            
+                            {order ? (
                               <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col gap-1">
                                 <span className="text-xs font-bold text-brand-400">رقم الطلب</span>
                                 <span className="text-sm font-mono text-brand-800 break-all">#{order.orderNumber || order.id.toUpperCase()}</span>
+                              </div>
+                            ) : (
+                               <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-100 flex-1 flex flex-col justify-center gap-1 opacity-50">
+                                <span className="text-xs font-bold text-brand-400">رقم الطلب</span>
+                                <span className="text-sm font-mono text-brand-800">قيد الإنشاء</span>
                               </div>
                             )}
                           </div>
@@ -2806,17 +2864,7 @@ export function Dashboard() {
                               defaultValue={currentUser.name || ""}
                             />
                           </div>
-                          <div>
-                            <label className="block text-sm font-bold text-brand-700 mb-2">
-                              البريد الإلكتروني (لا يمكن تعديله)
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full border-brand-200 object-not-allowed bg-gray-100 text-gray-500 rounded-xl"
-                              value={currentUser.email || ""}
-                              disabled
-                            />
-                          </div>
+                          
                           <div>
                             <label className="block text-sm font-bold text-brand-700 mb-2">
                               رقم الهاتف
@@ -3139,7 +3187,7 @@ export function Dashboard() {
                 }}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-md"
               >
-                تأكيد الإغلاق
+                حفظ وإغلاق
               </button>
               <button
                 onClick={() => setConfirmState({isOpen: false, action: null})}

@@ -125,6 +125,7 @@ export function AdminPanel() {
   const [showDesignModal, setShowDesignModal] = useState<string | null>(null);
 
   const [showNotifications, setShowNotifications] = useState(false);
+  const [assignSuccessModal, setAssignSuccessModal] = useState({ show: false, message: "" });
   const [readNotifIds, setReadNotifIds] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -1224,7 +1225,7 @@ export function AdminPanel() {
                                             import("@/lib/emailService").then(({ sendResearchAssignedEmail }) => {
                                               sendResearchAssignedEmail(order.data?.familyName || "العائلة", order.id).catch(console.error);
                                             });
-                                            alert("تم تعيين الباحث وتحديث حالة الطلب بنجاح!");
+                                            setAssignSuccessModal({ show: true, message: "تم تعيين الباحث بنجاح" }); setTimeout(() => setAssignSuccessModal({ show: false, message: "" }), 3000);
                                           } catch (error) {
                                             console.error("Assignment error:", error);
                                             alert("حدث خطأ أثناء المحاولة، يرجى التأكد من الصلاحيات والاتصال بالإنترنت.");
@@ -1869,6 +1870,7 @@ export function AdminPanel() {
             (o) =>
               !o.isDeleted &&
               (o.actionPhase === "تمت المسودة" ||
+                o.actionPhase === "جاري التصويب" ||
                 o.actionPhase === "تم التصميم الإلكتروني" ||
                 o.actionPhase === "تم إصدار النسخة الأولية" ||
                 o.actionPhase === "تم الإصدار" ||
@@ -1948,10 +1950,10 @@ export function AdminPanel() {
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
+                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
                                 <>
                                   <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                    <Download className="w-4 h-4" /> تحميل ملف البحث
+                                    <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
                                   </a>
                                   {order.data.designTemplate && (
                                     <button
@@ -1988,7 +1990,7 @@ export function AdminPanel() {
                                     onClick={() => setDesignSubmitOrder(order)}
                                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
                                   >
-                                    <Upload className="w-4 h-4" /> روابط النسخة الرقمية
+                                    <Upload className="w-4 h-4" /> تسليم السجل النهائي لإدارة الطلبات
                                   </button>
                                   
                                 </>
@@ -3577,7 +3579,7 @@ export function AdminPanel() {
               </div>
               
               <div>
-                <label className="block font-semibold text-brand-900 mb-2">رابط بوستر المشجرة (إن وجد)</label>
+                <label className="block font-semibold text-brand-900 mb-2">رابط بوستر المشجرة للتحميل</label>
                 <input
                   type="url"
                   value={designTreeLink}
@@ -3588,23 +3590,26 @@ export function AdminPanel() {
               </div>
 
               {designSubmitOrder.printRequested && (
-                <div className="flex items-center gap-2 mt-2 bg-amber-50 p-4 rounded-xl border border-amber-200">
-                  <input
-                    type="checkbox"
-                    id="shipped-checkbox"
-                    checked={designCopiesShipped}
-                    onChange={(e) => setDesignCopiesShipped(e.target.checked)}
-                    className="w-5 h-5 text-emerald-600 rounded border-brand-300 focus:ring-emerald-500"
-                  />
-                  <label htmlFor="shipped-checkbox" className="font-semibold text-brand-900">
-                    أؤكد أنه تم شحن النسخ الورقية المطبوعة للعميل
-                  </label>
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mt-4 space-y-4 text-right">
+                  <h4 className="font-bold text-amber-900 mb-2 border-b border-amber-200 pb-2">بيانات الشحنة</h4>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">تاريخ الشحن</label>
+                    <input type="date" value={shippingDate} onChange={(e) => setShippingDate(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">إسم الناقل</label>
+                    <input type="text" value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="مثال: أرامكس, DHL..." />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">رقم الشحنة للتتبع</label>
+                    <input type="text" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="أدخل رقم التتبع" />
+                  </div>
                 </div>
               )}
 
               <button
                 onClick={handleDesignSubmit}
-                disabled={isFulfilling || !designRecordLink.trim() || (designSubmitOrder.printRequested && !designCopiesShipped)}
+                disabled={isFulfilling || !designRecordLink.trim() || (designSubmitOrder.printRequested && (!shippingDate || !carrierName || !trackingNumber))}
                 className="w-full py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 {isFulfilling ? (
@@ -4269,6 +4274,22 @@ export function AdminPanel() {
           </div>
         </div>
       )}
+      
+      {/* Assign Success Modal */}
+      {assignSuccessModal.show && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-3xl w-full max-w-sm flex flex-col items-center justify-center shadow-2xl p-8 transform scale-100 animate-in zoom-in-95 font-sans">
+            <div className="w-20 h-20 bg-green-100 text-green-600 mb-6 rounded-full flex items-center justify-center ring-4 ring-green-50 shadow-inner">
+              <Check className="w-10 h-10" />
+            </div>
+            <h3 className="font-bold text-2xl text-slate-800 text-center mb-2">نجاح باهر!</h3>
+            <p className="text-slate-600 text-center font-medium leading-relaxed">
+              تم تعيين الباحث وتحديث حالة الطلب بنجاح.
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
