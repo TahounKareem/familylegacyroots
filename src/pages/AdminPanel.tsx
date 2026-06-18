@@ -110,6 +110,9 @@ export function AdminPanel() {
   const [designDownloadLink, setDesignDownloadLink] = useState("");
   const [designTreeLink, setDesignTreeLink] = useState("");
   const [designCopiesShipped, setDesignCopiesShipped] = useState(false);
+  const [shippingDate, setShippingDate] = useState("");
+  const [carrierName, setCarrierName] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
 
   const [initialDesignSubmitOrder, setInitialDesignSubmitOrder] = useState<Order | null>(null);
   const [initialDesignLink, setInitialDesignLink] = useState("");
@@ -146,7 +149,7 @@ export function AdminPanel() {
       } else if (role === "research") {
         isRelevant = true;
       } else if (role === "shipping") {
-        if (order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "تم التسليم") {
+        if (order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "تم التسليم") {
            isRelevant = true;
         }
       }
@@ -498,7 +501,12 @@ export function AdminPanel() {
     setIsFulfilling(true);
     try {
       await useAppStore.getState().fulfillOrder(designSubmitOrder.id, {
-        actionPhase: "جاهز للطباعة",
+        actionPhase: "جاهز للتسليم النهائي",
+        shippingDetails: {
+          shippingDate,
+          carrierName,
+          trackingNumber
+        },
         designLinks: {
           recordLink: designRecordLink,
           downloadLink: designDownloadLink,
@@ -515,6 +523,9 @@ export function AdminPanel() {
       setDesignDownloadLink("");
       setDesignTreeLink("");
       setDesignCopiesShipped(false);
+      setShippingDate("");
+      setCarrierName("");
+      setTrackingNumber("");
     } catch (e) {
       console.error(e);
       alert("حدث خطأ أثناء التسليم");
@@ -544,6 +555,7 @@ export function AdminPanel() {
         digitalCopyDownloadLink,
         posterLink,
         researchRecommendations,
+        ...(deliveryTab === "final" ? { shippingDetails: { shippingDate, carrierName, trackingNumber } } : {}),
         ...phaseUpdates,
       });
 
@@ -569,6 +581,9 @@ export function AdminPanel() {
 
       setDeliveryOrder(null);
       setDeliveryLink("");
+      setShippingDate("");
+      setCarrierName("");
+      setTrackingNumber("");
     } catch (e) {
       console.error(e);
       alert("حدث خطأ أثناء التسليم");
@@ -1256,7 +1271,7 @@ export function AdminPanel() {
                                         </button>
                                       </>
                                     )}
-                                    {order.actionPhase === "جاهز للطباعة" && (
+                                    {order.actionPhase === "جاهز للتسليم النهائي" && (
                                       <>
                                         <button
                                           onClick={() => {
@@ -1512,7 +1527,7 @@ export function AdminPanel() {
                                     </button>
                                   </div>
                                   
-                                  {order.actionPhase !== "تمت المسودة" && order.actionPhase !== "تم التصويب" && order.actionPhase !== "تم التصميم الإلكتروني" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم النسخة الأولية" && (
+                                  {order.actionPhase !== "تمت المسودة" && order.actionPhase !== "تم التصويب" && order.actionPhase !== "تم التصميم الإلكتروني" && order.actionPhase !== "جاهز للتسليم النهائي" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && order.actionPhase !== "تم تسليم النسخة الأولية" && (
                                     <button
                                       onClick={() => {
                                         setResearchDeliveryOrder(order);
@@ -1860,7 +1875,7 @@ export function AdminPanel() {
                 o.actionPhase === "تم تسليم الإصدار الأول" ||
                 o.actionPhase === "تم التصويب" ||
                 o.actionPhase === "تم تجهيز السجل للطباعة" ||
-                o.actionPhase === "جاهز للطباعة" ||
+                o.actionPhase === "جاهز للتسليم النهائي" ||
                 o.actionPhase === "جاهز للتسليم" ||
                 o.actionPhase === "تم التسليم"),
           ).sort((a, b) => {
@@ -1933,7 +1948,7 @@ export function AdminPanel() {
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للطباعة") && (
+                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
                                 <>
                                   <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                     <Download className="w-4 h-4" /> تحميل ملف البحث
@@ -1948,7 +1963,7 @@ export function AdminPanel() {
                                   )}
                                 </>
                               )}
-                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب") && (
+                              {(order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب") && (
                                 <button
                                   onClick={() => {
                                     setPrintReadyLink(order.printReadyLink || "");
@@ -1975,15 +1990,7 @@ export function AdminPanel() {
                                   >
                                     <Upload className="w-4 h-4" /> روابط النسخة الرقمية
                                   </button>
-                                  <button
-                                    onClick={() => {
-                                      setPrintReadyLink(order.printReadyLink || "");
-                                      setShippingContactOrder(order);
-                                    }}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs border border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.3)] mt-2 w-full"
-                                  >
-                                    <Printer className="w-4 h-4" /> تجهيز وتأكيد الطباعة/الشحن
-                                  </button>
+                                  
                                 </>
                               )}
                             </div>
@@ -3157,6 +3164,43 @@ export function AdminPanel() {
                       className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
                     />
                   </div>
+
+                  {deliveryTab === "final" && (
+                    <div className="flex flex-col gap-4 mt-6 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                      <div className="font-bold text-lg text-brand-900 border-b border-brand-200 pb-2">بيانات الشحنة (تظهر للعميل بعد التسليم)</div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-brand-900 mb-2">تاريخ الشحن</label>
+                        <input
+                          type="date"
+                          value={shippingDate}
+                          onChange={(e) => setShippingDate(e.target.value)}
+                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-brand-900 mb-2">إسم الناقل</label>
+                        <input
+                          type="text"
+                          value={carrierName}
+                          onChange={(e) => setCarrierName(e.target.value)}
+                          placeholder="أدخل اسم شركة الشحن..."
+                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-brand-900 mb-2">رقم الشحنة للتتبع</label>
+                        <input
+                          type="text"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          placeholder="أدخل رقم التتبع..."
+                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                 </>
               )}
               
@@ -3499,7 +3543,7 @@ export function AdminPanel() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-xl text-brand-900 flex items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-emerald-600" />
-                تسليم السجل جاهز للطباعة
+                تسليم السجل جاهز للتسليم النهائي
               </h3>
               <button
                 onClick={() => setDesignSubmitOrder(null)}

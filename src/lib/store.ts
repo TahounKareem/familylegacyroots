@@ -302,6 +302,11 @@ export interface Order {
   contractUrl?: string;
   contractSignedAt?: string;
   invoiceNumber?: string;
+  shippingDetails?: {
+    shippingDate?: string;
+    carrierName?: string;
+    trackingNumber?: string;
+  };
 }
 
 interface AppState {

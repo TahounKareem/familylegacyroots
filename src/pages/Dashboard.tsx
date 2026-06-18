@@ -2179,7 +2179,7 @@ export function Dashboard() {
                                       <Download className="w-7 h-7" /> تحميل نسختك الرقمية الفاخرة
                                     </a>
                                   </div>
-                                ) : order.actionPhase === "تم التصويب" || order.status === "جاهز للطباعة" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "جاهز للتسليم" ? (
+                                ) : order.actionPhase === "تم التصويب" || order.status === "جاهز للتسليم النهائي" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "جاهز للتسليم" ? (
                                   <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-xl flex items-start gap-4 text-right shadow-sm w-full animate-in fade-in zoom-in duration-500 max-w-2xl mx-auto">
                                     <CheckCircle className="w-8 h-8 text-emerald-500 shrink-0 mt-1" />
                                     <div>
@@ -2205,7 +2205,7 @@ export function Dashboard() {
                                           senderRole: "user",
                                           text: "تم إعتماد النسخة الحالية للطباعة بدون ملاحظات.",
                                           createdAt: new Date().toISOString(),
-                                        }, "جاهز للطباعة", { actionPhase: "تم التصويب" });
+                                        }, "جاهز للتسليم النهائي", { actionPhase: "تم التصويب" });
                                         useAppStore.getState().logTimelineEvent(order.id, "قام العميل بإعتماد النسخة للطباعة والتسليم النهائي.");
                                       }}
                                       className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1"
@@ -2234,6 +2234,24 @@ export function Dashboard() {
                                   </span>{" "}
                                   10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
                                 </p>
+                                {order.shippingDetails?.trackingNumber && (
+                                  <div className="mt-4 pt-4 border-t border-green-200 w-full">
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">تاريخ الشحن:</span>
+                                        <span className="text-green-900">{order.shippingDetails?.shippingDate || "غير محدد"}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">شركة الشحن:</span>
+                                        <span className="text-green-900">{order.shippingDetails?.carrierName || "غير محدد"}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">رقم التتبع:</span>
+                                        <span className="text-green-900 font-mono tracking-wider bg-white px-2 py-1 rounded border border-green-100">{order.shippingDetails?.trackingNumber || "غير محدد"}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -2291,6 +2309,24 @@ export function Dashboard() {
                                   </span>{" "}
                                   10 نسخ مطبوعة فاخرة، وبوستر مشجرة العائلة.
                                 </p>
+                                {order.shippingDetails?.trackingNumber && (
+                                  <div className="mt-4 pt-4 border-t border-green-200 w-full">
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">تاريخ الشحن:</span>
+                                        <span className="text-green-900">{order.shippingDetails?.shippingDate || "غير محدد"}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">شركة الشحن:</span>
+                                        <span className="text-green-900">{order.shippingDetails?.carrierName || "غير محدد"}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-sm">
+                                        <span className="text-green-700 font-bold">رقم التتبع:</span>
+                                        <span className="text-green-900 font-mono tracking-wider bg-white px-2 py-1 rounded border border-green-100">{order.shippingDetails?.trackingNumber || "غير محدد"}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -2301,15 +2337,19 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {order?.issueStatus === "تم الإغلاق" || order?.actionPhase === "تم التسليم" ? (
+                      {order?.issueStatus === "تم الإغلاق" || order?.actionPhase === "تم التسليم" || order?.actionPhase === "جاهز للتسليم النهائي" || order?.actionPhase === "تم إصدار النسخة النهائية" ? (
                         <div className="text-center py-10 px-4">
-                           <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                           <h3 className="text-xl font-bold text-brand-900 mb-2">
-                             سجل عائلتكم في مرحلة الطباعة النهائية!
-                           </h3>
-                           <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed mb-8">
-                             يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
-                           </p>
+                           {!["تم التسليم", "تم إصدار النسخة النهائية"].includes(order?.actionPhase || "") && (
+                             <>
+                               <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                               <h3 className="text-xl font-bold text-brand-900 mb-2">
+                                 سجل عائلتكم في مرحلة الطباعة النهائية!
+                               </h3>
+                               <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed mb-8">
+                                 يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
+                               </p>
+                             </>
+                           )}
 
                            {order?.messages?.some(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")) && (
                              <div className="mt-8 text-right bg-white p-6 md:p-8 rounded-2xl border border-brand-200 shadow-sm max-w-4xl mx-auto">
@@ -2383,7 +2423,7 @@ export function Dashboard() {
                              يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
                            </p>
                         </div>
-                      ) : !["مكتمل", "طلب مكتمل", "تم تسليم الإصدار الأول", "تم الإصدار", "جاهز للطباعة", "جاهز للتسليم للعميل"].includes(order?.status || "") &&
+                      ) : !["مكتمل", "طلب مكتمل", "تم تسليم الإصدار الأول", "تم الإصدار", "جاهز للتسليم النهائي", "جاهز للتسليم للعميل"].includes(order?.status || "") &&
                         !["جاري التصويب", "تم التصويب", "تم إصدار النسخة الأولية"].includes(order?.actionPhase || "") &&
                         !["جاري التصويب", "تم التصويب"].includes(order?.issueStatus || "") ? (
                         <div className="text-center py-10 px-4">
