@@ -1497,7 +1497,7 @@ export function Dashboard() {
                           placeholder="ابدا الكتابة هنا..."
                         />
                         
-                        {status !== "closed" && order?.actionPhase !== "تمت المسودة" ? (
+                        {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") ? (
                           <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                             <button
                               onClick={() => {
@@ -1568,7 +1568,7 @@ export function Dashboard() {
                         />
                       </div>
 
-                      {status !== "closed" && order?.actionPhase !== "تمت المسودة" && (
+                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1882,7 +1882,7 @@ export function Dashboard() {
                         })}
                       </div>
 
-                      {order.data.sectionStatuses?.archive !== "closed" && order?.actionPhase !== "تمت المسودة" && (
+                      {order.data.sectionStatuses?.archive !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1963,7 +1963,7 @@ export function Dashboard() {
                         }}
                       />
 
-                      {status !== "closed" && order?.actionPhase !== "تمت المسودة" && (
+                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {

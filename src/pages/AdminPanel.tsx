@@ -1285,6 +1285,9 @@ export function AdminPanel() {
                                             setDigitalCopyDownloadLink(order.designLinks?.downloadLink || "");
                                             setDeliveryLink(order.designLinks?.recordLink || "");
                                             setPosterLink(order.designLinks?.treeLink || "");
+                                            setShippingDate(order.designLinks?.shippingDate || "");
+                                            setCarrierName(order.designLinks?.carrierName || "");
+                                            setTrackingNumber(order.designLinks?.trackingNumber || "");
                                           }}
                                           className="flex items-center gap-1.5 whitespace-nowrap text-white bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 px-4 py-2 rounded-lg text-sm font-bold transition shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse"
                                         >
@@ -1948,23 +1951,29 @@ export function AdminPanel() {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex flex-col gap-2">
-                              {!isDelivered && order.initialDesignLink && (order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم الإصدار" || order.actionPhase === "تم تسليم الإصدار الأول") && (
+                              {!isDelivered && order.initialDesignLink && (order.actionPhase === "تم التصويب" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم الإصدار" || order.actionPhase === "تم تسليم الإصدار الأول") && (
                                 <a href={order.initialDesignLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {!isDelivered && (order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
+                              {!isDelivered && (
                                 <>
-                                  <a href={order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاري التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                    <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
-                                  </a>
-                                  {order.data.designTemplate && (
-                                    <button
-                                      onClick={() => setShowDesignModal(order.data.designTemplate)}
-                                      className="px-4 py-2 bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs w-full"
-                                    >
-                                      <Palette className="w-4 h-4" /> عرض قالب التصميم
-                                    </button>
+                                  {(order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصويب") && (
+                                    <a href={order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                      <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
+                                    </a>
+                                  )}
+                                  {(order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
+                                    <>
+                                      {order.data.designTemplate && (
+                                        <button
+                                          onClick={() => setShowDesignModal(order.data.designTemplate)}
+                                          className="px-4 py-2 bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs w-full"
+                                        >
+                                          <Palette className="w-4 h-4" /> عرض قالب التصميم
+                                        </button>
+                                      )}
+                                    </>
                                   )}
                                 </>
                               )}
@@ -3158,18 +3167,6 @@ export function AdminPanel() {
                       className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
-                  <div>
-                    <label className="block font-semibold text-brand-900 mb-2">
-                      التوصيات واقتراحات فريق البحث
-                    </label>
-                    <textarea
-                      value={researchRecommendations}
-                      onChange={(e) => setResearchRecommendations(e.target.value)}
-                      placeholder="أكتب التوصيات..."
-                      className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
-                    />
-                  </div>
-
                   {deliveryTab === "final" && (
                     <div className="flex flex-col gap-4 mt-6 bg-amber-50 p-4 rounded-xl border border-amber-200">
                       <div className="font-bold text-lg text-brand-900 border-b border-brand-200 pb-2">بيانات الشحنة (تظهر للعميل بعد التسليم)</div>
@@ -3205,6 +3202,18 @@ export function AdminPanel() {
                       </div>
                     </div>
                   )}
+
+                  <div>
+                    <label className="block font-semibold text-brand-900 mb-2 mt-6">
+                      التوصيات واقتراحات فريق البحث
+                    </label>
+                    <textarea
+                      value={researchRecommendations}
+                      onChange={(e) => setResearchRecommendations(e.target.value)}
+                      placeholder="أكتب التوصيات..."
+                      className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
+                    />
+                  </div>
 
                 </>
               )}
