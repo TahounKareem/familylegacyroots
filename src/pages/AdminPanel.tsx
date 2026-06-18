@@ -512,7 +512,10 @@ export function AdminPanel() {
           recordLink: designRecordLink,
           downloadLink: designDownloadLink,
           treeLink: designTreeLink,
-          copiesShipped: designCopiesShipped
+          copiesShipped: !!trackingNumber,
+          shippingDate,
+          carrierName,
+          trackingNumber
         }
       });
       await useAppStore.getState().logTimelineEvent(
@@ -1950,10 +1953,10 @@ export function AdminPanel() {
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
+                              {!isDelivered && (order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (
                                 <>
-                                  <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                    <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
+                                  <a href={order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاري التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                    <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
                                   </a>
                                   {order.data.designTemplate && (
                                     <button
@@ -3589,27 +3592,25 @@ export function AdminPanel() {
                 />
               </div>
 
-              {designSubmitOrder.printRequested && (
-                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mt-4 space-y-4 text-right">
-                  <h4 className="font-bold text-amber-900 mb-2 border-b border-amber-200 pb-2">بيانات الشحنة</h4>
-                  <div>
-                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">تاريخ الشحن</label>
-                    <input type="date" value={shippingDate} onChange={(e) => setShippingDate(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">إسم الناقل</label>
-                    <input type="text" value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="مثال: أرامكس, DHL..." />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-brand-900 mb-1 text-sm bg-transparent">رقم الشحنة للتتبع</label>
-                    <input type="text" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} className="w-full border border-brand-200 rounded-xl px-4 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="أدخل رقم التتبع" />
-                  </div>
+              <div className="flex flex-col gap-4 mt-6 bg-amber-50 p-4 rounded-xl border border-amber-200 text-right">
+                <div className="font-bold text-lg text-brand-900 border-b border-brand-200 pb-2">بيانات الشحنة</div>
+                <div>
+                  <label className="block text-sm font-semibold text-brand-900 mb-2">تاريخ الشحن</label>
+                  <input type="date" value={shippingDate} onChange={(e) => setShippingDate(e.target.value)} className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
                 </div>
-              )}
+                <div>
+                  <label className="block text-sm font-semibold text-brand-900 mb-2">إسم الناقل</label>
+                  <input type="text" value={carrierName} onChange={(e) => setCarrierName(e.target.value)} placeholder="أدخل اسم شركة الشحن..." className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-brand-900 mb-2">رقم الشحنة للتتبع</label>
+                  <input type="text" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="أدخل رقم التتبع..." className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+                </div>
+              </div>
 
               <button
                 onClick={handleDesignSubmit}
-                disabled={isFulfilling || !designRecordLink.trim() || (designSubmitOrder.printRequested && (!shippingDate || !carrierName || !trackingNumber))}
+                disabled={isFulfilling || !designRecordLink.trim()}
                 className="w-full py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 {isFulfilling ? (

@@ -245,7 +245,7 @@ export function Auth() {
               <div>
                 <label className="block text-sm font-medium text-brand-800">الاسم الكامل</label>
                 <div className="mt-1">
-                  <input
+                  <input autoComplete="new-password"
                     type="text"
                     required
                     value={name}
@@ -259,7 +259,7 @@ export function Auth() {
             <div>
               <label className="block text-sm font-medium text-brand-800">البريد الإلكتروني</label>
               <div className="mt-1">
-                <input
+                <input autoComplete="new-password"
                   type="email"
                   required
                   value={email}
@@ -273,7 +273,7 @@ export function Auth() {
             <div>
               <label className="block text-sm font-medium text-brand-800">كلمة المرور</label>
               <div className="mt-1 relative">
-                <input
+                <input autoComplete="new-password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
@@ -294,7 +294,7 @@ export function Auth() {
             {!isLogin && (
               <div className="flex items-start mt-4">
                 <div className="flex items-center h-5">
-                  <input
+                  <input autoComplete="new-password"
                     id="terms"
                     name="terms"
                     type="checkbox"
