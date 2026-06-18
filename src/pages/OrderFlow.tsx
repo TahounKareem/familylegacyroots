@@ -834,12 +834,12 @@ export function OrderFlow() {
                 }
               }} 
               disabled={isSubmitting || showInviteModal}
-              className="px-10 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-500 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
+              className="px-10 py-3 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting && !showInviteModal ? (
                 <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
-                <>إتمام الدفع <Check className="w-5 h-5 mr-2" /></>
+                <>إتمام الدفع</>
               )}
             </button>
           )}
