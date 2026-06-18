@@ -240,7 +240,7 @@ export function Auth() {
               {error}
             </div>
           )}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <div>
                 <label className="block text-sm font-medium text-brand-800">الاسم الكامل</label>
@@ -315,7 +315,7 @@ export function Auth() {
             {isLogin && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-brand-300 rounded" />
+                  <input autoComplete="new-password" id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-brand-300 rounded" />
                   <label htmlFor="remember-me" className="mr-2 block text-sm text-brand-800">
                     تذكرني
                   </label>

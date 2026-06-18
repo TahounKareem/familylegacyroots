@@ -74,6 +74,7 @@ export function Dashboard() {
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
   const [replyAttachments, setReplyAttachments] = useState<string[]>([]);
   const [successModal, setSuccessModal] = useState<{isOpen: boolean, title: string, subtitle: string, isDone?: boolean}>({isOpen: false, title: "", subtitle: ""});
+  const [confirmState, setConfirmState] = useState<{isOpen: boolean, action: (() => void) | null}>({isOpen: false, action: null});
   const chatFileInputRef = useRef<HTMLInputElement>(null);
 
   const [pendingUpload, setPendingUpload] = useState<{
@@ -740,7 +741,7 @@ export function Dashboard() {
                           "“كل إضافة اليوم… تصبح جزءًا محفوظًا من ذاكرة العائلة للأجيال القادمة.”";
                         actionText = "حالياً نقوم بأعمال التوثيق";
                         subText =
-                          "نعمل حاليًا على توثيق مخرجات سجل تراث عائلتكم. مازال يمكنكم إضافة المحتوى الإثرائي الذي ترونه مناسبًا لإدراجه ضمن السجل، نقترح عليكم المبادرة باضافة الإثراء الذي ترغبون به قبل صدور النسخة الأولية .";
+                          "نعمل حاليًا على توثيق مخرجات سجل تراث عائلتكم";
                       } else if (isState5) {
                         title =
                           "الآن اصبح تراث عائلتك كتاباً .. سجل تراث عائلتك بين يديك";
@@ -1512,14 +1513,16 @@ export function Dashboard() {
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
-                                  updateSpecificData({
-                                    [key]: (order.data as any)[key],
-                                    sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "closed" }
-                                  });
-                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
-                                }
+                                setConfirmState({
+                                  isOpen: true,
+                                  action: () => {
+                                    updateSpecificData({
+                                      [key]: (order.data as any)[key],
+                                      sectionStatuses: { ...(order.data.sectionStatuses || {}), [key]: "closed" }
+                                    });
+                                    setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                  }
+                                });
                               }}
                               className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                             >
@@ -1575,13 +1578,15 @@ export function Dashboard() {
                           </button>
                           <button
                             onClick={() => {
-                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
-                                updateSpecificData({
-                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "closed" }
-                                });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
-                              }
+                              setConfirmState({
+                                isOpen: true,
+                                action: () => {
+                                  updateSpecificData({
+                                    sectionStatuses: { ...(order.data.sectionStatuses || {}), familyTree: "closed" }
+                                  });
+                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                }
+                              });
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                           >
@@ -1887,13 +1892,15 @@ export function Dashboard() {
                           </button>
                           <button
                             onClick={() => {
-                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
-                                updateSpecificData({
-                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "closed" }
-                                });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
-                              }
+                              setConfirmState({
+                                isOpen: true,
+                                action: () => {
+                                  updateSpecificData({
+                                    sectionStatuses: { ...(order.data.sectionStatuses || {}), archive: "closed" }
+                                  });
+                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                }
+                              });
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                           >
@@ -1960,13 +1967,15 @@ export function Dashboard() {
                           </button>
                           <button
                             onClick={() => {
-                              if (confirm("هل أنت متأكد من حفظ وإغلاق هذا القسم؟ بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.")) {
-    
-                                updateSpecificData({
-                                  sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "closed" }
-                                });
-                                setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
-                              }
+                              setConfirmState({
+                                isOpen: true,
+                                action: () => {
+                                  updateSpecificData({
+                                    sectionStatuses: { ...(order.data.sectionStatuses || {}), timeline: "closed" }
+                                  });
+                                  setSuccessModal({isOpen: true, title: "تم حفظ وإغلاق القسم!", subtitle: "تم الاعتماد كنسخة نهائية لفريق البحث بنجاح.", isDone: true});
+                                }
+                              });
                             }}
                             className="flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                           >
@@ -3068,6 +3077,40 @@ export function Dashboard() {
           </div>
         </div>
       </footer>
+
+      {confirmState.isOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-300 relative overflow-hidden border border-brand-200">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600"></div>
+            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h3 className="text-xl font-bold text-brand-900 mb-3">
+              هل أنت متأكد من حفظ وإغلاق هذا القسم؟
+            </h3>
+            <p className="text-sm text-brand-600 mb-8 leading-relaxed">
+              بمجرد إغلاقه سيتم اعتماده كنسخة نهائية للباحثين.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  if (confirmState.action) confirmState.action();
+                  setConfirmState({isOpen: false, action: null});
+                }}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-md"
+              >
+                تأكيد الإغلاق
+              </button>
+              <button
+                onClick={() => setConfirmState({isOpen: false, action: null})}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

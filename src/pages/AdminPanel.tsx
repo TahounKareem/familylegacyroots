@@ -55,6 +55,7 @@ import {
   Palette,
   MapPin,
   Bell,
+  Printer
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { ComplianceDashboard } from "../components/admin/ComplianceDashboard";
@@ -74,6 +75,7 @@ export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<string>("lobby");
   const [orderTab, setOrderTab] = useState<"orders" | "archive">("orders");
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  const [successModal, setSuccessModal] = useState<{isOpen: boolean, title: string, subtitle: string, isDone?: boolean}>({isOpen: false, title: "", subtitle: ""});
   const [isUploading, setIsUploading] = useState(false);
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | null>(
@@ -1853,14 +1855,17 @@ export function AdminPanel() {
               !o.isDeleted &&
               (o.actionPhase === "تمت المسودة" ||
                 o.actionPhase === "تم التصميم الإلكتروني" ||
+                o.actionPhase === "تم إصدار النسخة الأولية" ||
+                o.actionPhase === "تم الإصدار" ||
+                o.actionPhase === "تم تسليم الإصدار الأول" ||
                 o.actionPhase === "تم التصويب" ||
                 o.actionPhase === "تم تجهيز السجل للطباعة" ||
                 o.actionPhase === "جاهز للطباعة" ||
                 o.actionPhase === "جاهز للتسليم" ||
                 o.actionPhase === "تم التسليم"),
           ).sort((a, b) => {
-            const needsActionA = a.actionPhase === "تمت المسودة" || a.actionPhase === "تم التصويب";
-            const needsActionB = b.actionPhase === "تمت المسودة" || b.actionPhase === "تم التصويب";
+            const needsActionA = a.actionPhase === "تمت المسودة" || a.actionPhase === "تم التصميم الإلكتروني" || a.actionPhase === "تم التصويب";
+            const needsActionB = b.actionPhase === "تمت المسودة" || b.actionPhase === "تم التصميم الإلكتروني" || b.actionPhase === "تم التصويب";
             if (needsActionA && !needsActionB) return -1;
             if (!needsActionA && needsActionB) return 1;
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -1896,7 +1901,7 @@ export function AdminPanel() {
                       </tr>
                     ) : (
                       designOrders.map((order) => {
-                        const needsAction = order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصويب";
+                        const needsAction = order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب";
                         const isDelivered = order.actionPhase === "تم التسليم";
                         return (
                         <tr
@@ -1923,12 +1928,12 @@ export function AdminPanel() {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex flex-col gap-2">
-                              {!isDelivered && order.initialDesignLink && order.actionPhase !== "تم التصويب" && order.actionPhase !== "جاهز للطباعة" && order.actionPhase !== "تم تجهيز السجل للطباعة" && order.actionPhase !== "جاهز للتسليم" && (
+                              {!isDelivered && order.initialDesignLink && (order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم الإصدار" || order.actionPhase === "تم تسليم الإصدار الأول") && (
                                 <a href={order.initialDesignLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                   <Download className="w-4 h-4" /> مسودة السجل
                                 </a>
                               )}
-                              {!isDelivered && order.researchDraftLink && order.actionPhase === "تمت المسودة" && (
+                              {!isDelivered && order.researchDraftLink && (order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للطباعة") && (
                                 <>
                                   <a href={order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                     <Download className="w-4 h-4" /> تحميل ملف البحث
@@ -1943,7 +1948,7 @@ export function AdminPanel() {
                                   )}
                                 </>
                               )}
-                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم" || order.actionPhase === "تمت المسودة") && (
+                              {(order.actionPhase === "جاهز للطباعة" || order.actionPhase === "جاهز للتسليم" || order.actionPhase === "تم تجهيز السجل للطباعة" || order.actionPhase === "تم التسليم" || order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب") && (
                                 <button
                                   onClick={() => {
                                     setPrintReadyLink(order.printReadyLink || "");
@@ -4199,6 +4204,27 @@ export function AdminPanel() {
           </div>
         </div>
       </footer>
+
+      {successModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-300 relative overflow-hidden border border-brand-200">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-400 via-brand-600 to-brand-800"></div>
+            <div className="bg-emerald-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <CheckCircle className="w-12 h-12 text-emerald-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-brand-900 mb-3">{successModal.title}</h3>
+            <p className="text-brand-600 font-light mb-8 leading-relaxed">
+              {successModal.subtitle}
+            </p>
+            <button
+              onClick={() => setSuccessModal({isOpen: false, title: "", subtitle: ""})}
+              className="w-full bg-brand-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-brand-700 hover:shadow-xl transition-all duration-300"
+            >
+              حسناً، فهمت
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

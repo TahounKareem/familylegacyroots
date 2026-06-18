@@ -322,15 +322,15 @@ export function OrderFlow() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الإسم الأول (أمين السجل) *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.firstName} onChange={(e)=>setFormData({...formData, firstName: e.target.value})} placeholder="الاسم الأول" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">اسم الأب *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} placeholder="اسم الأب" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.fatherName} onChange={(e)=>setFormData({...formData, fatherName: e.target.value})} placeholder="اسم الأب" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">اسم الجد *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.grandfatherName} onChange={(e)=>setFormData({...formData, grandfatherName: e.target.value})} placeholder="اسم الجد" />
                   </div>
                 </div>
               </div>
@@ -345,15 +345,15 @@ export function OrderFlow() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">إسم العائلة *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.familyName} onChange={(e)=>setFormData({...formData, familyName: e.target.value})} placeholder="اسم العائلة" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">القبيلة (اختياري)</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} placeholder="" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.tribeName || ""} onChange={(e)=>setFormData({...formData, tribeName: e.target.value})} placeholder="" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الموطن الأصلي للعائلة *</label>
-                    <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
+                    <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.homeland || ""} onChange={(e)=>setFormData({...formData, homeland: e.target.value})} placeholder="" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">الدولة (حيث الموطن الأصلي) *</label>
@@ -379,7 +379,7 @@ export function OrderFlow() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">البريد الإلكتروني *</label>
-                    <input type="email" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.email || ""} onChange={(e)=>setFormData({...formData, email: e.target.value})} placeholder="البريد الإلكتروني" />
+                    <input autoComplete="new-password" type="email" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" value={formData.email || ""} onChange={(e)=>setFormData({...formData, email: e.target.value})} placeholder="البريد الإلكتروني" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">دولة الإقامة الحالية *</label>
@@ -413,7 +413,7 @@ export function OrderFlow() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brand-800 mb-2">رقم الجوال *</label>
-                    <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" value={formData.mobileNumber || ""} onChange={(e)=>{
+                    <input autoComplete="new-password" type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" value={formData.mobileNumber || ""} onChange={(e)=>{
                          const val = e.target.value;
                          if (/^[\d+]*$/.test(val)) setFormData({...formData, mobileNumber: val});
                       }} placeholder="+0000000000" dir="ltr" />
@@ -422,7 +422,7 @@ export function OrderFlow() {
 
                 <div className="pt-6 border-t border-brand-200">
                   <label className="flex items-center gap-3 cursor-pointer select-none">
-                    <input 
+                    <input autoComplete="new-password" 
                       type="checkbox" 
                       className="w-5 h-5 text-brand-600 rounded border-brand-300 focus:ring-brand-500"
                       checked={formData.hasDeliveryAddress || false}
@@ -454,12 +454,12 @@ export function OrderFlow() {
                       <h4 className="col-span-1 md:col-span-2 font-bold text-brand-900 mb-2">عنوان التوصيل</h4>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-brand-800 mb-2">اسم المستلم *</label>
-                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                        <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.shippingAddress?.name || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, name: e.target.value}})} placeholder="الاسم الكامل" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">رقم هاتف المستلم *</label>
-                        <input type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
+                        <input autoComplete="new-password" type="tel" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3 text-left dir-ltr" 
                           value={formData.shippingAddress?.phone || ""} onChange={(e)=>{
                              const val = e.target.value;
                              if (/^[\d+]*$/.test(val)) {
@@ -498,12 +498,12 @@ export function OrderFlow() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-brand-800 mb-2">الرمز البريدي</label>
-                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                        <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.shippingAddress?.zip || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, zip: e.target.value}})} placeholder="الرمز البريدي" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-brand-800 mb-2">العنوان التفصيلي *</label>
-                        <input type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
+                        <input autoComplete="new-password" type="text" className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 border p-3" 
                           value={formData.shippingAddress?.street || ""} onChange={(e)=>setFormData({...formData, shippingAddress: {...formData.shippingAddress, street: e.target.value}})} placeholder="الحي، الشارع، المبنى، رقم الشقة" />
                       </div>
                     </div>
@@ -646,7 +646,7 @@ export function OrderFlow() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "مودرن" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
-                    <input type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
+                    <input autoComplete="new-password" type="radio" name="design" value="مودرن" className="hidden" checked={formData.designTemplate === "مودرن"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
                     <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
                        <img src="https://i.postimg.cc/KzTskNLd/Modern.png" alt="مسار مودرن" className="w-full h-full object-contain" />
                     </div>
@@ -657,7 +657,7 @@ export function OrderFlow() {
                   </label>
                   
                   <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center gap-4 transition-all ${formData.designTemplate === "كلاسيكي" ? "border-brand-600 bg-brand-50 shadow-md transform scale-[1.02]" : "border-brand-200 hover:border-brand-400"}`}>
-                    <input type="radio" name="design" value="كلاسيكي" className="hidden" checked={formData.designTemplate === "كلاسيكي"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
+                    <input autoComplete="new-password" type="radio" name="design" value="كلاسيكي" className="hidden" checked={formData.designTemplate === "كلاسيكي"} onChange={(e)=>setFormData({...formData, designTemplate: e.target.value})} />
                     <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-sm border border-brand-100 bg-white flex items-center justify-center p-2">
                        <img src="https://i.postimg.cc/cH35gmYj/Classic.png" alt="مسار كلاسيكي" className="w-full h-full object-contain" />
                     </div>
@@ -681,7 +681,7 @@ export function OrderFlow() {
                   <h3 className="text-2xl font-bold text-brand-900 mb-2">كود دعوة</h3>
                   <p className="text-brand-600 mb-6 text-sm">أدخل كود الدعوة الخاص بك للمتابعة</p>
                   
-                  <input 
+                  <input autoComplete="new-password" 
                     type="text" 
                     value={inviteCode}
                     onChange={(e) => {
