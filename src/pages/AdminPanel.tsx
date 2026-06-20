@@ -576,12 +576,23 @@ export function AdminPanel() {
       if (userDoc.exists()) {
         const userData = userDoc.data() as UserInfo;
         if (userData.email) {
-          await sendDeliveryEmail(
-            userData.email,
-            userData.name || "العميل الكريم",
-            deliveryOrder.id,
-            deliveryLink,
-          );
+          if (deliveryTab === "draft") {
+            const { sendCustomerDraftReadyEmail } = await import("@/lib/emailService");
+            await sendCustomerDraftReadyEmail(
+              userData.email,
+              userData.name || "العميل الكريم",
+              deliveryOrder.id,
+              deliveryLink,
+            );
+          } else {
+            const { sendDeliveryEmail } = await import("@/lib/emailService");
+            await sendDeliveryEmail(
+              userData.email,
+              userData.name || "العميل الكريم",
+              deliveryOrder.id,
+              deliveryLink,
+            );
+          }
         }
       }
 

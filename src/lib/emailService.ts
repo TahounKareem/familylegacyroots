@@ -21,10 +21,13 @@ export interface EmailTemplate {
 // دالة أساسية لإرسال الإيميل
 const queueEmail = async (emailData: EmailTemplate) => {
   try {
+    const sender = emailData.from || "سجل تراث العائلة <info@thefamilylegacyroots.com>";
     const docData: any = {
       to: emailData.to,
-      from: emailData.from || "سجل تراث العائلة <info@thefamilylegacyroots.com>",
-      message: emailData.message,
+      message: {
+        ...emailData.message,
+        from: sender
+      },
       createdAt: serverTimestamp(),
     };
     if (emailData.bcc) docData.bcc = emailData.bcc;
