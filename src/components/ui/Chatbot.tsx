@@ -108,7 +108,7 @@ export function Chatbot() {
     } catch (error: any) {
       console.error("Chat error:", error);
       const errorMessage = error.message?.includes('API key') 
-        ? 'عذراً، مفتاح API غير مهيأ. يرجى المراجعة.' 
+        ? 'عذراً، مفتاح API الخاص بالذكاء الاصطناعي غير متوفر أو غير صالح. يرجى إضافته أو تصحيحه من خلال قائمة الإعدادات (Settings) ثم (Secrets) في المنصة.' 
         : 'يبدو أن استفسارك يحتاج إلى تفصيل دقيق من قبل زملائي. يسعدنا استقبال رسالتك عبر مركز التواصل والدعم ليتم الرد عليك بشكل شافٍ ووافٍ.';
         
       setMessages(prev => [
