@@ -599,16 +599,7 @@ export function AdminPanel() {
   };
 
   const availableTabs = [
-    {
-      id: "chatbot_management",
-      label: "إدارة المرشد الذكي",
-      desc: "إضافة وتعديل الأسئلة والأجوبة التسويقية لتحسين ردود المرشد الذكي",
-      roles: ["maestro", "admin", "customer_support"],
-      icon: MessageCircle,
-      color: "bg-indigo-50 border-indigo-200 hover:shadow-indigo-100",
-      iconBg: "bg-indigo-100 text-indigo-600",
-      textColor: "text-indigo-900",
-    },
+    
     {
       id: "orders",
       label: "إدارة الطلبات",
@@ -2031,8 +2022,7 @@ export function AdminPanel() {
           );
         })()}
 
-      {currentTab === "chatbot_management" && <ChatbotManagement />}
-        {currentTab === "customer_service" &&
+              {currentTab === "customer_service" &&
         (() => {
           let filteredUsers = usersList.filter((u) => u.role === "user");
 
@@ -2054,12 +2044,14 @@ export function AdminPanel() {
           };
 
           return (
-            <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-              <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
-                <h2 className="font-bold text-lg text-brand-900">
-                  إدارة خدمة العملاء (العملاء والطلبات)
-                </h2>
-              </div>
+            <div className="space-y-8">
+              <ChatbotManagement />
+              <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+                <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
+                  <h2 className="font-bold text-lg text-brand-900">
+                    إدارة خدمة العملاء (العملاء والطلبات)
+                  </h2>
+                </div>
 
               <div className="p-4 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
                 <div className="flex-1 min-w-[200px] relative">
@@ -2175,6 +2167,7 @@ export function AdminPanel() {
                   </tbody>
                 </table>
               </div>
+            </div>
             </div>
           );
         })()}

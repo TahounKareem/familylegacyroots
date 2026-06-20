@@ -44,16 +44,9 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isTicketMode, setIsTicketMode] = useState(false);
     const [dynamicFaqs, setDynamicFaqs] = useState<string>("");
-  const [ticketStatus, setTicketStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const currentUser = useAppStore(state => state.currentUser);
 
-  const [ticketData, setTicketData] = useState({
-    name: currentUser?.name || '',
-    email: currentUser?.email || '',
-    message: ''
-  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +85,7 @@ export function Chatbot() {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, isOpen, isTicketMode]);
+  }, [messages, isOpen]);
 
   const handleSendMessage = async (text: string = inputText) => {
     if (!text.trim()) return;
@@ -145,32 +138,7 @@ export function Chatbot() {
     }
   };
 
-  const submitTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!ticketData.name || !ticketData.email || !ticketData.message) {
-      alert("الرجاء إكمال جميع الحقول");
-      return;
-    }
 
-    setTicketStatus('submitting');
-    try {
-      await createSupportTicket(ticketData.name, ticketData.email, ticketData.message);
-      setTicketStatus('success');
-      setTimeout(() => {
-        setTicketStatus('idle');
-        setIsTicketMode(false);
-        setTicketData(prev => ({ ...prev, message: '' }));
-        setMessages(prev => [
-          ...prev,
-          { id: Date.now().toString(), sender: 'bot', text: 'تم استلام تذكرتك بنجاح ومراجعتها، تفقد بريدك الإلكتروني.' }
-        ]);
-      }, 2500);
-    } catch (error) {
-      console.error("Error submitting ticket:", error);
-      setTicketStatus('idle');
-      alert('حدث خطأ، يرجى المحاولة مرة أخرى.');
-    }
-  };
 
   return (
     <>
@@ -232,7 +200,7 @@ export function Chatbot() {
                     {msg.text}
                       {msg.text.includes("مركز التواصل والدعم") && (
                          <div className="mt-3 text-center">
-                            <button onClick={() => setIsTicketMode(true)} className="inline-block bg-white text-emerald-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm border border-emerald-100 hover:bg-emerald-50 transition">
+                            <button onClick={() => { window.location.href='/contact'; }} className="inline-block bg-white text-emerald-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm border border-emerald-100 hover:bg-emerald-50 transition">
                               فتح تذكرة دعم
                             </button>
                          </div>
@@ -252,72 +220,13 @@ export function Chatbot() {
                 </div>
               )}
 
-              {/* نموذج فتح التذكرة */}
-              {isTicketMode && ticketStatus !== 'success' && (
-                <form onSubmit={submitTicket} className="mt-2 bg-white p-4 border border-brand-200 rounded-xl shadow-sm animate-fade-in flex flex-col gap-3">
-                  <h4 className="font-semibold text-brand-900 border-b border-brand-100 pb-2 mb-1 text-sm">ارسل استفسارك وسنرد عليك</h4>
-                  
-                  {!currentUser && (
-                    <>
-                      <input 
-                        type="text" 
-                        required 
-                        value={ticketData.name} 
-                        onChange={(e) => setTicketData({...ticketData, name: e.target.value})}
-                        placeholder="الاسم" 
-                        className="w-full bg-gray-50 border border-gray-200 p-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand-500" 
-                      />
-                      <input 
-                        type="email" 
-                        required 
-                        value={ticketData.email} 
-                        onChange={(e) => setTicketData({...ticketData, email: e.target.value})}
-                        placeholder="البريد الإلكتروني" 
-                        className="w-full bg-gray-50 border border-gray-200 p-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand-500" 
-                      />
-                    </>
-                  )}
-                  
-                  <textarea 
-                    required
-                    value={ticketData.message} 
-                    onChange={(e) => setTicketData({...ticketData, message: e.target.value})}
-                    placeholder="اكتب رسالتك أو استفسارك هنا تفصيلاً..." 
-                    className="w-full bg-gray-50 border border-gray-200 p-2 rounded-lg text-sm h-24 resize-none focus:outline-none focus:ring-1 focus:ring-brand-500"
-                  />
-                  
-                  <button 
-                    type="submit" 
-                    disabled={ticketStatus === 'submitting'}
-                    className="w-full bg-brand-800 text-white font-semibold py-2 rounded-lg text-sm hover:bg-brand-900 transition flex items-center justify-center gap-2"
-                  >
-                    {ticketStatus === 'submitting' ? 'جاري الإرسال...' : (
-                      <>إرسال التذكرة <Send className="w-4 h-4 ml-1" /></>
-                    )}
-                  </button>
-                  <button
-                     type="button"
-                     onClick={() => setIsTicketMode(false)}
-                     className="w-full mt-1 text-xs text-gray-500 hover:text-brand-800 transition"
-                  >
-                    إلغاء والعودة
-                  </button>
-                </form>
-              )}
 
-              {ticketStatus === 'success' && (
-                <div className="mt-2 text-center p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 flex flex-col items-center gap-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-                  <p className="font-semibold text-sm">تم إرسال التذكرة بنجاح!</p>
-                </div>
-              )}
 
               <div ref={messagesEndRef} />
             </div>
 
             {/* إدخال النص */}
-            {!isTicketMode && (
-              <div className="p-3 bg-white border-t border-brand-100">
+                          <div className="p-3 bg-white border-t border-brand-100">
                 <div className="relative flex items-center">
                   <button
                     onClick={() => handleSendMessage()}
@@ -337,7 +246,6 @@ export function Chatbot() {
                   />
                 </div>
               </div>
-            )}
             
           </motion.div>
         )}
