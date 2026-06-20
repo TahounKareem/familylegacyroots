@@ -78,12 +78,6 @@ export function Chatbot() {
   }, [isOpen, messages.length]);
 
   useEffect(() => {
-    if (currentUser) {
-      setTicketData(prev => ({ ...prev, name: currentUser.name, email: currentUser.email }));
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
