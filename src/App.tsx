@@ -7,7 +7,7 @@ import { Chatbot } from "./components/ui/Chatbot";
 import { SessionManager } from "./components/ui/SessionManager";
 import { ScrollToTop } from "./components/ui/ScrollToTop";
 import { Loader2 } from "lucide-react";
-import { MotionConfig } from "framer-motion";
+import { MotionConfig } from "motion/react";
 
 // Lazy Loaded Pages
 const Home = React.lazy(() => import("./pages/Home").then(m => ({ default: m.Home })));
