@@ -262,6 +262,15 @@ export interface FamilyData {
   treeData: TreeData;
 }
 
+
+export interface ChatbotFAQ {
+  id: string;
+  question: string;
+  answer: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
 export interface Order {
   id: string;
   orderNumber?: string;

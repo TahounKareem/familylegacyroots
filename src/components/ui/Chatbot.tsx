@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { createSupportTicket } from '@/lib/emailService';
 import { useAppStore } from '@/lib/store';
 
@@ -43,6 +45,7 @@ export function Chatbot() {
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isTicketMode, setIsTicketMode] = useState(false);
+    const [dynamicFaqs, setDynamicFaqs] = useState<string>("");
   const [ticketStatus, setTicketStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const currentUser = useAppStore(state => state.currentUser);
 
@@ -53,6 +56,21 @@ export function Chatbot() {
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "chatbot_faqs"), (snapshot) => {
+      let faqsText = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.isActive) {
+          faqsText += "سؤال: " + data.question + "\nإجابة: " + data.answer + "\n\n";
+        }
+      });
+      setDynamicFaqs(faqsText);
+    });
+    return () => unsubscribe();
+  }, []);
+
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -92,7 +110,7 @@ export function Chatbot() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ messages: newMessages, dynamicContext: dynamicFaqs })
       });
 
       const data = await response.json();
@@ -212,6 +230,14 @@ export function Chatbot() {
                     }`}
                   >
                     {msg.text}
+                      {msg.text.includes("مركز التواصل والدعم") && (
+                         <div className="mt-3 text-center">
+                            <button onClick={() => setIsTicketMode(true)} className="inline-block bg-white text-emerald-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm border border-emerald-100 hover:bg-emerald-50 transition">
+                              فتح تذكرة دعم
+                            </button>
+                         </div>
+                      )}
+
                   </div>
                 </div>
               ))}

@@ -154,7 +154,7 @@ async function startServer() {
         return res.json({ reply: "عذراً، المرشد الذكي في وضع التحديث حالياً أو أنه غير مربوط بالمحركات. يمكنك دائماً الرجوع إلى صفحة الأسئلة الشائعة والدليل الإرشادي." });
       }
 
-      const { messages } = req.body;
+      const { messages, dynamicContext } = req.body;
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "Invalid messages format" });
       }
@@ -171,7 +171,7 @@ async function startServer() {
         model: "gemini-2.5-flash",
         history: history,
         config: {
-          systemInstruction: systemInstruction,
+          systemInstruction: dynamicContext ? systemInstruction + "\n\n### معلومات إضافية من الإدارة لتوفير إجابات دقيقة (Dynamic FAQs):\n" + dynamicContext : systemInstruction,
           temperature: 0.1, // Strict temperature as requested
         }
       });

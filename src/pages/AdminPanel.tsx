@@ -58,6 +58,7 @@ import {
   Printer
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
+import { ChatbotManagement } from "@/components/ChatbotManagement";
 import { ComplianceDashboard } from "../components/admin/ComplianceDashboard";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
@@ -597,6 +598,16 @@ export function AdminPanel() {
   };
 
   const availableTabs = [
+    {
+      id: "chatbot_management",
+      label: "إدارة المرشد الذكي",
+      desc: "إضافة وتعديل الأسئلة والأجوبة التسويقية لتحسين ردود المرشد الذكي",
+      roles: ["maestro", "admin", "customer_support"],
+      icon: MessageCircle,
+      color: "bg-indigo-50 border-indigo-200 hover:shadow-indigo-100",
+      iconBg: "bg-indigo-100 text-indigo-600",
+      textColor: "text-indigo-900",
+    },
     {
       id: "orders",
       label: "إدارة الطلبات",
@@ -2019,7 +2030,8 @@ export function AdminPanel() {
           );
         })()}
 
-      {currentTab === "customer_service" &&
+      {currentTab === "chatbot_management" && <ChatbotManagement />}
+        {currentTab === "customer_service" &&
         (() => {
           let filteredUsers = usersList.filter((u) => u.role === "user");
 
