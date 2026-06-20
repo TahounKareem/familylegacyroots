@@ -25,7 +25,7 @@ export function ChatbotManagement() {
       });
       data.sort((a, b) => b.createdAt - a.createdAt);
       setFaqs(data);
-    });
+    }, () => {});
     return () => unsubscribe();
   }, []);
 

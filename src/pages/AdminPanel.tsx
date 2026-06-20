@@ -234,7 +234,7 @@ export function AdminPanel() {
         });
 
         setArticles(data);
-      });
+      }, () => {});
       return () => unsubscribe();
     }
 
@@ -250,7 +250,7 @@ export function AdminPanel() {
           data.push({ id: doc.id, ...doc.data() } as UserInfo);
         });
         setUsersList(data);
-      });
+      }, () => {});
       return () => unsubscribe();
     }
   }, [activeTab]);

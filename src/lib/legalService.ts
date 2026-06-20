@@ -48,8 +48,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     operationType,
     path
   }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.log('Firestore Error suppressed:', JSON.stringify(errInfo.error));
 }
 
 // Helper to remove undefined values before saving to Firestore

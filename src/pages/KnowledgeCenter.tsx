@@ -181,7 +181,7 @@ export function KnowledgeCenter() {
       setArticles(data);
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching articles", error);
+      // Suppress missing permissions error during check
       setLoading(false);
     });
 

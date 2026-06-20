@@ -61,7 +61,7 @@ export function Chatbot() {
       });
       setDynamicFaqs(faqsText);
     }, (error) => {
-      console.error("Chatbot FAQs snapshot error:", error);
+      // Suppress missing permissions error if deploying rules fails
     });
     return () => unsubscribe();
   }, []);

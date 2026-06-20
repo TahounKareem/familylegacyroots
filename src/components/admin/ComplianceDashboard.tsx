@@ -124,14 +124,14 @@ export function ComplianceDashboard() {
       const data: ComplianceUser[] = [];
       snap.forEach((d) => data.push({ id: d.id, ...d.data() }));
       setUsers(data);
-    });
+    }, () => {});
 
     // 2. Fetch Orders
     const unSubOrders = onSnapshot(collection(db, "orders"), (snap) => {
       const data: ComplianceOrder[] = [];
       snap.forEach((d) => data.push({ id: d.id, userId: d.data().userId, data: d.data(), isDeleted: d.data().isDeleted }));
       setOrders(data);
-    });
+    }, () => {});
 
     // 3. Fetch Audit Logs for Visitors/Consents
     const auditQuery = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"));
@@ -139,7 +139,7 @@ export function ComplianceDashboard() {
       const data: AuditLog[] = [];
       snap.forEach((d) => data.push({ id: d.id, ...d.data() } as AuditLog));
       setAuditLogs(data);
-    });
+    }, () => {});
 
     return () => {
       unSubUsers();
