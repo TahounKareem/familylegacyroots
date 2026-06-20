@@ -605,13 +605,13 @@ export const useAppStore = create<AppState>((set, get) => ({
 
             userInfo = {
               id: user.uid,
-              name: user.displayName || "مستخدم",
+              name: user.displayName || "العميل الكريم",
               email: user.email || "",
               role: newRole,
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString(),
             };
-            await setDoc(doc(db, "users", user.uid), userInfo);
+            await setDoc(doc(db, "users", user.uid), userInfo, { merge: true });
           }
 
           set({ currentUser: userInfo, isAuthReady: true });

@@ -183,6 +183,16 @@ export function Dashboard() {
   const userOrders = orders.filter((o) => o.userId === currentUser.id);
   const order = userOrders[0]; // ONLY 1 order allowed
 
+  const isPostInitialDelivery = order && (
+    order.actionPhase === "تم التصويب" ||
+    order.actionPhase === "تم الإصدار" ||
+    order.actionPhase === "تم تسليم الإصدار الأول" ||
+    order.actionPhase === "جاهز للتسليم النهائي" ||
+    order.actionPhase === "تم التسليم النهائي" ||
+    order.status === "تم الإغلاق" ||
+    order.status === "مكتمل"
+  );
+
   // If user just registered and has no order setup, redirect them to complete their data
   // if (!order) return <Navigate to="/order" replace />;
 
@@ -1475,11 +1485,11 @@ export function Dashboard() {
                         )}
 
                         <textarea
-                          className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${(status === "closed" || order?.actionPhase === "تمت المسودة") ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
-                          readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
+                          className={`w-full h-48 border-brand-200 rounded-xl p-4 focus:ring-brand-500 focus:border-brand-500 text-brand-900 leading-relaxed transition ${(status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة") ? "bg-gray-100 opacity-80 cursor-not-allowed" : "bg-brand-50"}`}
+                          readOnly={status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة"}
                           value={(order.data as any)[key] || ""}
                           onChange={(e) => {
-                            if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
+                            if (status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة") return;
                             const val = e.target.value;
                             useAppStore.setState((s) => ({
                               orders: s.orders.map((o) =>
@@ -1495,7 +1505,7 @@ export function Dashboard() {
                           placeholder="ابدا الكتابة هنا..."
                         />
                         
-                        {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") ? (
+                        {status !== "closed" && !isPostInitialDelivery && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") ? (
                           <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                             <button
                               onClick={() => {
@@ -1557,16 +1567,16 @@ export function Dashboard() {
                         <TreeBuilder
                           initialNodes={order.data.treeData?.nodes || []}
                           initialEdges={order.data.treeData?.edges || []}
-                          readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
+                          readOnly={status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة"}
                           onChange={(nodes, edges) => {
-                            if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
+                            if (status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة") return;
                             updateSpecificData({ treeData: { nodes, edges } })
                           }}
                           familyName={order.data.familyName}
                         />
                       </div>
 
-                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
+                      {status !== "closed" && !isPostInitialDelivery && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1804,9 +1814,9 @@ export function Dashboard() {
                       ) : (
                         <div
                           onClick={() =>
-                            !isUploading && fileInputRef.current?.click()
+                            !isUploading && !isPostInitialDelivery && fileInputRef.current?.click()
                           }
-                          className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-50 cursor-pointer"}`}
+                          className={`border-2 border-dashed border-brand-300 rounded-2xl p-10 text-center transition ${isUploading || isPostInitialDelivery || status === "closed" ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-50 cursor-pointer"}`}
                         >
                           <input
                             type="file"
@@ -1822,11 +1832,11 @@ export function Dashboard() {
                               }
                             }}
                             accept=".pdf,.doc,.docx,image/png,image/jpeg,image/jpg,image/webp"
-                            disabled={isUploading || order?.actionPhase === "تمت المسودة"}
+                            disabled={isUploading || isPostInitialDelivery || status === "closed" || order?.actionPhase === "تمت المسودة"}
                           />
                           <UploadCloud className="w-12 h-12 text-brand-400 mx-auto mb-4" />
                           <p className="text-brand-800 font-bold mb-2">
-                            انقر هنا لرفع وثيقة تاريخية أو صورة جديدة
+                            {isPostInitialDelivery ? "المرفقات مغلقة لانتهاء مرحلة التوثيق والإعتماد" : "انقر هنا لرفع وثيقة تاريخية أو صورة جديدة"}
                           </p>
                           <p className="text-sm text-brand-600">
                             (الرفع لمرفق واحد في كل مرة)
@@ -1954,14 +1964,14 @@ export function Dashboard() {
                       </div>
                       <TimelineBuilder 
                         events={order.data.timelineEvents || []}
-                        readOnly={status === "closed" || order?.actionPhase === "تمت المسودة"}
+                        readOnly={status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة"}
                         onChange={(events) => {
-                          if (status === "closed" || order?.actionPhase === "تمت المسودة") return;
+                          if (status === "closed" || isPostInitialDelivery || order?.actionPhase === "تمت المسودة") return;
                           updateSpecificData({ timelineEvents: events })
                         }}
                       />
 
-                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
+                      {status !== "closed" && !isPostInitialDelivery && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -2076,63 +2086,71 @@ export function Dashboard() {
                         </div>
                       )}
 
-                      <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0 z-10">
-                        <input
-                          type="file"
-                          className="hidden"
-                          ref={chatFileInputRef}
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              const file = e.target.files[0];
-                              const storageRef = ref(
-                                storage,
-                                `chat/${Date.now()}_${file.name}`,
-                              );
-                              const uploadTask = uploadBytesResumable(
-                                storageRef,
-                                file,
-                              );
-                              uploadTask.on(
-                                "state_changed",
-                                null,
-                                null,
-                                async () => {
-                                  const downloadURL = await getDownloadURL(
-                                    uploadTask.snapshot.ref,
-                                  );
-                                  setReplyAttachments([
-                                    ...replyAttachments,
-                                    downloadURL,
-                                  ]);
-                                },
-                              );
+                      {!isPostInitialDelivery ? (
+                        <div className="p-4 bg-white border-t border-brand-200 flex gap-2 absolute bottom-0 left-0 right-0 z-10">
+                          <input
+                            type="file"
+                            className="hidden"
+                            ref={chatFileInputRef}
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+                                const storageRef = ref(
+                                  storage,
+                                  `chat/${Date.now()}_${file.name}`,
+                                );
+                                const uploadTask = uploadBytesResumable(
+                                  storageRef,
+                                  file,
+                                );
+                                uploadTask.on(
+                                  "state_changed",
+                                  null,
+                                  null,
+                                  async () => {
+                                    const downloadURL = await getDownloadURL(
+                                      uploadTask.snapshot.ref,
+                                    );
+                                    setReplyAttachments([
+                                      ...replyAttachments,
+                                      downloadURL,
+                                    ]);
+                                  },
+                                );
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => chatFileInputRef.current?.click()}
+                            className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200"
+                            title="إرفاق ملف"
+                          >
+                            <Paperclip className="w-5 h-5" />
+                          </button>
+                          <input
+                            type="text"
+                            className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4"
+                            placeholder="اكتب رسالتك لفريق البحث هنا..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleSendReply()
                             }
-                          }}
-                        />
-                        <button
-                          onClick={() => chatFileInputRef.current?.click()}
-                          className="p-3 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 border border-brand-200"
-                          title="إرفاق ملف"
-                        >
-                          <Paperclip className="w-5 h-5" />
-                        </button>
-                        <input
-                          type="text"
-                          className="flex-1 border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4"
-                          placeholder="اكتب رسالتك لفريق البحث هنا..."
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSendReply()
-                          }
-                        />
-                        <button
-                          onClick={handleSendReply}
-                          className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold"
-                        >
-                          إرسال
-                        </button>
-                      </div>
+                          />
+                          <button
+                            onClick={handleSendReply}
+                            className="px-6 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold"
+                          >
+                            إرسال
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-white border-t border-brand-200 flex justify-center items-center absolute bottom-0 left-0 right-0 z-10 block w-full text-center py-6">
+                          <p className="text-brand-500 text-sm font-bold w-full text-center">
+                            الردود مغلقة لانتهاء مرحلة التوثيق واعتماد النسخة الأولية للسجل.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
