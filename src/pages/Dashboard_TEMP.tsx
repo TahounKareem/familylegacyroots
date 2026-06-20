@@ -143,14 +143,12 @@ export function Dashboard() {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(
-                ({ sendOrderConfirmationEmail, sendCustomerResearchStartedEmail }) => {
-                  sendOrderConfirmationEmail(
+                ({ sendCustomerResearchStartedEmail }) => {
+                  sendCustomerResearchStartedEmail(
                     userData.email,
                     userData.name || "العميل الكريم",
-                    order.orderNumber || orderId,
-                    isInvite,
-                  );
-                  sendCustomerResearchStartedEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || orderId);
+                    order.orderNumber || orderId
+                  ).catch(console.error);
                 },
               );
             }

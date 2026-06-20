@@ -23,11 +23,11 @@ const queueEmail = async (emailData: EmailTemplate) => {
   try {
     const docData: any = {
       to: emailData.to,
+      from: emailData.from || "سجل تراث العائلة <info@thefamilylegacyroots.com>",
       message: emailData.message,
       createdAt: serverTimestamp(),
     };
     if (emailData.bcc) docData.bcc = emailData.bcc;
-    if (emailData.from) docData.from = emailData.from;
 
     await addDoc(collection(db, "mail"), docData);
     console.log("Email queued for sending successfully.");

@@ -145,14 +145,12 @@ export function Dashboard() {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(
-                ({ sendOrderConfirmationEmail, sendCustomerResearchStartedEmail }) => {
-                  sendOrderConfirmationEmail(
+                ({ sendCustomerResearchStartedEmail }) => {
+                  sendCustomerResearchStartedEmail(
                     userData.email,
                     userData.name || "العميل الكريم",
-                    order.orderNumber || orderId,
-                    isInvite,
-                  );
-                  sendCustomerResearchStartedEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || orderId);
+                    order.orderNumber || orderId
+                  ).catch(console.error);
                 },
               );
             }
@@ -2348,7 +2346,7 @@ export function Dashboard() {
 
                   {activeTab === "التصويبات" && (
                     <div className="py-12 bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden">
-                      {order?.issueStatus === "تم الإغلاق" || order?.actionPhase === "تم التسليم" || order?.actionPhase === "جاهز للتسليم النهائي" || order?.actionPhase === "تم إصدار النسخة النهائية" ? (
+                      {order?.issueStatus === "تم الإغلاق" || order?.actionPhase === "تم التسليم" || order?.actionPhase === "تم إصدار النسخة النهائية" ? (
                         <div className="text-center py-10 px-4">
                            {!["تم التسليم", "تم إصدار النسخة النهائية"].includes(order?.actionPhase || "") && (
                              <>
@@ -2424,7 +2422,7 @@ export function Dashboard() {
                              </div>
                            </div>
                         </div>
-                      ) : order?.actionPhase === "جاري التصويب" || order?.issueStatus === "جاري التصويب" ? (
+                      ) : order?.actionPhase === "جاري التصويب" || order?.issueStatus === "جاري التصويب" || order?.actionPhase === "تم التصويب" || order?.actionPhase === "جاهز للتسليم النهائي" ? (
                         <div className="text-center py-10 px-4">
                            <div className="w-20 h-20 bg-amber-100 text-amber-600 mb-6 rounded-full flex items-center justify-center ring-4 ring-amber-50 shadow-inner mx-auto">
                               <Edit3 className="w-10 h-10" />
