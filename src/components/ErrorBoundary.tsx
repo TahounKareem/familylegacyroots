@@ -26,6 +26,19 @@ export class ErrorBoundary extends Component<Props, State> {
     
     // Log crash to Firestore
     try {
+      fetch('/api/log_error', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          error: error.message,
+          stack: error.stack,
+          info: errorInfo.componentStack
+        })
+      }).catch(console.error);
+    } catch (e) {}
+    try {
       addDoc(collection(db, 'crash_logs'), {
         error: error.message,
         stack: error.stack,
@@ -51,6 +64,11 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-red-700 mb-6">
               لقد سجل نظام الحماية الخاص بنا هذا الخطأ الفني (Crash Report) وجاري العمل على إصلاحه.
             </p>
+            <div className="bg-red-50 p-4 rounded text-left overflow-auto mb-6 h-48 text-xs font-mono text-red-900 border border-red-200">
+              {this.state.error?.toString()}
+              <br/><br/>
+              {this.state.errorInfo?.componentStack}
+            </div>
             <button
               onClick={() => window.location.href = '/'}
               className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition"

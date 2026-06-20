@@ -170,6 +170,30 @@ service cloud.firestore {
       }
     }
     
+    // ==========================================
+    // Chatbot FAQs
+    // ==========================================
+    match /chatbot_faqs/{faqId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+    
+    // ==========================================
+    // System and Audit Logs
+    // ==========================================
+    match /session_audit_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /legal_audit_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /crash_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Default Deny
     match /{document=**} {
       allow read, write: if false;

@@ -79,6 +79,12 @@ ${knowledgeBase}
 
 async function startServer() {
   const app = express();
+  app.post("/api/log_error", express.json(), (req, res) => {
+    import("fs").then(fs => {
+      fs.writeFileSync("client_error.txt", JSON.stringify(req.body, null, 2));
+    });
+    res.sendStatus(200);
+  });
   const PORT = Number(process.env.PORT) || 3000;
 
   // Stripe Webhook MUST be placed before express.json() to get the raw body

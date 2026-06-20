@@ -60,6 +60,8 @@ export function Chatbot() {
         }
       });
       setDynamicFaqs(faqsText);
+    }, (error) => {
+      console.error("Chatbot FAQs snapshot error:", error);
     });
     return () => unsubscribe();
   }, []);
