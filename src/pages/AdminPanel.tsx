@@ -55,7 +55,8 @@ import {
   Palette,
   MapPin,
   Bell,
-  Printer
+  Printer,
+  MessageCircle
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { ChatbotManagement } from "@/components/ChatbotManagement";
