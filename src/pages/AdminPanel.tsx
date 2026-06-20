@@ -1958,7 +1958,7 @@ export function AdminPanel() {
                               )}
                               {!isDelivered && (
                                 <>
-                                  {(order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصويب") && (
+                                  {(order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصويب") && (
                                     <a href={order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
                                       <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
                                     </a>
@@ -3121,6 +3121,7 @@ export function AdminPanel() {
               </div>
             </div>
 
+            
             <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
               <div>
                 <label className="block font-semibold text-brand-900 mb-2">
@@ -3141,8 +3142,41 @@ export function AdminPanel() {
               
               {deliveryTab !== "draft" && (
                 <>
+                  <div className="flex flex-col gap-4 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <div className="font-bold text-lg text-brand-900 border-b border-brand-200 pb-2">بيانات الشحنة (تظهر للعميل بعد التسليم)</div>
+                    <div>
+                      <label className="block text-sm font-semibold text-brand-900 mb-2">تاريخ الشحن</label>
+                      <input
+                        type="date"
+                        value={shippingDate}
+                        onChange={(e) => setShippingDate(e.target.value)}
+                        className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-brand-900 mb-2">إسم الناقل</label>
+                      <input
+                        type="text"
+                        value={carrierName}
+                        onChange={(e) => setCarrierName(e.target.value)}
+                        placeholder="أدخل اسم شركة الشحن..."
+                        className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-brand-900 mb-2">رقم الشحنة للتتبع</label>
+                      <input
+                        type="text"
+                        value={trackingNumber}
+                        onChange={(e) => setTrackingNumber(e.target.value)}
+                        placeholder="أدخل رقم التتبع..."
+                        className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block font-semibold text-brand-900 mb-2">
+                    <label className="block font-semibold text-brand-900 mb-2 mt-4">
                        رابط النسخة الرقمية للسجل للتحميل
                     </label>
                     <input
@@ -3167,44 +3201,9 @@ export function AdminPanel() {
                       className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white text-left focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
-                  {deliveryTab === "final" && (
-                    <div className="flex flex-col gap-4 mt-6 bg-amber-50 p-4 rounded-xl border border-amber-200">
-                      <div className="font-bold text-lg text-brand-900 border-b border-brand-200 pb-2">بيانات الشحنة (تظهر للعميل بعد التسليم)</div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-brand-900 mb-2">تاريخ الشحن</label>
-                        <input
-                          type="date"
-                          value={shippingDate}
-                          onChange={(e) => setShippingDate(e.target.value)}
-                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-brand-900 mb-2">إسم الناقل</label>
-                        <input
-                          type="text"
-                          value={carrierName}
-                          onChange={(e) => setCarrierName(e.target.value)}
-                          placeholder="أدخل اسم شركة الشحن..."
-                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-brand-900 mb-2">رقم الشحنة للتتبع</label>
-                        <input
-                          type="text"
-                          value={trackingNumber}
-                          onChange={(e) => setTrackingNumber(e.target.value)}
-                          placeholder="أدخل رقم التتبع..."
-                          className="w-full mx-auto border border-brand-200 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-
+                  
                   <div>
-                    <label className="block font-semibold text-brand-900 mb-2 mt-6">
+                    <label className="block font-semibold text-brand-900 mb-2 mt-4">
                       التوصيات واقتراحات فريق البحث
                     </label>
                     <textarea
@@ -3214,7 +3213,6 @@ export function AdminPanel() {
                       className="w-full border border-brand-200 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 min-h-[100px]"
                     />
                   </div>
-
                 </>
               )}
               

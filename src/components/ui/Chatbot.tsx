@@ -216,17 +216,6 @@ export function Chatbot() {
                 </div>
               ))}
               
-              {!isTicketMode && (
-                <div className="flex flex-col gap-2 mt-2 animate-fade-in">
-                  <button
-                    onClick={() => setIsTicketMode(true)}
-                    className="text-right text-xs px-4 py-2 bg-brand-50 border border-brand-300 text-brand-900 font-semibold rounded-xl hover:bg-brand-100 transition shadow-sm mx-auto"
-                  >
-                    لفتح تذكرة لفريق الدعم، اضغط هنا
-                  </button>
-                </div>
-              )}
-
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-white border border-brand-100 text-gray-500 rounded-2xl rounded-tr-sm p-3 shadow-sm text-sm flex gap-1 items-center">

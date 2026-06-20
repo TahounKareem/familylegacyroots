@@ -124,7 +124,7 @@ async function startServer() {
   app.post("/api/chat", async (req, res) => {
     try {
       if (!ai) {
-        return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+        return res.json({ reply: "عذراً، المرشد الذكي في وضع التحديث حالياً أو أنه غير مربوط بالمحركات. يمكنك دائماً الرجوع إلى صفحة الأسئلة الشائعة والدليل الإرشادي." });
       }
 
       const { messages } = req.body;

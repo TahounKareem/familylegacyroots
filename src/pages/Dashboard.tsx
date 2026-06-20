@@ -1497,7 +1497,7 @@ export function Dashboard() {
                           placeholder="ابدا الكتابة هنا..."
                         />
                         
-                        {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") ? (
+                        {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") ? (
                           <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                             <button
                               onClick={() => {
@@ -1568,7 +1568,7 @@ export function Dashboard() {
                         />
                       </div>
 
-                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
+                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1882,7 +1882,7 @@ export function Dashboard() {
                         })}
                       </div>
 
-                      {order.data.sectionStatuses?.archive !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
+                      {order.data.sectionStatuses?.archive !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -1963,7 +1963,7 @@ export function Dashboard() {
                         }}
                       />
 
-                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي"].includes(order?.actionPhase || "") && (
+                      {status !== "closed" && !["تمت المسودة", "تم التصميم الإلكتروني", "تم إصدار النسخة الأولية", "تم تسليم النسخة الأولية", "جاري التصويب", "تم التصويب", "جاهز للتسليم النهائي", "تم التسليم"].includes(order?.actionPhase || "") && (
                         <div className="flex gap-4 mt-6 pt-4 border-t border-brand-100">
                           <button
                             onClick={() => {
@@ -2202,8 +2202,8 @@ export function Dashboard() {
                                   <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl flex items-start gap-4 text-right w-full max-w-2xl mx-auto">
                                     <Edit3 className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
                                     <div>
-                                      <h4 className="font-bold text-lg mb-2">سجل تراث عائلتكم قيد التصويب</h4>
-                                      <p>نعمل حاليًا على مراجعة طلب التصويب لسجلكم ، ستتغير حالة السجل آلياً عند صدور النسخة النهائية من سجل تراث عائلتكم .</p>
+                                      <h4 className="font-bold text-lg mb-2">سجل عائلتكم في مرحلة جاري التصويب!</h4>
+                                      <p>نعمل حاليًا على مراجعة طلبات التصويب الخاصة بسجلكم، ستتغير حالة السجل آلياً عند صدور النسخة النهائية. نشكر لكم حسن انتظاركم.</p>
                                     </div>
                                   </div>
                                 ) : (
