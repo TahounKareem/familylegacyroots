@@ -91,7 +91,7 @@ export function Auth() {
 
           await setDoc(doc(db, "users", user.uid), {
             id: user.uid,
-            name: name,
+            name: name || "العميل الكريم",
             email: email,
             role: role,
             createdAt: new Date().toISOString(),
@@ -104,7 +104,7 @@ export function Auth() {
               cookieConsentAt: cookieConsent !== 'none' ? new Date().toISOString() : null,
               ipAddress: ipAddress,
             }
-          });
+          }, { merge: true });
 
           // Add to audit logs
           try {

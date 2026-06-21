@@ -569,6 +569,11 @@ export const useAppStore = create<AppState>((set, get) => ({
           if (userDoc.exists()) {
             userInfo = userDoc.data() as UserInfo;
             
+            // Fix empty name if it exists from previous bugs
+            if (!userInfo.name || userInfo.name.trim() === "") {
+              userInfo.name = user.displayName || "العميل الكريم";
+            }
+            
             // Hardcode specific emails to their designated roles
             const emailLower = user.email?.toLowerCase();
             let newRole = userInfo.role;
@@ -579,15 +584,20 @@ export const useAppStore = create<AppState>((set, get) => ({
             else if (emailLower === "tahoun.kareemsherif@gmail.com") newRole = "accounting";
 
             const shouldUpdateRole = newRole !== userInfo.role;
+            const shouldUpdateName = userInfo.name !== userDoc.data()?.name;
             if (shouldUpdateRole) {
                userInfo.role = newRole;
             }
 
-            // Update lastLoginAt and potentially role
+            // Update lastLoginAt, potentially role and name
             try {
               await setDoc(
                 doc(db, "users", user.uid),
-                { lastLoginAt: new Date().toISOString(), ...(shouldUpdateRole ? { role: newRole } : {}) },
+                { 
+                  lastLoginAt: new Date().toISOString(), 
+                  ...(shouldUpdateRole ? { role: newRole } : {}),
+                  ...(shouldUpdateName ? { name: userInfo.name } : {})
+                },
                 { merge: true },
               );
             } catch (e) {
