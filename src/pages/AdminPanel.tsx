@@ -438,16 +438,21 @@ export function AdminPanel() {
         // Notification to user
         const firestore = await import("firebase/firestore");
         const fb = await import("@/lib/firebase");
-        try {
-          const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
-          if(userDoc.exists()) {
-            const userData = userDoc.data();
-            await emailService.sendCustomerDesignPhaseEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
-          } else if (researchDeliveryOrder.data.contactEmail) {
-            await emailService.sendCustomerDesignPhaseEmail(researchDeliveryOrder.data.contactEmail, researchDeliveryOrder.data.firstName || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+        let toEmail = researchDeliveryOrder.data.contactEmail;
+        let toName = researchDeliveryOrder.data.firstName || "العميل الكريم";
+        if (researchDeliveryOrder.userId) {
+          try {
+            const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
+            if(userDoc.exists() && userDoc.data().email) {
+              toEmail = userDoc.data().email;
+              toName = userDoc.data().name || toName;
+            }
+          } catch (e) {
+            console.error("Failed to load user for design phase email:", e);
           }
-        } catch (e) {
-          console.error("Failed to send customer design phase email:", e);
+        }
+        if (toEmail) {
+          await emailService.sendCustomerDesignPhaseEmail(toEmail, toName, researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
         }
       } else {
         await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
@@ -464,16 +469,21 @@ export function AdminPanel() {
         // Notify user that corrections are applied
         const firestore = await import("firebase/firestore");
         const fb = await import("@/lib/firebase");
-        try {
-          const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
-          if(userDoc.exists()) {
-            const userData = userDoc.data();
-            await emailService.sendCustomerCorrectionsAppliedEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
-          } else if (researchDeliveryOrder.data.contactEmail) {
-            await emailService.sendCustomerCorrectionsAppliedEmail(researchDeliveryOrder.data.contactEmail, researchDeliveryOrder.data.firstName || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+        let toEmail = researchDeliveryOrder.data.contactEmail;
+        let toName = researchDeliveryOrder.data.firstName || "العميل الكريم";
+        if (researchDeliveryOrder.userId) {
+          try {
+            const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
+            if(userDoc.exists() && userDoc.data().email) {
+              toEmail = userDoc.data().email;
+              toName = userDoc.data().name || toName;
+            }
+          } catch (e) {
+            console.error("Failed to load user for corrections applied email:", e);
           }
-        } catch (e) {
-          console.error("Failed to send customer corrections applied email:", e);
+        }
+        if (toEmail) {
+          await emailService.sendCustomerCorrectionsAppliedEmail(toEmail, toName, researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
         }
       }
       setResearchDeliveryOrder(null);
@@ -543,16 +553,21 @@ export function AdminPanel() {
       // Also notify the customer
       const firestore = await import("firebase/firestore");
       const fb = await import("@/lib/firebase");
-      try {
-        const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", designSubmitOrder.userId));
-        if(userDoc.exists()) {
-          const userData = userDoc.data();
-          await emailService.sendFinalDeliveryToCustomerEmail(userData.email, userData.name || "العميل الكريم", designSubmitOrder.orderNumber || designSubmitOrder.id, designRecordLink);
-        } else if (designSubmitOrder.data.contactEmail) {
-          await emailService.sendFinalDeliveryToCustomerEmail(designSubmitOrder.data.contactEmail, designSubmitOrder.data.firstName || "العميل الكريم", designSubmitOrder.orderNumber || designSubmitOrder.id, designRecordLink);
+      let toEmail = designSubmitOrder.data.contactEmail;
+      let toName = designSubmitOrder.data.firstName || "العميل الكريم";
+      if (designSubmitOrder.userId) {
+        try {
+          const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", designSubmitOrder.userId));
+          if(userDoc.exists() && userDoc.data().email) {
+            toEmail = userDoc.data().email;
+            toName = userDoc.data().name || toName;
+          }
+        } catch (e) {
+          console.error("Failed to load user for final delivery email:", e);
         }
-      } catch (e) {
-        console.error("Failed to send customer final delivery email:", e);
+      }
+      if (toEmail) {
+        await emailService.sendFinalDeliveryToCustomerEmail(toEmail, toName, designSubmitOrder.orderNumber || designSubmitOrder.id, designRecordLink);
       }
 
       setDesignSubmitOrder(null);
@@ -1523,16 +1538,19 @@ export function AdminPanel() {
                                           const emailService = await import("@/lib/emailService");
                                           const firestore = await import("firebase/firestore");
                                           const fb = await import("@/lib/firebase");
-                                          try {
-                                            const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", order.userId));
-                                            if(userDoc.exists()) {
-                                              const userData = userDoc.data();
-                                              await emailService.sendCustomerDocumentationPhaseEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || order.id);
-                                            } else if (order.data.contactEmail) {
-                                              await emailService.sendCustomerDocumentationPhaseEmail(order.data.contactEmail, order.data.firstName || "العميل الكريم", order.orderNumber || order.id);
-                                            }
-                                          } catch(e) {
-                                            console.error(e);
+                                          let toEmail = order.data.contactEmail;
+                                          let toName = order.data.firstName || "العميل الكريم";
+                                          if (order.userId) {
+                                            try {
+                                              const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", order.userId));
+                                              if(userDoc.exists() && userDoc.data().email) {
+                                                toEmail = userDoc.data().email;
+                                                toName = userDoc.data().name || toName;
+                                              }
+                                            } catch(e) { console.error(e); }
+                                          }
+                                          if (toEmail) {
+                                            await emailService.sendCustomerDocumentationPhaseEmail(toEmail, toName, order.orderNumber || order.id);
                                           }
                                         }
                                       } catch (error) {
