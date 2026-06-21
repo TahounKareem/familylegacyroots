@@ -104,6 +104,43 @@ export function Auth() {
           // Reset attempts on success
           setFailedAttempts(0);
           setLockoutUntil(null);
+
+          // Check for new device / IP
+          try {
+            let currentIp = "غير متوفر";
+            try {
+              const res = await fetch('https://api.ipify.org?format=json');
+              const data = await res.json();
+              if (data.ip) currentIp = data.ip;
+            } catch (e) {
+              console.error("Could not fetch IP:", e);
+            }
+            const currentAgent = navigator.userAgent;
+            
+            if (docData && (docData.lastKnownIp !== currentIp || docData.lastKnownAgent !== currentAgent)) {
+              await setDoc(doc(db, "users", userCredential.user.uid), { 
+                lastKnownIp: currentIp,
+                lastKnownAgent: currentAgent,
+                lastLoginAt: new Date().toISOString()
+              }, { merge: true });
+              
+              const loginTime = new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }).format(new Date());
+              const { sendNewLoginEmail } = await import("@/lib/emailService");
+              await sendNewLoginEmail(
+                email, 
+                docData.name || "العميل الكريم", 
+                loginTime,
+                currentAgent,
+                currentIp
+              );
+            } else if (docData) {
+               await setDoc(doc(db, "users", userCredential.user.uid), { 
+                lastLoginAt: new Date().toISOString()
+              }, { merge: true });
+            }
+          } catch (e) {
+            console.error("Failed to check new login device:", e);
+          }
         } else {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
@@ -138,6 +175,8 @@ export function Auth() {
             role: role,
             createdAt: new Date().toISOString(),
             lastLoginAt: new Date().toISOString(),
+            lastKnownIp: ipAddress,
+            lastKnownAgent: navigator.userAgent,
             country: country,
             isEmailVerified: false,
             verificationToken: vCode,

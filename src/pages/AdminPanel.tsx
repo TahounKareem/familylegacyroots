@@ -489,6 +489,9 @@ export function AdminPanel() {
         initialDesignSubmitOrder.id,
         "تم تسليم تصميم السجل الأولي"
       );
+      import("@/lib/emailService").then(({ sendInitialDesignReadyEmail }) => {
+        sendInitialDesignReadyEmail(initialDesignSubmitOrder.data.familyName, initialDesignSubmitOrder.orderNumber || initialDesignSubmitOrder.id).catch(console.error);
+      });
       setInitialDesignSubmitOrder(null);
       setInitialDesignLink("");
     } catch (e) {
@@ -524,6 +527,9 @@ export function AdminPanel() {
         designSubmitOrder.id,
         "تم تجهيز السجل للطباعة والتسليم النهائي للمدير"
       );
+      import("@/lib/emailService").then(({ sendFinalLinksReadyEmail }) => {
+        sendFinalLinksReadyEmail(designSubmitOrder.data.familyName, designSubmitOrder.orderNumber || designSubmitOrder.id).catch(console.error);
+      });
       setDesignSubmitOrder(null);
       setDesignRecordLink("");
       setDesignDownloadLink("");

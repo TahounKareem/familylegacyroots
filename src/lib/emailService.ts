@@ -508,18 +508,14 @@ export const sendFinalDeliveryToCustomerEmail = async (
       text: `أهلاً ${userName}، اكتملت رحلة التوثيق. ويسعدنا اليوم أن نضع بين أيديكم النسخة النهائية من سجل تراث عائلتكم.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>اكتملت رحلة التوثيق.</p>
-          <p>ويسعدنا اليوم أن نضع بين أيديكم النسخة النهائية من سجل تراث عائلتكم.</p>
+          <h2 style="color: #6d5b3f;">اكتملت رحلة توثيق سجل تراث عائلتكم</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>اكتملت رحلة التوثيق.<br/>ويسعدنا اليوم أن نضع بين أيديكم النسخة النهائية من سجل تراث عائلتكم.</p>
           <p>لقد جمع هذا السجل بين ما توفر من روايات ووثائق ومواد تاريخية ومعلومات عائلية ضمن عمل واحد أُعد ليكون مرجعاً يحفظ ذاكرة العائلة للأبناء والأحفاد والأجيال القادمة.</p>
           <p>يمكنكم الآن استعراض النسخة الرقمية النهائية من خلال لوحة التحكم.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">استعراض السجل في لوحة التحكم</a>
-          </div>
           <p>كما بدأ فريقنا إجراءات إعداد النسخ الورقية للطباعة والتجليد تمهيداً لشحنها إليكم، وسنزودكم بمعلومات الشحن فور جاهزيتها.</p>
-          <p>شكراً لثقتكم بنا ومشاركتنا هذه الرحلة.</p>
-          <p>لأن بعض الأشياء لا تُشترى... بل تُورث.</p>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <p>شكراً لثقتكم بنا ومشاركتنا هذه الرحلة.<br/>لأن بعض الأشياء لا تُشترى... بل تُورث.</p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
@@ -586,8 +582,9 @@ export const sendCustomerDocumentationPhaseEmail = async (
       text: `أهلاً ${userName}، يسرنا إبلاغكم بأن فريق البحث قد أكمل المرحلة البحثية الخاصة بسجل تراث عائلتكم، وانتقل المشروع الآن إلى مرحلة التوثيق.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>يسرنا إبلاغكم بأن فريق البحث قد أكمل المرحلة البحثية الخاصة بسجل تراث عائلتكم، وانتقل المشروع الآن إلى <strong>مرحلة التوثيق</strong>.</p>
+          <h2 style="color: #6d5b3f;">اكتملت مرحلة البحث وبدأت مرحلة التوثيق</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>يسرنا إبلاغكم بأن فريق البحث قد أكمل المرحلة البحثية الخاصة بسجل تراث عائلتكم، وانتقل المشروع الآن إلى مرحلة التوثيق.</p>
           <p>خلال هذه المرحلة يعمل فريقنا على مراجعة وتنظيم وتحليل النتائج المتوصل إليها، وربط المعلومات بالمصادر ذات الصلة، وإعداد المحتوى الذي سيشكل الأساس العلمي والتوثيقي للسجل.</p>
           <p>كما نود التذكير بأنه لا يزال بإمكانكم إثراء السجل العائلي من خلال إضافة الصور أو الوثائق أو الذكريات أو المعلومات التي ترون أنها تستحق أن تكون جزءاً من هذا العمل.</p>
           <p>يمكنكم متابعة حالة المشروع وتطوراته من خلال لوحة التحكم الخاصة بكم في أي وقت.</p>
@@ -595,7 +592,7 @@ export const sendCustomerDocumentationPhaseEmail = async (
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض حالة السجل الأساسي</a>
           </div>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
@@ -624,8 +621,9 @@ export const sendCustomerDesignPhaseEmail = async (
       text: `أهلاً ${userName}، يسرنا إبلاغكم بأن مشروع سجل تراث عائلتكم قد انتقل إلى مرحلة الإخراج الفني.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #6d5b3f;">أهلاً ${userName}،</h2>
-          <p>يسرنا إبلاغكم بأن مشروع سجل تراث عائلتكم قد انتقل إلى <strong>مرحلة الإخراج الفني</strong>.</p>
+          <h2 style="color: #6d5b3f;">انتقل سجل تراث عائلتكم إلى مرحلة الإخراج الفني</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>يسرنا إبلاغكم بأن مشروع سجل تراث عائلتكم قد انتقل إلى مرحلة الإخراج الفني.</p>
           <p>بعد اكتمال مراحل البحث والتوثيق، يعمل فريقنا الآن على إعداد السجل في صورته النهائية، من خلال تنظيم المحتوى وإخراجه بأسلوب أنيق ومتناسق يليق بتاريخ عائلتكم وإرثها.</p>
           <p>خلال هذه المرحلة يتم العمل على تنسيق النصوص، وإعداد الصفحات، وتنظيم الصور والوثائق والمحتويات المعتمدة، تمهيداً لإصدار النسخة الأولية من السجل ومشاركتها معكم للمراجعة.</p>
           <p>يمكنكم متابعة حالة السجل الأساسي (المشروع) من خلال لوحة التحكم الخاصة بكم في أي وقت.</p>
@@ -633,11 +631,11 @@ export const sendCustomerDesignPhaseEmail = async (
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">عرض حالة السجل الأساسي</a>
           </div>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
-            <strong>سجل تراث العائلة</strong><br/>
-            مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+             <strong>سجل تراث العائلة</strong><br/>
+             مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة.
           </p>
         </div>
       `,
@@ -741,7 +739,7 @@ export const sendCustomPasswordResetEmail = async (
           <p>لأسباب أمنية، تنتهي صلاحية هذا الرابط بعد فترة محددة، لذا نوصي بإتمام العملية في أقرب وقت.</p>
           <p>إذا لم تقم بطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذه الرسالة بأمان، ولن يتم إجراء أي تغيير على حسابكم.</p>
           <p>في حال واجهتكم أي صعوبة، يسعد فريق الدعم الفني بمساعدتكم.</p>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
@@ -760,6 +758,8 @@ export const sendPasswordChangedSuccessEmail = async (
   userEmail: string,
   userName: string,
 ) => {
+  const currentDate = new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }).format(new Date());
+
   await queueEmail({
     to: userEmail,
     bcc: DEFAULT_BCC,
@@ -772,13 +772,14 @@ export const sendPasswordChangedSuccessEmail = async (
           <h2 style="color: #6d5b3f;">تم تغيير كلمة المرور بنجاح</h2>
           <p>أهلاً ${userName}،</p>
           <p>نود إبلاغكم بأنه تم تحديث كلمة المرور الخاصة بحسابكم في منصة سجل تراث العائلة بنجاح.</p>
+          <p>تاريخ التحديث: ${currentDate}</p>
           <p>يمكنكم الآن استخدام كلمة المرور الجديدة لتسجيل الدخول إلى حسابكم والاستفادة من خدمات المنصة.</p>
           <p>إذا كنتم أنتم من قام بإجراء هذا التغيير، فلا يلزم اتخاذ أي إجراء إضافي.</p>
           <p>أما إذا لم تقوموا بتغيير كلمة المرور أو لديكم أي مخاوف تتعلق بأمان الحساب، فنرجو التواصل مع فريق الدعم الفني فوراً.</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://thefamilylegacyroots.com/auth" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">تسجيل الدخول إلى حسابي</a>
           </div>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
@@ -823,7 +824,7 @@ export const sendNewLoginEmail = async (
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">إدارة الحساب</a>
           </div>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
@@ -848,18 +849,18 @@ export const sendVerificationCodeEmail = async (
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
-      subject: `رمز تفعيل حسابكم في سجل تراث العائلة`,
+      subject: `تفعيل الحساب`,
       text: `أهلاً ${userName}، رمز التفعيل الخاص بكم هو: ${code}`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #6d5b3f;">تفعيل الحساب</h2>
           <p>أهلاً ${userName}،</p>
-          <p>شكراً لانضمامكم إلى منصة سجل تراث العائلة. لتفعيل حسابكم، يرجى إدخال رمز التفعيل التالي:</p>
+          <p>مرحباً بكم في منصة سجل تراث العائلة.<br/>لتفعيل حسابكم، يرجى إدخال رمز التفعيل التالي:</p>
           <div style="font-size: 24px; font-weight: bold; background: #eee; padding: 15px; text-align: center; letter-spacing: 5px; margin: 20px 0; border-radius: 8px;">
             ${code}
           </div>
-          <p>إذا لم تقوموا بإنشاء حساب، يرجى تجاهل هذه الرسالة.</p>
-          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <p>إذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة ولن يتم اتخاذ أي إجراء.<br/>نوصي بإتمام عملية التحقق لضمان أمان حسابكم واستلام التحديثات والإشعارات المتعلقة بطلباتكم وخدماتكم داخل المنصة.</p>
+          <br/><p>مع خالص التقدير،<br/><br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">
             <strong>سجل تراث العائلة</strong><br/>
