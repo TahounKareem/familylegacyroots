@@ -849,7 +849,7 @@ export const sendVerificationCodeEmail = async (
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
-      subject: `تفعيل الحساب`,
+      subject: `تفعيل حسابكم على منصة سجل تراث العائلة`,
       text: `أهلاً ${userName}، رمز التفعيل الخاص بكم هو: ${code}`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

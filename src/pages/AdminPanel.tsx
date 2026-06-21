@@ -431,20 +431,24 @@ export function AdminPanel() {
           researchDeliveryOrder.id,
           "تم تسليم النسخة الأولية لإدارة التصميم"
         );
-        import("@/lib/emailService").then(({ sendDesignDraftReadyEmail, sendDocumentationPhaseEmail, sendCustomerDesignPhaseEmail }) => {
-          sendDesignDraftReadyEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
-          sendDocumentationPhaseEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
-          const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
-            import("@/lib/firebase").then(({db}) => {
-              getDoc(doc(db, "users", researchDeliveryOrder.userId)).then((userDoc) => {
-                if(userDoc.exists()) {
-                  const userData = userDoc.data();
-                  sendCustomerDesignPhaseEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id).catch(console.error);
-                }
-              });
-            });
-          });
-        });
+        const emailService = await import("@/lib/emailService");
+        emailService.sendDesignDraftReadyEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+        emailService.sendDocumentationPhaseEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+        
+        // Notification to user
+        const firestore = await import("firebase/firestore");
+        const fb = await import("@/lib/firebase");
+        try {
+          const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
+          if(userDoc.exists()) {
+            const userData = userDoc.data();
+            await emailService.sendCustomerDesignPhaseEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+          } else if (researchDeliveryOrder.data.contactEmail) {
+            await emailService.sendCustomerDesignPhaseEmail(researchDeliveryOrder.data.contactEmail, researchDeliveryOrder.data.firstName || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+          }
+        } catch (e) {
+          console.error("Failed to send customer design phase email:", e);
+        }
       } else {
         await useAppStore.getState().fulfillOrder(researchDeliveryOrder.id, {
           actionPhase: "تم التصويب",
@@ -527,9 +531,25 @@ export function AdminPanel() {
         designSubmitOrder.id,
         "تم تجهيز السجل للطباعة والتسليم النهائي للمدير"
       );
-      import("@/lib/emailService").then(({ sendFinalLinksReadyEmail }) => {
-        sendFinalLinksReadyEmail(designSubmitOrder.data.familyName, designSubmitOrder.orderNumber || designSubmitOrder.id).catch(console.error);
-      });
+      
+      const emailService = await import("@/lib/emailService");
+      emailService.sendFinalLinksReadyEmail(designSubmitOrder.data.familyName, designSubmitOrder.orderNumber || designSubmitOrder.id).catch(console.error);
+      
+      // Also notify the customer
+      const firestore = await import("firebase/firestore");
+      const fb = await import("@/lib/firebase");
+      try {
+        const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", designSubmitOrder.userId));
+        if(userDoc.exists()) {
+          const userData = userDoc.data();
+          await emailService.sendFinalDeliveryToCustomerEmail(userData.email, userData.name || "العميل الكريم", designSubmitOrder.orderNumber || designSubmitOrder.id, designRecordLink);
+        } else if (designSubmitOrder.data.contactEmail) {
+          await emailService.sendFinalDeliveryToCustomerEmail(designSubmitOrder.data.contactEmail, designSubmitOrder.data.firstName || "العميل الكريم", designSubmitOrder.orderNumber || designSubmitOrder.id, designRecordLink);
+        }
+      } catch (e) {
+        console.error("Failed to send customer final delivery email:", e);
+      }
+
       setDesignSubmitOrder(null);
       setDesignRecordLink("");
       setDesignDownloadLink("");
@@ -1495,18 +1515,20 @@ export function AdminPanel() {
                                         );
 
                                         if (newPhase === "مرحلة التوثيق") {
-                                          import("@/lib/emailService").then(({ sendCustomerDocumentationPhaseEmail }) => {
-                                            const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
-                                              import("@/lib/firebase").then(({db}) => {
-                                                getDoc(doc(db, "users", order.userId)).then((userDoc) => {
-                                                  if(userDoc.exists()) {
-                                                    const userData = userDoc.data();
-                                                    sendCustomerDocumentationPhaseEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || order.id).catch(console.error);
-                                                  }
-                                                });
-                                              });
-                                            });
-                                          });
+                                          const emailService = await import("@/lib/emailService");
+                                          const firestore = await import("firebase/firestore");
+                                          const fb = await import("@/lib/firebase");
+                                          try {
+                                            const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", order.userId));
+                                            if(userDoc.exists()) {
+                                              const userData = userDoc.data();
+                                              await emailService.sendCustomerDocumentationPhaseEmail(userData.email, userData.name || "العميل الكريم", order.orderNumber || order.id);
+                                            } else if (order.data.contactEmail) {
+                                              await emailService.sendCustomerDocumentationPhaseEmail(order.data.contactEmail, order.data.firstName || "العميل الكريم", order.orderNumber || order.id);
+                                            }
+                                          } catch(e) {
+                                            console.error(e);
+                                          }
                                         }
                                       } catch (error) {
                                         console.error("Failed to update status", error);

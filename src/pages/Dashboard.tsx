@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useAppStore, Message, Order, FamilyData, MediaItem } from "@/lib/store";
 import { storage, auth, db } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, updatePassword } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import {
@@ -76,6 +76,11 @@ export function Dashboard() {
   const [successModal, setSuccessModal] = useState<{isOpen: boolean, title: string, subtitle: string, isDone?: boolean}>({isOpen: false, title: "", subtitle: ""});
   const [confirmState, setConfirmState] = useState<{isOpen: boolean, action: (() => void) | null}>({isOpen: false, action: null});
   const chatFileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [newPasswordValue, setNewPasswordValue] = useState("");
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
+  const [passwordChangeError, setPasswordChangeError] = useState("");
 
   const [pendingUpload, setPendingUpload] = useState<{
     file: File;
@@ -203,6 +208,42 @@ export function Dashboard() {
 
   const handleResumePayment = async () => {
     navigate("/order?step=4");
+  };
+
+  const handleChangePasswordSubmit = async () => {
+    if (!newPasswordValue.trim() || newPasswordValue.length < 8) {
+      setPasswordChangeError("كلمة المرور يجب أن لا تقل عن 8 أحرف.");
+      return;
+    }
+    if (!auth.currentUser) return;
+    setPasswordChangeLoading(true);
+    setPasswordChangeError("");
+    try {
+      await updatePassword(auth.currentUser, newPasswordValue);
+      setShowChangePasswordModal(false);
+      setNewPasswordValue("");
+      const userEmail = currentUser?.email || auth.currentUser.email;
+      const userName = currentUser?.name || "العميل الكريم";
+      if (userEmail) {
+        import("@/lib/emailService").then(({ sendPasswordChangedSuccessEmail }) => {
+          sendPasswordChangedSuccessEmail(userEmail, userName).catch(console.error);
+        });
+      }
+      setSuccessModal({
+        isOpen: true,
+        title: "تم تغيير كلمة المرور بنجاح",
+        subtitle: "يمكنك الآن استخدام كلمة المرور الجديدة لتسجيل الدخول."
+      });
+    } catch (e: any) {
+      console.error(e);
+      if (e.code === 'auth/requires-recent-login') {
+        setPasswordChangeError("الرجاء تسجيل الخروج وتسجيل الدخول مجدداً لتغيير كلمة المرور لدواعي أمنية.");
+      } else {
+        setPasswordChangeError("حدث خطأ أثناء تغيير كلمة المرور.");
+      }
+    } finally {
+      setPasswordChangeLoading(false);
+    }
   };
 
   const updateSpecificData = async (updates: Partial<FamilyData>) => {
@@ -3035,11 +3076,7 @@ export function Dashboard() {
                               </p>
                             </div>
                             <button
-                              onClick={() =>
-                                alert(
-                                  "سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.",
-                                )
-                              }
+                              onClick={() => setShowChangePasswordModal(true)}
                               className="px-6 py-2 border border-brand-300 text-brand-700 rounded-xl hover:bg-brand-100 transition text-sm font-medium whitespace-nowrap"
                             >
                               تغيير كلمة المرور
@@ -3251,6 +3288,58 @@ export function Dashboard() {
               <button
                 onClick={() => setConfirmState({isOpen: false, action: null})}
                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in fade-in zoom-in duration-300 relative border border-brand-200">
+            <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
+              <Lock className="w-5 h-5 text-brand-600" />
+              تغيير كلمة المرور
+            </h3>
+            
+            {passwordChangeError && (
+              <div className="mb-4 bg-red-50 text-red-700 p-4 rounded-xl text-sm font-medium border border-red-100 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{passwordChangeError}</span>
+              </div>
+            )}
+
+            <div className="space-y-4 mb-8">
+              <div>
+                <label className="block text-sm font-bold text-brand-900 mb-2">كلمة المرور الجديدة</label>
+                <input
+                  type="password"
+                  value={newPasswordValue}
+                  onChange={(e) => setNewPasswordValue(e.target.value)}
+                  className="w-full border-brand-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 bg-brand-50 p-3"
+                  placeholder="8 أحرف كحد أدنى"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={handleChangePasswordSubmit}
+                disabled={passwordChangeLoading}
+                className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {passwordChangeLoading ? "جاري التغيير..." : "حفظ كلمة المرور"}
+              </button>
+              <button
+                disabled={passwordChangeLoading}
+                onClick={() => {
+                  setShowChangePasswordModal(false);
+                  setNewPasswordValue("");
+                  setPasswordChangeError("");
+                }}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition disabled:opacity-50"
               >
                 إلغاء
               </button>
