@@ -327,7 +327,7 @@ export const sendInitialDesignReadyEmail = async (
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
-      subject: `النسخة الإلكترونية الأولية جاهزة للطلب #${orderId} - عائلة (${familyName})`,
+      subject: `النسخة الأولية لسجل تراث العائلة جاهزة للإرسال الى العميل #${orderId} - عائلة (${familyName})`,
       text: `أنهى مدير التصميم إعداد النسخة الإلكترونية الأولية لسجل عائلة (${familyName}). يرجى المراجعة وتسليمها للعميل.`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

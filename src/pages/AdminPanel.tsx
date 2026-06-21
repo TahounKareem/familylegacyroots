@@ -458,18 +458,23 @@ export function AdminPanel() {
           researchDeliveryOrder.id,
           "تم تسليم السجل بعد التصويب لإدارة التصميم"
         );
-        import("@/lib/emailService").then(({ sendCustomerCorrectionsAppliedEmail }) => {
-          const uDoc = import("firebase/firestore").then(({getDoc, doc}) => {
-            import("@/lib/firebase").then(({db}) => {
-              getDoc(doc(db, "users", researchDeliveryOrder.userId)).then((userDoc) => {
-                if(userDoc.exists()) {
-                  const userData = userDoc.data();
-                  sendCustomerCorrectionsAppliedEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id).catch(console.error);
-                }
-              });
-            });
-          });
-        });
+        const emailService = await import("@/lib/emailService");
+        emailService.sendDesignCorrectionsAppliedEmail(researchDeliveryOrder.data.familyName, researchDeliveryOrder.id).catch(console.error);
+
+        // Notify user that corrections are applied
+        const firestore = await import("firebase/firestore");
+        const fb = await import("@/lib/firebase");
+        try {
+          const userDoc = await firestore.getDoc(firestore.doc(fb.db, "users", researchDeliveryOrder.userId));
+          if(userDoc.exists()) {
+            const userData = userDoc.data();
+            await emailService.sendCustomerCorrectionsAppliedEmail(userData.email, userData.name || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+          } else if (researchDeliveryOrder.data.contactEmail) {
+            await emailService.sendCustomerCorrectionsAppliedEmail(researchDeliveryOrder.data.contactEmail, researchDeliveryOrder.data.firstName || "العميل الكريم", researchDeliveryOrder.orderNumber || researchDeliveryOrder.id);
+          }
+        } catch (e) {
+          console.error("Failed to send customer corrections applied email:", e);
+        }
       }
       setResearchDeliveryOrder(null);
       setResearchDocumentLink("");
