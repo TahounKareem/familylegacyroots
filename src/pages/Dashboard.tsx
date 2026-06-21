@@ -2442,15 +2442,29 @@ export function Dashboard() {
                         </div>
                       ) : order?.actionPhase === "جاري التصويب" || order?.issueStatus === "جاري التصويب" || order?.actionPhase === "تم التصويب" || order?.actionPhase === "جاهز للتسليم النهائي" ? (
                         <div className="text-center py-10 px-4">
-                           <div className="w-20 h-20 bg-amber-100 text-amber-600 mb-6 rounded-full flex items-center justify-center ring-4 ring-amber-50 shadow-inner mx-auto">
-                              <Edit3 className="w-10 h-10" />
-                           </div>
-                           <h3 className="text-2xl font-bold text-brand-900 mb-2">
-                             سجل تراث عائلتكم قيد التصويب
-                           </h3>
-                           <p className="text-brand-600 font-medium max-w-lg mx-auto leading-relaxed mb-8">
-                             نعمل حاليًا على مراجعة طلب التصويب لسجلكم، ستتغير حالة السجل آلياً عند صدور النسخة النهائية.
-                           </p>
+                           {order?.actionPhase === "تم التصويب" || order?.actionPhase === "جاهز للتسليم النهائي" ? (
+                             <>
+                               <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                               <h3 className="text-xl font-bold text-brand-900 mb-2">
+                                 سجل عائلتكم في مرحلة الطباعة النهائية!
+                               </h3>
+                               <p className="text-brand-600 font-light max-w-lg mx-auto leading-relaxed mb-8">
+                                 يسعدنا تأكيد اعتمادكم للنسخة النهائية. يتم الآن العمل بكل اهتمام على طباعة وإخراج النسخ الفاخرة من سجل تراث أسرتكم لتكون بين أيديكم قريباً، ولتُخلد تاريخكم ومجدكم بأبهى حُلة تتوارثها الأجيال.
+                               </p>
+                             </>
+                           ) : (
+                             <>
+                               <div className="w-20 h-20 bg-amber-100 text-amber-600 mb-6 rounded-full flex items-center justify-center ring-4 ring-amber-50 shadow-inner mx-auto">
+                                  <Edit3 className="w-10 h-10" />
+                               </div>
+                               <h3 className="text-2xl font-bold text-brand-900 mb-2">
+                                 سجل تراث عائلتكم قيد التصويب
+                               </h3>
+                               <p className="text-brand-600 font-medium max-w-lg mx-auto leading-relaxed mb-8">
+                                 نعمل حاليًا على مراجعة طلب التصويب لسجلكم، ستتغير حالة السجل آلياً عند صدور النسخة النهائية.
+                               </p>
+                             </>
+                           )}
 
                            {order?.messages?.some(m => m.text?.includes("طلب تصويب - القسم") || m.text?.includes("تم إرسال طلب تصويبات متعددة")) && (
                              <div className="mt-8 text-right bg-white p-6 md:p-8 rounded-2xl border border-brand-200 shadow-sm max-w-4xl mx-auto">
