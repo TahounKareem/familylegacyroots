@@ -444,7 +444,7 @@ export function Dashboard() {
             <div className="text-center md:text-right flex flex-col items-center md:items-start">
               <span className="text-xs font-bold text-brand-400 mb-0.5 uppercase tracking-wider">مرحباً بك</span>
               <h1 className="text-2xl font-bold font-serif text-brand-900 leading-tight">
-                {currentUser.name}
+                {currentUser.name || "العميل الكريم"}
               </h1>
             </div>
 
@@ -2906,7 +2906,7 @@ export function Dashboard() {
                               name="name"
                               type="text"
                               className="w-full border-brand-200 rounded-xl bg-white"
-                              defaultValue={currentUser.name || ""}
+                              defaultValue={currentUser.name || "العميل الكريم"}
                             />
                           </div>
                           
@@ -3098,7 +3098,7 @@ export function Dashboard() {
                                     const { collection, addDoc } = await import('firebase/firestore');
                                     await addDoc(collection(db, 'support_tickets'), {
                                       userId: currentUser.id,
-                                      userName: currentUser.name,
+                                      userName: currentUser.name || "العميل الكريم",
                                       email: currentUser.email,
                                       topic: 'حذف الحساب',
                                       description: 'طلب رسمي مقدم من المستخدم لحذف بياناته.',
