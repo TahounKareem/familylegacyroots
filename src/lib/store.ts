@@ -150,6 +150,7 @@ export interface UserInfo {
   mobile?: string;
   passportUrl?: string;
   photoUrl?: string;
+  isEmailVerified?: boolean;
 }
 
 export interface Node {
@@ -555,19 +556,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   initializeFirebase: () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        if (!user.emailVerified) {
-          // Simply clear state, don't force a signout here as it races with Auth.tsx during registration
-          set({ currentUser: null, orders: [], isAuthReady: true });
-          return;
-        }
-
         try {
           // Get user document
           const userDoc = await getDoc(doc(db, "users", user.uid));
+          const docData = userDoc.data();
+          
+          const isVerified = user.emailVerified || (docData?.isEmailVerified === true);
+          if (!isVerified) {
+            // Simply clear state, don't force a signout here as it races with Auth.tsx during registration
+            set({ currentUser: null, orders: [], isAuthReady: true });
+            return;
+          }
+
           let userInfo: UserInfo;
 
           if (userDoc.exists()) {
-            userInfo = userDoc.data() as UserInfo;
+            userInfo = docData as UserInfo;
             
             // Fix empty name if it exists from previous bugs
             if (!userInfo.name || userInfo.name.trim() === "") {

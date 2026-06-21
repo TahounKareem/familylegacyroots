@@ -201,7 +201,7 @@ export const createSupportTicket = async (
   });
 };
 
-const DEFAULT_FROM = "info@thefamilylegacyroots.com";
+const DEFAULT_FROM = "سجل تراث العائلة <info@thefamilylegacyroots.com>";
 const DEFAULT_BCC: string | undefined = undefined; // "no-reply@thefamilylegacyroots.com";
 
 /**
@@ -823,6 +823,42 @@ export const sendNewLoginEmail = async (
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://thefamilylegacyroots.com/app" style="background-color: #6d5b3f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">إدارة الحساب</a>
           </div>
+          <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #666; font-size: 12px;">
+            <strong>سجل تراث العائلة</strong><br/>
+            منصة متخصصة لحفظ وتوثيق تراث العائلات للأجيال القادمة.
+          </p>
+        </div>
+      `,
+    },
+  });
+};
+
+/**
+ * 20. رسالة تفعيل الحساب برمز التأكيد (مخصصة)
+ */
+export const sendVerificationCodeEmail = async (
+  userEmail: string,
+  userName: string,
+  code: string,
+) => {
+  await queueEmail({
+    to: userEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `رمز تفعيل حسابكم في سجل تراث العائلة`,
+      text: `أهلاً ${userName}، رمز التفعيل الخاص بكم هو: ${code}`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">تفعيل الحساب</h2>
+          <p>أهلاً ${userName}،</p>
+          <p>شكراً لانضمامكم إلى منصة سجل تراث العائلة. لتفعيل حسابكم، يرجى إدخال رمز التفعيل التالي:</p>
+          <div style="font-size: 24px; font-weight: bold; background: #eee; padding: 15px; text-align: center; letter-spacing: 5px; margin: 20px 0; border-radius: 8px;">
+            ${code}
+          </div>
+          <p>إذا لم تقوموا بإنشاء حساب، يرجى تجاهل هذه الرسالة.</p>
           <br/><p>مع خالص التقدير،<br/><strong>فريق سجل تراث العائلة</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="text-align: center; color: #666; font-size: 12px;">

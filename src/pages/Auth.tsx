@@ -17,10 +17,35 @@ export function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [pendingUser, setPendingUser] = useState<any>(null);
   
   const currentUser = useAppStore((state) => state.currentUser);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleOtpVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingUser || !otpCode) return;
+    setLoading(true);
+    try {
+      const { getDoc } = await import("firebase/firestore");
+      const userDoc = await getDoc(doc(db, "users", pendingUser.uid));
+      const data = userDoc.data();
+      if (data?.verificationToken === otpCode) {
+        await setDoc(doc(db, "users", pendingUser.uid), { isEmailVerified: true, verificationToken: null }, { merge: true });
+        window.location.reload(); // Reload to trigger auth state and load dashboard
+      } else {
+        setError("رمز التفعيل غير صحيح. يرجى المحاولة مرة أخرى.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ أثناء التفعيل");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +80,24 @@ export function Auth() {
              alert("إشعار أمان: نظراً لسياسات الأمان الجديدة، يرجى تغيير كلمة المرور الخاصة بك لتتوافق مع المتطلبات الحالية (8 أحرف كحد أدنى تتضمن حرفاً كبيراً ورقم ورمز) وذلك من خلال خيار استعادة كلمة المرور.");
           }
 
-          if (!userCredential.user.emailVerified) {
-            await signOut(auth);
-            setError("برجاء تفعيل حسابك أولاً من خلال الرابط المرسل إلى بريدك الإلكتروني.");
+          const { getDoc } = await import("firebase/firestore");
+          const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+          const docData = userDoc.data();
+          const isVerified = userCredential.user.emailVerified || docData?.isEmailVerified === true;
+
+          if (!isVerified) {
+            setPendingUser(userCredential.user);
+            setShowOtp(true);
+            setError("برجاء إدخال رمز التفعيل المرسل إلى بريدك الإلكتروني.");
+            
+            // Optionally generate and send a new token here if not found...
+            if (!docData?.verificationToken) {
+              const vCode = Math.floor(100000 + Math.random() * 900000).toString();
+              await setDoc(doc(db, "users", userCredential.user.uid), { verificationToken: vCode }, { merge: true });
+              const { sendVerificationCodeEmail } = await import("@/lib/emailService");
+              await sendVerificationCodeEmail(email, docData?.name || "العميل الكريم", vCode);
+            }
+            setLoading(false);
             return;
           }
           
@@ -89,6 +129,8 @@ export function Auth() {
             console.error("Could not fetch country:", e);
           }
 
+          const vCode = Math.floor(100000 + Math.random() * 900000).toString();
+
           await setDoc(doc(db, "users", user.uid), {
             id: user.uid,
             name: name || "العميل الكريم",
@@ -97,6 +139,8 @@ export function Auth() {
             createdAt: new Date().toISOString(),
             lastLoginAt: new Date().toISOString(),
             country: country,
+            isEmailVerified: false,
+            verificationToken: vCode,
             legalConsent: {
               agreedToTerms: agreeTerms,
               agreedToTermsAt: agreeTerms ? new Date().toISOString() : null,
@@ -119,16 +163,20 @@ export function Auth() {
             console.error("Failed to log audit event:", e);
           }
 
-          // Send verification email and sign out to wait for verification
-          await sendEmailVerification(user);
-          await signOut(auth);
+          // Send verification email
+          try {
+            const { sendVerificationCodeEmail } = await import("@/lib/emailService");
+            await sendVerificationCodeEmail(email, name || "العميل الكريم", vCode);
+          } catch (e) {
+            console.error("Failed to send verification email:", e);
+          }
           
-          // Clear inputs and show success message
-          setError("تم إنشاء الحساب بنجاح! برجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني قبل تسجيل الدخول. (إذا لم تجد الرسالة، يرجى تفقد مجلد الرسائل المزعجة Spam / Junk).");
-          setIsLogin(true);
-          setPassword("");
+          setPendingUser(user);
+          setShowOtp(true);
+          setError("تم إنشاء الحساب بنجاح! برجاء إدخال رمز التفعيل المرسل إلى بريدك الإلكتروني. (قد تجد الرسالة في مجلد الرسائل المزعجة Spam / Junk).");
           return;
         }
+
       } catch (err: any) {
         console.error("Auth/Firestore error:", err);
         
@@ -246,8 +294,40 @@ export function Auth() {
               {error}
             </div>
           )}
-          <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
-            {!isLogin && (
+          {showOtp ? (
+            <form autoComplete="off" className="space-y-6" onSubmit={handleOtpVerification}>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-brand-900 mb-2">تفعيل الحساب</h3>
+                <p className="text-sm text-brand-600">أدخل رمز التفعيل المكون من 6 أرقام المرسل إلى بريدك الإلكتروني.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-800">رمز التفعيل</label>
+                <div className="mt-1">
+                  <input autoComplete="new-password"
+                    type="text"
+                    required
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className="appearance-none block w-full px-3 py-3 border border-brand-200 rounded-lg shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 text-center text-xl tracking-widest"
+                    dir="ltr"
+                    maxLength={6}
+                    placeholder="xxxxxx"
+                  />
+                </div>
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${loading ? 'bg-brand-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'}`}
+                >
+                  {loading ? "جاري التفعيل..." : "تأكيد"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
+              {!isLogin && (
               <div>
                 <label className="block text-sm font-medium text-brand-800">الاسم الكامل</label>
                 <div className="mt-1">
@@ -344,10 +424,12 @@ export function Auth() {
               </button>
             </div>
           </form>
+          )}
         </div>
 
-                {!isLogin ? (
-          <div className="mt-8">
+        {!showOtp && (
+          !isLogin ? (
+            <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-brand-200" />
@@ -387,7 +469,7 @@ export function Auth() {
               </button>
             </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
