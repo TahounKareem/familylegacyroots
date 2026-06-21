@@ -166,6 +166,12 @@ export function OrderFlow() {
         data: finalData,
       });
 
+      import("@/lib/emailService").then(({ sendManagementNewOrderEmail }) => {
+        if (sendManagementNewOrderEmail) {
+          sendManagementNewOrderEmail(orderNumber, finalData.familyName).catch(console.error);
+        }
+      });
+
       // Navigate to success page mimicking Stripe
       navigate(`/dashboard?success=true&order_id=${orderId}&invite=true`);
     } catch (e) {

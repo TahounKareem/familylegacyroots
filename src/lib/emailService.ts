@@ -83,6 +83,34 @@ export const sendOrderConfirmationEmail = async (
   });
 };
 
+export const sendManagementNewOrderEmail = async (
+  orderId: string,
+  familyName: string,
+) => {
+  await queueEmail({
+    to: ["kareem.tahoun@adamresearchcenter.net", "hassan.alamri@adamresearchcenter.net"],
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: `طلب جديد جاري التنفيذ - عائلة ${familyName}`,
+      text: `تم استلام طلب جديد لعائلة ${familyName} برقم ${orderId}. الطلب الآن في مرحلة البحث بانتظار تعيين باحث.`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #6d5b3f;">إشعار بطلب جديد (جاري التنفيذ)</h2>
+          <p>تحية طيبة،</p>
+          <p>نفيدكم علماً بأنه قد تم وصول طلب جديد وبدأت مرحلة التنفيذ (الطلب الآن في <strong>مرحلة البحث</strong>).</p>
+          <ul>
+            <li><strong>رقم الطلب:</strong> ${orderId}</li>
+            <li><strong>العائلة:</strong> ${familyName}</li>
+          </ul>
+          <p>يرجى التفضل بالدخول إلى لوحة التحكم لتعيين <strong>باحث مسؤول</strong> عن هذا الطلب للبدء في التنفيذ في أسرع وقت.</p>
+          <br/><p>مع خالص التحيات،<br/><strong>النظام الآلي - سجل تراث العائلة</strong></p>
+        </div>
+      `,
+    },
+  });
+};
+
 /**
  * إرسال إيميل طلب استيضاح أو بيانات إضافية من الباحث
  */

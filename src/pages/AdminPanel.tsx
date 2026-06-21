@@ -438,7 +438,7 @@ export function AdminPanel() {
         // Notification to user
         const firestore = await import("firebase/firestore");
         const fb = await import("@/lib/firebase");
-        let toEmail = researchDeliveryOrder.data.contactEmail;
+        let toEmail = researchDeliveryOrder.data.email || researchDeliveryOrder.data.contactEmail;
         let toName = researchDeliveryOrder.data.firstName || "العميل الكريم";
         if (researchDeliveryOrder.userId) {
           try {
@@ -469,7 +469,7 @@ export function AdminPanel() {
         // Notify user that corrections are applied
         const firestore = await import("firebase/firestore");
         const fb = await import("@/lib/firebase");
-        let toEmail = researchDeliveryOrder.data.contactEmail;
+        let toEmail = researchDeliveryOrder.data.email || researchDeliveryOrder.data.contactEmail;
         let toName = researchDeliveryOrder.data.firstName || "العميل الكريم";
         if (researchDeliveryOrder.userId) {
           try {
@@ -553,7 +553,7 @@ export function AdminPanel() {
       // Also notify the customer
       const firestore = await import("firebase/firestore");
       const fb = await import("@/lib/firebase");
-      let toEmail = designSubmitOrder.data.contactEmail;
+      let toEmail = designSubmitOrder.data.email || designSubmitOrder.data.contactEmail;
       let toName = designSubmitOrder.data.firstName || "العميل الكريم";
       if (designSubmitOrder.userId) {
         try {
@@ -1538,7 +1538,7 @@ export function AdminPanel() {
                                           const emailService = await import("@/lib/emailService");
                                           const firestore = await import("firebase/firestore");
                                           const fb = await import("@/lib/firebase");
-                                          let toEmail = order.data.contactEmail;
+                                          let toEmail = order.data.email || order.data.contactEmail;
                                           let toName = order.data.firstName || "العميل الكريم";
                                           if (order.userId) {
                                             try {
@@ -3425,7 +3425,7 @@ export function AdminPanel() {
                   const emailBody = `أهلاً بك ${name}،\n\nنهديكم أطيب التحيات من منصة سجل تراث العائلة.\nيُسعدنا إبلاغكم بأننا قد أنجزنا بنجاح خطوات مهمة في إعداد سجل عائلتكم العريق، حيث وصل الطلب الآن إلى ${phaseName}.\n\nوفقاً لنظام "الدفع المرن" المختار، فقد استُحقت الآن الدفعة التالية وقدرها (${amount} دولار).\nنرجو منكم التكرم بإتمام عملية السداد لضمان استمرار سير العمل بسلاسة انتقالاً للمرحلة القادمة.\n\nرابط إتمام الدفع (آمن ومباشر):\n${paymentLink}\n\nنشكر لكم ثقتكم وحرصكم الدائم، ونسعد دوماً بخدمتكم وتدوين إرث عائلتكم الممتد.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`;
                   
                   // Use window.open with mailto as fallback, or our email service if extended
-                  const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.contactEmail;
+                  const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.email || paymentRequestOrder.data.contactEmail;
                   const subject = encodeURIComponent(`مطالبة سداد مستحقة - ${phaseName} - منصة سجل تراث العائلة`);
                   const body = encodeURIComponent(emailBody);
                   window.open(`mailto:${toEmail}?subject=${subject}&body=${body}`, '_blank');

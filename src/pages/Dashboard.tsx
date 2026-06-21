@@ -144,18 +144,26 @@ export function Dashboard() {
           order.status === "بإنتظار إتمام الدفع")
       ) {
         updateOrderStatus(orderId, "قيد البحث");
-        // Trigger email
+        useAppStore.getState().fulfillOrder(orderId, {
+          issueStatus: "جاري التنفيذ",
+          actionPhase: "مرحلة البحث",
+        });
+        
+        // Trigger emails
         if (currentUser) {
           getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
             if (userDoc.exists()) {
               const userData = userDoc.data();
               import("@/lib/emailService").then(
-                ({ sendCustomerResearchStartedEmail }) => {
+                ({ sendCustomerResearchStartedEmail, sendManagementNewOrderEmail }) => {
                   sendCustomerResearchStartedEmail(
                     userData.email,
                     userData.name || "العميل الكريم",
                     order.orderNumber || orderId
                   ).catch(console.error);
+                  if (sendManagementNewOrderEmail) {
+                    sendManagementNewOrderEmail(order.orderNumber || orderId, order.data.familyName).catch(console.error);
+                  }
                 },
               );
             }
