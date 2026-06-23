@@ -8,6 +8,8 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
   const [userData, setUserData] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
+  const [consents, setConsents] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -24,6 +26,18 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
         const ticketsQ = query(collection(db, 'support_tickets'), where('userId', '==', userId));
         const ticketsSnap = await getDocs(ticketsQ);
         setTickets(ticketsSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter((t: any) => t.privacyType === 'طلب حذف بيانات'));
+        
+        const consentsQ = query(collection(db, 'legal_consents'), where('userId', '==', userId));
+        const consentsSnap = await getDocs(consentsQ);
+        setConsents(consentsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        
+        const logsQ = query(collection(db, 'audit_logs'), where('userId', '==', userId));
+        const logsSnap = await getDocs(logsQ);
+        setAuditLogs(logsSnap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => {
+           let tA = a.timestamp?.seconds || 0;
+           let tB = b.timestamp?.seconds || 0;
+           return tA - tB;
+        }));
       } catch (e) {
         console.error("Failed to fetch compliance report data", e);
       } finally {
@@ -221,15 +235,57 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                              <span className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100 shadow-sm" dir="ltr">Document ID: {order.id}</span>
                            </div>
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                               <p className="text-xs text-brand-500 mb-1 font-bold">الاسم الموقع المعتمد (E-Signature)</p>
-                               <p className="font-serif text-lg font-bold text-brand-800">{order.signatureName || "توقيع مرفق (تم التأكيد)"}</p>
+                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 flex flex-col items-center justify-center min-h-[100px]">
+                               <p className="text-xs text-brand-500 mb-2 font-bold select-none self-start">الاسم الموقع المعتمد (E-Signature)</p>
+                               {order.contractUrl ? (
+                                 <img src={order.contractUrl} alt="E-Signature" className="w-full max-h-24 object-contain opacity-80" style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.1))" }} />
+                               ) : (
+                                 <p className="font-serif text-lg font-bold text-brand-800">{order.signatureName || "توقيع مرفق (تم التأكيد)"}</p>
+                               )}
                              </div>
                              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                <p className="text-xs text-brand-500 mb-1 font-bold">تاريخ توقيع العقد (Timestamp)</p>
                                <p className="font-mono text-sm" dir="ltr">{formatDate(order.createdAt)}</p>
                              </div>
                            </div>
+                           
+                           {(consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).length > 0 || auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).length > 0) && (
+                             <div className="mt-3 bg-white border border-brand-100 rounded-lg p-3">
+                               <p className="text-xs font-bold text-brand-800 mb-3 border-b border-gray-100 pb-2">تفاصيل وسجل العمليات القانونية للعقد (Legal Actions Trail)</p>
+                               <ul className="space-y-4">
+                                 {/* First Actions (Audit Logs) */}
+                                 {auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).map((log, idx) => (
+                                    <li key={`log-${idx}`} className="flex items-start gap-3 text-xs bg-gray-50/50 p-2.5 rounded-lg border border-gray-100">
+                                      <Shield className="w-4 h-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                                      <div className="flex flex-col gap-1 w-full">
+                                        <div className="flex justify-between w-full">
+                                          <span>تسجيل نشاط: <strong className="text-brand-900 mx-1">{log.eventType}</strong></span>
+                                          <span dir="ltr" className="font-mono text-gray-500">{formatDate(log.timestamp)}</span>
+                                        </div>
+                                        {log.eventType === 'contract_opened' && <span className="text-gray-500">تم فتح واستعراض وثيقة العقد للمرة الأولى من قِبل العميل.</span>}
+                                        {log.eventType === 'contract_fully_scrolled' && <span className="text-green-600 font-medium">تم التحقق من تمرير وقراءة العقد بالكامل. (نسبة التمرير: {Math.round(log.scrollPercentage)}%)</span>}
+                                        {log.eventType === 'contract_terms_accepted' && <span className="text-brand-600 font-bold">تم تأكيد استكمال كافة بنود العقد.</span>}
+                                      </div>
+                                    </li>
+                                 ))}
+
+                                 {/* Then Consents */}
+                                 {consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).map((consent, idx) => (
+                                   <li key={`con-${idx}`} className="flex items-start gap-3 text-xs bg-green-50/50 p-2.5 rounded-lg border border-green-100">
+                                     <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                     <div className="flex flex-col gap-1 w-full">
+                                       <div className="flex justify-between w-full">
+                                         <span>إقرار صريح على: <strong className="text-brand-900 mx-1">{consent.consentType}</strong></span>
+                                         <span dir="ltr" className="font-mono text-gray-500">{formatDate(consent.acceptedAt || consent.timestamp)}</span>
+                                       </div>
+                                       <span className="text-gray-500 font-mono text-[10px]">Version: {consent.consentVersion || "v1.0"} | IP: {consent.ipAddress}</span>
+                                     </div>
+                                   </li>
+                                 ))}
+                               </ul>
+                             </div>
+                           )}
+
                            <div className="mt-1 text-xs text-brand-800 bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-2 shadow-sm leading-relaxed">
                              <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
                              يُلزم هذا العقد المنفذ جميع الأطراف باتفاقية خدمة البحث وفقاً للبنود הملزمة قانونياً، ويشمل ذلك الموافقة التامة على شروط التاريخ الشفوي والسياسات المالية وتكاليف الانسحاب، وقد تم حفظ بصمة العملية داخل مجموعات النظام السحابي.

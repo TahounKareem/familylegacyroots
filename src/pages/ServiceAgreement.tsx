@@ -163,6 +163,15 @@ export function ServiceAgreement() {
 
     await logLegalEvent("contract_electronically_signed", { version: "v1.0", provider: "signnow" }, contractId.current, orderId.current);
     
+    // Save contractId to pendingOrderData
+    useAppStore.setState(s => ({
+      pendingOrderData: { 
+        ...s.pendingOrderData, 
+        contractId: contractId.current,
+        checkoutOrderId: orderId.current
+      } as any
+    }));
+
     // Show success and jump smoothly to payment
     navigate("/e-signature-success");
   };
@@ -285,7 +294,10 @@ export function ServiceAgreement() {
           dummyInvoiceId={dummyInvoiceId}
           pendingOrderData={pendingOrderData}
           currentUser={currentUser}
-          onOpen={() => setShowDeclarations(true)}
+          onOpen={() => {
+            logLegalEvent("contract_expanded_to_view", { version: "v1.0" }, contractId.current, orderId.current);
+            setShowDeclarations(true);
+          }}
         />
         <div className="mb-8"></div>
         
