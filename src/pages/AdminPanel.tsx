@@ -781,7 +781,7 @@ export function AdminPanel() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {currentTab !== "lobby" && (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-brand-200 pb-4 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-brand-200 pb-4 gap-4 print:hidden">
           <div>
             <h1 className="text-3xl font-serif text-brand-900 mb-2">
               {allowedTabs.find((t) => t.id === currentTab)?.label ||
