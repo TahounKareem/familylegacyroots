@@ -2102,9 +2102,15 @@ export function AdminPanel() {
 
           if (customerServiceFilter !== "all") {
             filteredUsers = filteredUsers.filter((u) => {
+              const getOrderTime = (d: any) => {
+                if (!d) return 0;
+                if (d.toDate) return d.toDate().getTime();
+                if (d.seconds) return d.seconds * 1000;
+                return new Date(d).getTime() || 0;
+              };
               const userOrders = orders
                 .filter((o) => o.userId === u.id)
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                .sort((a, b) => getOrderTime(b.createdAt) - getOrderTime(a.createdAt));
               const latestOrder = userOrders[0];
               if (!latestOrder) return false;
 
@@ -2118,13 +2124,27 @@ export function AdminPanel() {
             });
           }
 
-          const formatDate = (d?: string) => {
+          const formatDate = (d?: any) => {
             if (!d) return "غير محدد";
-            return new Intl.DateTimeFormat("ar-EG", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }).format(new Date(d));
+            try {
+              let dateObj: Date;
+              if (d?.toDate) {
+                dateObj = d.toDate();
+              } else if (d?.seconds) {
+                dateObj = new Date(d.seconds * 1000);
+              } else {
+                dateObj = new Date(d);
+              }
+              if (isNaN(dateObj.getTime())) return "غير محدد";
+              
+              return new Intl.DateTimeFormat("ar-EG", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }).format(dateObj);
+            } catch (e) {
+              return "غير محدد";
+            }
           };
 
           return (
@@ -2219,12 +2239,16 @@ export function AdminPanel() {
                       </tr>
                     ) : null}
                     {filteredUsers.map((user) => {
+                      const getOrderTime = (d: any) => {
+                        if (!d) return 0;
+                        if (d.toDate) return d.toDate().getTime();
+                        if (d.seconds) return d.seconds * 1000;
+                        return new Date(d).getTime() || 0;
+                      };
                       const userOrders = orders
                         .filter((o) => o.userId === user.id)
                         .sort(
-                          (a, b) =>
-                            new Date(b.createdAt).getTime() -
-                            new Date(a.createdAt).getTime(),
+                          (a, b) => getOrderTime(b.createdAt) - getOrderTime(a.createdAt)
                         );
                       const latestOrder = userOrders[0];
 
@@ -2241,14 +2265,14 @@ export function AdminPanel() {
                           </td>
                           <td className="px-4 py-4 text-brand-900 text-xs">
                             {latestOrder
-                              ? `${latestOrder.data.firstName} ${latestOrder.data.familyName}`
+                              ? `${latestOrder.data?.firstName || 'بدون اسم'} ${latestOrder.data?.familyName || ''}`
                               : "لا يوجد طلب"}
                           </td>
                           <td className="px-4 py-4">
                             {latestOrder ? (
                               <div className="flex flex-col gap-1">
                                 <span className="text-brand-600 font-mono text-xs font-bold w-max">
-                                  #{latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)}
+                                  #{latestOrder.orderNumber || latestOrder.id?.toUpperCase()?.substring(0, 6) || "---"}
                                 </span>
                                 <span className="text-brand-500 text-xs whitespace-nowrap">
                                   {formatDate(latestOrder.createdAt)}
@@ -2288,7 +2312,7 @@ export function AdminPanel() {
                                 </button>
                               )}
                               <a
-                                href={`mailto:${user.email || ""}?subject=${encodeURIComponent(latestOrder ? `بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}` : "تواصل من فريق سجل تراث العائلة")}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\n`)}`}
+                                href={`mailto:${user.email || ""}?subject=${encodeURIComponent(latestOrder ? `بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id?.toUpperCase()?.substring(0, 6) || "---"} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}` : "تواصل من فريق سجل تراث العائلة")}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\n`)}`}
                                 className="flex items-center gap-1.5 whitespace-nowrap text-brand-700 bg-white border border-brand-300 hover:bg-brand-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit shadow-sm"
                               >
                                 <Mail className="w-3 h-3" /> بريد عبر التطبيق
@@ -2344,15 +2368,29 @@ export function AdminPanel() {
             return 0;
           });
 
-          const formatDate = (d?: string) => {
+          const formatDate = (d?: any) => {
             if (!d) return "غير محدد";
-            return new Intl.DateTimeFormat("ar-EG", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            }).format(new Date(d));
+            try {
+              let dateObj: Date;
+              if (d?.toDate) {
+                dateObj = d.toDate();
+              } else if (d?.seconds) {
+                dateObj = new Date(d.seconds * 1000);
+              } else {
+                dateObj = new Date(d);
+              }
+              if (isNaN(dateObj.getTime())) return "غير محدد";
+
+              return new Intl.DateTimeFormat("ar-EG", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }).format(dateObj);
+            } catch (e) {
+              return "غير محدد";
+            }
           };
 
           const uniqueCountries = Array.from(
