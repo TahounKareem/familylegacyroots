@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Check, ShieldCheck, Mail, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight, Loader2, PenTool } from "lucide-react";
+import { Check, ShieldCheck, Phone, MapPin, User, FileText, ArrowLeft, ArrowRight, Loader2, PenTool } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { OrderStepper } from "@/components/OrderStepper";
 import { orderDetailsContract, mainContractSections } from "@/data/contractContent";

@@ -2029,8 +2029,8 @@ export function AdminPanel() {
                               {!isDelivered && (
                                 <>
                                   {(order.actionPhase === "تمت المسودة" || order.actionPhase === "تم التصويب") && (
-                                    <a href={order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
-                                      <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" || order.actionPhase === "جاري التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
+                                    <a href={order.actionPhase === "تم التصويب" ? (order.postCorrectionLink || order.researchDraftLink) : order.researchDraftLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-xs">
+                                      <Download className="w-4 h-4" /> {order.actionPhase === "تم التصويب" ? "تحميل ملف البحث بعد التصويب" : "تحميل ملف البحث"}
                                     </a>
                                   )}
                                   {(order.actionPhase === "تمت المسودة" || order.actionPhase === "جاري التصويب" || order.actionPhase === "تم التصميم الإلكتروني" || order.actionPhase === "تم التصويب" || order.actionPhase === "جاهز للتسليم النهائي") && (

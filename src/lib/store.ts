@@ -68,53 +68,11 @@ function handleFirestoreError(
 
 export type OrderPriority = "عادي" | "عاجل";
 export type RecordType = "سجل أساسي" | "الأبواب المغلقة";
-export type PaymentStatus =
-  | "مدفوع بالكامل"
-  | "مدفوع أول دفعة"
-  | "مستحق الدفعة الثانية"
-  | "مدفوع ثاني دفعة"
-  | "مستحق الدفعة الثالثة"
-  | "مدفوع ثالث دفعة"
-  | "كود دعوة"
-  | "غير مدفوع"
-  | "دفع جزئي";
-export type IssueStatus =
-  | "طلب غير مكتمل"
-  | "بإنتظار إتمام الدفع"
-  | "جاري التنفيذ"
-  | "تم الإصدار"
-  | "جاري التصويب"
-  | "تم الإغلاق"
-  | "يوجد تصويبات"
-  | "قبول توصيات"
-  | "إلغاء";
-export type ActionPhase =
-  | "مرحلة البحث"
-  | "مرحلة التوثيق"
-  | "تمت المسودة"
-  | "تم التصميم الإلكتروني"
-  | "طلب إيضاح"
-  | "جاري التصويب"
-  | "تم التصويب"
-  | "جاهز للطباعة"
-  | "تم تجهيز السجل للطباعة"
-  | "جاهز للتسليم"
-  | "تم تسليم النسخة الأولية"
-  | "تم التسليم";
+export type PaymentStatus = string;
+export type IssueStatus = string;
+export type ActionPhase = string;
 
-export type OrderStatus =
-  | "بإنتظار إتمام الدفع"
-  | "بانتظار الدفع"
-  | "راحل"
-  | "قيد البحث"
-  | "طلب إيضاح"
-  | "تم الرد"
-  | "تم الإغلاق"
-  | "مكتمل"
-  | "طلب مكتمل"
-  | "تم الإصدار"
-  | "جاهز للطباعة"
-  | "تم تسليم الإصدار الأول";
+export type OrderStatus = string;
 
 export type AppRole =
   | "user"
@@ -288,11 +246,15 @@ export interface Order {
   initialDesignLink?: string;
   postCorrectionLink?: string;
   printReadyLink?: string;
+  followups?: any[];
   designLinks?: {
     recordLink: string;
     downloadLink?: string;
     treeLink: string;
     copiesShipped: boolean;
+    shippingDate?: string;
+    carrierName?: string;
+    trackingNumber?: string;
   };
 
   plan: "standard" | "express" | "invite" | "paid";

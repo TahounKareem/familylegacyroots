@@ -11,6 +11,7 @@ interface ComplianceUser {
   id: string;
   name?: string;
   email?: string;
+  createdAt?: string;
   agreedToTermsAt?: string;
   agreedToTermsLevel?: string;
   cookieConsentLevel?: string;
