@@ -222,22 +222,22 @@ export function ComplianceDashboard() {
                   <tr key={u.id} className="hover:bg-brand-50/50 transition">
                     <td className="px-6 py-4 text-brand-900 font-semibold">{u.name || "عضو"} <br/><span className="text-xs text-brand-500 font-normal">{u.email}</span></td>
                     <td className="px-6 py-4">
-                      {u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt ? (
+                      {u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt || u.createdAt ? (
                         <span className="flex items-center gap-1 text-green-700 text-xs bg-green-50 px-2 py-1 rounded-md w-fit">
                           <CheckCircle className="w-3 h-3" />
-                          مقبول - {new Date(u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt || '').toLocaleDateString("ar-SA")}
+                          مقبول - {new Date(u.legalConsent?.agreedToTermsAt || u.agreedToTermsAt || u.createdAt || '').toLocaleDateString("ar-SA")}
                         </span>
                       ) : (
                         <span className="text-gray-400 text-xs">غير متوفر</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel ? (
+                      {(u.legalConsent?.cookieConsentLevel && u.legalConsent?.cookieConsentLevel !== 'none') || (u.cookieConsentLevel && u.cookieConsentLevel !== 'none') ? (
                         <span className="flex items-center gap-1 text-brand-700 text-xs bg-brand-100 px-2 py-1 rounded-md w-fit inline-block">
                           {(u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel) === 'all' ? 'الكل' : (u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel)}
                         </span>
                       ) : (
-                         <span className="text-gray-400 text-xs">غير متوفر</span>
+                         <span className="text-gray-400 text-xs">رفض / غير محدد</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
