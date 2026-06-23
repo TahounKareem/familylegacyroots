@@ -58,13 +58,13 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-brand-900/60 backdrop-blur-md flex items-center justify-center p-4 print:p-0 print:bg-white print:block">
-      <div className="bg-white rounded-3xl shadow-2xl border border-brand-200 max-w-5xl w-full max-h-[95vh] flex flex-col overflow-hidden relative print:shadow-none print:border-none print:max-h-none">
+    <div className="fixed inset-0 z-50 bg-brand-900/60 backdrop-blur-md flex items-center justify-center p-4 print:static print:inset-auto print:bg-transparent print:p-0 print:block">
+      <div className="bg-white rounded-3xl shadow-2xl border border-brand-200 max-w-5xl w-full max-h-[95vh] flex flex-col overflow-hidden relative print:block print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none">
         
         <div className="absolute top-0 right-0 w-3 h-full bg-indigo-600 rounded-r-3xl print:hidden" />
 
         {/* Header */}
-        <div className="px-8 py-6 md:p-8 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white flex items-start justify-between print:bg-white print:border-none">
+        <div className="px-8 py-6 md:p-8 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white flex items-start justify-between print:px-0 print:py-4 print:bg-white print:border-b-2 print:border-black print:mb-6">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-white shadow-sm border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center print:hidden">
               <Shield className="w-8 h-8" />
@@ -86,7 +86,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
         </div>
 
         {/* Content */}
-        <div className="p-8 md:p-12 overflow-y-auto bg-white flex-1 space-y-12 print:overflow-visible">
+        <div className="p-8 md:p-12 overflow-y-auto bg-white flex-1 space-y-12 print:block print:overflow-visible print:h-auto print:p-0">
           {loading ? (
             <div className="text-center py-20">
               <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>

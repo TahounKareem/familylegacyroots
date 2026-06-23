@@ -7,10 +7,10 @@ export function LegalAuditTrailReport() {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg border border-brand-200 overflow-hidden relative print:shadow-none print:border-none">
+    <div className="bg-white rounded-3xl shadow-lg border border-brand-200 overflow-hidden relative print:block print:shadow-none print:border-none print:overflow-visible">
       <div className="absolute top-0 right-0 w-3 h-full bg-indigo-600 rounded-r-3xl print:hidden" />
       
-      <div className="p-8 md:p-12 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white print:bg-white print:border-none">
+      <div className="p-8 md:p-12 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white print:px-0 print:py-4 print:bg-white print:border-b-2 print:border-black print:mb-6">
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-white shadow-sm border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center print:hidden">
