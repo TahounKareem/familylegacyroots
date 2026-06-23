@@ -222,8 +222,10 @@ export function Auth() {
         let errorMessage = "حدث خطأ في المصادقة.";
         if (err.code === "auth/email-already-in-use") {
           errorMessage = "البريد الإلكتروني هذا مستخدم مسبقاً.";
+        } else if (err.code === "auth/user-not-found") {
+          errorMessage = "هذا الإيميل غير مسجل يرجى إنشاء حساب جديد.";
         } else if (err.code === "auth/invalid-credential") {
-          errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+          errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة. وإذا لم تملك حساباً بعد، يرجى إنشاء حساب جديد.";
           if (isLogin) {
             const newAttempts = failedAttempts + 1;
             setFailedAttempts(newAttempts);
