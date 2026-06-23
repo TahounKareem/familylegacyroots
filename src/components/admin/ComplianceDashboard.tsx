@@ -130,8 +130,8 @@ export function ComplianceDashboard() {
 
     // 2. Fetch Orders
     const unSubOrders = onSnapshot(collection(db, "orders"), (snap) => {
-      const data: ComplianceOrder[] = [];
-      snap.forEach((d) => data.push({ id: d.id, userId: d.data().userId, data: d.data(), isDeleted: d.data().isDeleted }));
+      const data: any[] = [];
+      snap.forEach((d) => data.push({ id: d.id, ...d.data() }));
       setOrders(data);
     }, () => {});
 
@@ -216,7 +216,7 @@ export function ComplianceDashboard() {
                 // Find user orders and check if any has a signed contract
                 const userOrders = orders.filter(o => o.userId === u.id && !o.isDeleted);
                 const hasSignedContract = userOrders.some(o => 
-                  o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')
+                  o.contractSigned || o.data?.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')
                 );
 
                 return (
@@ -429,7 +429,7 @@ export function ComplianceDashboard() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-6 duration-500">
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className={`mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${selectedUserReport ? 'print:hidden' : ''}`}>
         <div>
           <h2 className="text-2xl font-serif font-bold text-brand-900 mb-2">بوابة الرقابة و الإمتثال</h2>
           <p className="text-brand-600 text-sm">مراجعة الموافقات، السجلات القانونية، وإصدارات السياسات المتوافقة مع الخصوصية.</p>
@@ -437,7 +437,7 @@ export function ComplianceDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-8 bg-white p-2 rounded-2xl border border-brand-100 w-fit shadow-sm">
+      <div className={`flex flex-wrap gap-2 mb-8 bg-white p-2 rounded-2xl border border-brand-100 w-fit shadow-sm ${selectedUserReport ? 'print:hidden' : ''}`}>
         <button
           onClick={() => setActiveTab("users_consents")}
           className={`px-6 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 ${activeTab === "users_consents" ? "bg-brand-800 text-white shadow-md" : "text-brand-600 hover:bg-brand-50"}`}
@@ -464,7 +464,7 @@ export function ComplianceDashboard() {
         </button>
       </div>
 
-      <div className="min-h-[500px]">
+      <div className={`min-h-[500px] ${selectedUserReport ? 'print:hidden' : ''}`}>
         {activeTab === "users_consents" && renderUsersConsents()}
         {activeTab === "visitors_consents" && renderVisitorsConsents()}
         {activeTab === "legal_versions" && renderLegalVersions()}

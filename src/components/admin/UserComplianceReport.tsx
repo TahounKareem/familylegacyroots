@@ -59,7 +59,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
 
   return (
     <div className="fixed inset-0 z-50 bg-brand-900/60 backdrop-blur-md flex items-center justify-center p-4 print:static print:inset-auto print:bg-transparent print:p-0 print:block">
-      <div className="bg-white rounded-3xl shadow-2xl border border-brand-200 max-w-5xl w-full max-h-[95vh] flex flex-col overflow-hidden relative print:block print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none">
+      <div className="bg-white rounded-3xl shadow-2xl border border-brand-200 max-w-5xl w-full max-h-[95vh] flex flex-col overflow-hidden relative print:block print:overflow-visible print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none">
         
         <div className="absolute top-0 right-0 w-3 h-full bg-indigo-600 rounded-r-3xl print:hidden" />
 
@@ -223,9 +223,9 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                     </li>
                   </ul>
 
-                  {orders.filter(o => o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).length > 0 ? (
+                  {orders.filter(o => o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).length > 0 ? (
                     <div className="space-y-4">
-                      {orders.filter(o => o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).map((order) => (
+                      {orders.filter(o => o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).map((order) => (
                         <div key={order.id} className="bg-white p-5 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-4">
                            <div className="flex justify-between items-start border-b border-gray-100 pb-3">
                              <div>
