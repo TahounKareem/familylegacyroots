@@ -205,7 +205,7 @@ export function AdminPanel() {
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
   const [userTab, setUserTab] = useState<"team" | "users">("team");
   const [userSearch, setUserSearch] = useState("");
-  const [customerServiceFilter, setCustomerServiceFilter] = useState("all");
+  const [customerServiceFilter, setCustomerServiceFilter] = useState("incomplete");
   const [userCountryFilter, setUserCountryFilter] = useState("");
   const [userSortBy, setUserSortBy] = useState<
     "newest" | "recent_login" | "alpha"
@@ -2113,13 +2113,25 @@ export function AdminPanel() {
                 .filter((o) => o.userId === u.id)
                 .sort((a, b) => getOrderTime(b.createdAt) - getOrderTime(a.createdAt));
               const latestOrder = userOrders[0];
+              
+              if (customerServiceFilter === "incomplete") {
+                if (!latestOrder) return true;
+                return !latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل";
+              }
+              
               if (!latestOrder) return false;
 
-              if (customerServiceFilter === "incomplete") return !latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل";
-              if (customerServiceFilter === "pending_payment") return latestOrder.issueStatus === "بإنتظار إتمام الدفع" || latestOrder.paymentStatus === "pending";
+              if (customerServiceFilter === "pending_payment") {
+                return latestOrder.issueStatus === "بإنتظار إتمام الدفع" || 
+                       latestOrder.paymentStatus === "pending" || 
+                       latestOrder.paymentStatus === "partial";
+              }
+              
               if (customerServiceFilter === "in_progress") {
-                const phase = latestOrder.actionPhase || "مرحلة البحث";
-                return ["مرحلة البحث", "مرحلة التوثيق", "تمت المسودة", "جاري التصويب"].includes(phase);
+                return latestOrder.issueStatus !== "طلب غير مكتمل" && 
+                       latestOrder.issueStatus !== "بإنتظار إتمام الدفع" &&
+                       latestOrder.paymentStatus !== "pending" &&
+                       latestOrder.paymentStatus !== "partial";
               }
               return true;
             });
