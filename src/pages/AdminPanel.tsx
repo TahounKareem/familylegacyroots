@@ -2198,18 +2198,20 @@ export function AdminPanel() {
                       <th className="px-4 py-4 font-medium">
                         اسم العميل والعائلة
                       </th>
-                      <th className="px-4 py-4 font-medium">رقم الطلب</th>
-                      <th className="px-4 py-4 font-medium">تاريخ الطلب</th>
-                      <th className="px-4 py-4 font-medium">
-                        الإصدار (حالة التنفيذ)
+                      <th className="px-4 py-4 font-medium text-right">
+                         رقم الطلب / التاريخ
                       </th>
+                      <th className="px-4 py-4 font-medium text-right">
+                        المرحلة والحالة
+                      </th>
+                      <th className="px-4 py-4 font-medium text-right">الإجراء</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-50">
                     {filteredUsers.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={6}
+                          colSpan={7}
                           className="text-center py-8 text-brand-500"
                         >
                           لا يوجد عملاء يطابقون بحثك
@@ -2242,48 +2244,60 @@ export function AdminPanel() {
                               ? `${latestOrder.data.firstName} ${latestOrder.data.familyName}`
                               : "لا يوجد طلب"}
                           </td>
-                          <td className="px-4 py-4 text-brand-600 font-mono text-xs">
-                            {latestOrder
-                              ? `#${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)}`
-                              : "-"}
-                          </td>
-                          <td className="px-4 py-4 text-brand-500 text-xs">
-                            {latestOrder
-                              ? formatDate(latestOrder.createdAt)
-                              : "-"}
+                          <td className="px-4 py-4">
+                            {latestOrder ? (
+                              <div className="flex flex-col gap-1">
+                                <span className="text-brand-600 font-mono text-xs font-bold w-max">
+                                  #{latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)}
+                                </span>
+                                <span className="text-brand-500 text-xs whitespace-nowrap">
+                                  {formatDate(latestOrder.createdAt)}
+                                </span>
+                              </div>
+                            ) : "-"}
                           </td>
                           <td className="px-4 py-4">
                             {latestOrder ? (
-                              <div className="flex flex-col gap-2 relative">
-                                <span className={`px-2 py-1 rounded text-xs font-bold border text-center w-fit ${
+                              <div className="flex flex-col items-start gap-1">
+                                <span className={`px-2 py-1 rounded text-[10px] font-bold border whitespace-nowrap ${
                                     latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع" || !latestOrder.issueStatus
                                     ? "bg-amber-50 text-amber-700 border-amber-200"
                                     : "bg-brand-50 text-brand-700 border-brand-100"
                                 }`}>
                                   {latestOrder.issueStatus || "طلب غير مكتمل"}
                                 </span>
-                                
+                                {latestOrder.actionPhase && (
+                                  <span className="px-2 py-1 rounded text-[10px] font-bold border border-blue-200 bg-blue-50 text-blue-700 whitespace-nowrap">
+                                    {latestOrder.actionPhase}
+                                  </span>
+                                )}
+                              </div>
+                            ) : "-"}
+                          </td>
+                          <td className="px-4 py-4">
+                            {latestOrder ? (
+                              <div className="flex flex-col gap-2">
                                 {(!latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع") && (
                                   <button
                                     onClick={() => setFollowupOrder(latestOrder)}
-                                    className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit"
+                                    className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit shadow-sm"
                                   >
                                     <MessageSquare className="w-3 h-3" /> النظام
                                     {latestOrder.followups?.length > 0 && (
-                                      <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px]">{latestOrder.followups.length}</span>
+                                      <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px] border border-white">{latestOrder.followups.length}</span>
                                     )}
                                   </button>
                                 )}
                                 <a
                                   href={`mailto:${user.email || ""}?subject=${encodeURIComponent(`بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}`)}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\nبخصوص طلبكم...`)}`}
-                                  className="flex items-center justify-center gap-1.5 whitespace-nowrap text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit"
+                                  className="flex items-center gap-1.5 whitespace-nowrap text-brand-700 bg-white border border-brand-300 hover:bg-brand-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit shadow-sm"
                                 >
                                   <Mail className="w-3 h-3" /> بريد عبر التطبيق
                                 </a>
                               </div>
                             ) : (
                               <span className="text-gray-400 text-xs">
-                                لا يوجد بيانات
+                                لا يوجد اجراء
                               </span>
                             )}
                           </td>
