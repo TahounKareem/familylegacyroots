@@ -3154,15 +3154,19 @@ export function Dashboard() {
                                 if (ans === 'تأكيد') {
                                   alert('تم تسجيل طلبك لحذف الحساب بنجاح. سيقوم فريقنا بمراجعته وتنفيذه خلال 14 يوم عمل كحد أقصى وفق السياسات.');
                                   try {
-                                    const { collection, addDoc } = await import('firebase/firestore');
+                                    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+                                    const generatedId = `TKT-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
                                     await addDoc(collection(db, 'support_tickets'), {
                                       userId: currentUser.id,
-                                      userName: currentUser.name || "العميل الكريم",
+                                      name: currentUser.name || "العميل الكريم",
                                       email: currentUser.email,
-                                      topic: 'حذف الحساب',
-                                      description: 'طلب رسمي مقدم من المستخدم لحذف بياناته.',
-                                      status: 'new',
-                                      createdAt: new Date().toISOString()
+                                      subject: 'حذف الحساب',
+                                      message: 'طلب رسمي مقدم من المستخدم لحذف بياناته.',
+                                      status: 'جديدة',
+                                      categoryTitle: 'الخصوصية والوثائق',
+                                      privacyType: 'طلب حذف بيانات',
+                                      ticketNumber: generatedId,
+                                      createdAt: serverTimestamp()
                                     });
                                   } catch (e) {
                                     console.error("Could not send deletion request", e);

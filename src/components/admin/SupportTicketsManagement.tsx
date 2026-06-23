@@ -26,6 +26,7 @@ interface Ticket {
 export function SupportTicketsManagement() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("جديدة");
 
   useEffect(() => {
     const qVars = query(collection(db, "support_tickets"), orderBy("createdAt", "desc"));
@@ -42,8 +43,8 @@ export function SupportTicketsManagement() {
   }, []);
 
   const handleMarkReplied = async (ticket: Ticket) => {
-    const subject = encodeURIComponent(`رد على تذكرتكم رقم ${ticket.ticketNumber} - سجل تراث العائلة`);
-    const body = encodeURIComponent(`أهلاً بك ${ticket.name}،\n\nإشارة إلى تذكرتكم رقم ${ticket.ticketNumber} بخصوص (${ticket.subject})، نفيدكم بأنه تم استلام استفساركم ويسعدنا الرد عليكم:\n\n\n\n\n\nمع التحية،\nفريق خدمة العملاء`);
+    const subject = encodeURIComponent(`رد على تذكرتكم رقم ${ticket.ticketNumber || ticket.id} - سجل تراث العائلة`);
+    const body = encodeURIComponent(`أهلاً بك ${ticket.name}،\n\nإشارة إلى تذكرتكم رقم ${ticket.ticketNumber || ticket.id} بخصوص (${ticket.subject})، نفيدكم بأنه تم استلام استفساركم ويسعدنا الرد عليكم:\n\n\n\n\n\nمع التحية،\nفريق خدمة العملاء`);
     window.open(`mailto:${ticket.email}?subject=${subject}&body=${body}`, '_blank');
     
     if (ticket.status !== "تم الرد") {
@@ -58,10 +59,15 @@ export function SupportTicketsManagement() {
     }
   };
 
+  const filteredTickets = tickets.filter(t => filter === "الكل" || t.status === filter);
+
   return (
-    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-brand-200 mt-8 text-right" dir="rtl">
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-brand-200 mt-8 text-right relative overflow-hidden" dir="rtl">
+      {/* Visual Accent for this section */}
+      <div className="absolute top-0 right-0 w-2 h-full bg-blue-500 rounded-r-3xl" />
+
       <div className="flex items-center gap-3 mb-6 border-b border-brand-100 pb-4">
-        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
           <MessageSquare className="w-6 h-6" />
         </div>
         <div>
@@ -70,14 +76,55 @@ export function SupportTicketsManagement() {
         </div>
       </div>
 
+      <div className="flex gap-2 mb-6">
+        <button 
+          onClick={() => setFilter("جديدة")} 
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filter === "جديدة" ? "bg-amber-100 text-amber-800 border-amber-200 border" : "bg-gray-50 text-gray-600 border border-gray-200"}`}
+        >
+          إستفسارات جديدة
+        </button>
+        <button 
+          onClick={() => setFilter("تم الرد")} 
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filter === "تم الرد" ? "bg-green-100 text-green-800 border-green-200 border" : "bg-gray-50 text-gray-600 border border-gray-200"}`}
+        >
+          تم الرد
+        </button>
+        <button 
+          onClick={() => setFilter("الكل")} 
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filter === "الكل" ? "bg-brand-100 text-brand-800 border-brand-200 border" : "bg-gray-50 text-gray-600 border border-gray-200"}`}
+        >
+          الكل
+        </button>
+      </div>
+
       <div className="space-y-4">
-        {tickets.length === 0 ? (
+        {filteredTickets.length === 0 ? (
           <div className="text-center py-10 text-brand-500 bg-brand-50 rounded-2xl">
             لا توجد استفسارات حالياً
           </div>
         ) : (
-          tickets.map(ticket => {
+          filteredTickets.map(ticket => {
             const isReplied = ticket.status === "تم الرد";
+            
+            let replyDuration = null;
+            if (isReplied) {
+              const createdTime = ticket.createdAt?.seconds ? ticket.createdAt.seconds * 1000 : (typeof ticket.createdAt === 'string' ? new Date(ticket.createdAt).getTime() : null);
+              const repliedTime = ticket.repliedAt?.seconds ? ticket.repliedAt.seconds * 1000 : (ticket.repliedAt instanceof Date ? ticket.repliedAt.getTime() : null);
+              
+              if (createdTime && repliedTime && repliedTime > createdTime) {
+                const diffMs = repliedTime - createdTime;
+                const diffHours = diffMs / (1000 * 60 * 60);
+                if (diffHours < 1) {
+                  const diffMins = Math.round(diffMs / (1000 * 60));
+                  replyDuration = `خلال ${diffMins} دقيقة`;
+                } else if (diffHours < 24) {
+                  replyDuration = `خلال ${Math.round(diffHours)} ساعة`;
+                } else {
+                  replyDuration = `خلال ${Math.round(diffHours / 24)} يوم`;
+                }
+              }
+            }
+
             return (
               <div 
                 key={ticket.id} 
@@ -90,11 +137,11 @@ export function SupportTicketsManagement() {
                   <div className="flex-1 space-y-2 w-full pr-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded">{ticket.ticketNumber}</span>
+                        <span className="font-mono text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded">{ticket.ticketNumber || "TR-###"}</span>
                         <span className={`text-xs px-2 py-1 rounded select-none ${isReplied ? 'bg-green-100 text-green-800 font-bold' : 'bg-amber-100 text-amber-800 font-bold'}`}>
                           {isReplied ? 'تم الرد' : 'جديدة'}
                         </span>
-                        <span className="text-xs bg-gray-100 text-gray-700 font-bold px-2 py-1 rounded truncate max-w-[120px]">{ticket.categoryTitle}</span>
+                        <span className="text-xs bg-gray-100 text-gray-700 font-bold px-2 py-1 rounded truncate max-w-[120px]">{ticket.categoryTitle || 'عام'}</span>
                       </div>
                       {expandedId === ticket.id ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                     </div>
@@ -103,7 +150,12 @@ export function SupportTicketsManagement() {
                     </div>
                     <div className="flex sm:items-center gap-2 sm:gap-4 flex-col sm:flex-row text-xs text-brand-600">
                       <span className="flex items-center gap-1"><User className="w-3 h-3"/> {ticket.name}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> {ticket.createdAt?.seconds ? format(new Date(ticket.createdAt.seconds * 1000), 'PPP - p', {locale: ar}) : 'حالا'}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> {ticket.createdAt?.seconds ? format(new Date(ticket.createdAt.seconds * 1000), 'PPP - p', {locale: ar}) : (typeof ticket.createdAt === 'string' ? format(new Date(ticket.createdAt), 'PPP - p', {locale: ar}) : 'حالا')}</span>
+                      {isReplied && replyDuration && (
+                        <span className="flex items-center gap-1 text-green-700 font-bold bg-green-100 px-2 rounded-full">
+                          <Check className="w-3 h-3" /> تم الرد بنجاح {replyDuration}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -69,25 +69,32 @@ export function ChatbotManagement() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-brand-100 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-xl font-bold text-brand-900 flex items-center gap-2">
-            <MessageCircle className="w-6 h-6 text-indigo-600" />
-            إدارة المرشد الذكي
-          </h2>
-          <p className="text-sm text-brand-600 mt-1">
-            أضف الأسئلة الشائعة والإجابات التسويقية لتغذية المرشد الذكي بمعلومات دقيقة.
-          </p>
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-brand-200 mt-8 relative overflow-hidden">
+      {/* Visual Accent for this section */}
+      <div className="absolute top-0 right-0 w-2 h-full bg-indigo-500 rounded-r-3xl" />
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-brand-100 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <MessageCircle className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-brand-900">
+              إدارة المرشد الذكي
+            </h2>
+            <p className="text-sm text-brand-600 mt-1">
+              أضف الأسئلة الشائعة والإجابات ليجيب بها المرشد الذكي.
+            </p>
+          </div>
         </div>
         <button
           onClick={() => {
             setEditForm({ isActive: true });
             setIsEditing(true);
           }}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition"
+          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition shadow-sm"
         >
-          <Plus className="w-4 h-4" /> إضافة سؤال جديد
+          <Plus className="w-5 h-5" /> إضافة سؤال
         </button>
       </div>
 

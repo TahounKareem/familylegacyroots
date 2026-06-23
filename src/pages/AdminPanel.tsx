@@ -2113,14 +2113,23 @@ export function AdminPanel() {
               {followupOrder && (
                 <FollowupModal order={followupOrder} onClose={() => setFollowupOrder(null)} />
               )}
-              <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
-                  <h2 className="font-bold text-lg text-brand-900">
-                    إدارة خدمة العملاء (العملاء والطلبات)
-                  </h2>
+              <div className="bg-white rounded-3xl shadow-sm border border-brand-200 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-2 h-full bg-cyan-500 rounded-r-3xl" />
+                <div className="px-6 py-6 md:px-8 border-b border-brand-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-cyan-50 text-cyan-600 rounded-2xl flex items-center justify-center shadow-sm">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-brand-900">
+                        إدارة خدمة العملاء (العملاء والطلبات)
+                      </h2>
+                      <p className="text-sm text-brand-600 mt-1">تتبع طلبات العملاء وحالة إنجازها</p>
+                    </div>
+                  </div>
                 </div>
 
-              <div className="p-4 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
+              <div className="p-4 md:px-8 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
                 <div className="flex-1 min-w-[200px] relative">
                   <input
                     type="text"
