@@ -2115,7 +2115,7 @@ export function AdminPanel() {
               const latestOrder = userOrders[0];
               if (!latestOrder) return false;
 
-              if (customerServiceFilter === "incomplete") return latestOrder.issueStatus === "طلب غير مكتمل";
+              if (customerServiceFilter === "incomplete") return !latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل";
               if (customerServiceFilter === "pending_payment") return latestOrder.issueStatus === "بإنتظار إتمام الدفع" || latestOrder.paymentStatus === "pending";
               if (customerServiceFilter === "in_progress") {
                 const phase = latestOrder.actionPhase || "مرحلة البحث";
@@ -2172,12 +2172,6 @@ export function AdminPanel() {
               <div className="p-4 md:px-8 border-b border-brand-50 flex flex-col gap-4 bg-gray-50/50">
                 <div className="flex flex-wrap gap-2">
                   <button 
-                    onClick={() => setCustomerServiceFilter("all")} 
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "all" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
-                  >
-                    كل الطلبات
-                  </button>
-                  <button 
                     onClick={() => setCustomerServiceFilter("incomplete")} 
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "incomplete" ? "bg-amber-100 text-amber-800 border-amber-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
                   >
@@ -2194,6 +2188,12 @@ export function AdminPanel() {
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "in_progress" ? "bg-blue-100 text-blue-800 border-blue-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
                   >
                     إجراءات جارية
+                  </button>
+                  <button 
+                    onClick={() => setCustomerServiceFilter("all")} 
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "all" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    كل الطلبات
                   </button>
                 </div>
                 <div className="flex-1 w-full md:w-auto md:min-w-[300px] relative">
