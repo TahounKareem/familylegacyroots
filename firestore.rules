@@ -81,7 +81,7 @@ service cloud.firestore {
     // Support Tickets
     // ==========================================
     match /support_tickets/{ticketId} {
-      allow create: if isSignedIn();
+      allow create: if true;
       allow read, write: if isAdmin();
     }
     

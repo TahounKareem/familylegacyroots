@@ -28,7 +28,7 @@ const BASE_SECTIONS = [
     id: "الروايات والذاكرة",
     title: "الروايات والذاكرة",
     desc: "مقالات ومقاطع فيديو حول الانسان والمكان تغطي القضايا الاجتماعية وتاريخ الاعلَام والمشاهير من مختلف الدول والبقاع",
-    filters: ["كل الدول", "السعودية", "لبنان", "سوريا"]
+    filters: ["عام"]
   },
   {
     id: "قراءات ومراجع",
@@ -54,7 +54,7 @@ export function KnowledgeCenter() {
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState(BASE_SECTIONS[0].id);
-  const [activeFilter, setActiveFilter] = useState("كل الدول");
+  const [activeFilter, setActiveFilter] = useState("عام");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 

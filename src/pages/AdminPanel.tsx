@@ -2113,8 +2113,6 @@ export function AdminPanel() {
               {followupOrder && (
                 <FollowupModal order={followupOrder} onClose={() => setFollowupOrder(null)} />
               )}
-              <ChatbotManagement />
-              <SupportTicketsManagement />
               <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
                   <h2 className="font-bold text-lg text-brand-900">
@@ -2236,6 +2234,10 @@ export function AdminPanel() {
                 </table>
               </div>
             </div>
+            
+            <SupportTicketsManagement />
+            <ChatbotManagement />
+            
             </div>
           );
         })()}
