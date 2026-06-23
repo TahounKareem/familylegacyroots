@@ -88,7 +88,7 @@ export const sendManagementNewOrderEmail = async (
   familyName: string,
 ) => {
   await queueEmail({
-    to: ["kareem.tahoun@adamresearchcenter.net", "hassan.alamri@adamresearchcenter.net"],
+    to: ["info@thefamilylegacyroots.com", "kareem.tahoun@adamresearchcenter.net", "hassan.alamri@adamresearchcenter.net"],
     bcc: DEFAULT_BCC,
     from: DEFAULT_FROM,
     message: {
@@ -197,7 +197,7 @@ export const createSupportTicket = async (
 
   // 2. Email Admin
   await queueEmail({
-    to: "admin@adamresearchcenter.net", // ضع الإيميل الخاص بكم هنا
+    to: ["info@thefamilylegacyroots.com", "admin@adamresearchcenter.net"], // ضع الإيميل الخاص بكم هنا
     message: {
       subject: `تذكرة دعم جديدة #${ticketRef.id} من ${name}`,
       text: `رسالة جديدة من ${name} (${email}): ${message}`,
@@ -355,6 +355,7 @@ export const sendInitialDesignReadyEmail = async (
 ) => {
   await queueEmail({
     to: [
+      "info@thefamilylegacyroots.com",
       "hassan.alamri@adamresearchcenter.net",
       "kareem.tahoun@adamresearchcenter.net",
     ],
@@ -503,6 +504,7 @@ export const sendFinalLinksReadyEmail = async (
 ) => {
   await queueEmail({
     to: [
+      "info@thefamilylegacyroots.com",
       "hassan.alamri@adamresearchcenter.net",
       "kareem.tahoun@adamresearchcenter.net",
     ],

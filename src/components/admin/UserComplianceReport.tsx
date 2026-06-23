@@ -263,6 +263,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                                           <span dir="ltr" className="font-mono text-gray-500">{formatDate(log.timestamp)}</span>
                                         </div>
                                         {log.eventType === 'contract_opened' && <span className="text-gray-500">تم فتح واستعراض وثيقة العقد للمرة الأولى من قِبل العميل.</span>}
+                                        {log.eventType === 'contract_expanded_to_view' && <span className="text-gray-500 mt-1">تم النقر لفتح واستعراض تفاصيل البنود من قِبل العميل.</span>}
                                         {log.eventType === 'contract_fully_scrolled' && <span className="text-green-600 font-medium">تم التحقق من تمرير وقراءة العقد بالكامل. (نسبة التمرير: {Math.round(log.scrollPercentage)}%)</span>}
                                         {log.eventType === 'contract_terms_accepted' && <span className="text-brand-600 font-bold">تم تأكيد استكمال كافة بنود العقد.</span>}
                                       </div>
@@ -270,18 +271,25 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                                  ))}
 
                                  {/* Then Consents */}
-                                 {consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).map((consent, idx) => (
-                                   <li key={`con-${idx}`} className="flex items-start gap-3 text-xs bg-green-50/50 p-2.5 rounded-lg border border-green-100">
-                                     <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                     <div className="flex flex-col gap-1 w-full">
-                                       <div className="flex justify-between w-full">
-                                         <span>إقرار صريح على: <strong className="text-brand-900 mx-1">{consent.consentType}</strong></span>
-                                         <span dir="ltr" className="font-mono text-gray-500">{formatDate(consent.acceptedAt || consent.timestamp)}</span>
+                                 {consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).map((consent, idx) => {
+                                   let consentText = consent.consentType;
+                                   if (consentText === 'order_details_consent') consentText = 'أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل.';
+                                   if (consentText === 'electronic_signature_consent') consentText = 'أوافق على استخدام التوقيع الإلكتروني والسجلات الرقمية كوسائل قانونية معتمدة لإثبات إجراءات هذا الطلب.';
+                                   if (consentText?.includes('gdpr') || consentText?.includes('privacy')) consentText = 'موافقة صريحة على سياسة الخصوصية وقانون حماية البيانات.';
+
+                                   return (
+                                     <li key={`con-${idx}`} className="flex items-start gap-3 text-xs bg-green-50/50 p-2.5 rounded-lg border border-green-100">
+                                       <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                       <div className="flex flex-col gap-1 w-full">
+                                         <div className="flex justify-between w-full">
+                                           <span>إقرار صريح ومسجل: <strong className="text-brand-900 mx-1">{consentText}</strong></span>
+                                           <span dir="ltr" className="font-mono text-gray-500 min-w-[130px] text-right">{formatDate(consent.acceptedAt || consent.timestamp)}</span>
+                                         </div>
+                                         <span className="text-gray-500 font-mono text-[10px]">Reference: {consent.consentType} | Version: {consent.consentVersion || "v1.0"} | IP: {consent.ipAddress}</span>
                                        </div>
-                                       <span className="text-gray-500 font-mono text-[10px]">Version: {consent.consentVersion || "v1.0"} | IP: {consent.ipAddress}</span>
-                                     </div>
-                                   </li>
-                                 ))}
+                                     </li>
+                                   );
+                                 })}
                                </ul>
                              </div>
                            )}
