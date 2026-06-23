@@ -82,7 +82,7 @@ service cloud.firestore {
     // ==========================================
     match /support_tickets/{ticketId} {
       allow create: if true;
-      allow read, write: if isAdmin();
+      allow read, write: if isStaff();
     }
     
     // ==========================================

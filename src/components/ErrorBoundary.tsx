@@ -9,19 +9,22 @@ interface Props {
 interface State {
   hasError: boolean;
   errorMsg: string;
+  errorInfo?: string | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    errorMsg: ''
+    errorMsg: '',
+    errorInfo: null
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, errorMsg: error.message };
+    return { hasError: true, errorMsg: error.message, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ errorInfo: errorInfo.componentStack });
     console.error('Uncaught error:', error, errorInfo);
     
     // Log crash to Firestore
@@ -64,10 +67,12 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-red-700 mb-6">
               لقد سجل نظام الحماية الخاص بنا هذا الخطأ الفني (Crash Report) وجاري العمل على إصلاحه.
             </p>
-            <div className="bg-red-50 p-4 rounded text-left overflow-auto mb-6 h-48 text-xs font-mono text-red-900 border border-red-200">
-              {this.state.error?.toString()}
+            <div className="bg-red-50 p-4 rounded text-left overflow-auto mb-6 h-48 text-xs font-mono text-red-900 border border-red-200" dir="ltr">
+              <span className="font-bold text-red-700">Error:</span> {this.state.errorMsg}
               <br/><br/>
-              {this.state.errorInfo?.componentStack}
+              <span className="font-bold text-red-700">Component Stack:</span>
+              <br/>
+              {this.state.errorInfo}
             </div>
             <button
               onClick={() => window.location.href = '/'}
