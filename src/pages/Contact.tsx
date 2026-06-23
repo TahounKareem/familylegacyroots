@@ -1,10 +1,26 @@
 import React, { useState } from "react";
 import { HelpCircle, MessageSquare, PhoneCall, Book, ArrowLeft, Send, CheckCircle2, Search } from "lucide-react";
-import { Link } from "react-router"; // or dom, doesn't matter here if it uses react-router
+import { Link } from "react-router";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export function Contact() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [ticketId, setTicketId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    orderId: "",
+    adminName: "",
+    deviceInfo: "",
+    privacyType: "طلب حذف بيانات",
+    isProjectRelated: "لا",
+    subject: "",
+    message: ""
+  });
 
   const categories = [
     {
@@ -39,9 +55,33 @@ export function Contact() {
     }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
+    try {
+      const generatedId = `TKT-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+      const categoryTitle = categories.find(c => c.id === selectedCategory)?.title || "غير محدد";
+      
+      const payload = {
+        ...formData,
+        categoryId: selectedCategory,
+        categoryTitle,
+        ticketNumber: generatedId,
+        status: "جديدة",
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "support_tickets"), payload);
+      setTicketId(generatedId);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      alert("حدث خطأ أثناء إرسال رسالتكم. يرجى المحاولة لاحقاً.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -56,11 +96,11 @@ export function Contact() {
             تمت إحالة طلبكم إلى القسم المختص، وسيتم التواصل معكم عبر البريد الإلكتروني خلال الفترة التشغيلية المعتادة.
           </p>
           <div className="bg-brand-50 p-4 rounded-xl border border-brand-100 font-mono text-brand-800 font-bold mb-8 text-lg">
-            رقم المرجع: TKT-{new Date().getFullYear()}-{Math.floor(Math.random() * 100000).toString().padStart(5, '0')}
+            رقم المرجع: {ticketId || `TKT-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`}
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/" className="px-6 py-3 bg-brand-900 text-white rounded-xl font-bold hover:bg-brand-800 transition">العودة للصفحة الرئيسية</Link>
-            <Link to="/knowledge" className="px-6 py-3 bg-white text-brand-700 border border-brand-200 rounded-xl font-bold hover:bg-brand-50 transition">استعراض الدليل الإرشادي</Link>
+            <Link to="/guide" className="px-6 py-3 bg-white text-brand-700 border border-brand-200 rounded-xl font-bold hover:bg-brand-50 transition">استعراض الدليل الإرشادي</Link>
           </div>
         </div>
       </div>
@@ -85,7 +125,7 @@ export function Contact() {
           
           {/* Quick Support Cards */}
           <div className="grid md:grid-cols-3 gap-6">
-            <Link to="/knowledge" className="bg-white p-8 rounded-3xl border border-brand-100 shadow-sm hover:shadow-md hover:border-brand-300 transition group flex flex-col items-center text-center">
+            <Link to="/guide" className="bg-white p-8 rounded-3xl border border-brand-100 shadow-sm hover:shadow-md hover:border-brand-300 transition group flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
                 <Book className="w-8 h-8" />
               </div>
@@ -103,14 +143,14 @@ export function Contact() {
               <div className="w-full py-3 bg-brand-50 text-brand-800 rounded-xl font-bold group-hover:bg-brand-900 group-hover:text-white transition-colors">عرض الأسئلة</div>
             </Link>
 
-            <Link to="/help" className="bg-white p-8 rounded-3xl border border-brand-100 shadow-sm hover:shadow-md hover:border-brand-300 transition group flex flex-col items-center text-center">
+            <button onClick={() => window.dispatchEvent(new Event('open-chatbot'))} className="bg-white p-8 rounded-3xl border border-brand-100 shadow-sm hover:shadow-md hover:border-brand-300 transition group flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
                 <MessageSquare className="w-8 h-8" />
               </div>
               <h3 className="font-bold text-xl text-brand-900 mb-2">المرشد الذكي</h3>
               <p className="text-sm text-brand-600 mb-6 flex-1">مساعد ذكي للإجابة عن الأسئلة المتعلقة بالخدمة والمنصة.</p>
               <div className="w-full py-3 bg-brand-50 text-brand-800 rounded-xl font-bold group-hover:bg-brand-900 group-hover:text-white transition-colors">ابدأ المحادثة</div>
-            </Link>
+            </button>
           </div>
 
           {/* Contact Section */}
@@ -153,11 +193,11 @@ export function Contact() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold text-brand-800 mb-2">الاسم الكامل *</label>
-                      <input type="text" required className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" />
+                      <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-brand-800 mb-2">البريد الإلكتروني *</label>
-                      <input type="email" required className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border text-left" dir="ltr" />
+                      <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border text-left" dir="ltr" />
                     </div>
                   </div>
 
@@ -165,18 +205,18 @@ export function Contact() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-bold text-brand-800 mb-2">رقم الطلب (إن وجد)</label>
-                        <input type="text" className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border text-left" dir="ltr" />
+                        <input type="text" value={formData.orderId} onChange={(e) => setFormData({...formData, orderId: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border text-left" dir="ltr" />
                       </div>
                       {selectedCategory === "project" && (
                         <div>
                           <label className="block text-sm font-bold text-brand-800 mb-2">اسم أمين السجل</label>
-                          <input type="text" className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" />
+                          <input type="text" value={formData.adminName} onChange={(e) => setFormData({...formData, adminName: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" />
                         </div>
                       )}
                       {selectedCategory === "support" && (
                         <div>
                           <label className="block text-sm font-bold text-brand-800 mb-2">نوع الجهاز / المتصفح</label>
-                          <input type="text" className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="مثال: آيفون، كروم" />
+                          <input type="text" value={formData.deviceInfo} onChange={(e) => setFormData({...formData, deviceInfo: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="مثال: آيفون، كروم" />
                         </div>
                       )}
                     </div>
@@ -186,7 +226,7 @@ export function Contact() {
                     <div className="grid md:grid-cols-2 gap-6">
                        <div>
                           <label className="block text-sm font-bold text-brand-800 mb-2">نوع الطلب</label>
-                          <select className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border">
+                          <select value={formData.privacyType} onChange={(e) => setFormData({...formData, privacyType: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border">
                             <option>طلب حذف بيانات</option>
                             <option>استفسار عن الخصوصية</option>
                             <option>موافقة قانونية</option>
@@ -194,7 +234,7 @@ export function Contact() {
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-brand-800 mb-2">هل الطلب متعلق بمشروع قائم؟</label>
-                          <select className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border">
+                          <select value={formData.isProjectRelated} onChange={(e) => setFormData({...formData, isProjectRelated: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border">
                             <option>نعم</option>
                             <option>لا</option>
                           </select>
@@ -204,12 +244,12 @@ export function Contact() {
 
                   <div>
                     <label className="block text-sm font-bold text-brand-800 mb-2">عنوان الموضوع *</label>
-                    <input type="text" required className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="" />
+                    <input type="text" required value={formData.subject} onChange={(e) => setFormData({...formData, subject: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="" />
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold text-brand-800 mb-2">تفاصيل الرسالة *</label>
-                    <textarea required rows={6} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="يرجى توضيح طلبكم أو استفساركم بصورة مختصرة وواضحة."></textarea>
+                    <textarea required rows={6} value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} className="w-full border-brand-200 rounded-xl p-3 focus:ring-brand-500 focus:border-brand-500 border" placeholder="يرجى توضيح طلبكم أو استفساركم بصورة مختصرة وواضحة."></textarea>
                   </div>
 
                   {/* Dummy Captcha */}
@@ -220,8 +260,10 @@ export function Contact() {
                   </div>
 
                   <div className="pt-6 border-t border-brand-100">
-                    <button type="submit" className="w-full md:w-auto px-10 py-4 bg-brand-900 text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-brand-800 transition shadow-md">
-                      إرسال الطلب <Send className="w-5 h-5" />
+                    <button type="submit" disabled={isSubmitting} className="w-full md:w-auto px-10 py-4 bg-brand-900 text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-brand-800 transition shadow-md disabled:bg-gray-400">
+                      {isSubmitting ? "جاري الإرسال..." : (
+                        <>إرسال الطلب <Send className="w-5 h-5" /></>
+                      )}
                     </button>
                     <p className="text-xs text-brand-500 mt-4 leading-relaxed max-w-md">
                       ملاحظة: نظرًا لطبيعة العمل البحثي والتوثيقي، تتم مراجعة الرسائل وتصنيفها قبل الرد عليها من الفريق المختص.
@@ -240,11 +282,11 @@ export function Contact() {
             <h3 className="font-bold text-brand-900 mb-6 text-lg border-b border-brand-100 pb-4">قبل التواصل</h3>
             
             <ul className="space-y-4">
-              <li><Link to="/knowledge" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">الدليل الإرشادي</Link></li>
+              <li><Link to="/guide" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">الدليل الإرشادي</Link></li>
               <li><Link to="/faq" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">الأسئلة الشائعة</Link></li>
-              <li><Link to="/help" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">المرشد الذكي</Link></li>
-              <li><Link to="/legal" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">سياسة الخصوصية</Link></li>
-              <li><Link to="/legal" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">شروط الخدمة</Link></li>
+              <li><button onClick={() => window.dispatchEvent(new Event('open-chatbot'))} className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block text-right w-full">المرشد الذكي</button></li>
+              <li><Link to="/legal/privacy" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">سياسة الخصوصية</Link></li>
+              <li><Link to="/legal/terms" className="text-brand-700 hover:text-brand-900 hover:mr-2 transition-all block">شروط الخدمة</Link></li>
             </ul>
 
             <div className="mt-8 pt-8 border-t border-brand-100">

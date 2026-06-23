@@ -23,12 +23,12 @@ export interface KnowledgeArticle {
   createdAt?: string;
 }
 
-const SECTIONS = [
+const BASE_SECTIONS = [
   {
     id: "الروايات والذاكرة",
     title: "الروايات والذاكرة",
     desc: "مقالات ومقاطع فيديو حول الانسان والمكان تغطي القضايا الاجتماعية وتاريخ الاعلَام والمشاهير من مختلف الدول والبقاع",
-    filters: ["عام", "السعودية", "اليمن", "عمان", "الامارات", "الكويت", "قطر", "البحرين", "العراق", "سوريا", "الاردن", "فلسطين", "مصر", "ليبيا", "الجزائر", "المغرب", "موريتانيا", "السودان", "الصومال", "جيبوتي", "جزر القمر", "زنجبار", "ايران", "تركيا", "افغانستان", "الهند", "البرازيل", "الارجنتين", "استراليا"]
+    filters: ["كل الدول", "السعودية", "لبنان", "سوريا"]
   },
   {
     id: "قراءات ومراجع",
@@ -53,10 +53,23 @@ const SECTIONS = [
 export function KnowledgeCenter() {
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
-  const [activeFilter, setActiveFilter] = useState("عام");
+  const [activeSection, setActiveSection] = useState(BASE_SECTIONS[0].id);
+  const [activeFilter, setActiveFilter] = useState("كل الدول");
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Dynamic SECTIONS derivation
+  const getDynamicSections = () => {
+    return BASE_SECTIONS.map(section => {
+      const sectionArticles = articles.filter(a => a.section === section.id);
+      const articleFilters = sectionArticles.map(a => a.filter).filter(Boolean) as string[];
+      // Combine base filters and any custom filters found in articles exactly for this section
+      const uniqueFilters = Array.from(new Set([...section.filters, ...articleFilters]));
+      return { ...section, filters: uniqueFilters };
+    });
+  };
+
+  const SECTIONS = getDynamicSections();
 
   // Newsletter Inline Component
   const NewsletterInline = () => (
@@ -179,6 +192,19 @@ export function KnowledgeCenter() {
       }
 
       setArticles(data);
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const articleId = urlParams.get('article');
+      if (articleId && !selectedArticle) {
+        const found = data.find(a => a.id === articleId);
+        if (found) {
+          setSelectedArticle(found);
+          // Set section and filter to match
+          setActiveSection(found.section);
+          setActiveFilter(found.filter);
+        }
+      }
+      
       setLoading(false);
     }, (error) => {
       // Suppress missing permissions error during check
@@ -275,26 +301,26 @@ export function KnowledgeCenter() {
             <h3 className="text-lg font-bold text-brand-900 mb-6 text-center font-serif">شارك المعرفة</h3>
             <div className="flex flex-wrap justify-center gap-4">
               <button onClick={() => {
-                const url = window.location.href;
+                const url = `${window.location.origin}${window.location.pathname}?article=${selectedArticle.id}`;
                 navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
                 alert('تم نسخ الرابط بنجاح');
               }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-brand-700 flex items-center gap-2 hover:bg-brand-50 hover:border-brand-300 transition-colors shadow-sm font-medium" title="نسخ الرابط">
                 <Copy className="w-5 h-5" /> نسخ الرابط
               </button>
               <button onClick={() => {
-                const url = window.location.href;
+                const url = `${window.location.origin}${window.location.pathname}?article=${selectedArticle.id}`;
                 window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(selectedArticle.title)}&url=${encodeURIComponent(url)}`, '_blank');
               }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2] transition-colors shadow-sm font-medium" title="مشاركة على اكس">
                 <Twitter className="w-5 h-5" /> شارك على X
               </button>
               <button onClick={() => {
-                const url = window.location.href;
+                const url = `${window.location.origin}${window.location.pathname}?article=${selectedArticle.id}`;
                 window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
               }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] transition-colors shadow-sm font-medium" title="مشاركة على فيسبوك">
                 <Facebook className="w-5 h-5" /> شارك على فيسبوك
               </button>
               <button onClick={() => {
-                const url = window.location.href;
+                const url = `${window.location.origin}${window.location.pathname}?article=${selectedArticle.id}`;
                 window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(selectedArticle.title + ' ' + url)}`, '_blank');
               }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors shadow-sm font-medium" title="مشاركة على واتساب">
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> شارك على واتساب
@@ -343,7 +369,7 @@ export function KnowledgeCenter() {
           {SECTIONS.map((section) => (
             <button
               key={section.id}
-              onClick={() => { setActiveSection(section.id); setActiveFilter("عام"); }}
+              onClick={() => { setActiveSection(section.id); setActiveFilter(section.filters.length > 0 ? section.filters[0] : "عام"); }}
               className={`text-xl md:text-2xl font-bold font-serif transition-colors ${activeSection === section.id ? "text-[#C3262A]" : "text-gray-500 hover:text-gray-800"}`}
             >
               {section.title}

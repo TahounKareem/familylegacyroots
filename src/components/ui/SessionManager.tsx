@@ -32,9 +32,16 @@ export function SessionManager() {
   };
 
   const handleLogout = useCallback(async () => {
+    const role = currentUser?.role;
     await writeAuditLog('auto_logout_inactivity');
     await logout();
     setShowWarning(false);
+    
+    if (["admin", "maestro", "research", "design", "marketing", "accounting", "compliance", "shipping"].includes(role || '')) {
+      window.location.href = '/team/login';
+    } else {
+      window.location.href = '/auth';
+    }
   }, [logout, currentUser]);
 
   const getSessionTimeout = (role: string) => {

@@ -905,3 +905,20 @@ export const sendVerificationCodeEmail = async (
     },
   });
 };
+
+export const sendCustomEmail = async (
+  toEmail: string,
+  subject: string,
+  bodyHtml: string,
+) => {
+  await queueEmail({
+    to: toEmail,
+    bcc: DEFAULT_BCC,
+    from: DEFAULT_FROM,
+    message: {
+      subject: subject,
+      text: subject,
+      html: bodyHtml,
+    },
+  });
+};

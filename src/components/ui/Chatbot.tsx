@@ -47,6 +47,11 @@ export function Chatbot() {
     const [dynamicFaqs, setDynamicFaqs] = useState<string>("");
   const currentUser = useAppStore(state => state.currentUser);
 
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('open-chatbot', handleOpenChat);
+    return () => window.removeEventListener('open-chatbot', handleOpenChat);
+  }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

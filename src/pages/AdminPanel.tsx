@@ -60,6 +60,8 @@ import {
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { ChatbotManagement } from "@/components/ChatbotManagement";
+import { SupportTicketsManagement } from "@/components/admin/SupportTicketsManagement";
+import { FollowupModal } from "@/components/admin/FollowupModal";
 import { ComplianceDashboard } from "../components/admin/ComplianceDashboard";
 import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
@@ -95,6 +97,7 @@ export function AdminPanel() {
     null,
   );
   const [messagingOrder, setMessagingOrder] = useState<Order | null>(null);
+  const [followupOrder, setFollowupOrder] = useState<any>(null);
   const [deliveryOrder, setDeliveryOrder] = useState<Order | null>(null);
   const [deliveryTab, setDeliveryTab] = useState<"draft" | "final">("draft");
   const [replyText, setReplyText] = useState("");
@@ -2107,7 +2110,11 @@ export function AdminPanel() {
 
           return (
             <div className="space-y-8">
+              {followupOrder && (
+                <FollowupModal order={followupOrder} onClose={() => setFollowupOrder(null)} />
+              )}
               <ChatbotManagement />
+              <SupportTicketsManagement />
               <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-brand-100 bg-brand-50 flex items-center justify-between">
                   <h2 className="font-bold text-lg text-brand-900">
@@ -2195,27 +2202,26 @@ export function AdminPanel() {
                           </td>
                           <td className="px-4 py-4">
                             {latestOrder ? (
-                              <div className="flex flex-col gap-2">
-                                <span className="px-2 py-1 rounded bg-brand-50 text-brand-700 text-xs font-bold border border-brand-100 text-center w-fit">
+                              <div className="flex flex-col gap-2 relative">
+                                <span className={`px-2 py-1 rounded text-xs font-bold border text-center w-fit ${
+                                    latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع" || !latestOrder.issueStatus
+                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    : "bg-brand-50 text-brand-700 border-brand-100"
+                                }`}>
                                   {latestOrder.issueStatus || "طلب غير مكتمل"}
                                 </span>
-                                <button
-                                  onClick={() => {
-                                    setMessagingOrder(latestOrder);
-                                    markMessagesAsRead(latestOrder.id, "admin");
-                                  }}
-                                  className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit"
-                                >
-                                  <MessageSquare className="w-3 h-3" /> طلبات
-                                  إيضاح ورسائل
-                                  {latestOrder.messages &&
-                                    latestOrder.messages.filter(
-                                      (m) =>
-                                        m.senderRole === "user" && !m.isRead,
-                                    ).length > 0 && (
-                                      <span className="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full animate-ping"></span>
+                                
+                                {(!latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع") && (
+                                  <button
+                                    onClick={() => setFollowupOrder(latestOrder)}
+                                    className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit"
+                                  >
+                                    <MessageSquare className="w-3 h-3" /> التواصل مع العميل
+                                    {latestOrder.followups?.length > 0 && (
+                                      <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px]">{latestOrder.followups.length}</span>
                                     )}
-                                </button>
+                                  </button>
+                                )}
                               </div>
                             ) : (
                               <span className="text-gray-400 text-xs">
