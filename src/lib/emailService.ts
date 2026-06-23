@@ -9,6 +9,7 @@ import { db } from "./firebase";
 
 export interface EmailTemplate {
   to: string | string[];
+  cc?: string | string[];
   bcc?: string | string[];
   from?: string;
   message: {
@@ -30,6 +31,7 @@ const queueEmail = async (emailData: EmailTemplate) => {
       },
       createdAt: serverTimestamp(),
     };
+    if (emailData.cc) docData.cc = emailData.cc;
     if (emailData.bcc) docData.bcc = emailData.bcc;
 
     await addDoc(collection(db, "mail"), docData);
@@ -88,8 +90,9 @@ export const sendManagementNewOrderEmail = async (
   familyName: string,
 ) => {
   await queueEmail({
-    to: ["info@thefamilylegacyroots.com", "kareem.tahoun@adamresearchcenter.net", "hassan.alamri@adamresearchcenter.net"],
-    bcc: DEFAULT_BCC,
+    to: "Kareem.Tahoun@adamresearchcenter.net",
+    cc: "Hassan.Alamri@adamresearchcenter.net",
+    bcc: "info@thefamilylegacyroots.net",
     from: DEFAULT_FROM,
     message: {
       subject: `طلب جديد جاري التنفيذ - عائلة ${familyName}`,
@@ -197,7 +200,8 @@ export const createSupportTicket = async (
 
   // 2. Email Admin
   await queueEmail({
-    to: ["info@thefamilylegacyroots.com", "admin@adamresearchcenter.net"], // ضع الإيميل الخاص بكم هنا
+    to: "admin@adamresearchcenter.net", // ضع الإيميل الخاص بكم هنا
+    bcc: DEFAULT_BCC,
     message: {
       subject: `تذكرة دعم جديدة #${ticketRef.id} من ${name}`,
       text: `رسالة جديدة من ${name} (${email}): ${message}`,
@@ -236,7 +240,7 @@ export const createSupportTicket = async (
 };
 
 const DEFAULT_FROM = "سجل تراث العائلة <info@thefamilylegacyroots.com>";
-const DEFAULT_BCC: string | undefined = undefined; // "no-reply@thefamilylegacyroots.com";
+const DEFAULT_BCC = ["info@thefamilylegacyroots.net"];
 
 /**
  * 1. إشعار إدارة البحوث بإسناد طلب جديد للبحث والتوثيق
@@ -354,12 +358,9 @@ export const sendInitialDesignReadyEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: [
-      "info@thefamilylegacyroots.com",
-      "hassan.alamri@adamresearchcenter.net",
-      "kareem.tahoun@adamresearchcenter.net",
-    ],
-    bcc: DEFAULT_BCC,
+    to: "Kareem.Tahoun@adamresearchcenter.net",
+    cc: "Hassan.Alamri@adamresearchcenter.net",
+    bcc: "info@thefamilylegacyroots.net",
     from: DEFAULT_FROM,
     message: {
       subject: `النسخة الأولية لسجل تراث العائلة جاهزة للإرسال الى العميل #${orderId} - عائلة (${familyName})`,
@@ -503,12 +504,9 @@ export const sendFinalLinksReadyEmail = async (
   orderId: string,
 ) => {
   await queueEmail({
-    to: [
-      "info@thefamilylegacyroots.com",
-      "hassan.alamri@adamresearchcenter.net",
-      "kareem.tahoun@adamresearchcenter.net",
-    ],
-    bcc: DEFAULT_BCC,
+    to: "Kareem.Tahoun@adamresearchcenter.net",
+    cc: "Hassan.Alamri@adamresearchcenter.net",
+    bcc: "info@thefamilylegacyroots.net",
     from: DEFAULT_FROM,
     message: {
       subject: `السجل النهائي جاهز للعميل #${orderId} - عائلة (${familyName})`,

@@ -249,50 +249,65 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                              </div>
                            </div>
                            
-                           {(consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).length > 0 || auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).length > 0) && (
+                           {(consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).length > 0 || auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).length > 0) && (() => {
+                             const trailLogs = auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).map(a => ({ type: 'log', data: a, time: a.timestamp?.seconds || 0 }));
+                             const trailConsents = consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).map(c => ({ type: 'consent', data: c, time: (c.acceptedAt?.seconds || c.timestamp?.seconds || 0) }));
+                             const legalTrail = [...trailLogs, ...trailConsents].sort((a,b) => a.time - b.time);
+
+                             return (
                              <div className="mt-3 bg-white border border-brand-100 rounded-lg p-3">
-                               <p className="text-xs font-bold text-brand-800 mb-3 border-b border-gray-100 pb-2">تفاصيل وسجل العمليات القانونية للعقد (Legal Actions Trail)</p>
-                               <ul className="space-y-4">
-                                 {/* First Actions (Audit Logs) */}
-                                 {auditLogs.filter(a => a.orderId === order.id || a.contractId === (order.data?.contractId || order.contractId)).map((log, idx) => (
-                                    <li key={`log-${idx}`} className="flex items-start gap-3 text-xs bg-gray-50/50 p-2.5 rounded-lg border border-gray-100">
-                                      <Shield className="w-4 h-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                                      <div className="flex flex-col gap-1 w-full">
-                                        <div className="flex justify-between w-full">
-                                          <span>تسجيل نشاط: <strong className="text-brand-900 mx-1">{log.eventType}</strong></span>
-                                          <span dir="ltr" className="font-mono text-gray-500">{formatDate(log.timestamp)}</span>
-                                        </div>
-                                        {log.eventType === 'contract_opened' && <span className="text-gray-500">تم فتح واستعراض وثيقة العقد للمرة الأولى من قِبل العميل.</span>}
-                                        {log.eventType === 'contract_expanded_to_view' && <span className="text-gray-500 mt-1">تم النقر لفتح واستعراض تفاصيل البنود من قِبل العميل.</span>}
-                                        {log.eventType === 'contract_fully_scrolled' && <span className="text-green-600 font-medium">تم التحقق من تمرير وقراءة العقد بالكامل. (نسبة التمرير: {Math.round(log.scrollPercentage)}%)</span>}
-                                        {log.eventType === 'contract_terms_accepted' && <span className="text-brand-600 font-bold">تم تأكيد استكمال كافة بنود العقد.</span>}
-                                      </div>
-                                    </li>
-                                 ))}
-
-                                 {/* Then Consents */}
-                                 {consents.filter(c => c.orderId === order.id || c.contractId === (order.data?.contractId || order.contractId)).map((consent, idx) => {
-                                   let consentText = consent.consentType;
-                                   if (consentText === 'order_details_consent') consentText = 'أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل.';
-                                   if (consentText === 'electronic_signature_consent') consentText = 'أوافق على استخدام التوقيع الإلكتروني والسجلات الرقمية كوسائل قانونية معتمدة لإثبات إجراءات هذا الطلب.';
-                                   if (consentText?.includes('gdpr') || consentText?.includes('privacy')) consentText = 'موافقة صريحة على سياسة الخصوصية وقانون حماية البيانات.';
-
-                                   return (
-                                     <li key={`con-${idx}`} className="flex items-start gap-3 text-xs bg-green-50/50 p-2.5 rounded-lg border border-green-100">
-                                       <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                       <div className="flex flex-col gap-1 w-full">
-                                         <div className="flex justify-between w-full">
-                                           <span>إقرار صريح ومسجل: <strong className="text-brand-900 mx-1">{consentText}</strong></span>
-                                           <span dir="ltr" className="font-mono text-gray-500 min-w-[130px] text-right">{formatDate(consent.acceptedAt || consent.timestamp)}</span>
+                               <p className="text-xs font-bold text-brand-800 mb-3 border-b border-gray-100 pb-2">سجل العمليات الزمني للإقرارات والتوقيع (Chronological Legal Trail)</p>
+                               <ul className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:ml-[1.1rem] md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
+                                 {legalTrail.map((item, idx) => {
+                                   if (item.type === 'log') {
+                                     const log = item.data;
+                                     return (
+                                       <li key={`trail-${item.type}-${idx}`} className="relative flex items-start gap-4 text-xs">
+                                         <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-brand-200 shadow-sm flex-shrink-0">
+                                            <Shield className="w-3.5 h-3.5 text-brand-500" />
                                          </div>
-                                         <span className="text-gray-500 font-mono text-[10px]">Reference: {consent.consentType} | Version: {consent.consentVersion || "v1.0"} | IP: {consent.ipAddress}</span>
-                                       </div>
-                                     </li>
-                                   );
+                                         <div className="bg-gray-50/50 flex-1 p-3 rounded-lg border border-gray-100 shadow-sm flex flex-col gap-1 w-full relative">
+                                           <div className="flex justify-between w-full">
+                                             <span>تسجيل حدث: <strong className="text-brand-900 mx-1">{log.eventType}</strong></span>
+                                             <span dir="ltr" className="font-mono text-gray-500">{formatDate(log.timestamp)}</span>
+                                           </div>
+                                           {log.eventType === 'contract_opened' && <span className="text-gray-500">قام العميل بفتح نافذة العقد والبدء في استعراضه.</span>}
+                                           {log.eventType === 'contract_expanded_to_view' && <span className="text-gray-500">قام العميل بالنقر على خيار عرض بنود عقد الخدمة وقراءتها.</span>}
+                                           {log.eventType === 'contract_fully_scrolled' && <span className="text-gray-600 font-medium">العميل قام بالتمرير السحابي للعقد وأتم استعراض جزء كبير منه (<span dir="ltr">{Math.round(log.scrollPercentage)}%</span>).</span>}
+                                           {log.eventType === 'contract_terms_accepted' && <span className="text-brand-600 font-bold">العميل وافق على بنود العقد.</span>}
+                                           {log.eventType === 'contract_electronically_signed' && <span className="text-green-600 font-bold">العميل أتم التوقيع الإلكتروني المعتمد للملف.</span>}
+                                           <span className="text-gray-400 font-mono text-[10px] mt-1">Version: {log.details?.version || "v1.0"} | Device: {log.details?.userAgent ? "Captured" : "Unknown"} | Scope: System Audit</span>
+                                         </div>
+                                       </li>
+                                     );
+                                   } else {
+                                     const consent = item.data;
+                                     let consentText = consent.consentType;
+                                     if (consentText === 'order_details_consent') consentText = 'أقر بأن بيانات الطلب الحالية تُعد جزءًا مكملًا لعقد الخدمة، وتمثل المرجع المعتمد لنطاق العمل.';
+                                     if (consentText === 'electronic_signature_consent') consentText = 'أوافق على استخدام التوقيع الإلكتروني والسجلات الرقمية كوسائل قانونية معتمدة لإثبات إجراءات هذا الطلب.';
+                                     if (consentText?.includes('gdpr') || consentText?.includes('privacy')) consentText = 'موافقة صريحة على سياسة الخصوصية وقانون حماية البيانات.';
+
+                                     return (
+                                       <li key={`trail-${item.type}-${idx}`} className="relative flex items-start gap-4 text-xs">
+                                         <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-green-50 border-2 border-green-200 shadow-sm flex-shrink-0">
+                                            <CheckCircle className="w-4 h-4 text-green-600" />
+                                         </div>
+                                         <div className="bg-green-50 flex-1 p-3 rounded-lg border border-green-200 shadow-sm flex flex-col gap-1 w-full relative">
+                                           <div className="flex justify-between w-full">
+                                             <span><strong className="text-green-800">إقرار رقمي صريح</strong></span>
+                                             <span dir="ltr" className="font-mono text-gray-500 min-w-[130px] text-right">{formatDate(consent.acceptedAt || consent.timestamp)}</span>
+                                           </div>
+                                           <span className="text-black leading-relaxed font-medium mt-1">"{consentText}"</span>
+                                           <span className="text-gray-500 font-mono text-[10px] mt-2 pt-2 border-t border-green-100">Reference: {consent.consentType} | API Version: {consent.consentVersion || "v1.0"} | IPv4: {consent.ipAddress}</span>
+                                         </div>
+                                       </li>
+                                     );
+                                   }
                                  })}
                                </ul>
                              </div>
-                           )}
+                             );
+                           })()}
 
                            <div className="mt-1 text-xs text-brand-800 bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-2 shadow-sm leading-relaxed">
                              <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
