@@ -216,7 +216,7 @@ export function ComplianceDashboard() {
                 // Find user orders and check if any has a signed contract
                 const userOrders = orders.filter(o => o.userId === u.id && !o.isDeleted);
                 const hasSignedContract = userOrders.some(o => 
-                  o.contractSigned || o.data?.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')
+                  o.contractUrl || o.data?.contractUrl || o.contractSigned || o.data?.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')
                 );
 
                 return (

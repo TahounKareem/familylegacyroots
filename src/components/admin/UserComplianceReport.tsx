@@ -223,9 +223,9 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                     </li>
                   </ul>
 
-                  {orders.filter(o => o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).length > 0 ? (
+                  {orders.filter(o => o.contractUrl || o.data?.contractUrl || o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).length > 0 ? (
                     <div className="space-y-4">
-                      {orders.filter(o => o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).map((order) => (
+                      {orders.filter(o => o.contractUrl || o.data?.contractUrl || o.data?.contractSigned || o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).map((order) => (
                         <div key={order.id} className="bg-white p-5 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-4">
                            <div className="flex justify-between items-start border-b border-gray-100 pb-3">
                              <div>
@@ -366,6 +366,84 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   ) : (
                     <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 text-sm">
                       لم يتم تسجيل أي طلبات محو بيانات أو طلبات متعلقة بحقوق الخصوصية (GDPR) لهذا المستخدم حتّى الآن.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Section 5: Order Evidence */}
+              <section className="relative">
+                <div className="absolute -right-4 top-2 text-indigo-200 print:hidden">
+                  <CheckCircle className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
+                  5. الوثائق وأدلة الطلبات (Order Evidence)
+                </h3>
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
+                  {orders.length > 0 && orders.some(o => o.data?.documents && o.data.documents.length > 0) ? (
+                    <div className="space-y-4">
+                      {orders.filter(o => o.data?.documents && o.data.documents.length > 0).map((order) => (
+                        <div key={order.id} className="bg-white p-5 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-4">
+                           <div className="flex justify-between items-start border-b border-gray-100 pb-3">
+                             <span className="font-bold text-blue-900">دلائل الطلب رقم: #{order.orderNumber || order.id.toUpperCase().substring(0, 6)}</span>
+                           </div>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             {order.data.documents.map((doc: any, index: number) => {
+                               const docUrl = typeof doc === 'string' ? doc : doc.url;
+                               const docKind = typeof doc === 'string' ? 'وثيقة/مستند' : doc.kind;
+                               const isImage = docUrl && docUrl.startsWith('data:image');
+                               return (
+                                 <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-100 flex flex-col gap-2">
+                                   <p className="text-xs text-brand-500 font-bold self-start">{docKind}</p>
+                                   {isImage ? (
+                                      <img src={docUrl} alt={docKind} className="max-w-full max-h-32 object-contain rounded" />
+                                   ) : (
+                                      <a href={docUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 underline text-left block" dir="ltr" style={{ wordBreak: 'break-all' }}>{'<Document File / Reference>'}</a>
+                                   )}
+                                 </div>
+                               );
+                             })}
+                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 text-sm">
+                      لم يقم المستخدم برفع أي وثائق إثبات لطلباته حتى الآن.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Section 6: System Audit Logs */}
+              <section className="relative">
+                <div className="absolute -right-4 top-2 text-indigo-200 print:hidden">
+                  <CheckCircle className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
+                  6. سجلات التدقيق العام والنظام (System Audit Logs)
+                </h3>
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
+                  {auditLogs.length > 0 ? (
+                    <div className="space-y-3">
+                      {auditLogs.map((log, index) => (
+                        <div key={log.id || index} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                          <div>
+                            <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
+                              {log.action || log.eventType || 'System Event'}
+                            </span>
+                            <p className="text-sm text-gray-800 font-medium">سجل رقم: #{log.id?.substring(0, 8) || index}</p>
+                            <p className="text-xs font-mono text-gray-500 mt-1">IP: {log.ipAddress || 'غير محدد'}</p>
+                          </div>
+                          <div className="text-left font-mono text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 self-start md:self-auto min-w-[140px]" dir="ltr">
+                            {formatDate(log.timestamp?.seconds ? log.timestamp.toMillis() : log.timestamp)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                     <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 text-sm">
+                      ليس هناك سجلات تدقيق عامة إضافية بخلاف المرفقة بالطلبات.
                     </div>
                   )}
                 </div>
