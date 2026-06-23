@@ -315,7 +315,17 @@ export function ComplianceDashboard() {
                   <div key={log.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-brand-50/50 p-4 rounded-xl border border-brand-100">
                     <div>
                       <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
-                        {actionValue}
+			{(() => {
+			  const actionMap: Record<string, string> = {
+				'contract_electronically_signed': 'توقيع إلكتروني على العقد',
+				'contract_opened': 'استعراض وقراءة العقد',
+				'checkbox_checked': 'الموافقة على الإقرارات والشروط',
+				'user_registered': 'تسجيل مستخدم جديد بموافقة',
+				'order_placed': 'إنشاء طلب وموافقة على الشروط',
+				'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام'
+			  };
+			  return actionMap[actionValue] || actionValue;
+			})()}
                       </span>
                       <p className="text-sm font-semibold text-brand-900">{log.details || JSON.stringify(log.preferences || {})}</p>
                       {log.ipAddress && <p className="text-xs text-brand-600 mt-1 font-mono" dir="ltr">IP: {log.ipAddress}</p>}

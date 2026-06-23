@@ -436,7 +436,18 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                         <div key={log.id || index} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                           <div>
                             <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
-                              {log.action || log.eventType || 'System Event'}
+                              {(() => {
+                                const action = log.action || log.eventType || 'System Event';
+                                const actionMap: Record<string, string> = {
+                                  'contract_electronically_signed': 'توقيع إلكتروني على العقد',
+                                  'contract_opened': 'استعراض وقراءة العقد',
+                                  'checkbox_checked': 'الموافقة على الإقرارات والشروط',
+                                  'user_registered': 'تسجيل مستخدم جديد بموافقة',
+                                  'order_placed': 'إنشاء طلب وموافقة على الشروط',
+                                  'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام'
+                                };
+                                return actionMap[action] || action;
+                              })()}
                             </span>
                             <p className="text-sm text-gray-800 font-medium">سجل رقم: #{log.id?.substring(0, 8) || index}</p>
                             <p className="text-xs font-mono text-gray-500 mt-1">IP: {log.ipAddress || 'غير محدد'}</p>
