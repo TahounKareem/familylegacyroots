@@ -204,6 +204,7 @@ export function AdminPanel() {
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
   const [userTab, setUserTab] = useState<"team" | "users">("team");
   const [userSearch, setUserSearch] = useState("");
+  const [customerServiceFilter, setCustomerServiceFilter] = useState("all");
   const [userCountryFilter, setUserCountryFilter] = useState("");
   const [userSortBy, setUserSortBy] = useState<
     "newest" | "recent_login" | "alpha"
@@ -2099,6 +2100,24 @@ export function AdminPanel() {
             );
           }
 
+          if (customerServiceFilter !== "all") {
+            filteredUsers = filteredUsers.filter((u) => {
+              const userOrders = orders
+                .filter((o) => o.userId === u.id)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+              const latestOrder = userOrders[0];
+              if (!latestOrder) return false;
+
+              if (customerServiceFilter === "incomplete") return latestOrder.issueStatus === "طلب غير مكتمل";
+              if (customerServiceFilter === "pending_payment") return latestOrder.issueStatus === "بإنتظار إتمام الدفع" || latestOrder.paymentStatus === "pending";
+              if (customerServiceFilter === "in_progress") {
+                const phase = latestOrder.actionPhase || "مرحلة البحث";
+                return ["مرحلة البحث", "مرحلة التوثيق", "تمت المسودة", "جاري التصويب"].includes(phase);
+              }
+              return true;
+            });
+          }
+
           const formatDate = (d?: string) => {
             if (!d) return "غير محدد";
             return new Intl.DateTimeFormat("ar-EG", {
@@ -2129,16 +2148,42 @@ export function AdminPanel() {
                   </div>
                 </div>
 
-              <div className="p-4 md:px-8 border-b border-brand-50 flex flex-wrap gap-4 items-center bg-gray-50/50">
-                <div className="flex-1 min-w-[200px] relative">
+              <div className="p-4 md:px-8 border-b border-brand-50 flex flex-col gap-4 bg-gray-50/50">
+                <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={() => setCustomerServiceFilter("all")} 
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "all" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    كل الطلبات
+                  </button>
+                  <button 
+                    onClick={() => setCustomerServiceFilter("incomplete")} 
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "incomplete" ? "bg-amber-100 text-amber-800 border-amber-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    الطلبات الغير مكتملة
+                  </button>
+                  <button 
+                    onClick={() => setCustomerServiceFilter("pending_payment")} 
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "pending_payment" ? "bg-red-100 text-red-800 border-red-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    بإنتظار إتمام الدفع
+                  </button>
+                  <button 
+                    onClick={() => setCustomerServiceFilter("in_progress")} 
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${customerServiceFilter === "in_progress" ? "bg-blue-100 text-blue-800 border-blue-200 border" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    إجراءات جارية
+                  </button>
+                </div>
+                <div className="flex-1 w-full md:w-auto md:min-w-[300px] relative">
                   <input
                     type="text"
                     placeholder="ابحث بالاسم أو البريد..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
-                    className="w-full pl-4 pr-10 py-2 rounded-lg border border-brand-200 focus:ring-2 focus:ring-brand-500 text-sm"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-500 text-sm shadow-sm"
                   />
-                  <Search className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
+                  <Search className="w-4 h-4 text-brand-400 absolute right-3 top-3.5" />
                 </div>
               </div>
 
@@ -2223,12 +2268,18 @@ export function AdminPanel() {
                                     onClick={() => setFollowupOrder(latestOrder)}
                                     className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit"
                                   >
-                                    <MessageSquare className="w-3 h-3" /> التواصل مع العميل
+                                    <MessageSquare className="w-3 h-3" /> النظام
                                     {latestOrder.followups?.length > 0 && (
                                       <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px]">{latestOrder.followups.length}</span>
                                     )}
                                   </button>
                                 )}
+                                <a
+                                  href={`mailto:${user.email || ""}?subject=${encodeURIComponent(`بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}`)}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\nبخصوص طلبكم...`)}`}
+                                  className="flex items-center justify-center gap-1.5 whitespace-nowrap text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit"
+                                >
+                                  <Mail className="w-3 h-3" /> بريد عبر التطبيق
+                                </a>
                               </div>
                             ) : (
                               <span className="text-gray-400 text-xs">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Shield, FileCheck, Users, FileText, CheckCircle, AlertCircle, Save, Plus, ChevronDown, ChevronUp, History } from "lucide-react";
+import { Shield, FileCheck, Users, FileText, CheckCircle, AlertCircle, Save, Plus, ChevronDown, ChevronUp, History, ListChecks } from "lucide-react";
 import { collection, onSnapshot, getDocs, updateDoc, doc, setDoc, addDoc, query, orderBy } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { legalContent, LegalSection } from "../../pages/Legal";
@@ -53,9 +53,10 @@ interface DocumentVersion {
 }
 
 import { UserComplianceReport } from "./UserComplianceReport";
+import { LegalAuditTrailReport } from "./LegalAuditTrailReport";
 
 export function ComplianceDashboard() {
-  const [activeTab, setActiveTab] = useState<"users_consents" | "visitors_consents" | "legal_versions">("users_consents");
+  const [activeTab, setActiveTab] = useState<"users_consents" | "visitors_consents" | "legal_versions" | "legal_audit_trail">("users_consents");
   const [selectedUserReport, setSelectedUserReport] = useState<string | null>(null);
   
   // Data State
@@ -454,12 +455,19 @@ export function ComplianceDashboard() {
         >
           <FileText className="w-4 h-4"/> إدارة النسخ القانونية
         </button>
+        <button
+          onClick={() => setActiveTab("legal_audit_trail")}
+          className={`px-6 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 ${activeTab === "legal_audit_trail" ? "bg-indigo-600 text-white shadow-md" : "text-indigo-600 hover:bg-indigo-50 border border-indigo-100"}`}
+        >
+          <ListChecks className="w-4 h-4"/> Legal Audit Trail
+        </button>
       </div>
 
       <div className="min-h-[500px]">
         {activeTab === "users_consents" && renderUsersConsents()}
         {activeTab === "visitors_consents" && renderVisitorsConsents()}
         {activeTab === "legal_versions" && renderLegalVersions()}
+        {activeTab === "legal_audit_trail" && <LegalAuditTrailReport />}
       </div>
 
       {selectedUserReport && (
