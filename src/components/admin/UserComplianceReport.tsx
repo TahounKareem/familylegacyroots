@@ -439,12 +439,16 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                               {(() => {
                                 const action = log.action || log.eventType || 'System Event';
                                 const actionMap: Record<string, string> = {
-                                  'contract_electronically_signed': 'توقيع إلكتروني على العقد',
-                                  'contract_opened': 'استعراض وقراءة العقد',
-                                  'checkbox_checked': 'الموافقة على الإقرارات والشروط',
-                                  'user_registered': 'تسجيل مستخدم جديد بموافقة',
-                                  'order_placed': 'إنشاء طلب وموافقة على الشروط',
-                                  'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام'
+                                  'contract_electronically_signed': 'توقيع إلكتروني على العقد (contract_electronically_signed)',
+                                  'contract_opened': 'استعراض وقراءة العقد (contract_opened)',
+                                  'contract_expanded_to_view': 'توسيع لعرض وقراءة العقد (contract_expanded_to_view)',
+                                  'contract_terms_accepted': 'الموافقة على شروط العقد (contract_terms_accepted)',
+                                  'contract_generated': 'إنشاء/إصدار العقد (contract_generated)',
+                                  'checkbox_checked': 'الموافقة على الإقرارات والشروط (checkbox_checked)',
+                                  'user_registered': 'تسجيل مستخدم جديد بموافقة (user_registered)',
+                                  'order_placed': 'إنشاء طلب وموافقة على الشروط (order_placed)',
+                                  'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام (CONSENT_ACCEPTED)',
+                                  'USER_REGISTRATION_AND_CONSENT': 'تسجيل مستخدم وإقرار بالموافقة (USER_REGISTRATION_AND_CONSENT)'
                                 };
                                 return actionMap[action] || action;
                               })()}
