@@ -92,7 +92,7 @@ export const sendManagementNewOrderEmail = async (
   await queueEmail({
     to: "Kareem.Tahoun@adamresearchcenter.net",
     cc: "Hassan.Alamri@adamresearchcenter.net",
-    bcc: "info@thefamilylegacyroots.net",
+    bcc: "info@thefamilylegacyroots.com",
     from: DEFAULT_FROM,
     message: {
       subject: `طلب جديد جاري التنفيذ - عائلة ${familyName}`,
@@ -240,7 +240,7 @@ export const createSupportTicket = async (
 };
 
 const DEFAULT_FROM = "سجل تراث العائلة <info@thefamilylegacyroots.com>";
-const DEFAULT_BCC = ["info@thefamilylegacyroots.net"];
+const DEFAULT_BCC = ["info@thefamilylegacyroots.com"];
 
 /**
  * 1. إشعار إدارة البحوث بإسناد طلب جديد للبحث والتوثيق
@@ -360,7 +360,7 @@ export const sendInitialDesignReadyEmail = async (
   await queueEmail({
     to: "Kareem.Tahoun@adamresearchcenter.net",
     cc: "Hassan.Alamri@adamresearchcenter.net",
-    bcc: "info@thefamilylegacyroots.net",
+    bcc: "info@thefamilylegacyroots.com",
     from: DEFAULT_FROM,
     message: {
       subject: `النسخة الأولية لسجل تراث العائلة جاهزة للإرسال الى العميل #${orderId} - عائلة (${familyName})`,
@@ -506,7 +506,7 @@ export const sendFinalLinksReadyEmail = async (
   await queueEmail({
     to: "Kareem.Tahoun@adamresearchcenter.net",
     cc: "Hassan.Alamri@adamresearchcenter.net",
-    bcc: "info@thefamilylegacyroots.net",
+    bcc: "info@thefamilylegacyroots.com",
     from: DEFAULT_FROM,
     message: {
       subject: `السجل النهائي جاهز للعميل #${orderId} - عائلة (${familyName})`,
