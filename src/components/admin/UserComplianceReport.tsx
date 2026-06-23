@@ -102,7 +102,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   </ul>
 
                   {/* User Data */}
-                  {userData?.agreedToTermsAt ? (
+                  {userData?.agreedToTermsAt || userData?.legalConsent?.agreedToTermsAt ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">حالة الإقرار</span>
@@ -111,7 +111,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">تاريخ وسجل الإقرار</span>
                         <span className="font-mono text-brand-900 border border-gray-100 bg-gray-50 px-3 py-2 rounded-lg text-sm" dir="ltr">
-                          {formatDate(userData.agreedToTermsAt)}
+                          {formatDate(userData.agreedToTermsAt || userData.legalConsent?.agreedToTermsAt)}
                         </span>
                       </div>
                       <div className="md:col-span-2 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-brand-700 flex items-start gap-3 mt-2">
@@ -152,7 +152,7 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                     </li>
                   </ul>
 
-                  {userData?.cookieConsentAt ? (
+                  {userData?.cookieConsentAt || userData?.legalConsent?.cookieConsentAt ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">مستوى الموافقة (Level)</span>

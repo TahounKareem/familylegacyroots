@@ -108,8 +108,15 @@ export function SupportTicketsManagement() {
             
             let replyDuration = null;
             if (isReplied) {
-              const createdTime = ticket.createdAt?.seconds ? ticket.createdAt.seconds * 1000 : (typeof ticket.createdAt === 'string' ? new Date(ticket.createdAt).getTime() : null);
-              const repliedTime = ticket.repliedAt?.seconds ? ticket.repliedAt.seconds * 1000 : (ticket.repliedAt instanceof Date ? ticket.repliedAt.getTime() : null);
+              const getSafeTime = (d: any) => {
+                if (!d) return null;
+                if (d.toDate) return d.toDate().getTime();
+                if (d.seconds) return d.seconds * 1000;
+                const time = new Date(d).getTime();
+                return isNaN(time) ? null : time;
+              };
+              const createdTime = getSafeTime(ticket.createdAt);
+              const repliedTime = getSafeTime(ticket.repliedAt);
               
               if (createdTime && repliedTime && repliedTime > createdTime) {
                 const diffMs = repliedTime - createdTime;
@@ -150,7 +157,21 @@ export function SupportTicketsManagement() {
                     </div>
                     <div className="flex sm:items-center gap-2 sm:gap-4 flex-col sm:flex-row text-xs text-brand-600">
                       <span className="flex items-center gap-1"><User className="w-3 h-3"/> {ticket.name}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> {ticket.createdAt?.seconds ? format(new Date(ticket.createdAt.seconds * 1000), 'PPP - p', {locale: ar}) : (typeof ticket.createdAt === 'string' ? format(new Date(ticket.createdAt), 'PPP - p', {locale: ar}) : 'حالا')}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> {(() => {
+                        try {
+                          let dateValue = ticket.createdAt;
+                          if (!dateValue) return 'حالا';
+                          let d: Date;
+                          if (dateValue.toDate) d = dateValue.toDate();
+                          else if (dateValue.seconds) d = new Date(dateValue.seconds * 1000);
+                          else d = new Date(dateValue);
+                          
+                          if (isNaN(d.getTime())) return 'غير محدد';
+                          return format(d, 'PPP - p', {locale: ar});
+                        } catch (e) {
+                          return 'غير محدد';
+                        }
+                      })()}</span>
                       {isReplied && replyDuration && (
                         <span className="flex items-center gap-1 text-green-700 font-bold bg-green-100 px-2 rounded-full">
                           <Check className="w-3 h-3" /> تم الرد بنجاح {replyDuration}
