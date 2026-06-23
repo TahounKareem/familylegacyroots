@@ -2275,31 +2275,25 @@ export function AdminPanel() {
                             ) : "-"}
                           </td>
                           <td className="px-4 py-4">
-                            {latestOrder ? (
-                              <div className="flex flex-col gap-2">
-                                {(!latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع") && (
-                                  <button
-                                    onClick={() => setFollowupOrder(latestOrder)}
-                                    className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit shadow-sm"
-                                  >
-                                    <MessageSquare className="w-3 h-3" /> النظام
-                                    {latestOrder.followups?.length > 0 && (
-                                      <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px] border border-white">{latestOrder.followups.length}</span>
-                                    )}
-                                  </button>
-                                )}
-                                <a
-                                  href={`mailto:${user.email || ""}?subject=${encodeURIComponent(`بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}`)}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\nبخصوص طلبكم...`)}`}
-                                  className="flex items-center gap-1.5 whitespace-nowrap text-brand-700 bg-white border border-brand-300 hover:bg-brand-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit shadow-sm"
+                            <div className="flex flex-col gap-2">
+                              {latestOrder && (!latestOrder.issueStatus || latestOrder.issueStatus === "طلب غير مكتمل" || latestOrder.issueStatus === "بإنتظار إتمام الدفع") && (
+                                <button
+                                  onClick={() => setFollowupOrder(latestOrder)}
+                                  className="flex items-center gap-1.5 whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-md text-[10px] font-bold transition relative w-fit shadow-sm"
                                 >
-                                  <Mail className="w-3 h-3" /> بريد عبر التطبيق
-                                </a>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400 text-xs">
-                                لا يوجد اجراء
-                              </span>
-                            )}
+                                  <MessageSquare className="w-3 h-3" /> النظام
+                                  {latestOrder.followups?.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-green-500 text-white w-3 h-3 flex items-center justify-center rounded-full text-[8px] border border-white">{latestOrder.followups.length}</span>
+                                  )}
+                                </button>
+                              )}
+                              <a
+                                href={`mailto:${user.email || ""}?subject=${encodeURIComponent(latestOrder ? `بخصوص طلبكم رقم ${latestOrder.orderNumber || latestOrder.id.toUpperCase().substring(0, 6)} - المرحلة: ${latestOrder.actionPhase || latestOrder.issueStatus || "غير محدد"}` : "تواصل من فريق سجل تراث العائلة")}&body=${encodeURIComponent(`أهلاً بك ${user.name || "العميل الكريم"}،\n\n`)}`}
+                                className="flex items-center gap-1.5 whitespace-nowrap text-brand-700 bg-white border border-brand-300 hover:bg-brand-50 px-3 py-1.5 rounded-md text-[10px] font-bold transition w-fit shadow-sm"
+                              >
+                                <Mail className="w-3 h-3" /> بريد عبر التطبيق
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       );

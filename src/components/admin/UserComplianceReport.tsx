@@ -50,32 +50,33 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
         <div className="absolute top-0 right-0 w-3 h-full bg-indigo-600 rounded-r-3xl print:hidden" />
 
         {/* Header */}
-        <div className="px-8 py-6 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white flex items-center justify-between print:bg-white print:border-b-2 print:border-black">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white shadow-sm border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center print:hidden">
-              <Shield className="w-7 h-7" />
+        <div className="px-8 py-6 md:p-8 border-b border-brand-100 bg-gradient-to-r from-indigo-50 to-white flex items-start justify-between print:bg-white print:border-none">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 bg-white shadow-sm border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center print:hidden">
+              <Shield className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-serif font-bold text-brand-900">تقرير الإمتثال التفصيلي (User Audit)</h2>
-              <p className="text-sm text-brand-600 font-mono mt-1" dir="ltr">User: {userData?.email || userId}</p>
+              <h2 className="text-3xl font-serif font-bold text-brand-900">Legal Audit Trail Report</h2>
+              <p className="text-brand-600 mt-2 font-medium">سجل الامتثال القانوني والإقرارات الخاصة بالعميل</p>
+              <p className="text-sm text-brand-500 font-mono mt-1" dir="ltr">User: {userData?.email || userId}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 print:hidden">
-            <button onClick={handlePrint} className="flex items-center gap-2 bg-white border border-brand-200 hover:bg-brand-50 text-brand-800 px-4 py-2 rounded-xl font-bold shadow-sm transition">
+            <button onClick={handlePrint} className="flex items-center gap-2 bg-white border border-brand-200 hover:bg-brand-50 text-brand-800 px-4 py-2 mt-2 rounded-xl font-bold shadow-sm transition">
               <Printer className="w-4 h-4" /> طباعة
             </button>
-            <button onClick={onClose} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition bg-white border border-gray-200 shadow-sm">
+            <button onClick={onClose} className="p-2 mt-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition bg-white border border-gray-200 shadow-sm">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8 md:p-10 overflow-y-auto bg-white flex-1 space-y-12 print:overflow-visible">
+        <div className="p-8 md:p-12 overflow-y-auto bg-white flex-1 space-y-12 print:overflow-visible">
           {loading ? (
             <div className="text-center py-20">
               <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-brand-600 font-medium">جاري سحب السجلات القانونية للعميل...</p>
+              <p className="text-brand-600 font-medium">جاري التحقق من السجلات القانونية للعميل...</p>
             </div>
           ) : (
             <>
@@ -85,33 +86,46 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   <CheckCircle className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
-                  1. إقرار سياسة الخصوصية وشروط الخدمة
+                  1. إقرار سياسة الخصوصية وشروط الخدمة (عند التسجيل)
                 </h3>
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-6">
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
+                  {/* System Rule */}
+                  <ul className="space-y-3 text-sm text-brand-700 pb-5 border-b border-gray-200">
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900">المنشأ ومكان العرض:</span>
+                      صفحة إنشاء وتوثيق الحساب (Auth / Order Flow).
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900 text-indigo-700">بيانات المستخدم:</span>
+                      السجل المحفوظ في قاعدة البيانات لهذا العميل.
+                    </li>
+                  </ul>
+
+                  {/* User Data */}
                   {userData?.agreedToTermsAt ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">حالة الإقرار</span>
                         <span className="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-sm font-bold w-fit flex items-center gap-1"><CheckCircle className="w-4 h-4"/> تم الإقرار وتسجيل الاعتماد</span>
                       </div>
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">تاريخ وسجل الإقرار</span>
-                        <span className="font-mono text-brand-900 border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm" dir="ltr">
+                        <span className="font-mono text-brand-900 border border-gray-100 bg-gray-50 px-3 py-2 rounded-lg text-sm" dir="ltr">
                           {formatDate(userData.agreedToTermsAt)}
                         </span>
                       </div>
-                      <div className="md:col-span-2 bg-white p-4 rounded-xl border border-gray-200 text-sm text-brand-700 flex items-start gap-3 mt-2">
+                      <div className="md:col-span-2 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-brand-700 flex items-start gap-3 mt-2">
                          <Database className="w-5 h-5 text-indigo-500 flex-shrink-0" />
                          <div>
                            <p className="font-bold mb-1">بيانات التسجيل المرجعية</p>
-                           <p>تم تخزين بصمة الإقرار في مجموعة المستخدمين (Users Table) للحساب المرتبط بالبريد: <span className="font-mono">{userData?.email}</span></p>
+                           <p>تم تخزين بصمة الإقرار في جدول <code className="bg-white px-2 py-0.5 rounded text-indigo-600 shadow-sm mx-1">users</code> للحساب المرتبط بالبريد: <span className="font-mono">{userData?.email}</span></p>
                          </div>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3 text-amber-700 bg-amber-50 p-4 rounded-xl border border-amber-200">
-                      <AlertCircle className="w-5 h-5" />
-                      <span>لا يوجد سجل يوثق الإقرار بشروط الخدمة (قد يكون الحساب منشأ ضمن الإطار التجريبي أو قبل التحديثات).</span>
+                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                      <span>لا يوجد سجل يوثق الإقرار بشروط الخدمة لهذا الحساب. (قد يكون منشأ ضمن الإطار التجريبي أو بطريقة يدوية).</span>
                     </div>
                   )}
                 </div>
@@ -123,27 +137,43 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   <CheckCircle className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
-                  2. إقرارات الموافقة على ملفات الارتباط (Cookies)
+                  2. إقرارات الموافقات لملفات الارتباط (Cookies Content)
                 </h3>
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-6">
+                 <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
+                  {/* System Rule */}
+                   <ul className="space-y-3 text-sm text-brand-700 pb-5 border-b border-gray-200">
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900">المنشأ ومكان العرض:</span>
+                      نافذة الكوكيز المنبثقة للزوار في واجهة المنصة (Cookie Banner).
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900 text-indigo-700">بيانات المستخدم:</span>
+                      مستويات الموافقة المحفوظة لهذا العميل (Consent Level).
+                    </li>
+                  </ul>
+
                   {userData?.cookieConsentAt ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                       <div className="flex flex-col gap-2">
-                        <span className="text-sm text-brand-500 font-bold">مستوى الموافقة (Consent Level)</span>
+                        <span className="text-sm text-brand-500 font-bold">مستوى الموافقة (Level)</span>
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-bold w-fit font-mono tracking-wider">
-                          {userData.cookieConsentLevel?.toUpperCase() || "غير محدد"}
+                          {(userData.cookieConsentLevel || userData.legalConsent?.cookieConsentLevel)?.toUpperCase() === 'ALL' ? 'الكل - شمولية كاملة' : (userData.cookieConsentLevel || userData.legalConsent?.cookieConsentLevel)?.toUpperCase() || "غير محدد"}
                         </span>
                       </div>
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">تاريخ توثيق الموافقة</span>
-                        <span className="font-mono text-brand-900 border border-gray-200 bg-white px-3 py-2 rounded-lg text-sm" dir="ltr">
-                          {formatDate(userData.cookieConsentAt)}
+                        <span className="font-mono text-brand-900 border border-gray-100 bg-gray-50 px-3 py-2 rounded-lg text-sm" dir="ltr">
+                          {formatDate(userData.cookieConsentAt || userData.legalConsent?.cookieConsentAt)}
                         </span>
+                      </div>
+                      <div className="md:col-span-2 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-brand-700 flex items-start gap-3 mt-2">
+                         <Database className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                         <span>تم حفظ هذا الإقرار في سجل الزوار (Audit Logs) وتم إرفاقه ببيانات المستخدم الموثق برقم IP لضمان الموثوقية.</span>
                       </div>
                     </div>
                   ) : (
                     <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 flex items-center gap-2">
-                      <Clock className="w-4 h-4" /> لم يتخذ المستخدم إجراء بشأن ملفات الإرتباط بعد.
+                      <Clock className="w-4 h-4 text-gray-400" /> لم يتخذ المستخدم قراراً مسجلاً بشأن ملفات الإرتباط.
                     </div>
                   )}
                 </div>
@@ -155,40 +185,52 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   <CheckCircle className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
-                  3. عقود تقديم الخدمات (طلبات الأنساب الموثقة)
+                  3. عقد اتفاقية تقديم الخدمة (طلبات البحث)
                 </h3>
-                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mr-6">
-                  {orders.filter(o => o.contractSigned).length > 0 ? (
+                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mr-4 space-y-6">
+                   {/* System Rule */}
+                   <ul className="space-y-3 text-sm text-blue-800 pb-5 border-b border-blue-200">
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-blue-900">المنشأ ومكان العرض:</span>
+                      الخطوة الإلزامية قبل الدفع (نموذج ServiceAgreement المكون من 6 بنود).
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900 text-indigo-700">بيانات المستخدم:</span>
+                       العقود والتوقيعات الإلكترونية المدرجة بطلبات العميل.
+                    </li>
+                  </ul>
+
+                  {orders.filter(o => o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).length > 0 ? (
                     <div className="space-y-4">
-                      {orders.filter(o => o.contractSigned).map((order) => (
+                      {orders.filter(o => o.contractSigned || o.data?.documents?.some((doc: any) => typeof doc !== 'string' && doc.kind === 'توقيع إلكتروني')).map((order) => (
                         <div key={order.id} className="bg-white p-5 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-4">
                            <div className="flex justify-between items-start border-b border-gray-100 pb-3">
                              <div>
-                               <span className="font-bold text-blue-900 block mb-1">الطلب المنشأ رقم: #{order.orderNumber || order.id.toUpperCase().substring(0, 6)}</span>
+                               <span className="font-bold text-blue-900 block mb-1">الطلب الموثق رقم: #{order.orderNumber || order.id.toUpperCase().substring(0, 6)}</span>
                                <span className="text-xs text-brand-600 bg-brand-50 px-2 py-1 rounded-md">{order.data?.firstName} {order.data?.familyName}</span>
                              </div>
-                             <span className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100" dir="ltr">ID: {order.id}</span>
+                             <span className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100 shadow-sm" dir="ltr">Document ID: {order.id}</span>
                            </div>
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
+                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                <p className="text-xs text-brand-500 mb-1 font-bold">الاسم الموقع المعتمد (E-Signature)</p>
-                               <p className="font-serif text-lg font-bold text-brand-800">{order.signatureName || "توقيع غير مسجل بصيغة نصية"}</p>
+                               <p className="font-serif text-lg font-bold text-brand-800">{order.signatureName || "توقيع مرفق (تم التأكيد)"}</p>
                              </div>
-                             <div>
+                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                <p className="text-xs text-brand-500 mb-1 font-bold">تاريخ توقيع العقد (Timestamp)</p>
                                <p className="font-mono text-sm" dir="ltr">{formatDate(order.createdAt)}</p>
                              </div>
                            </div>
-                           <div className="mt-2 text-xs text-brand-700 bg-blue-50/50 p-3 rounded-lg border border-blue-50 flex items-start gap-2">
-                             <FileText className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                             يقر المترجم بهذا على إبرام اتفاقية خدمة البحث وفقاً للبنود الـ 6 الملزمة ضمن مرحلة الطلب، وتشمل الموافقة على إجراء شروط التاريخ الشفوي والسياسات المالية للإنسحاب.
+                           <div className="mt-1 text-xs text-brand-800 bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-2 shadow-sm leading-relaxed">
+                             <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                             يُلزم هذا العقد المنفذ جميع الأطراف باتفاقية خدمة البحث وفقاً للبنود הملزمة قانونياً، ويشمل ذلك الموافقة التامة على شروط التاريخ الشفوي والسياسات المالية وتكاليف الانسحاب، وقد تم حفظ بصمة العملية داخل مجموعات النظام السحابي.
                            </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 text-sm">
-                      ليس لدى العميل أي طلبات مسرى عليها بالعقود الإلكترونية.
+                      ليس لدى هذا العميل أية طلبات جارية صدرت لها عقود اتفاقية خدمة موقعة إلكترونياً.
                     </div>
                   )}
                 </div>
@@ -200,37 +242,51 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                   <CheckCircle className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-2">
-                  4. إقرارات ومطالبات حقوق البيانات (GDPR)
+                  4. إقرارات حقوق البيانات الشخصية (GDPR) طالبي الحذف
                 </h3>
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-6">
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
+                   {/* System Rule */}
+                   <ul className="space-y-3 text-sm text-brand-700 pb-5 border-b border-gray-200">
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900">المنشأ ومكان العرض:</span>
+                      منطقة (تنزيل / حذف معلوماتك الشخصية) من لوحة تحكم العميل.
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold min-w-[120px] text-brand-900 text-indigo-700">بيانات المستخدم:</span>
+                       تذاكر الخصوصية ومحو البيانات الخاصة بهذا النظام.
+                    </li>
+                  </ul>
+
                   {tickets.length > 0 ? (
                     <div className="space-y-4">
                       {tickets.map((t) => (
-                        <div key={t.id} className="bg-white p-4 rounded-xl border border-amber-200 border-l-4 border-l-amber-500 shadow-sm">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-bold text-amber-900">{t.privacyType || "طلب إداري للبيانات"}</span>
-                            <span className="font-mono text-xs text-gray-500" dir="ltr">{formatDate(t.createdAt)}</span>
+                        <div key={t.id} className="bg-white p-5 rounded-xl border border-amber-200 border-l-4 border-l-amber-500 shadow-sm transition">
+                          <div className="flex justify-between items-center mb-3">
+                            <span className="font-bold text-amber-900 flex items-center gap-2"><AlertCircle className="w-4 h-4 text-amber-600"/> {t.privacyType || "طلب حقوق للبيانات"}</span>
+                            <span className="font-mono text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100" dir="ltr">{formatDate(t.createdAt)}</span>
                           </div>
-                          <p className="text-sm text-gray-700">{t.message || t.description}</p>
-                          <div className="mt-3 flex items-center gap-2">
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded ${t.status === 'تم الرد' ? 'bg-green-100 text-green-700' : 'bg-brand-100 text-brand-700'}`}>{t.status || "قيد المراجعة"}</span>
-                            <span className="text-[10px] font-mono text-gray-500">Ticket: {t.ticketNumber || t.id.substring(0, 8)}</span>
+                          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                             <p className="text-sm text-gray-800 leading-relaxed font-medium">{t.message || t.description}</p>
+                          </div>
+                          <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                            <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${t.status === 'تم الرد' || t.status === 'مكتمل' ? 'bg-green-100 text-green-700' : 'bg-brand-100 text-brand-700'}`}>الحالة: {t.status || "قيد المراجعة"}</span>
+                            <span className="text-[10px] font-mono text-gray-500">Ticket Ref: {t.ticketNumber || t.id.substring(0, 8)}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-gray-500 p-4 bg-white rounded-xl border border-gray-200 text-sm">
-                      لم يتم تسجيل أي طلبات محو بيانات أو طلبات متعلقة بحقوق الخصوصية (GDPR) لهذا المستخدم.
+                      لم يتم تسجيل أي طلبات محو بيانات أو طلبات متعلقة بحقوق الخصوصية (GDPR) لهذا المستخدم حتّى الآن.
                     </div>
                   )}
                 </div>
               </section>
 
               {/* Footer */}
-              <div className="pt-8 border-t border-gray-200 text-center hidden print:block">
-                <p className="text-brand-900 font-bold text-lg mb-1">وثيقة رسمية للإمتثال لمنصة سجل تراث العائلة</p>
-                <p className="text-sm text-gray-500 font-mono">Date Generated: {new Date().toLocaleString('en-GB')} | Record ID: {userId}</p>
+              <div className="pt-8 border-t border-gray-200 pb-2 text-center hidden print:block">
+                <p className="text-brand-900 font-bold text-lg mb-1">وثيقة رسمية مُولّدة للإمتثال، منصة سجل تراث العائلة</p>
+                <p className="text-xs text-gray-500 font-mono">Report Date: {new Date().toLocaleString('en-GB')} | Audit Record ID: {userId}</p>
               </div>
 
             </>
