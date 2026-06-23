@@ -426,7 +426,13 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                 <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mr-4 space-y-6">
                   {auditLogs.length > 0 ? (
                     <div className="space-y-3">
-                      {auditLogs.map((log, index) => (
+                      {Array.from(
+                        auditLogs.reduce((map, log) => {
+                          const key = log.action || log.eventType || 'System Event';
+                          map.set(key, log);
+                          return map;
+                        }, new Map())
+                      ).map(([_, log]: any, index) => (
                         <div key={log.id || index} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                           <div>
                             <span className="inline-block text-xs font-bold text-white bg-brand-700 px-2 py-1 rounded mb-2">
