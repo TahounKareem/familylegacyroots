@@ -3,12 +3,14 @@ import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+import { useAppStore } from '@/lib/store';
 
 export function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [prefs, setPrefs] = useState({ analytics: false, personalization: false });
+  const { currentUser } = useAppStore();
 
   useEffect(() => {
     const consent = localStorage.getItem('cookie-consent');
@@ -50,6 +52,26 @@ export function CookieBanner() {
         createdAt: serverTimestamp(),
         timestamp: new Date().toISOString()
       });
+
+      if (currentUser?.id) {
+        // Also save to user document
+        await setDoc(doc(db, "users", currentUser.id), {
+          cookieConsentLevel: level,
+          cookieConsentPreferences: details,
+          cookieConsentAt: new Date().toISOString()
+        }, { merge: true });
+
+        // Add to main audit logs
+        await addDoc(collection(db, 'audit_logs'), {
+          action: 'cookie_consent_accepted',
+          userId: currentUser.id,
+          consentLevel: level,
+          details: `User updated cookie consent to ${level}`,
+          preferences: details,
+          ipAddress: ip,
+          timestamp: new Date().toISOString()
+        });
+      }
     } catch (error) {
       console.error("Error archiving visitor consent:", error);
     }
@@ -57,12 +79,14 @@ export function CookieBanner() {
 
   const acceptAll = async () => {
     localStorage.setItem('cookie-consent', 'all');
+    localStorage.setItem('cookie-prefs', JSON.stringify({ analytics: true, personalization: true }));
     setIsVisible(false);
     await saveConsentToArchive('all', { analytics: true, personalization: true });
   };
 
   const acceptEssential = async () => {
     localStorage.setItem('cookie-consent', 'essential');
+    localStorage.setItem('cookie-prefs', JSON.stringify({ analytics: false, personalization: false }));
     setIsVisible(false);
     await saveConsentToArchive('essential', { analytics: false, personalization: false });
   };

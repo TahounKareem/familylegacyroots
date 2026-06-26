@@ -173,9 +173,26 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">مستوى الموافقة (Level)</span>
-                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-bold w-fit font-mono tracking-wider">
-                          {(userData.cookieConsentLevel || userData.legalConsent?.cookieConsentLevel)?.toUpperCase() === 'ALL' ? 'الكل - شمولية كاملة' : (userData.cookieConsentLevel || userData.legalConsent?.cookieConsentLevel)?.toUpperCase() || "غير محدد"}
-                        </span>
+                        <div className="flex flex-col gap-2">
+                          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-bold w-fit font-mono tracking-wider">
+                            {(() => {
+                              const level = (userData.cookieConsentLevel || userData.legalConsent?.cookieConsentLevel)?.toUpperCase() || "";
+                              if (level === 'ALL') return 'الكل - شمولية كاملة (ALL)';
+                              if (level === 'ESSENTIAL') return 'أساسية فقط (ESSENTIAL)';
+                              if (level === 'CUSTOM') return 'تفضيلات مخصصة (CUSTOM)';
+                              return level || "غير محدد";
+                            })()}
+                          </span>
+                          {(userData.cookieConsentPreferences || userData.legalConsent?.cookieConsentPreferences) && (
+                            <div className="mt-2 text-xs border border-gray-100 bg-gray-50 p-2 rounded w-fit">
+                              <span className="font-bold text-gray-600 block mb-1">تفاصيل التخصيص:</span>
+                              <ul className="list-disc list-inside text-gray-500">
+                                <li>ملفات الأداء والتحليلات: {(userData.cookieConsentPreferences || userData.legalConsent?.cookieConsentPreferences).analytics ? 'موافق' : 'مرفوض'}</li>
+                                <li>ملفات التخصيص: {(userData.cookieConsentPreferences || userData.legalConsent?.cookieConsentPreferences).personalization ? 'موافق' : 'مرفوض'}</li>
+                              </ul>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-col gap-2">
                         <span className="text-sm text-brand-500 font-bold">تاريخ توثيق الموافقة</span>
@@ -448,7 +465,8 @@ export function UserComplianceReport({ userId, onClose }: { userId: string, onCl
                                   'user_registered': 'تسجيل مستخدم جديد بموافقة (user_registered)',
                                   'order_placed': 'إنشاء طلب وموافقة على الشروط (order_placed)',
                                   'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام (CONSENT_ACCEPTED)',
-                                  'USER_REGISTRATION_AND_CONSENT': 'تسجيل مستخدم وإقرار بالموافقة (USER_REGISTRATION_AND_CONSENT)'
+                                  'USER_REGISTRATION_AND_CONSENT': 'تسجيل مستخدم وإقرار بالموافقة (USER_REGISTRATION_AND_CONSENT)',
+                                  'cookie_consent_accepted': 'الموافقة على سياسة الكوكيز (cookie_consent_accepted)'
                                 };
                                 return actionMap[action] || action;
                               })()}

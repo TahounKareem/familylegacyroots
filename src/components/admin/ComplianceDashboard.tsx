@@ -235,7 +235,13 @@ export function ComplianceDashboard() {
                     <td className="px-6 py-4">
                       {(u.legalConsent?.cookieConsentLevel && u.legalConsent?.cookieConsentLevel !== 'none') || (u.cookieConsentLevel && u.cookieConsentLevel !== 'none') ? (
                         <span className="flex items-center gap-1 text-brand-700 text-xs bg-brand-100 px-2 py-1 rounded-md w-fit inline-block">
-                          {(u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel) === 'all' ? 'الكل' : (u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel)}
+                          {(() => {
+                            const level = (u.legalConsent?.cookieConsentLevel || u.cookieConsentLevel)?.toUpperCase() || "";
+                            if (level === 'ALL') return 'الكل';
+                            if (level === 'ESSENTIAL') return 'أساسي';
+                            if (level === 'CUSTOM') return 'مخصص';
+                            return level;
+                          })()}
                         </span>
                       ) : (
                          <span className="text-gray-400 text-xs">رفض / غير محدد</span>
@@ -279,8 +285,8 @@ export function ComplianceDashboard() {
 
   const renderVisitorsConsents = () => {
     const displayedLogs = auditLogs.filter(log => {
-      const actionValue = log?.action || log?.eventType || "";
-      return actionValue.includes('CONSENT') || actionValue.includes('REGISTRATION') || actionValue.includes('checkbox');
+      const actionValue = String(log?.action || log?.eventType || "").toLowerCase();
+      return actionValue.includes('consent') || actionValue.includes('registration') || actionValue.includes('checkbox') || actionValue.includes('cookie');
     });
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
@@ -326,7 +332,8 @@ export function ComplianceDashboard() {
 				'user_registered': 'تسجيل مستخدم جديد بموافقة (user_registered)',
 				'order_placed': 'إنشاء طلب وموافقة على الشروط (order_placed)',
 				'CONSENT_ACCEPTED': 'الموافقة العامة على الشروط والأحكام (CONSENT_ACCEPTED)',
-				'USER_REGISTRATION_AND_CONSENT': 'تسجيل مستخدم وإقرار بالموافقة (USER_REGISTRATION_AND_CONSENT)'
+				'USER_REGISTRATION_AND_CONSENT': 'تسجيل مستخدم وإقرار بالموافقة (USER_REGISTRATION_AND_CONSENT)',
+				'cookie_consent_accepted': 'الموافقة على سياسة الكوكيز (cookie_consent_accepted)'
 			  };
 			  return actionMap[actionValue] || actionValue;
 			})()}

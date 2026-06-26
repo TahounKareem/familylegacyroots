@@ -155,6 +155,12 @@ export function Auth() {
             role = "admin";
           }
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
+          let cookiePrefs = null;
+          try {
+            cookiePrefs = JSON.parse(localStorage.getItem('cookie-prefs') || 'null');
+          } catch (e) {
+            console.error("Could not parse cookie prefs", e);
+          }
           
           const country = "غير محدد";
           let ipAddress = "غير متوفر";
@@ -184,6 +190,7 @@ export function Auth() {
               agreedToTerms: agreeTerms,
               agreedToTermsAt: agreeTerms ? new Date().toISOString() : null,
               cookieConsentLevel: cookieConsent,
+              cookieConsentPreferences: cookiePrefs,
               cookieConsentAt: cookieConsent !== 'none' ? new Date().toISOString() : null,
               ipAddress: ipAddress,
             }
