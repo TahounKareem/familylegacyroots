@@ -153,6 +153,8 @@ export function Auth() {
             role = "maestro";
           } else if (lowerEmail === "hassan.alamri@adamresearchcenter.net") {
             role = "admin";
+          } else if (lowerEmail === "kaouther.douzi@adamresearchcenter.net") {
+            role = "editor";
           }
           const cookieConsent = localStorage.getItem('cookie-consent') || 'none';
           let cookiePrefs = null;

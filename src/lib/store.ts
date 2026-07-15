@@ -548,6 +548,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             else if (emailLower === "eng.kareemsherif@gmail.com") newRole = "research";
             else if (emailLower === "ahlymember@gmail.com") newRole = "shipping";
             else if (emailLower === "tahoun.kareemsherif@gmail.com") newRole = "accounting";
+            else if (emailLower === "kaouther.douzi@adamresearchcenter.net") newRole = "editor";
 
             const shouldUpdateRole = newRole !== userInfo.role;
             const shouldUpdateName = userInfo.name !== userDoc.data()?.name;
@@ -578,6 +579,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             else if (emailLower === "eng.kareemsherif@gmail.com") newRole = "research";
             else if (emailLower === "ahlymember@gmail.com") newRole = "shipping";
             else if (emailLower === "tahoun.kareemsherif@gmail.com") newRole = "accounting";
+            else if (emailLower === "kaouther.douzi@adamresearchcenter.net") newRole = "editor";
 
             userInfo = {
               id: user.uid,
