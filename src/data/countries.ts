@@ -60,6 +60,11 @@ export const ALL_COUNTRIES = [
     "code": "+20"
   },
   {
+    "id": "تونس",
+    "name": "تونس",
+    "code": "+216"
+  },
+  {
     "id": "ليبيا",
     "name": "ليبيا",
     "code": "+218"

@@ -15,6 +15,7 @@ const ISO_MAP: Record<string, string> = {
   "مصر": "EG",
   "ليبيا": "LY",
   "الجزائر": "DZ",
+  "تونس": "TN",
   "المغرب": "MA",
   "موريتانيا": "MR",
   "السودان": "SD",
@@ -223,10 +224,14 @@ export const getStatesForCountry = (countryId: string | undefined): { name: stri
 
   if (countryId === "تونس") {
     return [
-      { name: "تونس", isoCode: "11" }, { name: "صفاقس", isoCode: "61" }, { name: "سوسة", isoCode: "51" },
-      { name: "بنزرت", isoCode: "17" }, { name: "نابل", isoCode: "21" }, { name: "القيروان", isoCode: "41" },
-      { name: "قابس", isoCode: "81" }, { name: "المنستير", isoCode: "52" }, { name: "مدنين", isoCode: "82" },
-      { name: "المهدية", isoCode: "53" }
+      { name: "تونس", isoCode: "11" }, { name: "أريانة", isoCode: "12" }, { name: "بن عروس", isoCode: "13" },
+      { name: "منوبة", isoCode: "14" }, { name: "نابل", isoCode: "21" }, { name: "زغوان", isoCode: "22" },
+      { name: "بنزرت", isoCode: "17" }, { name: "باجة", isoCode: "31" }, { name: "جندوبة", isoCode: "32" },
+      { name: "الكاف", isoCode: "33" }, { name: "سليانة", isoCode: "34" }, { name: "القيروان", isoCode: "41" },
+      { name: "القصرين", isoCode: "42" }, { name: "سيدي بوزيد", isoCode: "43" }, { name: "سوسة", isoCode: "51" },
+      { name: "المنستير", isoCode: "52" }, { name: "المهدية", isoCode: "53" }, { name: "صفاقس", isoCode: "61" },
+      { name: "قابس", isoCode: "81" }, { name: "مدنين", isoCode: "82" }, { name: "تطاوين", isoCode: "83" },
+      { name: "قفصة", isoCode: "71" }, { name: "توزر", isoCode: "72" }, { name: "قبلي", isoCode: "73" }
     ];
   }
 
