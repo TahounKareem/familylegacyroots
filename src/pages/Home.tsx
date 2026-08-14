@@ -34,6 +34,9 @@ export function Home() {
                   ابدأ سجل عائلتك
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </Link>
+                <Link to="/intro-session" className="bg-transparent border-2 border-white hover:bg-white/10 text-white px-8 py-4 rounded-md font-semibold transition text-center text-lg flex items-center justify-center gap-2 w-fit">
+                  احجز جلسة تعريف
+                </Link>
               </div>
             </motion.div>
           </div>

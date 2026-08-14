@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Link } from "react-router";
 
 const FAQ_SECTIONS = [
   {
@@ -129,6 +130,13 @@ export function FAQ() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-16 bg-white p-8 sm:p-12 rounded-2xl shadow-xl border-t-4 border-[#C3262A] text-center">
+          <h2 className="text-3xl font-serif font-bold text-brand-900 mb-4">هل لديك أسئلة؟</h2>
+          <Link to="/intro-session" className="inline-block bg-[#C3262A] hover:bg-brand-700 text-white px-8 py-4 rounded-lg font-bold transition text-lg mt-4">
+            احجز جلسة تعريف
+          </Link>
         </div>
       </div>
     </div>

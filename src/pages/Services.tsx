@@ -437,9 +437,14 @@ export function Services() {
                       بعض الروايات تضيع… لأنها لم تُوثق.<br/>
                       <span className="font-bold text-brand-900 mt-1 block">ابدأ اليوم إنشاء سجل عائلي يوثق عمود نسبكم ويحفظ الذاكرة العائلية للأجيال القادمة.</span>
                     </p>
-                    <Link to="/auth" className="inline-flex items-center justify-center bg-brand-500 hover:bg-brand-400 text-white text-xl lg:text-2xl px-12 py-5 lg:py-6 rounded-2xl font-bold transition shadow-[0_0_40px_-10px_rgba(185,28,34,0.3)] hover:shadow-[0_0_60px_-10px_rgba(185,28,34,0.5)] hover:-translate-y-1 w-full sm:w-auto">
-                      ابدأ سجل عائلتك
-                    </Link>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-end">
+                      <Link to="/auth" className="inline-flex items-center justify-center bg-brand-500 hover:bg-brand-400 text-white text-xl lg:text-2xl px-12 py-5 lg:py-6 rounded-2xl font-bold transition shadow-[0_0_40px_-10px_rgba(185,28,34,0.3)] hover:shadow-[0_0_60px_-10px_rgba(185,28,34,0.5)] hover:-translate-y-1 w-full sm:w-auto">
+                        ابدأ سجل عائلتك
+                      </Link>
+                      <Link to="/intro-session" className="inline-flex items-center justify-center bg-white border-2 border-brand-200 hover:border-brand-300 text-brand-700 text-lg lg:text-xl px-8 py-5 lg:py-6 rounded-2xl font-bold transition w-full sm:w-auto">
+                        احجز جلسة تعريف
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

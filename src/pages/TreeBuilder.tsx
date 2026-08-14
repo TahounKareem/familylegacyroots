@@ -28,6 +28,7 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   
   // Sync root node name with familyName if it hasn't been heavily manually changed and it's the beginning
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!initialNodes.length && familyName) {
       setNodes(prev => prev.map(n => n.id === "root" ? { ...n, name: familyName } : n));
@@ -74,7 +75,8 @@ export function TreeBuilder({ initialNodes = [], initialEdges = [], onChange, re
     const parent = nodes.find(n => n.id === parentId);
     if (!parent) return;
 
-    const newId = Math.random().toString(36).substring(7);
+    // eslint-disable-next-line react-hooks/purity
+    const newId = Date.now().toString(36);
     const newNode = {
       id: newId,
       name: "",

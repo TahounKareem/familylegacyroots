@@ -28,6 +28,7 @@ const ServiceAgreement = React.lazy(() => import("./pages/ServiceAgreement").the
 const ESignature = React.lazy(() => import("./pages/ESignature").then(m => ({ default: m.ESignature })));
 const ESignatureSuccess = React.lazy(() => import("./pages/ESignatureSuccess").then(m => ({ default: m.ESignatureSuccess })));
 const MockSignature = React.lazy(() => import("./pages/MockSignature").then(m => ({ default: m.MockSignature })));
+const IntroSession = React.lazy(() => import("./pages/IntroSession").then(m => ({ default: m.IntroSession })));
 
 // Loading Component
 const PageLoading = () => (
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="/guide" element={<HelpCenter />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/legal/:documentId" element={<Legal />} />
+            <Route path="/intro-session" element={<IntroSession />} />
           </Route>
           
           <Route path="/auth" element={<Auth />} />

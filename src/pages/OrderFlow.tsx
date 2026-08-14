@@ -228,11 +228,34 @@ export function OrderFlow() {
       });
 
       // We redirect directly to Stripe Payment Links with client_reference_id
-      const paymentLink = paymentType === "full" 
-        ? `https://buy.stripe.com/9B6aEY0Ax1dv3nY8tv8so04?client_reference_id=${orderId}`
-        : `https://buy.stripe.com/7sY8wQ82Z6xP8Ii4df8so03?client_reference_id=${orderId}`;
+      const packagePrice = paymentType === "full" ? 1780 : 693;
+      
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          userName: currentUser?.name || "العميل الكريم",
+          userEmail: currentUser?.email,
+          packagePrice: packagePrice,
+          invoiceNumber: invoiceNumber,
+        }),
+      });
 
-      window.location.href = paymentLink;
+      const session = await response.json();
+      
+      if (session.url) {
+        // Use window.open to prevent X-Frame-Options blocking in iframes
+        const newWin = window.open(session.url, '_blank');
+        if (!newWin) {
+          // Fallback if popup blocker is active
+          window.location.href = session.url;
+        }
+      } else {
+        throw new Error(session.error || "فشل في إنشاء جلسة الدفع.");
+      }
     } catch (error) {
       console.error("Order submission error", error);
       alert("حدث خطأ غير متوقع.");
@@ -850,6 +873,7 @@ export function OrderFlow() {
             </button>
           )}
         </div>
+
       </div>
     </div>
   );

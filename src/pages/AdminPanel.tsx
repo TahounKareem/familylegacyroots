@@ -49,6 +49,7 @@ import {
   Quote,
   LogOut,
   ChevronDown,
+  ChevronUp,
   ChevronLeft,
   Download,
   Upload,
@@ -203,7 +204,33 @@ export function AdminPanel() {
   };
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
+  const [csSubTab, setCsSubTab] = useState<"users" | "intro_sessions">("users");
+  const [introSessions, setIntroSessions] = useState<any[]>([]);
   const [userTab, setUserTab] = useState<"team" | "users">("team");
+
+  useEffect(() => {
+    if (activeTab === "customer_service") {
+      const q = collection(db, "intro_sessions");
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: any[] = [];
+        snapshot.forEach((doc) => {
+          data.push({ id: doc.id, ...doc.data() });
+        });
+        
+        data.sort((a, b) => {
+          const getMs = (dateVal: any) => {
+            if (!dateVal) return 0;
+            if (dateVal.toDate) return dateVal.toDate().getTime();
+            return new Date(dateVal).getTime();
+          };
+          return getMs(b.createdAt) - getMs(a.createdAt);
+        });
+
+        setIntroSessions(data);
+      });
+      return () => unsubscribe();
+    }
+  }, [activeTab]);
   const [userSearch, setUserSearch] = useState("");
   const [customerServiceFilter, setCustomerServiceFilter] = useState("incomplete");
   const [userCountryFilter, setUserCountryFilter] = useState("");
@@ -754,9 +781,14 @@ export function AdminPanel() {
     },
   ];
 
-  const allowedTabs = availableTabs.filter((tab) =>
-    tab.roles.includes(currentUser?.role || ""),
-  );
+  const allowedTabs = availableTabs.filter((tab) => {
+    if (currentUser?.email === "kaouther.douzi@adamresearchcenter.net") {
+      if (tab.id === "customer_service" || tab.id === "articles") {
+        return true;
+      }
+    }
+    return tab.roles.includes(currentUser?.role || "");
+  });
 
   const roleNames: Record<string, string> = {
     maestro: "المايسترو",
@@ -883,7 +915,7 @@ export function AdminPanel() {
               <button
                 onClick={() => {
                   logout();
-                  window.location.href = "/Team";
+                  navigate("/Team", { replace: true });
                 }}
                 className="text-red-500 hover:text-red-700 mr-2 text-xs font-bold border-r border-brand-100 pr-3"
               >
@@ -974,7 +1006,7 @@ export function AdminPanel() {
             <button
               onClick={() => {
                 logout();
-                window.location.href = "/Team";
+                navigate("/Team", { replace: true });
               }}
               className="flex items-center gap-2 bg-white text-red-600 border border-brand-200 px-4 py-2 rounded-md hover:bg-red-50 transition shadow-sm font-medium"
             >
@@ -2180,12 +2212,33 @@ export function AdminPanel() {
                       <h2 className="text-xl font-bold text-brand-900">
                         إدارة خدمة العملاء (العملاء والطلبات)
                       </h2>
-                      <p className="text-sm text-brand-600 mt-1">تتبع طلبات العملاء وحالة إنجازها</p>
+                      <p className="text-sm text-brand-600 mt-1">تتبع طلبات العملاء وحالة إنجازها والجلسات التعريفية</p>
                     </div>
                   </div>
                 </div>
 
-              <div className="p-4 md:px-8 border-b border-brand-50 flex flex-col gap-4 bg-gray-50/50">
+                <div className="p-4 border-b border-gray-100 flex gap-2">
+                  <button
+                    onClick={() => setCsSubTab("users")}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                      csSubTab === "users" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    الطلبات والعملاء
+                  </button>
+                  <button
+                    onClick={() => setCsSubTab("intro_sessions")}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                      csSubTab === "intro_sessions" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    الجلسات التعريفية
+                  </button>
+                </div>
+
+                {csSubTab === "users" ? (
+                  <>
+                    <div className="p-4 md:px-8 border-b border-brand-50 flex flex-col gap-4 bg-gray-50/50">
                 <div className="flex flex-wrap gap-2">
                   <button 
                     onClick={() => setCustomerServiceFilter("incomplete")} 
@@ -2342,8 +2395,178 @@ export function AdminPanel() {
                   </tbody>
                 </table>
               </div>
+            </>
+            ) : (
+              <div className="bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-sm">
+                    <thead className="bg-white text-brand-500 border-b border-brand-100">
+                      <tr>
+                        <th className="px-4 py-4 font-medium">وقت وتاريخ الجلسة</th>
+                        <th className="px-4 py-4 font-medium">بيانات العميل</th>
+                        <th className="px-4 py-4 font-medium">الهدف من المشروع</th>
+                        <th className="px-4 py-4 font-medium">تقييم مدير الخدمة</th>
+                        <th className="px-4 py-4 font-medium">إجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand-50">
+                      {introSessions.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="text-center py-8 text-gray-500">لا توجد جلسات تعريفية حتى الآن</td>
+                        </tr>
+                      ) : (
+                        introSessions.map(session => (
+                          <React.Fragment key={session.id}>
+                            <tr className={`hover:bg-brand-50/30 transition-colors ${expandedRows.includes(session.id) ? 'bg-brand-50/50' : ''}`}>
+                              <td className="px-4 py-4 align-top">
+                                <div className="font-bold text-brand-900">{session.selectedDate}</div>
+                                <div className="text-brand-600 text-xs mt-1 font-mono" dir="ltr">{session.selectedTime}</div>
+                                <div className="text-xs text-gray-500 mt-1">الوسيلة: {session.commPreference === 'Google Meet' ? 'فيديو (Meet)' : session.commPreference === 'WhatsApp' ? 'اتصال هاتفي (واتساب)' : session.commPreference === 'Telegram' ? 'اتصال هاتفي (تيلغرام)' : session.commPreference || 'غير محدد'}</div>
+                                <div className="text-xs text-gray-400 mt-1">تم الإنشاء: {new Date(session.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString('ar-EG')}</div>
+                              </td>
+                              <td className="px-4 py-4 align-top">
+                                <div className="font-bold text-gray-900">{session.name || `${session.firstName || ''} ${session.lastName || ''}`.trim()}</div>
+                                <div className="text-gray-500 text-xs">{session.email}</div>
+                                <div className="text-gray-500 text-xs" dir="ltr">{session.phone}</div>
+                                <div className="text-gray-500 text-xs mt-1">{session.country} {session.origin ? `- أصول: ${session.origin}` : ''}</div>
+                              </td>
+                              <td className="px-4 py-4 align-top max-w-xs">
+                                <div className="text-gray-700 whitespace-pre-wrap line-clamp-2" title={session.mainGoal || session.projectGoal || "لم يحدد"}>{session.mainGoal || session.projectGoal || "لم يحدد"}</div>
+                                {session.materialsAvailable && session.materialsAvailable.length > 0 && (
+                                  <div className="mt-2 inline-block px-2 py-1 bg-green-100 text-green-800 text-[10px] rounded-md">
+                                    لديه وثائق/صور ({session.materialsAvailable.length})
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 align-top">
+                                <div className="space-y-2">
+                                  <label className="flex items-center gap-2 text-xs">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={session.isHeld || false} 
+                                      onChange={(e) => updateDoc(doc(db, "intro_sessions", session.id), { isHeld: e.target.checked })}
+                                      className="rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
+                                    />
+                                    <span>هل تم الإجتماع؟</span>
+                                  </label>
+                                  
+                                  {session.isHeld && (
+                                    <>
+                                      <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] text-gray-500">مدة الإجتماع (دقيقة):</span>
+                                        <input 
+                                          type="number" 
+                                          className="w-16 px-2 py-1 text-xs border rounded-md"
+                                          value={session.duration || ''}
+                                          onChange={(e) => updateDoc(doc(db, "intro_sessions", session.id), { duration: Number(e.target.value) })}
+                                        />
+                                      </div>
+                                      <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] text-gray-500">تقييم الجلسة:</span>
+                                        <select 
+                                          className="w-full px-2 py-1 text-xs border rounded-md"
+                                          value={session.evaluation || ''}
+                                          onChange={(e) => updateDoc(doc(db, "intro_sessions", session.id), { evaluation: e.target.value })}
+                                        >
+                                          <option value="">غير محدد</option>
+                                          <option value="positive">إيجابي</option>
+                                          <option value="neutral">عادي</option>
+                                          <option value="negative">سلبي</option>
+                                        </select>
+                                      </div>
+                                      <label className="flex items-center gap-2 text-xs mt-2">
+                                        <input 
+                                          type="checkbox" 
+                                          checked={session.expectedPurchase || false} 
+                                          onChange={(e) => updateDoc(doc(db, "intro_sessions", session.id), { expectedPurchase: e.target.checked })}
+                                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
+                                        />
+                                        <span>يتوقع إتمام الشراء؟</span>
+                                      </label>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 align-top">
+                                <div className="flex flex-col gap-2">
+                                  <button
+                                    onClick={() => setExpandedRows(prev => prev.includes(session.id) ? prev.filter(id => id !== session.id) : [...prev, session.id])}
+                                    className="flex items-center justify-center gap-1.5 whitespace-nowrap text-brand-700 bg-brand-50 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded-md text-[11px] font-bold transition w-full shadow-sm"
+                                  >
+                                    {expandedRows.includes(session.id) ? (
+                                      <><ChevronUp className="w-3 h-3" /> إخفاء الإجابات</>
+                                    ) : (
+                                      <><ChevronDown className="w-3 h-3" /> استعراض الإجابات</>
+                                    )}
+                                  </button>
+                                  <a
+                                    href={`mailto:${session.email}?subject=بخصوص الجلسة التعريفية لمشروع سجل تراث العائلة`}
+                                    className="flex items-center justify-center gap-1.5 whitespace-nowrap text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-md text-[11px] font-bold transition w-full shadow-sm"
+                                  >
+                                    <Mail className="w-3 h-3" /> مراسلة
+                                  </a>
+                                </div>
+                              </td>
+                            </tr>
+
+                            {expandedRows.includes(session.id) && (
+                              <tr className="bg-brand-50/20 border-b border-brand-100">
+                                <td colSpan={5} className="px-4 py-6">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl border border-brand-100 shadow-sm mx-2">
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">الهدف الرئيسي</h4>
+                                        <p className="text-sm font-medium text-brand-900">{session.mainGoal || session.projectGoal || '—'}</p>
+                                      </div>
+                                      
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">نطاق المشروع</h4>
+                                        <p className="text-sm font-medium text-brand-900">{session.projectScope || '—'}</p>
+                                      </div>
+                                      
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">المعرفة بتاريخ العائلة</h4>
+                                        <p className="text-sm font-medium text-brand-900">{session.familyHistoryKnowledge || '—'}</p>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">الدافع والقصة</h4>
+                                        <p className="text-sm font-medium text-brand-900 whitespace-pre-wrap">{session.motivation || '—'}</p>
+                                      </div>
+                                      
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">الوثائق المتوفرة</h4>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                          {session.materialsAvailable?.length ? session.materialsAvailable.map((mat: string, idx: number) => (
+                                            <span key={idx} className="bg-brand-50 text-brand-700 px-2 py-1 rounded text-xs border border-brand-100">{mat}</span>
+                                          )) : <span className="text-sm text-gray-500">{session.hasDocuments ? "نعم" : "—"}</span>}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-1">المطلوب توثيقه</h4>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                          {session.whatToDocument?.length ? session.whatToDocument.map((doc_item: string, idx: number) => (
+                                            <span key={idx} className="bg-brand-50 text-brand-700 px-2 py-1 rounded text-xs border border-brand-100">{doc_item}</span>
+                                          )) : <span className="text-sm text-gray-500">—</span>}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
             </div>
-            
             <SupportTicketsManagement />
             <ChatbotManagement />
             
@@ -3533,9 +3756,10 @@ export function AdminPanel() {
                     const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
                     const amount = isPhase2 ? "693" : "594";
                     const phaseName = isPhase2 ? "تم التوثيق" : "التصميم الإلكتروني";
+                    const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.email || paymentRequestOrder.data.contactEmail || "";
                     const paymentLink = isPhase2 
-                      ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
-                      : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
+                      ? `https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02?client_reference_id=${paymentRequestOrder.id}&prefilled_email=${encodeURIComponent(toEmail)}` 
+                      : `https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01?client_reference_id=${paymentRequestOrder.id}&prefilled_email=${encodeURIComponent(toEmail)}`;
                     
                     const name = paymentRequestOrder.data.firstName ? `${paymentRequestOrder.data.firstName} ${paymentRequestOrder.data.fatherName}` : "عميلنا الكريم";
                     
@@ -3549,14 +3773,14 @@ export function AdminPanel() {
                   const isPhase2 = paymentRequestOrder.actionPhase === "مرحلة التوثيق" || paymentRequestOrder.actionPhase === "تم التوثيق";
                   const amount = isPhase2 ? "693" : "594";
                   const phaseName = isPhase2 ? "تم التوثيق" : "التصميم الإلكتروني";
+                  const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.email || paymentRequestOrder.data.contactEmail || "";
                   const paymentLink = isPhase2 
-                    ? "https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02" 
-                    : "https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01";
+                    ? `https://buy.stripe.com/fZubJ2dnje0hf6GbFH8so02?client_reference_id=${paymentRequestOrder.id}&prefilled_email=${encodeURIComponent(toEmail)}` 
+                    : `https://buy.stripe.com/28E14o6YV2hz3nY9xz8so01?client_reference_id=${paymentRequestOrder.id}&prefilled_email=${encodeURIComponent(toEmail)}`;
                   const name = paymentRequestOrder.data.firstName ? `${paymentRequestOrder.data.firstName} ${paymentRequestOrder.data.fatherName}` : "عميلنا الكريم";
                   const emailBody = `أهلاً بك ${name}،\n\nنهديكم أطيب التحيات من منصة سجل تراث العائلة.\nيُسعدنا إبلاغكم بأننا قد أنجزنا بنجاح خطوات مهمة في إعداد سجل عائلتكم العريق، حيث وصل الطلب الآن إلى ${phaseName}.\n\nوفقاً لنظام "الدفع المرن" المختار، فقد استُحقت الآن الدفعة التالية وقدرها (${amount} دولار).\nنرجو منكم التكرم بإتمام عملية السداد لضمان استمرار سير العمل بسلاسة انتقالاً للمرحلة القادمة.\n\nرابط إتمام الدفع (آمن ومباشر):\n${paymentLink}\n\nنشكر لكم ثقتكم وحرصكم الدائم، ونسعد دوماً بخدمتكم وتدوين إرث عائلتكم الممتد.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`;
                   
                   // Use window.open with mailto as fallback, or our email service if extended
-                  const toEmail = usersList.find((u) => u.id === paymentRequestOrder.userId)?.email || paymentRequestOrder.data.email || paymentRequestOrder.data.contactEmail;
                   const subject = encodeURIComponent(`مطالبة سداد مستحقة - ${phaseName} - منصة سجل تراث العائلة`);
                   const body = encodeURIComponent(emailBody);
                   window.open(`mailto:${toEmail}?subject=${subject}&body=${body}`, '_blank');

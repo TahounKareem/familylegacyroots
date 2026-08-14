@@ -3,6 +3,7 @@ import { useAppStore } from '@/lib/store';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogOut } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router';
 import { db } from '@/lib/firebase';
 
 const SESSION_TIMEOUT = 90 * 60 * 1000; // 90 minutes
@@ -10,6 +11,7 @@ const WARNING_TIMEOUT = 88 * 60 * 1000; // 88 minutes
 
 export function SessionManager() {
   const { currentUser, logout } = useAppStore();
+  const navigate = useNavigate();
   const [showWarning, setShowWarning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
   
@@ -38,11 +40,11 @@ export function SessionManager() {
     setShowWarning(false);
     
     if (["admin", "maestro", "research", "design", "marketing", "accounting", "compliance", "shipping"].includes(role || '')) {
-      window.location.href = '/team/login';
+      navigate('/Team', { replace: true });
     } else {
-      window.location.href = '/auth';
+      navigate('/auth', { replace: true });
     }
-  }, [logout, currentUser]);
+  }, [logout, currentUser, navigate]);
 
   const getSessionTimeout = (role: string) => {
     // 15 min for admins/maestro, 30 min for users

@@ -30,15 +30,15 @@ export function ServiceAgreement() {
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const contractId = useRef(`CTR-${Date.now()}-${Math.floor(Math.random() * 1000)}`);
-  const orderId = useRef(`ORD-PENDING-${Math.floor(Math.random() * 9000)}`);
-  const invoiceId = useRef(`INV-PENDING-${Math.floor(Math.random() * 9000)}`);
+  const [contractId] = useState(() => `CTR-${Date.now()}-${Math.floor(Math.random() * 1000)}`);
+  const [orderIdState] = useState(() => `ORD-PENDING-${Math.floor(Math.random() * 9000)}`);
+  const [invoiceIdState] = useState(() => `INV-PENDING-${Math.floor(Math.random() * 9000)}`);
 
   useEffect(() => {
     if (currentUser && pendingOrderData) {
-      logLegalEvent("contract_opened", { version: "v1.0" }, contractId.current, orderId.current);
+      logLegalEvent("contract_opened", { version: "v1.0" }, contractId, orderIdState);
     }
-  }, [currentUser, pendingOrderData]);
+  }, [currentUser, pendingOrderData, contractId, orderIdState]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -49,7 +49,7 @@ export function ServiceAgreement() {
       if (scrollPercentage >= 95) {
         if (!scrolledToBottom) {
           setScrolledToBottom(true);
-          logLegalEvent("contract_fully_scrolled", { scrollPercentage, version: "v1.0" }, contractId.current, orderId.current);
+          logLegalEvent("contract_fully_scrolled", { scrollPercentage, version: "v1.0" }, contractId, orderIdState);
         }
       }
     }
@@ -90,16 +90,16 @@ export function ServiceAgreement() {
     ];
     
     for (const type of consentTypes) {
-      await recordLegalConsent(type, { version: "v1.0" }, contractId.current, orderId.current);
+      await recordLegalConsent(type, { version: "v1.0" }, contractId, orderIdState);
     }
 
     // Add final acceptance event required by rules
-    await logLegalEvent("contract_terms_accepted", { mandatoryConsentsCompleted: true, contractVersion: "v1.0" }, contractId.current, orderId.current);
+    await logLegalEvent("contract_terms_accepted", { mandatoryConsentsCompleted: true, contractVersion: "v1.0" }, contractId, orderIdState);
 
     // 2. Generate the actual legal contract record
     await createLegalContractRecord(
-      contractId.current,
-      orderId.current,
+      contractId,
+      orderIdState,
       "v1.0",
       "awaiting_signature",
       { ...currentUser },
@@ -109,11 +109,11 @@ export function ServiceAgreement() {
 
     // 3. Generate canonical order evidence
     await createOrderEvidence(
-       orderId.current,
-       contractId.current,
+       orderIdState,
+       contractId,
        {
-         order_id: orderId.current,
-         invoice_id: invoiceId.current,
+         order_id: orderIdState,
+         invoice_id: invoiceIdState,
          order_date: new Date().toISOString(),
          customer_full_name: pendingOrderData.firstName + " " + pendingOrderData.familyName,
          customer_email: currentUser.email,
@@ -146,7 +146,7 @@ export function ServiceAgreement() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-           orderId: orderId.current,
+           orderId: orderIdState,
            customerName: pendingOrderData.firstName + " " + pendingOrderData.familyName,
            email: currentUser.email,
            auditTrail: {
@@ -161,14 +161,14 @@ export function ServiceAgreement() {
       console.error("SignNow background error:", e);
     }
 
-    await logLegalEvent("contract_electronically_signed", { version: "v1.0", provider: "signnow" }, contractId.current, orderId.current);
+    await logLegalEvent("contract_electronically_signed", { version: "v1.0", provider: "signnow" }, contractId, orderIdState);
     
     // Save contractId to pendingOrderData
     useAppStore.setState(s => ({
       pendingOrderData: { 
         ...s.pendingOrderData, 
-        contractId: contractId.current,
-        checkoutOrderId: orderId.current
+        contractId: contractId,
+        checkoutOrderId: orderIdState
       } as any
     }));
 
@@ -179,8 +179,8 @@ export function ServiceAgreement() {
   if (!currentUser || !pendingOrderData) return null;
 
   const priceAmount = "تُحدد حسب خيار الدفع";
-  const dummyOrderId = orderId.current;
-  const dummyInvoiceId = invoiceId.current;
+  const dummyOrderId = orderIdState;
+  const dummyInvoiceId = invoiceIdState;
 
   // Prevent copy in viewer
   const handleCopy = (e: React.ClipboardEvent) => {
@@ -295,7 +295,7 @@ export function ServiceAgreement() {
           pendingOrderData={pendingOrderData}
           currentUser={currentUser}
           onOpen={() => {
-            logLegalEvent("contract_expanded_to_view", { version: "v1.0" }, contractId.current, orderId.current);
+            logLegalEvent("contract_expanded_to_view", { version: "v1.0" }, contractId, orderIdState);
             setShowDeclarations(true);
           }}
         />
@@ -321,7 +321,7 @@ export function ServiceAgreement() {
                       type="checkbox" 
                       className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
                       checked={req1}
-                  onChange={(e) => { setReq1(e.target.checked); if(e.target.checked) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+                  onChange={(e) => { setReq1(e.target.checked); if(e.target.checked) recordLegalConsent("order_details_consent", { version: "v1.0" }, contractId, orderIdState); }} 
                 />
                 <span className="font-bold text-sm text-brand-900">أوافق على اعتماد بيانات الطلب الحالية.</span>
               </div>
@@ -340,7 +340,7 @@ export function ServiceAgreement() {
                   type="checkbox" 
                   className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
                   checked={req2}
-                  onChange={(e) => { setReq2(e.target.checked); if(e.target.checked) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId.current, orderId.current); }} 
+                  onChange={(e) => { setReq2(e.target.checked); if(e.target.checked) recordLegalConsent("electronic_signature_consent", { version: "v1.0" }, contractId, orderIdState); }} 
                 />
                 <span className="font-bold text-sm text-brand-900">أوافق على الاعتماد الإلكتروني.</span>
               </div>

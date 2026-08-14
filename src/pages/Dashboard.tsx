@@ -136,40 +136,92 @@ export function Dashboard() {
     const orderId = params.get("order_id");
     const isInvite = params.get("invite") === "true";
 
-    if (success === "true" && orderId) {
-      const order = orders.find((o) => o.id === orderId);
-      if (
-        order &&
-        (order.status === "بانتظار الدفع" ||
-          order.status === "بإنتظار إتمام الدفع")
-      ) {
-        updateOrderStatus(orderId, "قيد البحث");
-        useAppStore.getState().fulfillOrder(orderId, {
-          issueStatus: "جاري التنفيذ",
-          actionPhase: "مرحلة البحث",
-        });
-        
-        // Trigger emails
-        if (currentUser) {
-          getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              import("@/lib/emailService").then(
-                ({ sendCustomerResearchStartedEmail, sendManagementNewOrderEmail }) => {
-                  sendCustomerResearchStartedEmail(
-                    userData.email,
-                    userData.name || "العميل الكريم",
-                    order.orderNumber || orderId
-                  ).catch(console.error);
-                  if (sendManagementNewOrderEmail) {
-                    sendManagementNewOrderEmail(order.orderNumber || orderId, order.data.familyName).catch(console.error);
-                  }
-                },
-              );
-            }
+    if (success === "true") {
+      let targetOrder = null;
+      if (orderId) {
+        targetOrder = orders.find((o) => o.id === orderId);
+      } else {
+        const unpaidOrders = orders.filter((o) => o.status === "بانتظار الدفع" || o.status === "بإنتظار إتمام الدفع");
+        if (unpaidOrders.length > 0) targetOrder = unpaidOrders[0];
+      }
+      const order = targetOrder;
+      const effectiveOrderId = order ? order.id : orderId;
+      if (order && effectiveOrderId) {
+        if (order.status === "بانتظار الدفع" || order.status === "بإنتظار إتمام الدفع") {
+          updateOrderStatus(effectiveOrderId, "قيد البحث");
+          useAppStore.getState().fulfillOrder(effectiveOrderId, {
+            issueStatus: "جاري التنفيذ",
+            actionPhase: "مرحلة البحث",
           });
+          
+          // Trigger emails
+          if (currentUser) {
+            getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                import("@/lib/emailService").then(
+                  ({ sendCustomerResearchStartedEmail, sendManagementNewOrderEmail }) => {
+                    sendCustomerResearchStartedEmail(
+                      userData.email,
+                      userData.name || "العميل الكريم",
+                      order.orderNumber || effectiveOrderId,
+                      order.invoiceNumber
+                    ).catch(console.error);
+                    if (sendManagementNewOrderEmail) {
+                      sendManagementNewOrderEmail(order.orderNumber || effectiveOrderId, order.data.familyName).catch(console.error);
+                    }
+                  },
+                );
+              }
+            });
+          }
+          navigate("/dashboard", { replace: true });
+        } else if (order.actionPhase === "مرحلة التوثيق" || order.actionPhase === "تم التوثيق") {
+          useAppStore.getState().fulfillOrder(effectiveOrderId, {
+            actionPhase: "التصميم الإلكتروني",
+          });
+          
+          if (currentUser) {
+            getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                import("@/lib/emailService").then(
+                  ({ sendCustomEmail }) => {
+                    sendCustomEmail(
+                      userData.email,
+                      "تأكيد استلام الدفعة الثانية - منصة سجل تراث العائلة",
+                      `أهلاً ${userData.name || "العميل الكريم"}،\n\nنفيدكم بتأكيد استلام الدفعة المستحقة بنجاح.\nيسعدنا إبلاغكم أن مشروعكم قد انتقل الآن إلى مرحلة التصميم الإلكتروني، حيث يقوم فريق التصميم لدينا بتنسيق كافة المعلومات التي تم توثيقها لتكون جاهزة للمراجعة.\n\nيمكنكم متابعة حالة الطلب عبر لوحة التحكم.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`
+                    ).catch(console.error);
+                  }
+                );
+              }
+            });
+          }
+          navigate("/dashboard", { replace: true });
+        } else if (order.actionPhase === "التصميم الإلكتروني" || order.actionPhase === "تم التصميم (للمراجعة)" || order.actionPhase === "الاعتماد النهائي والتسليم") {
+           // Assume final payment
+           useAppStore.getState().fulfillOrder(effectiveOrderId, {
+            actionPhase: "الاعتماد النهائي والتسليم",
+          });
+          
+          if (currentUser) {
+            getDoc(doc(db, "users", currentUser.id)).then((userDoc) => {
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                import("@/lib/emailService").then(
+                  ({ sendCustomEmail }) => {
+                    sendCustomEmail(
+                      userData.email,
+                      "تأكيد استلام الدفعة الأخيرة - منصة سجل تراث العائلة",
+                      `أهلاً ${userData.name || "العميل الكريم"}،\n\nنفيدكم بتأكيد استلام الدفعة الأخيرة المستحقة بنجاح.\nيسعدنا إبلاغكم أن مشروعكم في مراحله النهائية استعداداً للتسليم.\n\nيمكنكم متابعة حالة الطلب عبر لوحة التحكم.\n\nمع خالص التحيات،\nفريق سجل تراث العائلة`
+                    ).catch(console.error);
+                  }
+                );
+              }
+            });
+          }
+          navigate("/dashboard", { replace: true });
         }
-        navigate("/dashboard", { replace: true });
       }
     }
   }, [location.search, orders, updateOrderStatus, navigate, currentUser]);
@@ -537,7 +589,7 @@ export function Dashboard() {
                     onClick={async () => {
                       await signOut(auth);
                       useAppStore.getState().logout();
-                      window.location.href = "/auth";
+                      navigate("/auth", { replace: true });
                     }}
                     className="w-full text-right px-5 py-3.5 text-sm hover:bg-red-100 text-red-600 font-semibold flex items-center gap-3 transition-colors"
                   >

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router";
 import { FileText, Link as LinkIcon, Book, X, PlayCircle, Edit3, Share2, Facebook, Twitter, Mail, Copy, Instagram, ArrowLeft } from "lucide-react";
 import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -299,7 +300,7 @@ export function KnowledgeCenter() {
           {/* Share Buttons at the Bottom */}
           <div className="mt-16 pt-8 border-t border-brand-200">
             <h3 className="text-lg font-bold text-brand-900 mb-6 text-center font-serif">شارك المعرفة</h3>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
               <button onClick={() => {
                 const url = `${window.location.origin}${window.location.pathname}?article=${selectedArticle.id}`;
                 navigator.clipboard.writeText(`${selectedArticle.title}\n${url}`);
@@ -325,6 +326,14 @@ export function KnowledgeCenter() {
               }} className="px-6 py-3 rounded-full bg-white border border-brand-200 text-gray-700 flex items-center gap-2 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors shadow-sm font-medium" title="مشاركة على واتساب">
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> شارك على واتساب
               </button>
+            </div>
+
+            <div className="bg-brand-50 p-8 rounded-2xl text-center border border-brand-200 mt-12 max-w-2xl mx-auto shadow-sm">
+              <h3 className="text-2xl font-serif font-bold text-brand-900 mb-4">هل لديك أسئلة؟</h3>
+              <p className="text-brand-700 mb-6">يسعدنا الإجابة عن كافة تساؤلاتك ومناقشة مشروع توثيق سجل تراث عائلتك.</p>
+              <Link to="/intro-session" className="inline-block bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-lg font-bold transition text-lg shadow-md">
+                احجز جلسة تعريف
+              </Link>
             </div>
           </div>
 

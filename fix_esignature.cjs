@@ -1,4 +1,7 @@
-import React, { useEffect } from 'react';
+const fs = require('fs');
+let code = fs.readFileSync('src/pages/ESignatureSuccess.tsx', 'utf8');
+
+code = `import React, { useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
@@ -29,3 +32,6 @@ export function ESignatureSuccess() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/pages/ESignatureSuccess.tsx', code);

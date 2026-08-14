@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Menu, X, BookOpen, User } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store";
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAppStore();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const navLinks = [
@@ -48,7 +49,7 @@ export function Navbar() {
                   <User className="w-4 h-4" />
                   لوحة التحكم
                 </Link>
-                <button onClick={() => { logout(); window.location.href = '/auth'; }} className="text-[#8E9091] hover:text-[#C3262A] font-serif font-medium transition text-sm">
+                <button onClick={() => { const isAdmin = currentUser?.role !== 'user'; logout(); navigate(isAdmin ? '/Team' : '/auth'); }} className="text-[#8E9091] hover:text-[#C3262A] font-serif font-medium transition text-sm">
                   تسجيل الخروج
                 </button>
               </div>
@@ -87,7 +88,7 @@ export function Navbar() {
           {currentUser ? (
             <>
               <Link to={currentUser.role === 'user' ? '/dashboard' : '/admin'} className="block text-brand-800 font-serif font-medium" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
-              <button onClick={() => { logout(); window.location.href = '/auth'; setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-serif font-medium">تسجيل الخروج</button>
+              <button onClick={() => { const isAdmin = currentUser?.role !== 'user'; logout(); navigate(isAdmin ? '/Team' : '/auth'); setIsOpen(false); }} className="block text-brand-800 hover:text-red-600 font-serif font-medium">تسجيل الخروج</button>
             </>
           ) : (
             <Link to="/auth" className="block text-brand-800 font-serif font-medium" onClick={() => setIsOpen(false)}>
