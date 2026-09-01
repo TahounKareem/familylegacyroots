@@ -208,7 +208,7 @@ export function KnowledgeCenter() {
       
       setLoading(false);
     }, (error) => {
-      // Suppress missing permissions error during check
+      console.warn("KnowledgeCenter permissions error:", error);
       setLoading(false);
     });
 
