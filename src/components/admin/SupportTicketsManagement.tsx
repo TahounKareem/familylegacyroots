@@ -27,6 +27,7 @@ export function SupportTicketsManagement() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("جديدة");
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const qVars = query(collection(db, "support_tickets"), orderBy("createdAt", "desc"));
@@ -36,8 +37,10 @@ export function SupportTicketsManagement() {
         msgs.push({ id: doc.id, ...doc.data() } as Ticket);
       });
       setTickets(msgs);
+      setHasError(false);
     }, (error) => {
-      console.error("SupportTickets error:", error);
+      setHasError(true);
+      console.warn("Support tickets permission issue, please update your Firebase rules.");
     });
     return () => unsubscribe();
   }, []);
@@ -97,6 +100,11 @@ export function SupportTicketsManagement() {
         </button>
       </div>
 
+      {hasError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 font-bold flex items-center gap-2">
+          ⚠️ يرجى تحديث قواعد البيانات (Firestore Rules) لتتمكن من إدارة هذه الصفحة بشكل كامل.
+        </div>
+      )}
       <div className="space-y-4">
         {filteredTickets.length === 0 ? (
           <div className="text-center py-10 text-brand-500 bg-brand-50 rounded-2xl">

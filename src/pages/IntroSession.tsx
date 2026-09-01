@@ -22,6 +22,7 @@ export function IntroSession() {
     origin: "",
     name: "",
     email: "",
+    phoneCode: "",
     phone: "",
     commPreference: "",
     selectedDate: "",
@@ -423,15 +424,6 @@ export function IntroSession() {
   );
 
   const renderContact = () => {
-    // Determine calling code based on selected country
-    let callingCode = "";
-    if (formData.country) {
-      const selectedC = ALL_COUNTRIES.find(c => c.name === formData.country);
-      if (selectedC && selectedC.code) {
-        callingCode = selectedC.code;
-      }
-    }
-
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto w-full text-right">
         <h3 className="text-2xl font-bold text-brand-900 mb-8 font-serif">أين تقيم العائلة أو معظم أفرادها؟</h3>
@@ -442,7 +434,14 @@ export function IntroSession() {
             <div className="relative">
               <select 
                 value={formData.country} 
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                onChange={(e) => {
+                  const selectedC = ALL_COUNTRIES.find(c => c.name === e.target.value);
+                  setFormData({ 
+                    ...formData, 
+                    country: e.target.value,
+                    phoneCode: selectedC?.code || formData.phoneCode
+                  });
+                }}
                 className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-brand-600 appearance-none pr-4 pl-10"
               >
                 <option value="">اختر الدولة</option>
@@ -490,15 +489,19 @@ export function IntroSession() {
           <div>
             <label className="block text-brand-900 font-bold mb-2">الهاتف الجوال</label>
             <div className="flex" dir="ltr">
-              <div className="bg-gray-100 border-2 border-r-0 border-gray-200 rounded-l-xl px-4 flex items-center font-bold text-brand-700 min-w-[4rem] justify-center">
-                {callingCode || "+"}
-              </div>
+              <input
+                type="text"
+                value={formData.phoneCode || "+"}
+                onChange={(e) => setFormData({ ...formData, phoneCode: e.target.value })}
+                className="bg-gray-100 border-2 border-r-0 border-gray-200 rounded-l-xl px-2 w-20 text-center font-bold text-brand-700 focus:border-brand-600 focus:ring-0 focus:bg-white outline-none"
+                placeholder="+"
+              />
               <input 
                 type="tel" 
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full p-4 border-2 border-gray-200 rounded-r-xl focus:border-brand-600 focus:ring-0" 
-                placeholder="رقم الجوال بدون رمز الدولة"
+                placeholder="رقم الجوال"
               />
             </div>
           </div>
@@ -581,7 +584,12 @@ export function IntroSession() {
           </div>
           
           <div>
-            <h4 className="font-bold text-brand-900 mb-4 flex items-center gap-2"><Clock className="w-5 h-5"/> اختر الوقت</h4>
+            <div className="mb-4">
+              <h4 className="font-bold text-brand-900 flex items-center gap-2"><Clock className="w-5 h-5"/> اختر الوقت</h4>
+              <span className="text-[11px] text-gray-500 mr-7 mt-1 flex items-center gap-1 font-medium bg-gray-50 px-2 py-0.5 rounded border border-gray-100 w-fit">
+                التوقيت (GMT+2)
+              </span>
+            </div>
             {formData.selectedDate ? (
               <div className="grid grid-cols-2 gap-3">
                 {times.map(time => (
@@ -682,7 +690,7 @@ export function IntroSession() {
         {step < 9 && (
           <div className="mb-12 max-w-2xl mx-auto">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-brand-600">الخطوة {step + 1} من 9</span>
+              <span className="text-sm font-bold text-brand-600">إستفسار {step + 1} من 9</span>
               <span className="text-sm text-brand-500">{Math.round(((step + 1) / 9) * 100)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
 import { BookOpen, Shield, TreeDeciduous, ArrowLeft, Star, ChevronLeft, Play, FolderPlus, Database, SearchCheck, Gift, Network, FileText, Clock, Users } from "lucide-react";
+import { StoriesSection } from "../components/ui/StoriesSection";
 
 export function Home() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -201,6 +202,8 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      <StoriesSection />
 
     </div>
   );

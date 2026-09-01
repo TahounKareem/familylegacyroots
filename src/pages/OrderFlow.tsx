@@ -75,7 +75,9 @@ export function OrderFlow() {
 
   useEffect(() => {
     if (currentUser?.email && !formData.email) {
-      setFormData(prev => ({ ...prev, email: currentUser.email || "" }));
+      setTimeout(() => {
+        setFormData(prev => ({ ...prev, email: currentUser.email || "" }));
+      }, 0);
     }
   }, [currentUser, formData.email]);
 

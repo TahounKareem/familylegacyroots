@@ -3,26 +3,26 @@ import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, BookOpen, Clock, ShieldCheck, CheckCircle2, Bookmark, Info, ChevronDown, Users, FileText, Lock, Coins, Sparkles, LayoutList } from 'lucide-react';
 
+const sections = [
+  { id: 'memory', title: 'ذاكرة العائلة' },
+  { id: 'what-is', title: 'ما هو سجل تراث العائلة؟' },
+  { id: 'why-different', title: 'لماذا هذا السجل مختلف؟' },
+  { id: 'methodology', title: 'المنهجية المعتمدة' },
+  { id: 'content-model', title: 'نموذج لمحتوى السجل' },
+  { id: 'basic-edition', title: 'الإصدار الأساسي' },
+  { id: 'advanced-research', title: 'البحث المتقدم' },
+  { id: 'what-is-included', title: 'ما الذي يشمله السجل؟' },
+  { id: 'curator', title: 'أمين السجل' },
+  { id: 'timeline', title: 'مدة العمل' },
+  { id: 'privacy', title: 'الخصوصية وحماية البيانات' },
+  { id: 'investment', title: 'الاستثمار في حفظ إرث العائلة' },
+];
+
 export function Services() {
   const [activeSection, setActiveSection] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showFlexiblePaymentInfo, setShowFlexiblePaymentInfo] = useState(false);
   const [showFullPaymentInfo, setShowFullPaymentInfo] = useState(false);
-
-  const sections = [
-    { id: 'memory', title: 'ذاكرة العائلة' },
-    { id: 'what-is', title: 'ما هو سجل تراث العائلة؟' },
-    { id: 'why-different', title: 'لماذا هذا السجل مختلف؟' },
-    { id: 'methodology', title: 'المنهجية المعتمدة' },
-    { id: 'content-model', title: 'نموذج لمحتوى السجل' },
-    { id: 'basic-edition', title: 'الإصدار الأساسي' },
-    { id: 'advanced-research', title: 'البحث المتقدم' },
-    { id: 'what-is-included', title: 'ما الذي يشمله السجل؟' },
-    { id: 'curator', title: 'أمين السجل' },
-    { id: 'timeline', title: 'مدة العمل' },
-    { id: 'privacy', title: 'الخصوصية وحماية البيانات' },
-    { id: 'investment', title: 'الاستثمار في حفظ إرث العائلة' },
-  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,7 +48,7 @@ export function Services() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeSection]);
+  }, [activeSection, sections]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);

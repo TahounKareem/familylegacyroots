@@ -1,0 +1,1047 @@
+
+> react-example@0.0.0 lint
+> eslint . && tsc --noEmit
+
+
+/app/applet/app/applet/src/pages/ESignature.tsx
+   3:23  warning  'ArrowLeft' is defined but never used           @typescript-eslint/no-unused-vars
+   4:23  warning  'FamilyData' is defined but never used          @typescript-eslint/no-unused-vars
+  38:13  warning  'timestamp' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  39:13  warning  'userAgent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/server.ts
+  116:15  warning  'userName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/ChatbotManagement.tsx
+  4:37  warning  'X' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/ErrorBoundary.tsx
+  43:14  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  43:17  error    Empty block statement          no-empty
+
+/app/applet/src/components/admin/ComplianceDashboard.tsx
+   3:10  warning  'Shield' is defined but never used                  @typescript-eslint/no-unused-vars
+   3:78  warning  'Plus' is defined but never used                    @typescript-eslint/no-unused-vars
+   3:84  warning  'ChevronDown' is defined but never used             @typescript-eslint/no-unused-vars
+   3:97  warning  'ChevronUp' is defined but never used               @typescript-eslint/no-unused-vars
+   4:34  warning  'getDocs' is defined but never used                 @typescript-eslint/no-unused-vars
+   4:43  warning  'updateDoc' is defined but never used               @typescript-eslint/no-unused-vars
+  47:11  warning  'DocumentVersion' is defined but never used         @typescript-eslint/no-unused-vars
+  70:10  warning  'docContent' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  70:22  warning  'setDocContent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  91:16  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/admin/LegalAuditTrailReport.tsx
+  2:50  warning  'FileText' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/admin/SupportTicketsManagement.tsx
+  162:31  error    'dateValue' is never reassigned. Use 'const' instead  prefer-const
+  171:34  warning  'e' is defined but never used                         @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/admin/UserComplianceReport.tsx
+   37:16   error    'tA' is never reassigned. Use 'const' instead                                                                 prefer-const
+   38:16   error    'tB' is never reassigned. Use 'const' instead                                                                 prefer-const
+  190:101  error    Unsafe usage of optional chaining. If it short-circuits with 'undefined' the evaluation will throw TypeError  no-unsafe-optional-chaining
+  191:91   error    Unsafe usage of optional chaining. If it short-circuits with 'undefined' the evaluation will throw TypeError  no-unsafe-optional-chaining
+  452:31   warning  '_' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Footer.tsx
+  2:10  warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
+  2:20  warning  'MapPin' is defined but never used    @typescript-eslint/no-unused-vars
+  2:28  warning  'Phone' is defined but never used     @typescript-eslint/no-unused-vars
+  2:35  warning  'Mail' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Layout.tsx
+  4:10  warning  'MessageSquare' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/layout/Navbar.tsx
+  2:19  warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/components/ui/Chatbot.tsx
+   2:34  warning  'ChevronDown' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   2:47  warning  'CheckCircle2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   6:10  warning  'createSupportTicket' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  15:7   warning  'QA_DB' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  48:9   warning  'currentUser' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  68:9   warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  77:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/applet/src/components/ui/Chatbot.tsx:77:7
+  75 |   useEffect(() => {
+  76 |     if (isOpen && messages.length === 0) {
+> 77 |       setMessages([{ 
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  78 |         id: '1', 
+  79 |         sender: 'bot', 
+  80 |         text: 'أهلاً بك. أنا "المرشد الذكي"، المساعد الإرشادي لمنصة سجل تراث العائلة. كيف يمكنني مساعدتك؟'   react-hooks/set-state-in-effect
+
+/app/applet/src/components/ui/SessionManager.tsx
+    9:7  warning  'SESSION_TIMEOUT' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   10:7  warning  'WARNING_TIMEOUT' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   47:6  warning  React Hook useCallback has a missing dependency: 'writeAuditLog'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+   90:7  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/applet/src/components/ui/SessionManager.tsx:90:7
+  88 |     if (currentUser) {
+  89 |       writeAuditLog('session_started');
+> 90 |       resetTimers();
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  91 |       const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+  92 |       const handler = () => resetTimers();
+  93 |         react-hooks/set-state-in-effect
+  107:6  warning  React Hook useEffect has a missing dependency: 'writeAuditLog'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+/app/applet/src/components/ui/StoriesSection.tsx
+  3:23  warning  'Play' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/data/statesMapping.ts
+  1:10  warning  'State' is defined but never used             @typescript-eslint/no-unused-vars
+  3:7   warning  'ISO_MAP' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/emailService.ts
+   52:3  warning  'isInvite' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  153:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  154:3  warning  'downloadLink' is defined but never used       @typescript-eslint/no-unused-vars
+  387:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  388:3  warning  'downloadLink' is defined but never used       @typescript-eslint/no-unused-vars
+  533:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  534:3  warning  'finalLink' is defined but never used          @typescript-eslint/no-unused-vars
+  609:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  648:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  687:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+  721:3  warning  'orderId' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/firebase.ts
+  4:10  warning  'getFirestore' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/legalService.ts
+  117:14  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+  205:14  warning  'ignore' is defined but never used  @typescript-eslint/no-unused-vars
+  254:16  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/src/lib/store.ts
+   13:3   warning  'getDocs' is defined but never used  @typescript-eslint/no-unused-vars
+  321:16  warning  'e' is defined but never used        @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/About.tsx
+  2:10  warning  'BookOpen' is defined but never used   @typescript-eslint/no-unused-vars
+  2:20  warning  'Milestone' is defined but never used  @typescript-eslint/no-unused-vars
+  2:31  warning  'Users' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/AdminAuth.tsx
+   3:33  warning  'Link' is defined but never used               @typescript-eslint/no-unused-vars
+   4:10  warning  'Home' is defined but never used               @typescript-eslint/no-unused-vars
+   4:47  warning  'Lock' is defined but never used               @typescript-eslint/no-unused-vars
+   4:53  warning  'Users' is defined but never used              @typescript-eslint/no-unused-vars
+  18:9   warning  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/AdminPanel.tsx
+     9:3   warning  'query' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    10:3   warning  'orderBy' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    11:3   warning  'serverTimestamp' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+    12:3   warning  'limit' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    13:3   warning  'arrayUnion' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+    22:3   warning  'PaymentStatus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+    23:3   warning  'IssueStatus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    59:3   warning  'Printer' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    60:3   warning  'MessageCircle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+    68:10  warning  'sendDeliveryEmail' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   127:10  warning  'designCopiesShipped' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   149:16  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   149:19  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-empty
+   186:38  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/applet/src/pages/AdminPanel.tsx:186:38
+  184 |
+  185 |           if (includeEvent) {
+> 186 |              const tId = event.id || Math.random().toString();
+      |                                      ^^^^^^^^^^^^^ Cannot call impure function
+  187 |              events.push({
+  188 |                id: tId + "_" + order.id,
+  189 |                title: event.message || event.event || "تحديث",                                                                                                                                                                                   react-hooks/purity
+   191:55  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/applet/src/pages/AdminPanel.tsx:191:55
+  189 |                title: event.message || event.event || "تحديث",
+  190 |                message: `تحديث في طلب العائلة: ${order.data?.firstName || ''} ${order.data?.familyName || ''} - #${order.orderNumber || order.id.substring(0, 6)}`,
+> 191 |                timestamp: new Date(event.timestamp || Date.now()).getTime(),
+      |                                                       ^^^^^^^^^^ Cannot call impure function
+  192 |                orderId: order.id,
+  193 |                type: "order_update"
+  194 |             });  react-hooks/purity
+   217:10  warning  'userTab' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   217:19  warning  'setUserTab' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   311:46  warning  '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   421:9   warning  'handleStatusChange' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  1199:29  warning  'teamMembers' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  2206:22  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  2666:22  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Auth.tsx
+   6:85   warning  'sendEmailVerification' is defined but never used  @typescript-eslint/no-unused-vars
+   6:108  warning  'signOut' is defined but never used                @typescript-eslint/no-unused-vars
+  25:9    warning  'navigate' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Contact.tsx
+   2:37  warning  'PhoneCall' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   2:54  warning  'ArrowLeft' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  99:84  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/app/applet/src/pages/Contact.tsx:99:84
+   97 |           </p>
+   98 |           <div className="bg-brand-50 p-4 rounded-xl border border-brand-100 font-mono text-brand-800 font-bold mb-8 text-lg">
+>  99 |             رقم المرجع: {ticketId || `TKT-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`}
+      |                                                                                    ^^^^^^^^^^^^^ Cannot call impure function
+  100 |           </div>
+  101 |           <div className="flex flex-col sm:flex-row justify-center gap-4">
+  102 |             <Link to="/" className="px-6 py-3 bg-brand-900 text-white rounded-xl font-bold hover:bg-brand-800 transition">العودة للصفحة الرئيسية</Link>  react-hooks/purity
+
+/app/applet/src/pages/Dashboard.tsx
+     3:32  warning  'Order' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+     9:3   warning  'Printer' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+    20:3   warning  'ChevronRight' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    27:3   warning  'Phone' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    28:3   warning  'CalendarCheck' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    33:3   warning  'Play' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    36:12  warning  'ImageIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+    39:3   warning  'MoreVertical' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    41:3   warning  'Quote' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    43:3   warning  'Book' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    44:3   warning  'X' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+    47:3   warning  'ShieldCheck' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    73:9   warning  'photosInputRef' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   137:11  warning  'isInvite' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   459:9   warning  'calculateDeliveryDate' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   624:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:624:20
+  622 |                 </h3>
+  623 |                 <div className="space-y-1">
+> 624 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  625 |                     title="السجل الأساسي"
+  626 |                     isActive={activeTab === "السجل الأساسي"}
+  627 |                   />
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/static-components
+   628:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:628:20
+  626 |                     isActive={activeTab === "السجل الأساسي"}
+  627 |                   />
+> 628 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  629 |                     title="بيانات أمين السجل"
+  630 |                     isActive={activeTab === "بيانات أمين السجل"}
+  631 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/static-components
+   633:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:633:20
+  631 |                     isLocked={!isPaid}
+  632 |                   />
+> 633 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  634 |                     title="نقطة العرض الأساسية"
+  635 |                     isActive={activeTab === "نقطة العرض الأساسية"}
+  636 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/static-components
+   638:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:638:20
+  636 |                     isLocked={!isPaid}
+  637 |                   />
+> 638 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  639 |                     title="قالب التصميم المختار"
+  640 |                     isActive={activeTab === "قالب التصميم المختار"}
+  641 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/static-components
+   659:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:659:20
+  657 |                 </h3>
+  658 |                 <div className="space-y-1">
+> 659 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  660 |                     title="ساهم في بناء ذاكرة عائلتك"
+  661 |                     isActive={activeTab === "ساهم في بناء ذاكرة عائلتك"}
+  662 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/static-components
+   666:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:666:20
+  664 |                   {(activeTab === "ساهم في بناء ذاكرة عائلتك" || ["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي", "خزانة السجل (أرشيف العائلة)", "نافذة الإدراج العائلي", "التسلسل الزمني للعائلة"].includes(activeTab)) && (
+  665 |                     <div className="pr-4 border-r-2 border-brand-100 flex flex-col gap-1 mt-1 mb-2">
+> 666 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  667 |                     title="كلمة أمين السجل"
+  668 |                     isActive={activeTab === "كلمة أمين السجل"}
+  669 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/static-components
+   671:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:671:20
+  669 |                     isLocked={!isPaid}
+  670 |                   />
+> 671 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  672 |                     title="نبذة عن العائلة"
+  673 |                     isActive={activeTab === "نبذة عن العائلة"}
+  674 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/static-components
+   676:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:676:20
+  674 |                     isLocked={!isPaid}
+  675 |                   />
+> 676 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  677 |                     title="أماكن ارتبطت بالعائلة"
+  678 |                     isActive={activeTab === "أماكن ارتبطت بالعائلة"}
+  679 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/static-components
+   681:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:681:20
+  679 |                     isLocked={!isPaid}
+  680 |                   />
+> 681 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  682 |                     title="أعلام الأسرة وألقابها"
+  683 |                     isActive={activeTab === "أعلام الأسرة وألقابها"}
+  684 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/static-components
+   686:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:686:20
+  684 |                     isLocked={!isPaid}
+  685 |                   />
+> 686 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  687 |                     title="شخصيات ورموز العائلة"
+  688 |                     isActive={activeTab === "شخصيات ورموز العائلة"}
+  689 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/static-components
+   691:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:691:20
+  689 |                     isLocked={!isPaid}
+  690 |                   />
+> 691 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  692 |                     title="المهن والأعمال والإرث المهني"
+  693 |                     isActive={activeTab === "المهن والأعمال والإرث المهني"}
+  694 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/static-components
+   696:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:696:20
+  694 |                     isLocked={!isPaid}
+  695 |                   />
+> 696 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  697 |                     title="ذاكرة العائلة والإرث الاجتماعي"
+  698 |                     isActive={activeTab === "ذاكرة العائلة والإرث الاجتماعي"}
+  699 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/static-components
+   701:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:701:20
+  699 |                     isLocked={!isPaid}
+  700 |                   />
+> 701 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  702 |                     title="خزانة السجل (أرشيف العائلة)"
+  703 |                     isActive={activeTab === "خزانة السجل (أرشيف العائلة)"}
+  704 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/static-components
+   706:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:706:20
+  704 |                     isLocked={!isPaid}
+  705 |                   />
+> 706 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  707 |                     title="نافذة الإدراج العائلي"
+  708 |                     isActive={activeTab === "نافذة الإدراج العائلي"}
+  709 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/static-components
+   711:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:711:20
+  709 |                     isLocked={!isPaid}
+  710 |                   />
+> 711 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  712 |                     title="التسلسل الزمني للعائلة"
+  713 |                     isActive={activeTab === "التسلسل الزمني للعائلة"}
+  714 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/static-components
+   726:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:726:20
+  724 |                 </h3>
+  725 |                 <div className="space-y-1">
+> 726 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  727 |                     title="استيضاحات فريق البحث"
+  728 |                     isActive={activeTab === "استيضاحات فريق البحث"}
+  729 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/static-components
+   741:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:741:20
+  739 |                 </h3>
+  740 |                 <div className="space-y-1">
+> 741 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  742 |                     title="النسخة الرقمية للسجل"
+  743 |                     isActive={activeTab === "النسخة الرقمية للسجل"}
+  744 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/static-components
+   746:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:746:20
+  744 |                     isLocked={!isPaid}
+  745 |                   />
+> 746 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  747 |                     title="بوستر عمود النسب"
+  748 |                     isActive={activeTab === "بوستر عمود النسب"}
+  749 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/static-components
+   751:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:751:20
+  749 |                     isLocked={!isPaid}
+  750 |                   />
+> 751 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  752 |                     title="التصويبات"
+  753 |                     isActive={activeTab === "التصويبات"}
+  754 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/static-components
+   765:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:765:20
+  763 |                 </h3>
+  764 |                 <div className="space-y-1">
+> 765 |                   <SidebarItem
+      |                    ^^^^^^^^^^^ This component is created during render
+  766 |                     title="فتح الأبواب المغلقة"
+  767 |                     isActive={activeTab === "فتح الأبواب المغلقة"}
+  768 |                     isLocked={!isPaid}
+
+/app/applet/src/pages/Dashboard.tsx:476:23
+  474 |   );
+  475 |
+> 476 |   const SidebarItem = ({
+      |                       ^^
+> 477 |     title,
+      | ^^^^^^^^^^
+> 478 |     isActive,
+      …
+      | ^^^^^^^^^^
+> 517 |     </button>
+      | ^^^^^^^^^^
+> 518 |   );
+      | ^^^^ The component is created during render here
+  519 |
+  520 |   return (
+  521 |     <div className="bg-brand-50 min-h-screen pb-10">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/static-components
+  1234:32  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/Dashboard.tsx:1234:32
+  1232 |                             <label className="flex items-center text-brand-900 font-bold mb-4">
+  1233 |                               العنوان البريدي (الذي ترغب شحن الباقة اليه):{" "}
+> 1234 |                               <InfoTooltip text="العنوان البريدي من اجل توصيل الباقة اليكم ." />
+       |                                ^^^^^^^^^^^ This component is created during render
+  1235 |                             </label>
+  1236 |                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  1237 |                               <div>
+
+/app/applet/src/pages/Dashboard.tsx:465:23
+  463 |   };
+  464 |
+> 465 |   const InfoTooltip = ({ text }: { text: string }) => (
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 466 |     <div className="relative group inline-flex items-center justify-center mr-2 z-50 align-middle">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 467 |       <div className="w-5 h-5 rounded-full bg-brand-200 text-brand-700 font-bold text-xs flex items-center justify-center cursor-help">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 468 |         i
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 469 |       </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 470 |       <div className="absolute bottom-full right-1/2 translate-x-1/2 mb-2 w-64 bg-brand-50 border border-brand-200 text-brand-800 text-xs rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 471 |         {text}
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 472 |       </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 473 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 474 |   );
+      | ^^^^ The component is created during render here
+  475 |
+  476 |   const SidebarItem = ({
+  477 |     title,  react-hooks/static-components
+
+/app/applet/src/pages/ESignature.tsx
+    3:23   warning  'ArrowLeft' is defined but never used           @typescript-eslint/no-unused-vars
+    4:23   warning  'FamilyData' is defined but never used          @typescript-eslint/no-unused-vars
+   38:13   warning  'timestamp' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   39:13   warning  'userAgent' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  111:144  warning  'e' is defined but never used                   @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Home.tsx
+  4:20   warning  'Shield' is defined but never used         @typescript-eslint/no-unused-vars
+  4:28   warning  'TreeDeciduous' is defined but never used  @typescript-eslint/no-unused-vars
+  4:54   warning  'Star' is defined but never used           @typescript-eslint/no-unused-vars
+  4:60   warning  'ChevronLeft' is defined but never used    @typescript-eslint/no-unused-vars
+  4:79   warning  'FolderPlus' is defined but never used     @typescript-eslint/no-unused-vars
+  4:91   warning  'Database' is defined but never used       @typescript-eslint/no-unused-vars
+  4:101  warning  'SearchCheck' is defined but never used    @typescript-eslint/no-unused-vars
+  4:114  warning  'Gift' is defined but never used           @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/IntroSession.tsx
+  10:9   warning  'navigate' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  50:13  warning  'sessionRef' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/KnowledgeCenter.tsx
+    3:28   warning  'LinkIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+    3:38   warning  'Book' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    3:44   warning  'X' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+    3:66   warning  'Share2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    3:93   warning  'Mail' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    3:105  warning  'Instagram' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    4:34   warning  'query' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    4:41   warning  'orderBy' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   60:10   warning  'isPlaying' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  140:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/applet/src/pages/KnowledgeCenter.tsx:140:7
+  138 |   useEffect(() => {
+  139 |     if (selectedArticle) {
+> 140 |       setIsPlaying(false);
+      |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  141 |     }
+  142 |   }, [selectedArticle]);
+  143 |                                                                                                                                                                                                                                                                                                                                                              react-hooks/set-state-in-effect
+  210:9    warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  216:6    warning  React Hook useEffect has a missing dependency: 'selectedArticle'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  349:16   error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/KnowledgeCenter.tsx:349:16
+  347 |
+  348 |               {/* Newsletter Inline */}
+> 349 |               <NewsletterInline />
+      |                ^^^^^^^^^^^^^^^^ This component is created during render
+  350 |             </div>
+  351 |           </div>
+  352 |       </div>
+
+/app/applet/src/pages/KnowledgeCenter.tsx:76:28
+   74 |
+   75 |   // Newsletter Inline Component
+>  76 |   const NewsletterInline = () => (
+      |                            ^^^^^^^
+>  77 |     <div className="relative mx-auto rounded-2xl w-full max-w-2xl overflow-hidden shadow-md group mt-8">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  78 |       <img 
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 123 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 124 |   );
+      | ^^^^ The component is created during render here
+  125 |
+  126 |   const getYoutubeEmbedUrl = (url: string) => {
+  127 |     let videoId = '';  react-hooks/static-components
+  468:14   error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/app/applet/src/pages/KnowledgeCenter.tsx:468:14
+  466 |
+  467 |             {/* Newsletter Inline */}
+> 468 |             <NewsletterInline />
+      |              ^^^^^^^^^^^^^^^^ This component is created during render
+  469 |           </div>
+  470 |       </div>
+  471 |     </div>
+
+/app/applet/src/pages/KnowledgeCenter.tsx:76:28
+   74 |
+   75 |   // Newsletter Inline Component
+>  76 |   const NewsletterInline = () => (
+      |                            ^^^^^^^
+>  77 |     <div className="relative mx-auto rounded-2xl w-full max-w-2xl overflow-hidden shadow-md group mt-8">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  78 |       <img 
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 123 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 124 |   );
+      | ^^^^ The component is created during render here
+  125 |
+  126 |   const getYoutubeEmbedUrl = (url: string) => {
+  127 |     let videoId = '';                react-hooks/static-components
+
+/app/applet/src/pages/Legal.tsx
+  62:9  warning  'location' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/OrderFlow.tsx
+    2:23  warning  'Link' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   29:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/app/applet/src/pages/OrderFlow.tsx:29:7
+  27 |     const searchParams = new URLSearchParams(location.search);
+  28 |     if (searchParams.get("payment") === "true") {
+> 29 |       setStep(4);
+     |       ^^^^^^^ Avoid calling setState() directly within an effect
+  30 |     } else if (searchParams.get("step") === "2") {
+  31 |       setStep(2);
+  32 |     } else if (searchParams.get("step") === "4") {  react-hooks/set-state-in-effect
+   89:10  warning  'agreedToService' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   89:27  warning  'setAgreedToService' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  197:13  warning  'planPrice' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/ServiceAgreement.tsx
+    1:46  warning  'useMemo' is defined but never used                              @typescript-eslint/no-unused-vars
+    3:30  warning  'Phone' is defined but never used                                @typescript-eslint/no-unused-vars
+    3:37  warning  'MapPin' is defined but never used                               @typescript-eslint/no-unused-vars
+    3:51  warning  'FileText' is defined but never used                             @typescript-eslint/no-unused-vars
+    3:84  warning  'Loader2' is defined but never used                              @typescript-eslint/no-unused-vars
+    3:93  warning  'PenTool' is defined but never used                              @typescript-eslint/no-unused-vars
+    8:10  warning  'arabicContractText' is defined but never used                   @typescript-eslint/no-unused-vars
+   25:10  warning  'req3' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   25:16  warning  'setReq3' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   26:10  warning  'req4' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   26:16  warning  'setReq4' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   27:10  warning  'req5' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   27:16  warning  'setReq5' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   28:10  warning  'req6' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   28:16  warning  'setReq6' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+   43:9   warning  'handleScroll' is assigned a value but never used                @typescript-eslint/no-unused-vars
+   63:10  warning  'isSigning' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+   63:21  warning  'setIsSigning' is assigned a value but never used                @typescript-eslint/no-unused-vars
+   64:35  warning  'setShowManuallySignedModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   65:10  warning  'signedInternally' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   65:28  warning  'setSignedInternally' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  181:9   warning  'priceAmount' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+  186:9   warning  'handleCopy' is assigned a value but never used                  @typescript-eslint/no-unused-vars
+  399:10  warning  'CheckboxLabel' is defined but never used                        @typescript-eslint/no-unused-vars
+
+/app/applet/src/pages/Services.tsx
+   4:36  warning  'ShieldCheck' is defined but never used                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  51:6   warning  React Hook useEffect has an unnecessary dependency: 'sections'. Either exclude it or remove the dependency array. Outer scope values like 'sections' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+/app/applet/src/pages/TreeBuilder.tsx
+   2:31  warning  'ChevronDown' is defined but never used            @typescript-eslint/no-unused-vars
+  45:10  warning  'editRelation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/vite.config.ts
+  6:32  warning  'mode' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 200 problems (37 errors, 163 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

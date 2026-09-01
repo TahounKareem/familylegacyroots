@@ -23,7 +23,7 @@ import {
   IssueStatus,
   ActionPhase,
 } from "@/lib/store";
-import { Navigate, Link } from "react-router";
+import { Navigate, Link, useNavigate } from "react-router";
 import {
   Users,
   User,
@@ -69,6 +69,7 @@ import { sendDeliveryEmail } from "@/lib/emailService";
 import { KnowledgeArticle } from "./KnowledgeCenter";
 
 export function AdminPanel() {
+  const navigate = useNavigate();
   const {
     currentUser,
     orders,
@@ -78,6 +79,13 @@ export function AdminPanel() {
     markMessagesAsRead,
     logout,
   } = useAppStore();
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role === "user") {
+      navigate("/Team", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   const [activeTab, setActiveTab] = useState<string>("lobby");
   const [orderTab, setOrderTab] = useState<"orders" | "archive">("orders");
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
@@ -138,7 +146,7 @@ export function AdminPanel() {
       try {
         const stored = localStorage.getItem("readNotifIds");
         if (stored) return new Set(JSON.parse(stored));
-      } catch (e) {}
+      } catch (e) { /* ignore */ }
     }
     return new Set();
   });
@@ -175,12 +183,20 @@ export function AdminPanel() {
           if (event.userId === currentUser.id) includeEvent = false;
 
           if (includeEvent) {
-             const tId = event.id || Math.random().toString();
+             const tId = event.id || "fallback_" + events.length;
              events.push({
                id: tId + "_" + order.id,
                title: event.message || event.event || "تحديث",
                message: `تحديث في طلب العائلة: ${order.data?.firstName || ''} ${order.data?.familyName || ''} - #${order.orderNumber || order.id.substring(0, 6)}`,
-               timestamp: new Date(event.timestamp || Date.now()).getTime(),
+               timestamp: (() => {
+                 let ts = 0;
+                 if (event.timestamp) {
+                   if (typeof event.timestamp === "number") ts = event.timestamp;
+                   else if (event.timestamp.toDate) ts = event.timestamp.toDate().getTime();
+                   else ts = new Date(event.timestamp).getTime();
+                 }
+                 return isNaN(ts) ? 0 : ts;
+               })(),
                orderId: order.id,
                type: "order_update"
             });
@@ -204,7 +220,7 @@ export function AdminPanel() {
   };
 
   const [usersList, setUsersList] = useState<UserInfo[]>([]);
-  const [csSubTab, setCsSubTab] = useState<"users" | "intro_sessions">("users");
+  const [csSubTab, setCsSubTab] = useState<"users" | "intro_sessions" | "support_tickets" | "chatbot">("intro_sessions");
   const [introSessions, setIntroSessions] = useState<any[]>([]);
   const [userTab, setUserTab] = useState<"team" | "users">("team");
 
@@ -351,7 +367,7 @@ export function AdminPanel() {
       setIsUploading(true);
       const fileRef = ref(
         storage,
-        `knowledge_articles/${Date.now()}_${file.name}`,
+        `knowledge_articles/${0}_${file.name}`,
       );
       await uploadBytes(fileRef, file);
       const url = await getDownloadURL(fileRef);
@@ -783,7 +799,7 @@ export function AdminPanel() {
 
   const allowedTabs = availableTabs.filter((tab) => {
     if (currentUser?.email === "kaouther.douzi@adamresearchcenter.net") {
-      if (tab.id === "customer_service" || tab.id === "articles") {
+      if (["customer_service", "articles", "support_tickets", "chatbot"].includes(tab.id)) {
         return true;
       }
     }
@@ -809,6 +825,10 @@ export function AdminPanel() {
       : allowedTabs.find((t) => t.id === activeTab)
         ? activeTab
         : "lobby";
+
+  if (!currentUser || currentUser.role === "user") {
+    return null;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -2217,7 +2237,15 @@ export function AdminPanel() {
                   </div>
                 </div>
 
-                <div className="p-4 border-b border-gray-100 flex gap-2">
+                <div className="p-4 border-b border-gray-100 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setCsSubTab("intro_sessions")}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                      csSubTab === "intro_sessions" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    الجلسات التعريفية
+                  </button>
                   <button
                     onClick={() => setCsSubTab("users")}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
@@ -2227,16 +2255,24 @@ export function AdminPanel() {
                     الطلبات والعملاء
                   </button>
                   <button
-                    onClick={() => setCsSubTab("intro_sessions")}
+                    onClick={() => setCsSubTab("support_tickets")}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                      csSubTab === "intro_sessions" ? "bg-cyan-100 text-cyan-800 border-cyan-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                      csSubTab === "support_tickets" ? "bg-yellow-100 text-yellow-800 border-yellow-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
                     }`}
                   >
-                    الجلسات التعريفية
+                    إدارة التذاكر والاستفسارات
+                  </button>
+                  <button
+                    onClick={() => setCsSubTab("chatbot")}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                      csSubTab === "chatbot" ? "bg-blue-100 text-blue-800 border-blue-200 border" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    إدارة المرشد الذكي
                   </button>
                 </div>
 
-                {csSubTab === "users" ? (
+                {csSubTab === "users" && (
                   <>
                     <div className="p-4 md:px-8 border-b border-brand-50 flex flex-col gap-4 bg-gray-50/50">
                 <div className="flex flex-wrap gap-2">
@@ -2396,7 +2432,9 @@ export function AdminPanel() {
                 </table>
               </div>
             </>
-            ) : (
+            )}
+            
+            {csSubTab === "intro_sessions" && (
               <div className="bg-white">
                 <div className="overflow-x-auto">
                   <table className="w-full text-right text-sm">
@@ -2422,12 +2460,12 @@ export function AdminPanel() {
                                 <div className="font-bold text-brand-900">{session.selectedDate}</div>
                                 <div className="text-brand-600 text-xs mt-1 font-mono" dir="ltr">{session.selectedTime}</div>
                                 <div className="text-xs text-gray-500 mt-1">الوسيلة: {session.commPreference === 'Google Meet' ? 'فيديو (Meet)' : session.commPreference === 'WhatsApp' ? 'اتصال هاتفي (واتساب)' : session.commPreference === 'Telegram' ? 'اتصال هاتفي (تيلغرام)' : session.commPreference || 'غير محدد'}</div>
-                                <div className="text-xs text-gray-400 mt-1">تم الإنشاء: {new Date(session.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString('ar-EG')}</div>
+                                <div className="text-xs text-gray-400 mt-1">تم الإنشاء: {new Date(session.createdAt?.seconds * 1000 || 0).toLocaleDateString('ar-EG')}</div>
                               </td>
                               <td className="px-4 py-4 align-top">
                                 <div className="font-bold text-gray-900">{session.name || `${session.firstName || ''} ${session.lastName || ''}`.trim()}</div>
                                 <div className="text-gray-500 text-xs">{session.email}</div>
-                                <div className="text-gray-500 text-xs" dir="ltr">{session.phone}</div>
+                                <div className="text-gray-500 text-xs" dir="ltr">{(session.phoneCode || '') + ' ' + (session.phone || '')}</div>
                                 <div className="text-gray-500 text-xs mt-1">{session.country} {session.origin ? `- أصول: ${session.origin}` : ''}</div>
                               </td>
                               <td className="px-4 py-4 align-top max-w-xs">
@@ -2566,10 +2604,15 @@ export function AdminPanel() {
                 </div>
               </div>
             )}
-            </div>
-            <SupportTicketsManagement />
-            <ChatbotManagement />
             
+            {csSubTab === "support_tickets" && (
+              <SupportTicketsManagement />
+            )}
+            {csSubTab === "chatbot" && (
+              <ChatbotManagement />
+            )}
+            
+            </div>
             </div>
           );
         })()}

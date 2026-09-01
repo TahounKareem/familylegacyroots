@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
           info: errorInfo.componentStack
         })
       }).catch(console.error);
-    } catch (e) {}
+    } catch (e) { /* ignore */ }
     try {
       addDoc(collection(db, 'crash_logs'), {
         error: error.message,

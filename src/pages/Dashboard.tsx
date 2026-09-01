@@ -55,6 +55,67 @@ import {
 import { TreeBuilder } from "./TreeBuilder";
 import { TimelineBuilder } from "./TimelineBuilder";
 
+
+const SidebarItem = ({
+  title,
+  isActive,
+  isLocked,
+  info,
+  badge,
+  setActiveTab
+}: {
+  title: string;
+  isActive: boolean;
+  isLocked?: boolean;
+  info?: string;
+  badge?: number;
+  setActiveTab: (tab: string) => void;
+}) => (
+  <button
+    disabled={isLocked && title !== "السجل الأساسي"}
+    onClick={() => setActiveTab(title)}
+    className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative font-sans text-sm border
+      ${isLocked && title !== "السجل الأساسي" ? "opacity-50 cursor-not-allowed" : ""}
+      ${isActive ? "bg-brand-50 border-brand-200 text-black font-bold" : "text-black border-transparent hover:bg-brand-50 hover:border-brand-200"}`}
+  >
+    <div className="flex items-center">
+      <span>{title}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">
+          {badge}
+        </span>
+      )}
+      {info && (
+        <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
+          <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-200">
+            i
+          </div>
+          <div className="absolute bottom-full mb-2 right-0 w-60 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
+            {info}
+          </div>
+        </div>
+      )}
+    </div>
+    {isLocked && title !== "السجل الأساسي" && (
+      <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />
+    )}
+  </button>
+);
+
+
+
+const InfoTooltip = ({ text }: { text: string }) => (
+  <div className="relative group inline-flex items-center justify-center mr-2 z-50 align-middle">
+    <div className="w-5 h-5 rounded-full bg-brand-200 text-brand-700 font-bold text-xs flex items-center justify-center cursor-help">
+      i
+    </div>
+    <div className="absolute bottom-full right-1/2 translate-x-1/2 mb-2 w-64 bg-brand-50 border border-brand-200 text-brand-800 text-xs rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
+      {text}
+    </div>
+  </div>
+);
+
+
 export function Dashboard() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder } =
     useAppStore();
@@ -473,49 +534,7 @@ export function Dashboard() {
     </div>
   );
 
-  const SidebarItem = ({
-    title,
-    isActive,
-    isLocked,
-    info,
-    badge,
-  }: {
-    title: string;
-    isActive: boolean;
-    isLocked?: boolean;
-    info?: string;
-    badge?: number;
-  }) => (
-    <button
-      disabled={isLocked && title !== "السجل الأساسي"}
-      onClick={() => setActiveTab(title)}
-      className={`w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between group/btn relative font-sans text-sm border
-        ${isLocked && title !== "السجل الأساسي" ? "opacity-50 cursor-not-allowed" : ""}
-        ${isActive ? "bg-brand-50 border-brand-200 text-black font-bold" : "text-black border-transparent hover:bg-brand-50 hover:border-brand-200"}`}
-    >
-      <div className="flex items-center">
-        <span>{title}</span>
-        {badge !== undefined && badge > 0 && (
-          <span className="mr-2 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">
-            {badge}
-          </span>
-        )}
-        {info && (
-          <div className="relative group/tooltip inline-flex items-center justify-center mr-2 z-50">
-            <div className="w-4 h-4 rounded-full bg-brand-100 text-brand-500 font-bold text-[10px] flex items-center justify-center cursor-help transition-colors hover:bg-brand-200">
-              i
-            </div>
-            <div className="absolute bottom-full mb-2 right-0 w-60 bg-brand-50 border border-brand-200 text-brand-800 font-normal text-xs rounded-xl p-3 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all shadow-xl leading-relaxed whitespace-pre-wrap text-right pointer-events-none z-50">
-              {info}
-            </div>
-          </div>
-        )}
-      </div>
-      {isLocked && title !== "السجل الأساسي" && (
-        <Lock className="w-4 h-4 text-brand-400 group-hover/btn:text-brand-500" />
-      )}
-    </button>
-  );
+  
 
   return (
     <div className="bg-brand-50 min-h-screen pb-10">
@@ -621,22 +640,18 @@ export function Dashboard() {
                   البوابة الرئيسية
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem
-                    title="السجل الأساسي"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="السجل الأساسي"
                     isActive={activeTab === "السجل الأساسي"}
                   />
-                  <SidebarItem
-                    title="بيانات أمين السجل"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="بيانات أمين السجل"
                     isActive={activeTab === "بيانات أمين السجل"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="نقطة العرض الأساسية"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="نقطة العرض الأساسية"
                     isActive={activeTab === "نقطة العرض الأساسية"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="قالب التصميم المختار"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="قالب التصميم المختار"
                     isActive={activeTab === "قالب التصميم المختار"}
                     isLocked={!isPaid}
                   />
@@ -656,60 +671,49 @@ export function Dashboard() {
                   </div>
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem
-                    title="ساهم في بناء ذاكرة عائلتك"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="ساهم في بناء ذاكرة عائلتك"
                     isActive={activeTab === "ساهم في بناء ذاكرة عائلتك"}
                     isLocked={!isPaid}
                   />
                   {(activeTab === "ساهم في بناء ذاكرة عائلتك" || ["كلمة أمين السجل", "نبذة عن العائلة", "أماكن ارتبطت بالعائلة", "أعلام الأسرة وألقابها", "شخصيات ورموز العائلة", "المهن والأعمال والإرث المهني", "ذاكرة العائلة والإرث الاجتماعي", "خزانة السجل (أرشيف العائلة)", "نافذة الإدراج العائلي", "التسلسل الزمني للعائلة"].includes(activeTab)) && (
                     <div className="pr-4 border-r-2 border-brand-100 flex flex-col gap-1 mt-1 mb-2">
-                  <SidebarItem
-                    title="كلمة أمين السجل"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="كلمة أمين السجل"
                     isActive={activeTab === "كلمة أمين السجل"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="نبذة عن العائلة"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="نبذة عن العائلة"
                     isActive={activeTab === "نبذة عن العائلة"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="أماكن ارتبطت بالعائلة"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="أماكن ارتبطت بالعائلة"
                     isActive={activeTab === "أماكن ارتبطت بالعائلة"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="أعلام الأسرة وألقابها"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="أعلام الأسرة وألقابها"
                     isActive={activeTab === "أعلام الأسرة وألقابها"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="شخصيات ورموز العائلة"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="شخصيات ورموز العائلة"
                     isActive={activeTab === "شخصيات ورموز العائلة"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="المهن والأعمال والإرث المهني"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="المهن والأعمال والإرث المهني"
                     isActive={activeTab === "المهن والأعمال والإرث المهني"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="ذاكرة العائلة والإرث الاجتماعي"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="ذاكرة العائلة والإرث الاجتماعي"
                     isActive={activeTab === "ذاكرة العائلة والإرث الاجتماعي"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="خزانة السجل (أرشيف العائلة)"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="خزانة السجل (أرشيف العائلة)"
                     isActive={activeTab === "خزانة السجل (أرشيف العائلة)"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="نافذة الإدراج العائلي"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="نافذة الإدراج العائلي"
                     isActive={activeTab === "نافذة الإدراج العائلي"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="التسلسل الزمني للعائلة"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="التسلسل الزمني للعائلة"
                     isActive={activeTab === "التسلسل الزمني للعائلة"}
                     isLocked={!isPaid}
                   />
@@ -723,8 +727,7 @@ export function Dashboard() {
                   التواصل والتحديثات
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem
-                    title="استيضاحات فريق البحث"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="استيضاحات فريق البحث"
                     isActive={activeTab === "استيضاحات فريق البحث"}
                     isLocked={!isPaid}
                     info="عند وجود استفسار من فريق البحث ستظهر لك رسالة طلب ايضاح من قبلهم ، بحيث ستتمكن من الرد على الإستفسار بسهولة وخصوصية وأمان ."
@@ -738,18 +741,15 @@ export function Dashboard() {
                   ابق سجلك حياً
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem
-                    title="النسخة الرقمية للسجل"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="النسخة الرقمية للسجل"
                     isActive={activeTab === "النسخة الرقمية للسجل"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="بوستر عمود النسب"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="بوستر عمود النسب"
                     isActive={activeTab === "بوستر عمود النسب"}
                     isLocked={!isPaid}
                   />
-                  <SidebarItem
-                    title="التصويبات"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="التصويبات"
                     isActive={activeTab === "التصويبات"}
                     isLocked={!isPaid}
                     info="هذه الخاصية ستظهر عند استلامكم السجل الخاص بكم حيث سيتم تفعيل هذه الخاصية لتتمكنوا من ارسال التصويبات ان وجدت ."
@@ -762,8 +762,7 @@ export function Dashboard() {
                   فتح الأبواب المغلقة
                 </h3>
                 <div className="space-y-1">
-                  <SidebarItem
-                    title="فتح الأبواب المغلقة"
+                  <SidebarItem setActiveTab={setActiveTab} setActiveTab={setActiveTab} title="فتح الأبواب المغلقة"
                     isActive={activeTab === "فتح الأبواب المغلقة"}
                     isLocked={!isPaid}
                     info="بحث متقدم. هذه الخدمة ستظهر تفاصيلها بعد صدور السجل الأساسي والذي يمثل البوابة الرئيسية في سجل تراث العائلة ، من أجل فتح بعض الأبواب المغلقة وتوسيع البحث ."

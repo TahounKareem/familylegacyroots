@@ -15,6 +15,7 @@ export function ChatbotManagement() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<FAQ>>({});
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const q = collection(db, "chatbot_faqs");
@@ -25,7 +26,11 @@ export function ChatbotManagement() {
       });
       data.sort((a, b) => b.createdAt - a.createdAt);
       setFaqs(data);
-    }, () => {});
+      setHasError(false);
+    }, (error) => { 
+      setHasError(true);
+      console.warn("Chatbot FAQs permission issue, please update your Firebase rules.");
+    });
     return () => unsubscribe();
   }, []);
 
@@ -98,7 +103,7 @@ export function ChatbotManagement() {
         </button>
       </div>
 
-      {isEditing && (
+      {hasError && (        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 font-bold flex items-center gap-2">          ⚠️ يرجى تحديث قواعد البيانات (Firestore Rules) لتتمكن من إدارة هذه الصفحة بشكل كامل.        </div>      )}      {isEditing && (
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-8 text-right">
           <h3 className="font-bold text-lg text-indigo-900 mb-4 border-b border-indigo-200 pb-2">
             {editForm.id ? "تعديل السؤال" : "إضافة سؤال جديد"}
