@@ -198,8 +198,13 @@ service cloud.firestore {
     // Intro Sessions
     // ==========================================
     match /intro_sessions/{sessionId} {
-      allow create: if true;
-      allow read, update, delete: if isStaff();
+      allow create, read: if true;
+      allow update, delete: if isStaff();
+    }
+
+    match /booked_intro_slots/{slotId} {
+      allow create, read: if true;
+      allow update, delete: if isStaff();
     }
 
     // Default Deny

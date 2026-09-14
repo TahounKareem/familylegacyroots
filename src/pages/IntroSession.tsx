@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, ChevronDown, Video, Phone, MessageCircle } from "lucide-react";
 import { ALL_COUNTRIES } from "../data/countries";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { AVAILABLE_TIME_SLOTS, formatArabicGregorianDate, formatTimeSlotArabic } from "../utils/dateUtils";
 
 export function IntroSession() {
   const navigate = useNavigate();
@@ -31,6 +32,29 @@ export function IntroSession() {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [bookedSlots, setBookedSlots] = useState<{ date: string; time: string }[]>([]);
+  const [loadingBooked, setLoadingBooked] = useState(false);
+
+  const fetchBookedSlots = useCallback(async () => {
+    try {
+      setLoadingBooked(true);
+      const res = await fetch("/api/intro-sessions/booked");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.booked)) {
+          setBookedSlots(data.booked);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching booked slots:", err);
+    } finally {
+      setLoadingBooked(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookedSlots();
+  }, [fetchBookedSlots]);
 
   const handleNext = () => {
     window.scrollTo(0, 0);
@@ -46,9 +70,13 @@ export function IntroSession() {
     setLoading(true);
     setErrorMsg("");
     try {
+      const formattedDateObj = formatArabicGregorianDate(formData.selectedDate);
+      const gregorianDateText = formattedDateObj.formatted || formData.selectedDate;
+
       // Save to Firebase
       const sessionRef = await addDoc(collection(db, "intro_sessions"), {
         ...formData,
+        gregorianFormattedDate: gregorianDateText,
         status: "pending", // admin will update this
         createdAt: serverTimestamp(),
       });
@@ -82,8 +110,8 @@ export function IntroSession() {
     <p><strong>مكان الإجتماع:</strong><br/>
     ${formData.commPreference === 'Google Meet' ? 'عبر جوجل ميت <br/> <a href="https://meet.google.com/ydc-vwcj-nsj">https://meet.google.com/ydc-vwcj-nsj</a>' : formData.commPreference === 'WhatsApp' ? 'اتصال هاتفي (عبر واتساب)' : 'اتصال هاتفي (عبر تيلغرام)'}</p>
     <p><strong>الوقت :</strong><br/>
-    ${formData.selectedTime} - توقيت مكة المكرمة<br/>
-    يوم: ${formData.selectedDate}</p>
+    ${formData.selectedTime} (التوقيت: GMT+2)<br/>
+    يوم: ${gregorianDateText}</p>
     <p><strong>الوقت المحدد للجلسة :</strong> 30 دقيقة</p>
   </div>
 
@@ -113,80 +141,32 @@ export function IntroSession() {
         createdAt: serverTimestamp(),
       });
 
-      // Try parsing date/time to schedule the second email (1 hour before)
+      // Register session with server API for background 1-hour automated reminder & slot blocking
       try {
-        const timeParts = formData.selectedTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-        if (timeParts) {
-          let hours = parseInt(timeParts[1]);
-          const minutes = parseInt(timeParts[2]);
-          const isPM = timeParts[3] && timeParts[3].toUpperCase() === 'PM';
-          
-          if (isPM && hours < 12) hours += 12;
-          if (!isPM && hours === 12) hours = 0;
-
-          // Note: using local timezone, could be adjusted to Makkah timezone if needed
-          const sessionDate = new Date(formData.selectedDate);
-          sessionDate.setHours(hours, minutes, 0, 0);
-          
-          // 1 hour before
-          const reminderDate = new Date(sessionDate.getTime() - 60 * 60 * 1000);
-          
-          // Only schedule if reminder date is in the future
-          if (reminderDate > new Date()) {
-            const email2Html = `
-<div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
-  <h2 style="color: #4A5568;">دقائق ونبدأ أول صفحة من سجل العائلة .</h2>
-  <p>بالتأكيد توجد لدى عائلتكم قصة لم تُكتب بعد، أو صورة يعرف الجميع قيمتها، أو اسم يتناقله الأبناء دون أن يعرفوا حكايته، او عمود نسب يحتاج الي توثيق وربطه تاريخياً بالأصل بحسب ماتذكره المصادر الموثوقة .</p>
-  <p>لذا .. بعد دقائق سنبدأ معًا بفهم مشروعكم، وكيف يمكن أن يتحول ما تملكونه اليوم إلى سجل يحفظ ذاكرة العائلة للأجيال القادمة.</p>
-  <p>إن كان لديكم أي نقاط أو وثائق أو ملاحظات ترون أنها قد تساعد لجعل جلستكم مثمرة، فاحتفظوا بها بالقرب منكم أثناء الجلسة، وإن لم يكن لديكم شيء، فلا تقلقوا... فكل سجل عائلي يبدأ بخطوة...</p>
-  
-  <div style="background-color: #f7fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-    <p><strong>مكان الإجتماع:</strong><br/>
-    ${formData.commPreference === 'Google Meet' ? 'عبر جوجل ميت <br/> <a href="https://meet.google.com/ydc-vwcj-nsj">https://meet.google.com/ydc-vwcj-nsj</a>' : formData.commPreference === 'WhatsApp' ? 'اتصال هاتفي (عبر واتساب)' : 'اتصال هاتفي (عبر تيلغرام)'}</p>
-    <p><strong>الوقت :</strong><br/>
-    ${formData.selectedTime} - توقيت مكة المكرمة<br/>
-    يوم: ${formData.selectedDate}</p>
-    <p><strong>الوقت المحدد للجلسة :</strong> 30 دقيقة</p>
-    <p style="color: #e53e3e; font-size: 14px; font-weight: bold;">فضلا تأكد من التوقيت الخاص ببلدك</p>
-  </div>
-
-  <p>نتطلع للقائكم غدًا.<br/>
-  فريق سجل تراث العائلة</p>
-
-  <p><strong>هل طرأ لديكم انشغال !!</strong><br/>
-  <a href="mailto:info@thefamilylegacyroots.com?subject=تعديل موعد الجلسة&body=أرغب بتعديل الجلسة التعريفية الخاصة بي" style="background-color: #e2e8f0; padding: 8px 16px; text-decoration: none; color: #4a5568; border-radius: 4px; margin-left: 10px;">تعديل موعد الجلسة</a>
-  <a href="mailto:info@thefamilylegacyroots.com?subject=إلغاء الجلسة&body=أرغب بإلغاء الجلسة التعريفية الخاصة بي" style="background-color: #fed7d7; padding: 8px 16px; text-decoration: none; color: #c53030; border-radius: 4px;">إلغاء</a></p>
-
-  <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
-  <p style="text-align: center; color: #718096; font-size: 14px;">
-    <strong>سجل تراث العائلة</strong><br/>
-    مشروع بحثي متخصص لحفظ وتوثيق تراث العائلات للأجيال القادمة
-  </p>
-</div>`;
-
-            await addDoc(collection(db, "mail"), {
-              to: formData.email,
-              bcc: "info@thefamilylegacyroots.com",
-              message: {
-                subject: "تذكير قبل الموعد بساعة",
-                html: email2Html,
-              },
-              delivery: {
-                startTime: reminderDate
-              },
-              createdAt: serverTimestamp(),
-            });
-          }
-        }
+        await fetch("/api/intro-sessions/book", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: sessionRef.id,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            commPreference: formData.commPreference,
+            selectedDate: formData.selectedDate,
+            selectedTime: formData.selectedTime,
+            mainGoal: formData.mainGoal,
+          }),
+        });
+        fetchBookedSlots();
       } catch (e) {
-        console.warn("Failed to schedule reminder email", e);
+        console.warn("Failed to notify backend booking endpoint", e);
       }
 
       // Notify the admin via DB
       await addDoc(collection(db, "notifications"), {
         userId: "admin", // Admin broadcast
         title: "حجز جلسة تعريفية جديدة",
-        message: `تم حجز جلسة من قبل ${formData.name} يوم ${formData.selectedDate} الساعة ${formData.selectedTime}`,
+        message: `تم حجز جلسة من قبل ${formData.name} يوم ${gregorianDateText} الساعة ${formData.selectedTime}`,
         type: "session_booking",
         link: "/admin", // Links them to the admin panel
         read: false,
@@ -539,14 +519,29 @@ export function IntroSession() {
   };
 
   const renderCalendar = () => {
-    // Generate dates starting from tomorrow for 7 days
-    const dates = Array.from({length: 14}).map((_, i) => {
+    // Generate dates starting from tomorrow for 14 days
+    const dates = Array.from({ length: 14 }).map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() + 1 + i);
       return d;
     });
 
-    const times = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "03:00 PM", "05:00 PM", "07:00 PM"];
+    // Calculate booked and excluded slots for the selected date
+    // Rule: Hide the booked slot AND the immediate following slot!
+    const bookedTimesForSelectedDate = bookedSlots
+      .filter((b) => b.date === formData.selectedDate)
+      .map((b) => b.time);
+
+    const excludedTimes = new Set<string>();
+    bookedTimesForSelectedDate.forEach((bookedTime) => {
+      excludedTimes.add(bookedTime);
+      const idx = AVAILABLE_TIME_SLOTS.indexOf(bookedTime);
+      if (idx !== -1 && idx + 1 < AVAILABLE_TIME_SLOTS.length) {
+        excludedTimes.add(AVAILABLE_TIME_SLOTS[idx + 1]);
+      }
+    });
+
+    const availableTimes = AVAILABLE_TIME_SLOTS.filter((t) => !excludedTimes.has(t));
 
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto w-full text-right">
@@ -560,50 +555,83 @@ export function IntroSession() {
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <h4 className="font-bold text-brand-900 mb-4 flex items-center gap-2"><Calendar className="w-5 h-5"/> اختر اليوم</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <h4 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-brand-600"/> اختر اليوم (بالتقويم الميلادي)
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto p-1">
               {dates.map((date, idx) => {
-                const dateStr = date.toISOString().split('T')[0];
-                const dayName = new Intl.DateTimeFormat('ar-SA', { weekday: 'short' }).format(date);
-                const dayNum = date.getDate();
-                const monthName = new Intl.DateTimeFormat('ar-SA', { month: 'short' }).format(date);
+                const { dayName, dayNum, monthName, isoDate } = formatArabicGregorianDate(date);
+                const isSelected = formData.selectedDate === isoDate;
                 
                 return (
                   <button 
                     key={idx}
-                    onClick={() => setFormData({ ...formData, selectedDate: dateStr, selectedTime: '' })}
-                    className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${formData.selectedDate === dateStr ? 'border-brand-600 bg-brand-50 shadow-md' : 'border-gray-200 hover:border-brand-300 bg-white'}`}
+                    type="button"
+                    onClick={() => {
+                      setFormData(prev => ({
+                        ...prev,
+                        selectedDate: isoDate,
+                        selectedTime: ''
+                      }));
+                    }}
+                    className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${
+                      isSelected 
+                        ? 'border-brand-600 bg-brand-50 shadow-md ring-2 ring-brand-300' 
+                        : 'border-gray-200 hover:border-brand-300 bg-white hover:bg-brand-50/20'
+                    }`}
                   >
-                    <span className="text-xs font-bold text-brand-500 mb-1">{dayName}</span>
+                    <span className="text-xs font-bold text-brand-600 mb-1">{dayName}</span>
                     <span className="text-2xl font-bold text-brand-900">{dayNum}</span>
-                    <span className="text-xs text-brand-700">{monthName}</span>
+                    <span className="text-xs text-brand-700 font-medium">{monthName}</span>
                   </button>
-                )
+                );
               })}
             </div>
           </div>
           
           <div>
-            <div className="mb-4">
-              <h4 className="font-bold text-brand-900 flex items-center gap-2"><Clock className="w-5 h-5"/> اختر الوقت</h4>
-              <span className="text-[11px] text-gray-500 mr-7 mt-1 flex items-center gap-1 font-medium bg-gray-50 px-2 py-0.5 rounded border border-gray-100 w-fit">
+            <div className="mb-4 flex items-center justify-between">
+              <h4 className="font-bold text-brand-900 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-brand-600"/> اختر الوقت
+              </h4>
+              <span className="text-[11px] text-brand-800 font-bold bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
                 التوقيت (GMT+2)
               </span>
             </div>
+
             {formData.selectedDate ? (
-              <div className="grid grid-cols-2 gap-3">
-                {times.map(time => (
-                  <button
-                    key={time}
-                    onClick={() => setFormData({ ...formData, selectedTime: time })}
-                    className={`p-4 rounded-xl border-2 text-center transition-all font-mono font-bold ${formData.selectedTime === time ? 'border-brand-600 bg-brand-600 text-white shadow-md' : 'border-gray-200 hover:border-brand-300 bg-white text-brand-900'}`}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
+              availableTimes.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2.5 max-h-[380px] overflow-y-auto p-1">
+                  {availableTimes.map(time => {
+                    const isSelected = formData.selectedTime === time;
+                    return (
+                      <button
+                        key={time}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, selectedTime: time })}
+                        className={`p-3 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center ${
+                          isSelected 
+                            ? 'border-brand-600 bg-brand-600 text-white shadow-md ring-2 ring-brand-300' 
+                            : 'border-gray-200 hover:border-brand-300 bg-white text-brand-900 hover:bg-brand-50/30'
+                        }`}
+                      >
+                        <span className="font-mono font-bold text-sm" dir="ltr">{time}</span>
+                        <span className={`text-[11px] mt-0.5 ${isSelected ? 'text-brand-100' : 'text-brand-600 font-medium'}`}>
+                          {formatTimeSlotArabic(time)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="h-full min-h-[220px] flex flex-col items-center justify-center bg-amber-50/60 rounded-xl border border-amber-200 text-amber-800 p-6 text-center">
+                  <Clock className="w-8 h-8 text-amber-600 mb-2" />
+                  <p className="font-bold text-sm">جميع مواعيد هذا اليوم محجوزة</p>
+                  <p className="text-xs text-amber-700 mt-1">يرجى اختيار يوم آخر لاختيار الموعد المناسب لكم</p>
+                </div>
+              )
             ) : (
-              <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100 text-gray-400 p-8 text-center">
+              <div className="h-full min-h-[220px] flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100 text-gray-400 p-8 text-center text-sm">
                 الرجاء اختيار اليوم أولاً لرؤية الأوقات المتاحة
               </div>
             )}
@@ -661,8 +689,13 @@ export function IntroSession() {
             <Clock className="w-6 h-6 text-brand-500 shrink-0" />
             <div>
               <p className="text-sm text-brand-600 font-bold mb-1">الوقت:</p>
-              <p className="font-medium text-brand-900 font-mono" dir="ltr">{formData.selectedTime} - {formData.selectedDate}</p>
-              <p className="text-xs text-brand-500 mt-1">بتوقيت مكة المكرمة</p>
+              <p className="font-medium text-brand-900 font-sans" dir="rtl">
+                {formData.selectedTime} ({formatTimeSlotArabic(formData.selectedTime)})
+              </p>
+              <p className="text-sm text-brand-700 font-medium mt-0.5" dir="rtl">
+                {formatArabicGregorianDate(formData.selectedDate).formatted || formData.selectedDate}
+              </p>
+              <p className="text-xs text-brand-500 mt-1">التوقيت (GMT+2)</p>
             </div>
           </div>
           

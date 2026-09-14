@@ -243,6 +243,13 @@ export function AdminPanel() {
         });
 
         setIntroSessions(data);
+
+        // Sync with server scheduler & slot blocking
+        fetch("/api/intro-sessions/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessions: data })
+        }).catch(err => console.error("Auto-sync sessions error:", err));
       });
       return () => unsubscribe();
     }
@@ -2543,6 +2550,29 @@ export function AdminPanel() {
                                   >
                                     <Mail className="w-3 h-3" /> مراسلة
                                   </a>
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        const res = await fetch("/api/intro-sessions/trigger-reminder", {
+                                          method: "POST",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({ email: session.email, id: session.id })
+                                        });
+                                        const json = await res.json();
+                                        if (json.success) {
+                                          alert("تم إرسال تذكير الجلسة بنجاح!");
+                                        } else {
+                                          alert("خطأ: " + (json.error || "تعذر الإرسال"));
+                                        }
+                                      } catch (e: any) {
+                                        alert("خطأ في الاتصال: " + e.message);
+                                      }
+                                    }}
+                                    title="إرسال رسالة التذكير (دقائق ونبدأ أول صفحة من سجل العائلة .)"
+                                    className="flex items-center justify-center gap-1.5 whitespace-nowrap text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-md text-[11px] font-bold transition w-full shadow-sm"
+                                  >
+                                    <Clock className="w-3 h-3 text-amber-600" /> إرسال تذكير الآن
+                                  </button>
                                 </div>
                               </td>
                             </tr>

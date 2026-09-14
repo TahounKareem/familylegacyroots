@@ -165,7 +165,7 @@ export function Home() {
       </section>
       
       {/* Target Audience */}
-      <section className="py-24 bg-white relative">
+      <section className="pt-20 pb-8 md:pb-12 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-brand-50 rounded-[3rem] p-8 md:p-16 shadow-xl border border-brand-100">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
