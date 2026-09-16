@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, BookOpen, Clock, ShieldCheck, CheckCircle2, Bookmark, Info, ChevronDown, Users, FileText, Lock, Coins, Sparkles, LayoutList } from 'lucide-react';
+import { ConsultantCtaBar } from '../components/ui/ConsultantCtaBar';
 
 const sections = [
   { id: 'memory', title: 'ذاكرة العائلة' },
@@ -447,6 +448,11 @@ export function Services() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Sleek CTA Bar below Investment Box with comfortable spacing */}
+              <div className="mt-10 sm:mt-14">
+                <ConsultantCtaBar id="services-consultant-cta-bar" />
               </div>
             </section>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, X, Play } from 'lucide-react';
+import { ConsultantCtaBar } from './ConsultantCtaBar';
 
 interface Story {
   id: string;
@@ -137,6 +138,11 @@ export function StoriesSection() {
             ))}
           </div>
 
+        </div>
+
+        {/* Sleek CTA Bar below Stories Box */}
+        <div className="mt-6 sm:mt-8">
+          <ConsultantCtaBar id="stories-consultant-cta-bar" />
         </div>
       </div>
 
