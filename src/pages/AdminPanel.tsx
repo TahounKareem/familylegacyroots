@@ -58,7 +58,8 @@ import {
   Bell,
   Printer,
   MessageCircle,
-  Mail
+  Mail,
+  Clock
 } from "lucide-react";
 import { TreeBuilder } from "./TreeBuilder";
 import { ChatbotManagement } from "@/components/ChatbotManagement";
