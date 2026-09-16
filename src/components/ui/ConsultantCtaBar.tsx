@@ -51,7 +51,7 @@ export function ConsultantCtaBar({ id = "consultant-cta-bar", className = "" }: 
             className="inline-flex items-center gap-2 px-4 py-2 sm:py-2.5 bg-[#722f37] hover:bg-[#5a242b] text-white rounded-xl font-serif font-bold text-xs sm:text-sm transition-all duration-200 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 whitespace-nowrap"
           >
             <Calendar className="w-3.5 h-3.5 text-brand-200" />
-            <span>أو احجز جلسة تعريف</span>
+            <span>احجز جلسة تعريف</span>
           </Link>
         </div>
       </div>
